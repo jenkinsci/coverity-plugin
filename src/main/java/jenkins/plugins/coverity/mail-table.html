@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <STYLE type="text/css">
+        table.pane {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px #BBB solid;
+        }
+        .pane {
+        margin-top: 4px;
+        white-space: nowrap;
+        }
+        body, table, form, input, td, th, p, textarea, select {
+        font-family: Verdana, Helvetica, sans serif;
+        font-size: 11px;
+        }
+        td.pane-header {
+        border: 1px #BBB solid;
+        border-right: none;
+        border-left: none;
+        background-color: #F0F0F0;
+        font-weight: bold;
+        }
+        .pane td {
+        padding: 4px 4px 3px 4px;
+        }
+        td {
+        vertical-align: top;
+        }
+    </STYLE>
+</head>
+<body>
+
+<table class="pane">
+    <tbody>
+    <tr>
+        <td colspan="3" class="pane-header">Coverity Defects</td>
+    </tr>
+    <tr class="pane">
+        <th align="left">CID</th>
+        <th align="left">Checker</th>
+        <th align="left">Function</th>
+    </tr>
+    <tr class="pane">
+        <td><a href="http://localhost:18080/sourcebrowser.htm?projectId=10001#mergedDefectId=10023">10023</a></td>
+        <td>FORWARD_NULL</td>
+        <td>foo.Bar.
+            <init>()</init>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+</body>
+</html>

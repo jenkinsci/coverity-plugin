@@ -1,0 +1,32 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:section title="CIM Instance">
+        <f:entry title="CIM Instance">
+            <f:repeatable var="instance" name="instances" items="${descriptor.instances}" add="Add" header="CIM Instance">
+                <table width="100%">
+                    <f:entry title="Name" field="name">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="Host" field="host">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="Port" field="port">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="User" field="user">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="Password" field="password">
+                        <f:password/>
+                    </f:entry>
+                    <f:validateButton method="check" title="Check" progress="Checking..." with="host,port,user,password"/>
+                    <f:entry title="">
+                        <div align="right">
+                            <f:repeatableDeleteButton value="Delete"/>
+                        </div>
+                    </f:entry>
+                </table>
+            </f:repeatable>
+        </f:entry>
+    </f:section>
+</j:jelly>

@@ -1,0 +1,62 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jvnet.hudson.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>1.374</version>
+    </parent>
+
+    <artifactId>coverity</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>hpi</packaging>
+    <name>Coverity plugin</name>
+    <url>http://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin</url>
+
+    <!--
+      <scm>
+            <connection>scm:git:git://github.com/jenkinsci/sauce-ondemand-plugin.git</connection>
+            <developerConnection>scm:git:git@github.com:jenkinsci/sauce-ondemand-plugin.git</developerConnection>
+        </scm>
+    -->
+
+    <distributionManagement>
+        <repository>
+            <id>maven.jenkins-ci.org</id>
+            <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <goals>deploy</goals>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <!--
+        <dependency>
+            <groupId>com.coverity</groupId>
+            <artifactId>coverity-ws</artifactId>
+            <version>3</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.sun.xml.xws</groupId>
+            <artifactId>xws-security</artifactId>
+            <version>3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.messaging.saaj</groupId>
+            <artifactId>saaj-impl</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

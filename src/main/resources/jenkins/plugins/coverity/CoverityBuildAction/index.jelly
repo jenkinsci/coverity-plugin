@@ -1,0 +1,24 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson">
+    <l:layout title="${it.project.displayName} #${it.number}">
+      <st:include page="sidepanel.jelly" it="${it.build}" optional="true"/>
+      <l:main-panel>
+
+    <H2>Coverity Defects</H2>
+    <l:pane title="Coverity Defects" width="3">
+        <tr class="pane">
+            <th align="left">CID</th>
+            <th align="left">Checker</th>
+            <th align="left">Function</th>
+        </tr>
+    <j:forEach var="defect" items="${it.defects}">
+        <tr class="pane">
+            <td><a href="${it.getURL(defect)}">${defect.cid}</a></td>
+            <td>${defect.checker}</td>
+            <td>${defect.functionDisplayName}</td>
+        </tr>
+    </j:forEach>
+    </l:pane>
+    </l:main-panel>
+</l:layout>
+</j:jelly>
