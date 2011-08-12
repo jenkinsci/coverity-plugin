@@ -28,6 +28,10 @@ public class ListUsers {
      * <code>main</code> entry point.  
      */
 	public static void main (String[] args) {
+
+        System.setProperty("javax.net.ssl.trustStore", "c:\\users\\tom\\.keystore");
+        System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
+
 		try {
 			if(args.length != 2){
 				System.err.println(
@@ -59,7 +63,7 @@ public class ListUsers {
             // Create a Web Services port to the server
             AdministrationServiceService administrationServiceService = 
                 new AdministrationServiceService(
-                    new URL("http://" + serverAddr + "/ws/v3/administrationservice?wsdl"),
+                    new URL("https://" + serverAddr + "/ws/v3/administrationservice?wsdl"),
                     new QName("http://ws.coverity.com/v3", "AdministrationServiceService"));
             AdministrationService administrationService = 
                 administrationServiceService.getAdministrationServicePort();

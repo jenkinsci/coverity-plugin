@@ -4,22 +4,23 @@ import hudson.*;
 import hudson.model.*;
 import hudson.remoting.Channel;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Tom
- * Date: 4/06/11
- * Time: 14:43
- * To change this template use File | Settings | File Templates.
+ * This makes sure that all commands executed (when invocation assistance is enabled) are run through cov-build
  */
 @Extension
 public class CoverityLauncherDecorator extends LauncherDecorator {
 
+    /**
+     * A ThreadLocal that is used to disable cov-build when running other Coverity tools during the build.
+     */
     public static ThreadLocal<Boolean> SKIP = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
@@ -47,22 +48,45 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             return launcher;
         }
 
-        if (publisher.getInvocationAssistance() == null) {
+        InvocationAssistance ii = publisher.getInvocationAssistance();
+        if (ii == null) {
             return launcher;
         }
 
         try {
-            FilePath coverityDir = node.getRootPath().child("coverity");
-            coverityDir.mkdirs();
-            FilePath temp = coverityDir.createTempDir("temp-", null);
+            FilePath temp;
+            if (ii.getIntermediateDir() == null) {
+                FilePath coverityDir = node.getRootPath().child("coverity");
+                coverityDir.mkdirs();
+                temp = coverityDir.createTempDir("temp-", null);
+            } else {
+                temp = new FilePath(node.getChannel(), ii.getIntermediateDir());
+            }
 
             build.addAction(new CoverityTempDir(temp));
 
-            return new DecoratedLauncher(launcher, "cov-build.exe", "--dir", temp.getRemote());
+            String covBuild = "cov-build";
+            TaskListener listener = launcher.getListener();
+            String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
+            if (home != null) {
+                covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
+            }
+
+            List<String> args = new ArrayList<String>();
+            args.add(covBuild);
+            args.add("--dir");
+            args.add(temp.getRemote());
+            if (ii.getBuildArguments() != null) {
+                for (String arg: Util.tokenize(ii.getBuildArguments())) {
+                    args.add(arg);
+                }
+            }
+            
+            return new DecoratedLauncher(launcher, args.toArray(new String[args.size()]));
         } catch (IOException e) {
-            throw new RuntimeException("Error while creating temporariy directory for Coverity", e);
+            throw new RuntimeException("Error while creating temporary directory for Coverity", e);
         } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted while creating temporariy directory for Coverity");
+            throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
         }
 
     }
@@ -70,8 +94,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
     /**
      * Returns a decorated {@link Launcher} that puts the given set of arguments as a prefix to any commands
      * that it invokes.
-     *
-     * @since 1.299
      */
     public class DecoratedLauncher extends Launcher {
         private final Launcher decorated;
@@ -90,8 +112,12 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     cmds.addAll(0, Arrays.asList(prefix));
                     starter.cmds(cmds);
                     boolean[] masks = starter.masks();
-                    if (masks == null) masks = new boolean[cmds.size()];
-                    starter.masks(prefix(masks));
+                    if (masks == null) {
+                        masks = new boolean[cmds.size()];
+                        starter.masks(masks);
+                    } else {
+                        starter.masks(prefix(masks));
+                    }
 
                     starter.envs("COVERITY_UNSUPPORTED=1");
                 }

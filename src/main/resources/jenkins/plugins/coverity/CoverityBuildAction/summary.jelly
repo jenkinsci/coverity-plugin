@@ -1,0 +1,6 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson">
+
+    <t:summary icon="/plugin/coverity/icons/coverity-logo-400px.png"><a href="coverity">${it.defects.size()}</a> matching Coverity defect(s) found.</t:summary>
+
+</j:jelly>

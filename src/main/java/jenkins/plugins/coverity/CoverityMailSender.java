@@ -10,6 +10,8 @@ import hudson.model.*;
 import hudson.model.labels.LabelExpression;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.Mailer;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -24,13 +26,25 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Sends mails to culprits when Coverity defects are found.
+ * Inspired by hudson.tasks.MailSender.
+ */
 public class CoverityMailSender {
     /**
      * The charset to use for the text and subject.
      */
     private String charset = "UTF-8";
 
-    public CoverityMailSender() {
+    private final String recipients;
+
+    @DataBoundConstructor
+    public CoverityMailSender(String recipients) {
+        this.recipients = Util.fixEmptyAndTrim(recipients);
+    }
+
+    public String getRecipients() {
+        return recipients;
     }
 
     public boolean execute(CoverityBuildAction action, BuildListener listener) throws InterruptedException {
@@ -104,6 +118,19 @@ public class CoverityMailSender {
         msg.setSentDate(new Date());
 
         Set<InternetAddress> rcp = new LinkedHashSet<InternetAddress>();
+
+        if (recipients != null) {
+            StringTokenizer tokens = new StringTokenizer(recipients);
+            while (tokens.hasMoreTokens()) {
+                String address = tokens.nextToken();
+                try {
+                    rcp.add(new InternetAddress(address));
+                } catch (AddressException e) {
+                    // report bad address, but try to send to other addresses
+                    e.printStackTrace(listener.error(e.getMessage()));
+                }
+            }
+        }
 
         Set<User> culprits = action.getBuild().getCulprits();
 

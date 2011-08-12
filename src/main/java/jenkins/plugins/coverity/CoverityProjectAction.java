@@ -23,13 +23,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
+import java.util.Calendar;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Tom
- * Date: 13/06/11
- * Time: 18:58
- * To change this template use File | Settings | File Templates.
+ * Project-level action for Coverity. This is used to to display the history graph.
  */
 public class CoverityProjectAction implements Action {
 
@@ -61,7 +58,7 @@ public class CoverityProjectAction implements Action {
 
     private class GraphImpl extends Graph {
         protected GraphImpl() {
-            super(project.getLastCompletedBuild().getTimestamp(),600,300);
+            super(project.getLastCompletedBuild() != null ? project.getLastCompletedBuild().getTimestamp() : Calendar.getInstance(), 600,300);
         }
 
         protected DataSetBuilder<String, ChartLabel> createDataSet() {

@@ -1,0 +1,75 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+    <j:set var="publisher" value="${instance}"/>
+    <j:set var="defectFilters" value="${instance.defectFilters}"/>
+    <j:set var="cimInstance" value="${publisher.cimInstance}"/>
+    <j:set var="stream" value="${publisher.stream}"/>
+
+    <tr>
+        <td colspan="3">
+            <table id="filters" style="display: none;">
+                <f:entry title="Classification is among:">
+                    <input type="checkbox" disabled="true" checked="true"/>
+                    <label class="attach-previous">Unclassified</label>
+                    <st:nbsp/>
+                    <input type="checkbox" disabled="true" checked="true"/>
+                    <label class="attach-previous">Bug</label>
+                    <st:nbsp/>
+                    <input type="checkbox" disabled="true" checked="true"/>
+                    <label class="attach-previous">Pending</label>
+                    <st:nbsp/>
+                    <input type="checkbox" disabled="true" />
+                    <label class="attach-previous">False</label>
+                    <st:nbsp/>
+                    <input type="checkbox" disabled="true" />
+                    <label class="attach-previous">Intentional</label>
+                    <st:nbsp/>
+                </f:entry>
+                <f:entry title="Action is among:">
+                    <j:forEach var="e" items="${descriptor.doFillActionDefectFilterItems(cimInstance)}">
+                            <f:checkbox name="actions" json="${e.value}" checked="${defectFilters == null ? true : defectFilters.isActionSelected(e.value)}"/>
+                            <label class="attach-previous">${e.name}</label>
+                            <st:nbsp/>
+                    </j:forEach>
+                </f:entry>
+                <f:entry title="Severity is among:">
+                    <j:set var="instance" value="${defectFilters.severitiesDefectFilter}"/>
+                    <j:forEach var="e" items="${descriptor.doFillSeveritiesDefectFilterItems(cimInstance)}">
+                            <f:checkbox name="severities" json="${e.value}"
+                                        checked="${defectFilters == null ? true : defectFilters.isSeveritySelected(e.value)}"/>
+                            <label class="attach-previous">${e.name}</label>
+                            <st:nbsp/>
+                    </j:forEach>
+                </f:entry>
+                <f:entry title="Component is among:">
+                    <j:forEach var="e" items="${descriptor.doFillComponentDefectFilterItems(cimInstance,stream)}">
+                            <f:checkbox name="components" json="${e.value}"
+                                        checked="${defectFilters == null ? true : defectFilters.isComponentSelected(e.value)}"/>
+                        <label class="attach-previous">${e.name}</label>
+                        <st:nbsp/>
+                    </j:forEach>
+                </f:entry>
+                <f:entry title="Checker is among:">
+                    <j:set var="checkers" value="${descriptor.doFillCheckerDefectFilterItems(cimInstance,stream)}"/>
+                    <a href="#" id="showCheckers"
+                       onclick="document.getElementById('checkers').style.display='block';document.getElementById('hideCheckers').style.display='block';this.style.display='none';">(Show ${checkers.size()} checkers)</a>
+                    <a href="#" id="hideCheckers" style="display: none;"
+                       onclick="document.getElementById('checkers').style.display='none';document.getElementById('showCheckers').style.display='block';this.style.display='none';">(Hide ${checkers.size()} checkers)</a>
+                    <div id="checkers" style="display: none;">
+                    <j:forEach var="e" items="${checkers}">
+                        <div style="white-space: nowrap">
+                            <f:checkbox name="checkers" json="${e.value}"
+                                        checked="${defectFilters == null ? true : defectFilters.isCheckerSelected(e.value)}"/>
+                        <label class="attach-previous">${e.name}</label>
+                        </div>
+                    </j:forEach>
+                    </div>
+                </f:entry>
+                <f:entry title="Date first detected is on or after">
+                    <f:textbox name="cutOffDate" value="${defectFilters.cutOffDate}"/>
+                </f:entry>
+            </table>
+        </td>
+    </tr>
+</j:jelly>

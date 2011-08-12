@@ -1,52 +1,88 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v3.*;
-import hudson.Extension;
-import hudson.model.Describable;
-import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.util.FormValidation;
-import net.sf.json.JSONObject;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.kohsuke.stapler.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Tom
- * Date: 4/06/11
- * Time: 13:46
- * To change this template use File | Settings | File Templates.
+ * Represents one Coverity Integrity Manager server
  */
-public class CIMInstance implements Describable<CIMInstance> {
+public class CIMInstance {
 
+    public static final String COVERITY_V3_NAMESPACE = "http://ws.coverity.com/v3";
+
+    public static final String ADMINISTRATION_SERVICE_V1_WSDL = "/ws/v1/administrationservice?wsdl";
+    public static final String ADMINISTRATION_SERVICE_V2_WSDL = "/ws/v2/administrationservice?wsdl";
+    public static final String ADMINISTRATION_SERVICE_V3_WSDL = "/ws/v3/administrationservice?wsdl";
+    public static final String CONFIGURATION_SERVICE_V3_WSDL = "/ws/v3/configurationservice?wsdl";
+    public static final String DEFECT_SERVICE_V3_WSDL = "/ws/v3/defectservice?wsdl";
+
+    public static final String STREAM_TYPE_STATIC = "STATIC";
+    public static final String STREAM_TYPE_SOURCE = "SOURCE";
+
+    /**
+     * The id for this instance, used as a key in CoverityPublisher
+     */
     private final String name;
+
+    /**
+     * The host name for the CIM server
+     */
     private final String host;
+
+    /**
+     * The port for the CIM server (this is the HTTP port and not the data port)
+     */
     private final int port;
+
+    /**
+     * Username for connecting to the CIM server
+     */
     private final String user;
+
+    /**
+     * Password for connecting to the CIM server
+     */
     private final String password;
 
+    /**
+     * Use SSL
+     */
+    private final boolean useSSL;
+
+    /**
+     * cached webservice port for Administration service
+     */
     private transient AdministrationServiceService administrationServiceService;
+
+    /**
+     * cached webservice port for Defect service
+     */
     private transient DefectServiceService defectServiceService;
+
+    /**
+     * cached webservice port for Configuration service
+     */
     private transient ConfigurationServiceService configurationServiceService;
-    private List<ProjectDataObj[]> projects;
 
     @DataBoundConstructor
-    public CIMInstance(String name, String host, int port, String user, String password) {
+    public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL) {
         this.name = name;
         this.host = host;
         this.port = port;
         this.user = user;
         this.password = password;
+        this.useSSL = useSSL;
     }
 
     public String getHost() {
@@ -69,83 +105,115 @@ public class CIMInstance implements Describable<CIMInstance> {
         return password;
     }
 
-    public URL getURL() throws MalformedURLException {
-        return new URL("http", host, port, "/");
+    public boolean isUseSSL() {
+        return useSSL;
     }
 
+    /**
+     * The root URL for the CIM instance
+     *
+     * @return a url
+     * @throws MalformedURLException should not happen if host is valid
+     */
+    public URL getURL() throws MalformedURLException {
+        return new URL(isUseSSL() ? "https" : "http", host, port, "/");
+    }
+
+    /**
+     * Returns a Defect service client
+     */
     public DefectService getDefectService() throws IOException {
         synchronized (this) {
             if (defectServiceService == null) {
-            // Create a Web Services port to the server
                 defectServiceService = new DefectServiceService(
-                    new URL(getURL(), "/ws/v3/defectservice?wsdl"),
-                    new QName("http://ws.coverity.com/v3", "DefectServiceService"));
+                        new URL(getURL(), DEFECT_SERVICE_V3_WSDL),
+                        new QName(COVERITY_V3_NAMESPACE, "DefectServiceService"));
             }
         }
 
-        DefectService defectService = defectServiceService.getDefectServicePort();
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            DefectService defectService = defectServiceService.getDefectServicePort();
+            attachAuthenticationHandler((BindingProvider) defectService);
 
-        // Attach an authentication handler to it
-        BindingProvider bindingProvider = (BindingProvider)defectService;
-        bindingProvider.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(user, password)));
-
-        return defectService;
+            return defectService;
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
+        }
     }
 
+    /**
+     * Attach an authentication handler to the web service, that uses the configured user and password
+     */
+    private void attachAuthenticationHandler(BindingProvider service) {
+        service.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(user, password)));
+    }
+
+    /**
+     * Returns a Configuration service client
+     */
     public ConfigurationService getConfigurationService() throws IOException {
         synchronized (this) {
             if (configurationServiceService == null) {
-            // Create a Web Services port to the server
+                // Create a Web Services port to the server
                 configurationServiceService = new ConfigurationServiceService(
-                    new URL(getURL(), "/ws/v3/configurationservice?wsdl"),
-                    new QName("http://ws.coverity.com/v3", "ConfigurationServiceService"));
+                        new URL(getURL(), CONFIGURATION_SERVICE_V3_WSDL),
+                        new QName(COVERITY_V3_NAMESPACE, "ConfigurationServiceService"));
             }
         }
 
-        ConfigurationService configurationService = configurationServiceService.getConfigurationServicePort();
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            ConfigurationService configurationService = configurationServiceService.getConfigurationServicePort();
+            attachAuthenticationHandler((BindingProvider) configurationService);
 
-        // Attach an authentication handler to it
-        BindingProvider bindingProvider = (BindingProvider)configurationService;
-        bindingProvider.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(user, password)));
-
-        return configurationService;
+            return configurationService;
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
+        }
     }
 
+    /**
+     * Returns an Administration service client
+     */
     public AdministrationService getAdministrationService() throws IOException {
         synchronized (this) {
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             if (administrationServiceService == null) {
-            // Create a Web Services port to the server
+                // Create a Web Services port to the server
                 administrationServiceService = new AdministrationServiceService(
-                    new URL(getURL(), "/ws/v3/administrationservice?wsdl"),
-                    new QName("http://ws.coverity.com/v3", "AdministrationServiceService"));
+                        new URL(getURL(), ADMINISTRATION_SERVICE_V3_WSDL),
+                        new QName(COVERITY_V3_NAMESPACE, "AdministrationServiceService"));
             }
         }
 
-        AdministrationService administrationService = administrationServiceService.getAdministrationServicePort();
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            AdministrationService administrationService = administrationServiceService.getAdministrationServicePort();
+            attachAuthenticationHandler((BindingProvider) administrationService);
 
-        // Attach an authentication handler to it
-        BindingProvider bindingProvider = (BindingProvider) administrationService;
-        bindingProvider.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(user, password)));
-
-        return administrationService;
+            return administrationService;
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
+        }
     }
 
     public List<MergedDefectDataObj> getDefects(String streamId, List<Long> defectIds) throws IOException, CovRemoteServiceException_Exception {
         MergedDefectFilterSpecDataObj filterSpec1 = new MergedDefectFilterSpecDataObj();
         StreamIdDataObj stream = new StreamIdDataObj();
         stream.setName(streamId);
-        stream.setType("STATIC");
+        stream.setType(STREAM_TYPE_STATIC);
         filterSpec1.getStreamIdIncludeList().add(stream);
         PageSpecDataObj pageSpec = new PageSpecDataObj();
         pageSpec.setPageSize(2500);
 
-        List<MergedDefectDataObj> result =new ArrayList<MergedDefectDataObj>();
+        List<MergedDefectDataObj> result = new ArrayList<MergedDefectDataObj>();
         int defectCount = 0;
         MergedDefectsPageDataObj defects = null;
         do {
             pageSpec.setStartIndex(defectCount);
             defects = getDefectService().getMergedDefectsForStreams(Arrays.asList(stream), filterSpec1, pageSpec);
-            for (MergedDefectDataObj defect: defects.getMergedDefects()) {
+            for (MergedDefectDataObj defect : defects.getMergedDefects()) {
                 if (defectIds.contains(defect.getCid())) {
                     result.add(defect);
                 }
@@ -167,11 +235,11 @@ public class CIMInstance implements Describable<CIMInstance> {
         }
     }
 
-    private transient Map<String,Long> projectKeys;
+    private transient Map<String, Long> projectKeys;
 
     public Long getProjectKey(String projectId) throws IOException, CovRemoteServiceException_Exception {
         if (projectKeys == null) {
-            projectKeys = new ConcurrentHashMap<String, Long> ();
+            projectKeys = new ConcurrentHashMap<String, Long>();
         }
 
         Long result = projectKeys.get(projectId);
@@ -199,16 +267,9 @@ public class CIMInstance implements Describable<CIMInstance> {
 
 
         ProjectDataObj project = getProject(projectId);
-        Set<String> projectStreams = new HashSet<String>();
-        for (StreamDataObj stream: project.getStreams()) {
-            projectStreams.add(stream.getId().getName());
-        }
         List<StreamDataObj> result = new ArrayList<StreamDataObj>();
-        StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
-        filter.getTypeList().add("STATIC");
-
-        for (StreamDataObj stream: getConfigurationService().getStreams(filter)) {
-            if (projectStreams.contains(stream.getId().getName())) {
+        for (StreamDataObj stream : project.getStreams()) {
+            if (stream.getId().getType().equals("STATIC")) {
                 result.add(stream);
             }
         }
@@ -218,7 +279,7 @@ public class CIMInstance implements Describable<CIMInstance> {
 
     public StreamDataObj getStream(String streamId) throws IOException, CovRemoteServiceException_Exception {
         StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
-        filter.getTypeList().add("STATIC");
+        filter.getTypeList().add(STREAM_TYPE_SOURCE);
         filter.setNamePattern(streamId);
 
         List<StreamDataObj> streams = getConfigurationService().getStreams(filter);
@@ -229,95 +290,56 @@ public class CIMInstance implements Describable<CIMInstance> {
         }
     }
 
-    public Descriptor<CIMInstance> getDescriptor() {
-        return Hudson.getInstance().getDescriptor(CIMInstance.class);
+    public FormValidation doCheck() throws IOException {
+        try {
+            URL url = getURL();
+            int responseCode = getURLResponseCode(new URL(url, ADMINISTRATION_SERVICE_V3_WSDL));
+            if (responseCode != 200) {
+                if (getURLResponseCode(new URL(url, ADMINISTRATION_SERVICE_V2_WSDL)) == 200) {
+                    return FormValidation.error("Detected Coverity web services v2, but v3 is required");
+                } else if (getURLResponseCode(new URL(url, ADMINISTRATION_SERVICE_V1_WSDL)) == 200) {
+                    return FormValidation.error("Detected Coverity web services v1, but v3 is required");
+                } else {
+                    return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
+                }
+            }
+            getAdministrationService().getServerTime();
+            return FormValidation.ok("Successfully connected to the instance.");
+        } catch (UnknownHostException e) {
+            return FormValidation.error("Host name unknown");
+        } catch (ConnectException e) {
+            return FormValidation.error("Connection refused");
+        } catch (Throwable e) {
+            String javaVersion = System.getProperty("java.version");
+            if (javaVersion.startsWith("1.6.0_")) {
+                int patch = Integer.parseInt(javaVersion.substring(javaVersion.indexOf('_') + 1));
+                if (patch < 26) {
+                    return FormValidation.error(e, "Please use Java 1.6.0_26 or later to run Jenkins.");
+                }
+            }
+            return FormValidation.error(e, "An unexpected error occurred.");
+        }
     }
 
-    public static final DescriptorImpl DESCRIPTOR = Hudson.getInstance().getDescriptorByType(DescriptorImpl.class);
-
-    @Extension
-    public static class DescriptorImpl extends Descriptor<CIMInstance> {
-
-        private List<CIMInstance> instances = new ArrayList<CIMInstance>();
-
-        public DescriptorImpl() {
-            super(CIMInstance.class);
-
-            load();
+    private FormValidation error(Throwable t) {
+        if (Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
+            return FormValidation.error(t, t.getMessage());
+        } else {
+            return FormValidation.error(t.getMessage());
         }
+    }
 
-        public String getDisplayName() {
-            return "Coverity CIM Instances";
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-            req.bindJSON(this, json);
-
-            save();
-
-            return true;
-        }
-
-        public void setInstances(List<CIMInstance> instances) {
-            this.instances = instances;
-        }
-
-        public List<CIMInstance> getInstances() {
-            return instances;
-        }
-
-        public CIMInstance getInstance(String name) {
-            for (CIMInstance instance: instances) {
-                if (instance.getName().equals(name)) {
-                    return instance;
-                }
-            }
-            throw new IllegalArgumentException("Unknown instance " + name);
-        }
-
-        public FormValidation doCheck(@QueryParameter String host, @QueryParameter int port, @QueryParameter String user, @QueryParameter String password) throws IOException {
-            CIMInstance instance = new CIMInstance("", host, port, user, password);
-
-            try {
-                int responseCode = getURLResponseCode(new URL(instance.getURL(), "/ws/v3/administrationservice?wsdl"));
-                if (responseCode != 200) {
-                    if (getURLResponseCode(new URL(instance.getURL(), "/ws/v2/administrationservice?wsdl")) == 200) {
-                        return FormValidation.error("Detected Coverity web services v2, but v3 is required");
-                    } else if (getURLResponseCode(new URL(instance.getURL(), "/ws/v1/administrationservice?wsdl")) == 200) {
-                        return FormValidation.error("Detected Coverity web services v1, but v3 is required");
-                    }
-                }
-                instance.getAdministrationService().getServerTime();
-                return FormValidation.ok("Successfully connected to server.");
-            } catch (UnknownHostException e) {
-                return FormValidation.error("Host name unknown");
-            } catch (ConnectException e) {
-                return FormValidation.error("Connection refused");
-            } catch (Exception e) {
-                return error(e);
-            }
-        }
-
-        private FormValidation error(Throwable t) {
-            if (Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
-                return FormValidation.error(t, t.getMessage());
-            } else {
-                return FormValidation.error(t.getMessage());
-            }
-        }
-
-        private int getURLResponseCode(URL url) throws IOException {
+    private int getURLResponseCode(URL url) throws IOException {
+        try {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
             conn.getInputStream();
             return conn.getResponseCode();
-
+        } catch (FileNotFoundException e) {
+            return 404;
         }
 
     }
-
-
 
 }

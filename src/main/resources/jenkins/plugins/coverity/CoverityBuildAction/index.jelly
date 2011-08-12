@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson">
-    <l:layout title="${it.project.displayName} #${it.number}">
+    <l:layout title="${it.build.parent.displayName} #${it.build.number} Coverity Defects">
       <st:include page="sidepanel.jelly" it="${it.build}" optional="true"/>
       <l:main-panel>
 

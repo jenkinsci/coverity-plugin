@@ -10,11 +10,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Tom
- * Date: 13/06/11
- * Time: 19:01
- * To change this template use File | Settings | File Templates.
+ * Captures Coverity information for a single build, including a snapshot of cim instance, project and stream, and a
+ * filtered list of defects.
  */
 public class CoverityBuildAction implements Action {
     private final AbstractBuild build;
@@ -33,27 +30,39 @@ public class CoverityBuildAction implements Action {
         this.defectIds = matchingDefects;
     }
 
+    /**
+     * The owning build
+     */
     public AbstractBuild getBuild() {
         return build;
     }
 
+    /**
+     * The IDs defects that were captured for this build
+     */
     public List<Long> getDefectIds() {
         return defectIds;
     }
 
+    /**
+     * The data for the defects that were captured for this build. This will perform a call to the web service.
+     */
     public List<MergedDefectDataObj> getDefects() throws IOException, CovRemoteServiceException_Exception {
-        CIMInstance cim = Hudson.getInstance().getDescriptorByType(CIMInstance.DescriptorImpl.class).getInstance(cimInstance);
+        CIMInstance cim = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
         return cim.getDefects(streamId, defectIds);
     }
 
+    /**
+     * Returns the URL to the page for this defect in the CIM instance.
+     */
     public String getURL(MergedDefectDataObj defect) throws IOException, CovRemoteServiceException_Exception {
-        CIMInstance instance = CIMInstance.DESCRIPTOR.getInstance(cimInstance);
+        CIMInstance instance = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
         return String.format("http://%s:%d/sourcebrowser.htm?projectId=%s#mergedDefectId=%d",
                 instance.getHost(), instance.getPort(), instance.getProjectKey(projectId), defect.getCid());
     }
 
     public String getIconFileName() {
-        return "star.gif"; //TODO
+        return "/plugin/coverity/icons/coverity-logo-400px.png";
     }
 
     public String getDisplayName() {
@@ -64,6 +73,10 @@ public class CoverityBuildAction implements Action {
         return "coverity";
     }
 
+    /**
+     * ID of the CIM project used for ths build
+     * @return
+     */
     public String getProjectId() {
         return projectId;
     }

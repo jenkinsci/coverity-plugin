@@ -1,0 +1,57 @@
+X matrix support -> is ok as long as you don't build in parallel
+X password fields
+X cim instance dropdown
+renaming cim instances ? projects ? streams ?
+Xconfigurable temp dir (for when no invocation assistance) -> not necessary, just get latest defects from WS
+X put extra arguments behind advanced
+X make stream a dropdown ?
+X move from publisher to recorder (change result)
+Xcoverity program location ?
+X    check if can run from path -> yes
+X    per node config
+Xglobal config -- test button -> must check web services version
+TO-TEST pass/fail filters
+Xdon't run coverity if the build failed
+    what does coverity itself do ? -> eats the return code -> ignore
+Xcan use port instead of dataPort with cov-commit-defects (no need for two configs)
+Xgenerate url http://coverity5.coverity.com/node/319
+Xsidepanel for build coverity link
+when coverity errors, print buildlog
+X help
+Xlayout of filters (in configuration) is wrong
+Xpaging of defects
+X implement build arguments (change to one per line ?)
+Xmail
+X put library ? in repo somewhere
+TO-TEST language (c vs java)
+Xlist of checkers
+X        checkers as config option
+X        automatically updated
+Xcut off date
+dynamic update of configuration based on stream
+TO-TEST linux test (cov-build.exe)
+Xtest over slave
+unit tests
+Xtest without invocation assistance
+Xjavadoc
+
+Xdon't gather defects if cov-buidl fails (e.g. no inv assist and no temp dir set)
+
+2011-07-01 19:51:36.104::WARN:  /job/matrix/coverity/graph/map
+X java.lang.NullPointerException
+        at jenkins.plugins.coverity.CoverityProjectAction$GraphImpl.<init>(CoverityProjectAction.java:64)
+        at jenkins.plugins.coverity.CoverityProjectAction.getGraph(CoverityProjectAction.java:59)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+
+
+X icon
+
+i18n
+
+send 'fixed' mail
+additional email addresses
+
+
+"fail the build" does not collapse
