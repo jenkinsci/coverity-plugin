@@ -41,8 +41,18 @@
         <f:select id="stream" onchange="loadDefectFilters()"/>
     </f:entry>
     <f:entry title="" field="failBuild">
-        <f:checkbox /><label class="attach-previous">Fail the build if defects are found</label>
     </f:entry>
+        <tr>
+          <td class="setting-leftspace"><st:nbsp/></td>
+          <td class="setting-name" colspan="2">
+              <f:checkbox field="failBuild"/><label class="attach-previous">Fail the build if defects are found</label>
+          </td>
+          <td class="setting-help">
+            <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/failBuild"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
+          </td>
+        </tr>
+        <f:helpArea />
+
     <!--
     <f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">
         <j:set var="instance" value="${instance.mailSender}"/>
