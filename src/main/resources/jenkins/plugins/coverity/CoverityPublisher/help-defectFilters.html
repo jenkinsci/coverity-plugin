@@ -1,12 +1,17 @@
 <div>
     <p>
-        Only defects for which action, severity, component and checker are all selected here, will be considered.
-        Classification is deliberately not configurable.
-    </p>
-
+  Defects found by the Coverity analysis are first filtered according to
+  the settings here.  If a defect matches all the filters, then it will
+  be included in the list of "Coverity Defects" associated with the build,
+  and in the defect count trend chart.  Furthermore, if any defect matches
+  the filters, and the "Fail the build if matching defects are found" box
+  is checked, then the build will be marked as a failure.
     <p>
-        Additionally a cut-off date (yyyy-mm-dd) can be provided. Any defects that were first detected before this date
-        will be ignored. This is useful when setting up a base line, so that only newly committed defects are
-        considered.
+ Defects are filtered according to action, severity, component,
+  checker, classification and date found.  The classification filter is
+  deliberately not configurable.  If a date (yyyy-mm-dd) is specified,
+  then only defects found on or after that date pass the filter.  This is
+  useful to establish a "base line" of existing defects that will be
+  tolerated, whereas new defects will not be.
     </p>
 </div>

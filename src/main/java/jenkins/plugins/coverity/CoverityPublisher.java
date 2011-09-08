@@ -1,16 +1,16 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v3.*;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.SingleValueConverter;
 import hudson.*;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.util.ArgumentListBuilder;
-import hudson.util.FormValidation;
-import hudson.util.IOUtils;
-import hudson.util.ListBoxModel;
+import hudson.util.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -19,11 +19,13 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -234,11 +236,15 @@ public class CoverityPublisher extends Recorder {
         BufferedReader reader = new BufferedReader(build.getLogReader());
         String line = null;
         long snapshotId = -1;
-        while ((line = reader.readLine()) != null && snapshotId < 0) {
-            Matcher m = snapshotPattern.matcher(line);
-            if (m.matches()) {
-                snapshotId = Long.parseLong(m.group(1));
+        try {
+            while ((line = reader.readLine()) != null && snapshotId < 0) {
+                Matcher m = snapshotPattern.matcher(line);
+                if (m.matches()) {
+                    snapshotId = Long.parseLong(m.group(1));
+                }
             }
+        } finally {
+            reader.close();
         }
 
         if (snapshotId == -1) {
@@ -269,16 +275,31 @@ public class CoverityPublisher extends Recorder {
             getDescriptor().updateCheckers(language, checkers);
 
             List<Long> matchingDefects = new ArrayList<Long>();
+
+            XStream xs = new XStream2();
+
+            if (defectFilters != null) {
+                listener.getLogger().println("matching defects against filters: " + xs.toXML(defectFilters));
+            }
             for (MergedDefectDataObj defect : defects) {
-                if (defectFilters == null || defectFilters.matches(defect)) {
+                if (defectFilters == null) {
                     matchingDefects.add(defect.getCid());
+                } else {
+                    listener.getLogger().println("checking defect: " + xs.toXML(defect));
+                    boolean match = defectFilters.matches(defect);
+                    listener.getLogger().println("defect match:" + match);
+                    if (match) {
+                        matchingDefects.add(defect.getCid());
+                    }
                 }
             }
 
-            if (failBuild && !matchingDefects.isEmpty()) {
+            if (!matchingDefects.isEmpty()) {
                 listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
-                if (build.getResult().isBetterThan(Result.FAILURE)) {
-                    build.setResult(Result.FAILURE);
+                if (failBuild) {
+                    if (build.getResult().isBetterThan(Result.FAILURE)) {
+                        build.setResult(Result.FAILURE);
+                    }
                 }
             } else {
                 listener.getLogger().println("[Coverity] No defects matched all filters.");
@@ -530,8 +551,23 @@ public class CoverityPublisher extends Recorder {
 
             JSONObject json = req.getSubmittedForm().getJSONObject(getJsonSafeClassName());
             if (json != null && !json.isNullObject()) {
-                CoverityPublisher p = req.bindJSON(CoverityPublisher.class, json);
-                req.setAttribute("instance", p);
+                CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
+                if (StringUtils.isEmpty(publisher.getCimInstance()) ||StringUtils.isEmpty(publisher.getStream()) ||StringUtils.isEmpty(publisher.getProject())) {
+
+                } else
+                try {
+                    String language = publisher.getLanguage();
+                    Set<String> allCheckers = split2(getCheckers(language));
+                    publisher.getDefectFilters().invertCheckers(
+                            allCheckers,
+                            toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
+                            toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
+                            toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
+                            );
+                } catch (CovRemoteServiceException_Exception e) {
+                    throw new IOException(e);
+                }
+                req.setAttribute("instance", publisher);
             }
             rsp.forward(this, "defectFilters", req);
         }
@@ -590,16 +626,25 @@ public class CoverityPublisher extends Recorder {
             CoverityPublisher publisher = (CoverityPublisher) super.newInstance(req, formData);
 
             try {
-                if (publisher.getDefectFilters() != null) {
-                    String language = publisher.getLanguage();
-                    String allCheckers = getCheckers(language);
-                    publisher.getDefectFilters().invertCheckers(split2(allCheckers));
-                }
+                String language = publisher.getLanguage();
+                Set<String> allCheckers = split2(getCheckers(language));
+                publisher.getDefectFilters().invertCheckers(
+                        allCheckers,
+                        toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
+                        toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
+                        toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
+                        );
 
                 return publisher;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        private static List<String> toStrings(ListBoxModel list) {
+            List<String> result = new ArrayList<String>();
+            for (ListBoxModel.Option option:list) result.add(option.name);
+            return result;
         }
     }
 

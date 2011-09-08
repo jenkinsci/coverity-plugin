@@ -52,11 +52,14 @@
                 </f:entry>
                 <f:entry title="Checker is among:">
                     <j:set var="checkers" value="${descriptor.doFillCheckerDefectFilterItems(cimInstance,stream)}"/>
-                    <a href="#" id="showCheckers"
+                    <a name="#checkers"/>
+                    <a href="#checkers" id="showCheckers"
                        onclick="document.getElementById('checkers').style.display='block';document.getElementById('hideCheckers').style.display='block';this.style.display='none';">(Show ${checkers.size()} checkers)</a>
-                    <a href="#" id="hideCheckers" style="display: none;"
+                    <a href="#checkers" id="hideCheckers" style="display: none;"
                        onclick="document.getElementById('checkers').style.display='none';document.getElementById('showCheckers').style.display='block';this.style.display='none';">(Hide ${checkers.size()} checkers)</a>
-                    <div id="checkers" style="display: none;">
+                 <div id="checkers" style="display: none;">
+                     <input type="button" class="yui-button" value="Select All" onclick="checkFilters(true);"/>
+                     <input type="button" class="yui-button" value="Select None" onclick="checkFilters(false);"/>
                     <j:forEach var="e" items="${checkers}">
                         <div style="white-space: nowrap">
                             <f:checkbox name="checkers" json="${e.value}"

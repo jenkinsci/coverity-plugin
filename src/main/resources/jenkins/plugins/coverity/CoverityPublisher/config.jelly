@@ -21,10 +21,24 @@
                           + '\').style.display=\'block\';return false">ERROR</a><div id="valerr'
                           + i + '" style="display:none">' + rsp.responseText + '</div>';
                     Behaviour.applySubtree(target);
+
+                    document.getElementById('filters').style.display='none';
+                    document.getElementById('showFilters').style.display='block';
+                    document.getElementById('hideFilters').style.display='none';
                 }
+
             });
         }
-
+    </script>
+    <script type="text/javascript">
+        function checkFilters(state) {
+            YAHOO.util.Dom.getElementsBy(
+                function(el) { return (el.name == 'checkers'); },
+                'input',
+                'filters',
+                function(el) { el.checked = (state ? 'true' : null); }
+            );
+        }
     </script>
 
     <tr>
@@ -40,18 +54,6 @@
     <f:entry title="Stream" field="stream">
         <f:select id="stream" onchange="loadDefectFilters()"/>
     </f:entry>
-    <f:entry title="" field="failBuild">
-    </f:entry>
-        <tr>
-          <td class="setting-leftspace"><st:nbsp/></td>
-          <td class="setting-name" colspan="2">
-              <f:checkbox field="failBuild"/><label class="attach-previous">Fail the build if defects are found</label>
-          </td>
-          <td class="setting-help">
-            <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/failBuild"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
-          </td>
-        </tr>
-        <f:helpArea />
 
     <!--
     <f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">
@@ -78,12 +80,21 @@
     </f:optionalBlock>
 
         <tr>
+          <td class="setting-name" colspan="3">
+              <f:checkbox field="failBuild"/><label class="attach-previous">Fail the build if matching defects are found</label>
+          </td>
+          <td class="setting-help">
+            <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/failBuild"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
+          </td>
+        </tr>
+        <f:helpArea />
+        <tr>
           <td class="setting-leftspace"><st:nbsp/></td>
           <td class="setting-name">
-              <a href="#" id="showFilters"
-                 onclick="document.getElementById('filters').style.display='block';document.getElementById('hideFilters').style.display='block';this.style.display='none';">Filters >>></a>
-              <a href="#" id="hideFilters" style="display: none;"
-                 onclick="document.getElementById('filters').style.display='none';document.getElementById('showFilters').style.display='block';this.style.display='none';">Filters &lt;&lt;&lt;</a>
+              <a href="#filters" id="showFilters"
+                 onclick="document.getElementById('filters').style.display='block';document.getElementById('hideFilters').style.display='block';this.style.display='none';">Defect Filters >>></a>
+              <a href="#filters" id="hideFilters" style="display: none;"
+                 onclick="document.getElementById('filters').style.display='none';document.getElementById('showFilters').style.display='block';this.style.display='none';">Defect Filters &lt;&lt;&lt;</a>
           </td>
           <td class="setting-main">
                   <table width="100%" id="defectFilters" name="defectFilters">

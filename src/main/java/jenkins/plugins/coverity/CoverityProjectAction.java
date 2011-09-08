@@ -58,7 +58,7 @@ public class CoverityProjectAction implements Action {
 
     private class GraphImpl extends Graph {
         protected GraphImpl() {
-            super(project.getLastCompletedBuild() != null ? project.getLastCompletedBuild().getTimestamp() : Calendar.getInstance(), 600,300);
+            super(-1, 600,300); // no caching, because it doesn't deal with deleted builds
         }
 
         protected DataSetBuilder<String, ChartLabel> createDataSet() {

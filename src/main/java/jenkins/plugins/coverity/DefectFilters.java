@@ -14,11 +14,11 @@ import java.util.*;
  */
 public class DefectFilters {
 
-    private final List<String> classifications = Arrays.asList("Unclassified", "Bug", "Pending");
-    private final List<String> actions;
-    private final List<String> severities;
-    private final List<String> components;
-    private final List<String> checkers;
+    private List<String> classifications = Arrays.asList("Unclassified", "Bug", "Pending");
+    private List<String> actions;
+    private List<String> severities;
+    private List<String> components;
+    private List<String> checkers;
     private List<String> ignoredCheckers;
     private final Date cutOffDate;
 
@@ -37,29 +37,21 @@ public class DefectFilters {
         }
     }
 
-    void invertCheckers(Set<String> allCheckers) {
-        ignoredCheckers = new ArrayList<String>(allCheckers);
-        ignoredCheckers.removeAll(checkers);
+    void invertCheckers(Set<String> allCheckers, List<String> allActions, List<String> allSeverities, List<String> allComponents) {
+        if (checkers.isEmpty() && actions.isEmpty() && components.isEmpty() && severities.isEmpty()) {
+            ignoredCheckers = new ArrayList<String>();
+            actions = allActions;
+            severities = allSeverities;
+            components = allComponents;
+        } else {
+            ignoredCheckers = new ArrayList<String>(allCheckers);
+            ignoredCheckers.removeAll(checkers);
+            checkers = null;
+        }
     }
 
     public List<String> getClassifications() {
         return classifications;
-    }
-
-    public List<String> getActions() {
-        return actions;
-    }
-
-    public List<String> getSeverities() {
-        return severities;
-    }
-
-    public List<String> getComponents() {
-        return components;
-    }
-
-    public List<String> getCheckers() {
-        return checkers;
     }
 
     public boolean isActionSelected(String action) {
@@ -75,8 +67,7 @@ public class DefectFilters {
     }
 
     public boolean isCheckerSelected(String checker) {
-        if (ignoredCheckers != null) return !ignoredCheckers.contains(checker);
-        return checkers.contains(checker);
+        return !ignoredCheckers.contains(checker);
     }
 
     public String getCutOffDate() {
