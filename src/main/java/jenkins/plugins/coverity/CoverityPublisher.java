@@ -152,9 +152,14 @@ public class CoverityPublisher extends Recorder {
 
         CoverityTempDir temp = null;
         String language = null;
+        try {
+            language = cim.getStream(stream).getLanguage();
+        } catch (CovRemoteServiceException_Exception e) {
+            e.printStackTrace(listener.error("Error while retrieving stream information for " + stream));
+            return false;
+        }
         if (invocationAssistance != null) {
             try {
-                language = cim.getStream(stream).getLanguage();
                 String covAnalyze = "JAVA".equals(language) ? "cov-analyze-java" : "cov-analyze";
                 String covCommitDefects = "cov-commit-defects";
 
@@ -224,8 +229,6 @@ public class CoverityPublisher extends Recorder {
                     build.setResult(Result.FAILURE);
                     return false;
                 }
-            } catch (CovRemoteServiceException_Exception e) {
-                e.printStackTrace(listener.error("Error while retrieving stream information for " + stream));
             } finally {
                 CoverityLauncherDecorator.SKIP.set(false);
                 if (temp != null) temp.tempDir.deleteRecursive();
@@ -586,7 +589,7 @@ public class CoverityPublisher extends Recorder {
         public String getCheckers(String language) {
             if ("CXX".equals(language)) return cxxCheckers;
             if ("JAVA".equals(language)) return javaCheckers;
-            throw new IllegalArgumentException(language);
+            throw new IllegalArgumentException("Unknown language: " + language);
         }
 
         public void setCheckers(String language, Set<String> checkers) {
