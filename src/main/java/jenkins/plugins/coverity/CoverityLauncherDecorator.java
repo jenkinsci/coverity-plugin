@@ -2,15 +2,13 @@ package jenkins.plugins.coverity;
 
 import hudson.*;
 import hudson.model.*;
+import hudson.model.Queue;
 import hudson.remoting.Channel;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This makes sure that all commands executed (when invocation assistance is enabled) are run through cov-build
@@ -118,8 +116,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     } else {
                         starter.masks(prefix(masks));
                     }
-
-                    starter.envs("COVERITY_UNSUPPORTED=1");
                 }
                 return decorated.launch(starter);
             }
