@@ -67,15 +67,7 @@ public class CoverityProjectAction implements Action {
             while (build != null) {
                 final CoverityBuildAction action = build.getAction(CoverityBuildAction.class);
                 if (action != null) {
-                    data.add(action.getDefectIds().size(), "", new ChartLabel(build)  {
-                        @Override
-                        public Color getColor() {
-                            if (action.getDefectIds().size() > 0)
-                                return ColorPalette.RED;
-                            else
-                                return ColorPalette.BLUE;
-                        }
-                    });
+                    data.add(action.getDefectIds().size(), "", new ChartLabel(build));
                 }
                 build = build.getPreviousBuild();
             }
@@ -146,9 +138,7 @@ public class CoverityProjectAction implements Action {
                 }
             };
             plot.setRenderer(ar);
-            ar.setSeriesPaint(0,ColorPalette.RED); // Failures.
-            ar.setSeriesPaint(1,ColorPalette.YELLOW); // Skips.
-            ar.setSeriesPaint(2,ColorPalette.BLUE); // Total.
+            ar.setSeriesPaint(0,ColorPalette.RED);
 
             // crop extra space around the graph
             plot.setInsets(new RectangleInsets(0, 0, 0, 5.0));
