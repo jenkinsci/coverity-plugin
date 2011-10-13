@@ -12,7 +12,7 @@
             var json = form.elements["json"].value;
 
             var parameters = { cimInstance: cimInstance, streamId: streamId }
-            new Ajax.Request("/descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
+            new Ajax.Request("${app.rootUrl}descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
                 parameters: { json: json },
                 onComplete: function(rsp) {
                     var target = document.getElementById("defectFilters");
