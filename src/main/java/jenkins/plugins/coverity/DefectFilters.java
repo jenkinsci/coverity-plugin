@@ -2,6 +2,7 @@ package jenkins.plugins.coverity;
 
 import com.coverity.ws.v3.MergedDefectDataObj;
 import hudson.Util;
+import hudson.model.Descriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.text.ParseException;
@@ -23,7 +24,7 @@ public class DefectFilters {
     private final Date cutOffDate;
 
     @DataBoundConstructor
-    public DefectFilters(List<String> actions, List<String> severities, List<String> components, List<String> checkers, String cutOffDate) throws ParseException {
+    public DefectFilters(List<String> actions, List<String> severities, List<String> components, List<String> checkers, String cutOffDate) throws Descriptor.FormException {
         this.actions = Util.fixNull(actions);
         this.severities = Util.fixNull(severities);
         this.components = Util.fixNull(components);
@@ -31,7 +32,11 @@ public class DefectFilters {
 
         cutOffDate = Util.fixEmpty(cutOffDate);
         if (cutOffDate != null) {
-            this.cutOffDate = new SimpleDateFormat("yyyy-MM-dd").parse(cutOffDate);
+            try {
+                this.cutOffDate = new SimpleDateFormat("yyyy-MM-dd").parse(cutOffDate);
+            } catch (ParseException e) {
+                throw new Descriptor.FormException("Could not parse, yyyy-MM-dd expected", "cutOffDate");
+            }
         } else {
             this.cutOffDate = null;
         }

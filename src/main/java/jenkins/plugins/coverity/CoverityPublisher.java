@@ -441,6 +441,15 @@ public class CoverityPublisher extends Recorder {
             return new CIMInstance("", host, port, user, password, useSSL).doCheck();
         }
 
+        public FormValidation doCheckCutOffDate(@QueryParameter String value) throws FormException {
+            try {
+                if (!StringUtils.isEmpty(value)) new SimpleDateFormat("yyyy-MM-dd").parse(value);
+                return FormValidation.ok();
+            } catch (ParseException e) {
+                return FormValidation.error("Could not parse date, yyyy-MM-dd expected");
+            }
+        }
+
         public ListBoxModel doFillCimInstanceItems() {
             ListBoxModel result = new ListBoxModel();
             result.add("");
@@ -626,6 +635,12 @@ public class CoverityPublisher extends Recorder {
 
         @Override
         public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            String cutOffDate = req.getParameter("cutOffDate");
+            try {
+                if (cutOffDate != null) new SimpleDateFormat("yyyy-MM-dd").parse(cutOffDate);
+            } catch (ParseException e) {
+                throw new Descriptor.FormException("Could not parse date '" + cutOffDate + "', yyyy-MM-dd expected", "cutOffDate");
+            }
             CoverityPublisher publisher = (CoverityPublisher) super.newInstance(req, formData);
 
             try {
