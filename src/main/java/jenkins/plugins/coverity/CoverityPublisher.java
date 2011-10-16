@@ -446,7 +446,7 @@ public class CoverityPublisher extends Recorder {
                 if (!StringUtils.isEmpty(value)) new SimpleDateFormat("yyyy-MM-dd").parse(value);
                 return FormValidation.ok();
             } catch (ParseException e) {
-                return FormValidation.error("Could not parse date, yyyy-MM-dd expected");
+                return FormValidation.error("yyyy-MM-dd expected");
             }
         }
 
@@ -463,7 +463,11 @@ public class CoverityPublisher extends Recorder {
             ListBoxModel result = new ListBoxModel();
             if (!StringUtils.isEmpty(cimInstance)) {
                 for (ProjectDataObj project : getInstance(cimInstance).getProjects()) {
-                    result.add(project.getId().getName());
+                    // don't add projects for which there are no valid streams
+                    ListBoxModel streams = doFillStreamItems(cimInstance, project.getId().getName());
+                    if (!streams.isEmpty()) {
+                        result.add(project.getId().getName());
+                    }
                 }
             }
             return result;
@@ -475,7 +479,9 @@ public class CoverityPublisher extends Recorder {
             CIMInstance instance = getInstance(cimInstance);
             if (instance != null) {
                 for (StreamDataObj stream : instance.getStaticStreams(project)) {
-                    result.add(stream.getId().getName());
+                    if ("JAVA".equals(stream.getLanguage()) || "CXX".equals(stream.getLanguage())) {
+                        result.add(stream.getId().getName());
+                    }
                 }
             }
             return result;
@@ -635,7 +641,7 @@ public class CoverityPublisher extends Recorder {
 
         @Override
         public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            String cutOffDate = req.getParameter("cutOffDate");
+            String cutOffDate = Util.fixEmpty(req.getParameter("cutOffDate"));
             try {
                 if (cutOffDate != null) new SimpleDateFormat("yyyy-MM-dd").parse(cutOffDate);
             } catch (ParseException e) {

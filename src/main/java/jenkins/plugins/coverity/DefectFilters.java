@@ -21,7 +21,7 @@ public class DefectFilters {
     private List<String> components;
     private List<String> checkers;
     private List<String> ignoredCheckers;
-    private final Date cutOffDate;
+    private Date cutOffDate;
 
     @DataBoundConstructor
     public DefectFilters(List<String> actions, List<String> severities, List<String> components, List<String> checkers, String cutOffDate) throws Descriptor.FormException {
@@ -35,7 +35,7 @@ public class DefectFilters {
             try {
                 this.cutOffDate = new SimpleDateFormat("yyyy-MM-dd").parse(cutOffDate);
             } catch (ParseException e) {
-                throw new Descriptor.FormException("Could not parse, yyyy-MM-dd expected", "cutOffDate");
+                this.cutOffDate = null;
             }
         } else {
             this.cutOffDate = null;
