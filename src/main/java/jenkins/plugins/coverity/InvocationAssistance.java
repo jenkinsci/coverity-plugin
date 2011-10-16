@@ -1,16 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2011 Coverity, Inc
+
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Tom Huybrechts - initial implementation and documentation
+ *******************************************************************************/
 package jenkins.plugins.coverity;
 
 import hudson.Util;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-
-/**
- * Created by IntelliJ IDEA.
- * User: Tom
- * Date: 19/06/11
- * Time: 14:33
- * To change this template use File | Settings | File Templates.
- */
 public class InvocationAssistance {
 
     private final String buildArguments;

@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011 Coverity, Inc
+
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Tom Huybrechts - initial implementation and documentation
+ *******************************************************************************/
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v3.CovRemoteServiceException_Exception;
@@ -29,6 +40,8 @@ import java.util.regex.Pattern;
 /**
  * Sends mails to culprits when Coverity defects are found.
  * Inspired by hudson.tasks.MailSender.
+ *
+ * Not used at this point.
  */
 public class CoverityMailSender {
     /**
