@@ -1,6 +1,0 @@
-class CLASSNAME {
-        CLASSNAME() {
-                String foo = "foo";
-                foo.toString();
-        }
-}
