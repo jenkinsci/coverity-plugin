@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Tom Huybrechts - initial implementation and documentation
+ *    Coverity, Inc - initial implementation and documentation
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
@@ -70,6 +70,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 temp = coverityDir.createTempDir("temp-", null);
             } else {
                 temp = new FilePath(node.getChannel(), ii.getIntermediateDir());
+                temp.mkdirs();
             }
 
             build.addAction(new CoverityTempDir(temp));

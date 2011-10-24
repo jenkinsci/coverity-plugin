@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Tom Huybrechts - initial implementation and documentation
+ *    Coverity, Inc - initial implementation and documentation
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
