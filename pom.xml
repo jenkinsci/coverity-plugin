@@ -36,12 +36,10 @@
         </license>
     </licenses>
 
-    <!--
-      <scm>
-            <connection>scm:git:git://github.com/jenkinsci/sauce-ondemand-plugin.git</connection>
-            <developerConnection>scm:git:git@github.com:jenkinsci/sauce-ondemand-plugin.git</developerConnection>
-        </scm>
-    -->
+	<scm>
+		<connection>scm:git:git://github.com/cloudbees/coverity-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:cloudbees/coverity-plugin.git</developerConnection>
+	</scm>
 
     <distributionManagement>
         <repository>
