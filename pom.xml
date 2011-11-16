@@ -36,8 +36,8 @@
     </licenses>
 
 	<scm>
-		<connection>scm:git:git://github.com/cloudbees/coverity-plugin.git</connection>
-		<developerConnection>scm:git:git@github.com:cloudbees/coverity-plugin.git</developerConnection>
+		<connection>scm:git:git://github.com/jenkinsci/coverity-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:jenkinsci/coverity-plugin.git</developerConnection>
 	</scm>
 
     <distributionManagement>
