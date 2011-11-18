@@ -47,6 +47,8 @@ import java.util.regex.Pattern;
  */
 public class CoverityPublisher extends Recorder {
 
+    private static final Logger logger = Logger.getLogger(CoverityPublisher.class.getName());
+
     /**
      * ID of the CIM instance used
      */
@@ -652,6 +654,8 @@ public class CoverityPublisher extends Recorder {
 
         @Override
         public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            logger.info(formData.toString());
+
             String cutOffDate = Util.fixEmpty(req.getParameter("cutOffDate"));
             try {
                 if (cutOffDate != null) new SimpleDateFormat("yyyy-MM-dd").parse(cutOffDate);
@@ -663,13 +667,16 @@ public class CoverityPublisher extends Recorder {
             try {
                 String language = publisher.getLanguage();
                 Set<String> allCheckers = split2(getCheckers(language));
-                publisher.getDefectFilters().invertCheckers(
-                        allCheckers,
-                        toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
-                        toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
-                        toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
-                        );
+                DefectFilters defectFilters = publisher.getDefectFilters();
 
+                if (defectFilters != null) {
+                    defectFilters.invertCheckers(
+                            allCheckers,
+                            toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
+                            toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
+                            toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
+                            );
+                }
                 return publisher;
             } catch (Exception e) {
                 throw new RuntimeException(e);
