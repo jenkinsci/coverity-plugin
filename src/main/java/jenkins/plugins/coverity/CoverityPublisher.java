@@ -24,6 +24,7 @@ import hudson.tasks.Recorder;
 import hudson.util.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.spi.LoggerRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -589,12 +590,15 @@ public class CoverityPublisher extends Recorder {
                 try {
                     String language = publisher.getLanguage();
                     Set<String> allCheckers = split2(getCheckers(language));
-                    publisher.getDefectFilters().invertCheckers(
-                            allCheckers,
-                            toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
-                            toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
-                            toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
-                            );
+                    DefectFilters defectFilters = publisher.getDefectFilters();
+                    if (defectFilters != null) {
+                        publisher.getDefectFilters().invertCheckers(
+                                allCheckers,
+                                toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
+                                toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
+                                toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
+                                );
+                    }
                 } catch (CovRemoteServiceException_Exception e) {
                     throw new IOException(e);
                 }
