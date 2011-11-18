@@ -579,6 +579,8 @@ public class CoverityPublisher extends Recorder {
         }
 
         public void doDefectFiltersConfig(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+            logger.info(req.getSubmittedForm().toString());
+
             req.setAttribute("descriptor", this);
 
             JSONObject json = req.getSubmittedForm().getJSONObject(getJsonSafeClassName());
