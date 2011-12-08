@@ -19,6 +19,7 @@ public class InvocationAssistance {
     private final String buildArguments;
     private final String analyzeArguments;
     private final String commitArguments;
+    private final String csharpAssemblies;
 
     /**
      * Absolute path to the intermediate directory that Coverity should use. Null to use the default.
@@ -26,11 +27,12 @@ public class InvocationAssistance {
     private final String intermediateDir;
 
     @DataBoundConstructor
-    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir) {
+    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies) {
         this.intermediateDir = Util.fixEmpty(intermediateDir);
         this.buildArguments = Util.fixEmpty(buildArguments);
         this.analyzeArguments = Util.fixEmpty(analyzeArguments);
         this.commitArguments = Util.fixEmpty(commitArguments);
+        this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
     }
 
     public String getBuildArguments() {
@@ -48,6 +50,10 @@ public class InvocationAssistance {
     public String getIntermediateDir() {
         return intermediateDir;
     }
+    
+    public String getCsharpAssemblies() {
+    	return csharpAssemblies;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -62,7 +68,9 @@ public class InvocationAssistance {
             return false;
         if (commitArguments != null ? !commitArguments.equals(that.commitArguments) : that.commitArguments != null)
             return false;
-
+        if (csharpAssemblies != null ? !csharpAssemblies.equals(that.csharpAssemblies) : that.csharpAssemblies != null)
+            return false;
+        
         return true;
     }
 
@@ -71,6 +79,8 @@ public class InvocationAssistance {
         int result = buildArguments != null ? buildArguments.hashCode() : 0;
         result = 31 * result + (analyzeArguments != null ? analyzeArguments.hashCode() : 0);
         result = 31 * result + (commitArguments != null ? commitArguments.hashCode() : 0);
+        result = 31 * result + (csharpAssemblies != null ? csharpAssemblies.hashCode() : 0);
+
         return result;
     }
 }

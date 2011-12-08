@@ -51,6 +51,9 @@
             <f:entry title="Known C/C++ Checkers" field="cxxCheckers">
                 <f:textarea/>
             </f:entry>
+            <f:entry title="Known C# Checkers" field="csharpCheckers">
+                <f:textarea/>
+            </f:entry>
         </f:advanced>
     </f:section>
 </j:jelly>

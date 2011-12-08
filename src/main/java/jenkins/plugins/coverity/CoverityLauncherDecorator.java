@@ -20,12 +20,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.logging.Logger;
+
+import com.coverity.ws.v3.CovRemoteServiceException_Exception;
 
 /**
  * This makes sure that all commands executed (when invocation assistance is enabled) are run through cov-build
  */
 @Extension
 public class CoverityLauncherDecorator extends LauncherDecorator {
+
+    private static final Logger logger = Logger.getLogger(CoverityLauncherDecorator.class.getName());
 
     /**
      * A ThreadLocal that is used to disable cov-build when running other Coverity tools during the build.
@@ -61,9 +66,24 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         if (ii == null) {
             return launcher;
         }
+        
+        // Do not run cov-build if language is "CSHARP"
+        String cimInstanceName = publisher.getCimInstance();
+        CIMInstance cim = publisher.getDescriptor().getInstance(publisher.getCimInstance());
+        
+        String streamName = publisher.getStream();
+        String language = null;
+        try {
+            language = cim.getStream(streamName).getLanguage();
+        } catch (CovRemoteServiceException_Exception e) {
+        	throw new RuntimeException("Error while retrieving stream information for " + streamName, e);
+        } catch (IOException e) {
+        	throw new RuntimeException("Error while retrieving stream information for " + streamName, e);
+        }
+
+        FilePath temp;
 
         try {
-            FilePath temp;
             if (ii.getIntermediateDir() == null) {
                 FilePath coverityDir = node.getRootPath().child("coverity");
                 coverityDir.mkdirs();
@@ -74,7 +94,19 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             }
 
             build.addAction(new CoverityTempDir(temp));
+        } catch (IOException e) {
+            throw new RuntimeException("Error while creating temporary directory for Coverity", e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
+        }
 
+        if ("CSHARP".equals(language)) {
+        	logger.info("Stream " + streamName + " is of type CSHARP, skipping cov-build");
+        	
+        	return launcher;
+        }
+        
+        try {
             String covBuild = "cov-build";
             TaskListener listener = launcher.getListener();
             String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
@@ -93,11 +125,12 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             }
             
             return new DecoratedLauncher(launcher, args.toArray(new String[args.size()]));
-        } catch (IOException e) {
-            throw new RuntimeException("Error while creating temporary directory for Coverity", e);
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
+        } catch (IOException e) {
+            throw new RuntimeException("Error while creating temporary directory for Coverity", e);
         }
+
 
     }
 
