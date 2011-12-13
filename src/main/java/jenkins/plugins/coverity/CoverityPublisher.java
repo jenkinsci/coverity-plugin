@@ -193,11 +193,43 @@ public class CoverityPublisher extends Recorder {
             		covAnalyze = "cov-analyze";
             	}
             	
+            	/*
+            	 * TODO - Automatically detect CLR assemblies in build workspace
+            	 * Work in progress
+            	 */
+            	
+            	/*
+            	if (isCsharp) {
+            		// For CSHARP builds, generate a list of assemblies
+            		String vsGetSolutionAssemblies = "VSGetSolutionAssemblies";
+            		
+            		List<String> cmd = new ArrayList<String>();
+            		cmd.add("echo");
+            		cmd.add("Hello, world");
+            		cmd.add(build.getArtifactsDir().toString());
+            		//Jenkins.getInstance().
+            		
+                    int result = launcher.
+                                 launch().
+                                 cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+                                 stdout(listener).
+                                 join();
+
+                    if (result != 0) {
+                    	listener.getLogger().println("[Coverity] " + vsGetSolutionAssemblies + " returned " + result + ", aborting...");
+                    	build.setResult(Result.FAILURE);
+                    	return false;
+                    }
+
+            	}
+            	*/
+            	
                 //String covAnalyze = "JAVA".equals(language) ? "cov-analyze-java" : "cov-analyze";
             	
                 String covCommitDefects = "cov-commit-defects";
 
                 Node node = Executor.currentExecutor().getOwner().getNode();
+               
                 String home = getDescriptor().getHome(node, build.getEnvironment(listener));
                 if (home != null) {
                     covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
@@ -230,6 +262,7 @@ public class CoverityPublisher extends Recorder {
                 int result = launcher.
                         launch().
                         cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+                        pwd(build.getWorkspace()).
                         stdout(listener).
                         join();
                 if (result != 0) {
