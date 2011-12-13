@@ -87,6 +87,11 @@
         <f:entry title="Intermediate directory:" field="intermediateDir">
             <f:textbox/>
         </f:entry>
+        
+        <f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
+            <f:textbox/>
+        </f:entry>
+        
     </f:optionalBlock>
 
         <tr>

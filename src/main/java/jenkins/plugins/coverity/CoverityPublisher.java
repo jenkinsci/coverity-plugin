@@ -29,6 +29,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import jenkins.plugins.coverity.*;
 
 import javax.servlet.ServletException;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -116,7 +117,7 @@ public class CoverityPublisher extends Recorder {
     public boolean isFailBuild() {
         return failBuild;
     }
-
+    
     public DefectFilters getDefectFilters() {
         return defectFilters;
     }
@@ -174,10 +175,61 @@ public class CoverityPublisher extends Recorder {
         }
         if (invocationAssistance != null) {
             try {
-                String covAnalyze = "JAVA".equals(language) ? "cov-analyze-java" : "cov-analyze";
+            	boolean isCsharp = "CSHARP".equals(language);
+            	
+            	// TODO Handle language is "CSHARP"
+            	if (isCsharp && invocationAssistance.getCsharpAssemblies() != null) {
+            		String csharpAssembliesStr = invocationAssistance.getCsharpAssemblies();
+            		
+            		listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
+            	}
+            	
+            	String covAnalyze = null;
+            	if ("JAVA".equals(language)) {
+            		covAnalyze = "cov-analyze-java";
+            	} else if (isCsharp) {
+            		covAnalyze = "cov-analyze-cs";
+            	} else {
+            		covAnalyze = "cov-analyze";
+            	}
+            	
+            	/*
+            	 * TODO - Automatically detect CLR assemblies in build workspace
+            	 * Work in progress
+            	 */
+            	
+            	/*
+            	if (isCsharp) {
+            		// For CSHARP builds, generate a list of assemblies
+            		String vsGetSolutionAssemblies = "VSGetSolutionAssemblies";
+            		
+            		List<String> cmd = new ArrayList<String>();
+            		cmd.add("echo");
+            		cmd.add("Hello, world");
+            		cmd.add(build.getArtifactsDir().toString());
+            		//Jenkins.getInstance().
+            		
+                    int result = launcher.
+                                 launch().
+                                 cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+                                 stdout(listener).
+                                 join();
+
+                    if (result != 0) {
+                    	listener.getLogger().println("[Coverity] " + vsGetSolutionAssemblies + " returned " + result + ", aborting...");
+                    	build.setResult(Result.FAILURE);
+                    	return false;
+                    }
+
+            	}
+            	*/
+            	
+                //String covAnalyze = "JAVA".equals(language) ? "cov-analyze-java" : "cov-analyze";
+            	
                 String covCommitDefects = "cov-commit-defects";
 
                 Node node = Executor.currentExecutor().getOwner().getNode();
+               
                 String home = getDescriptor().getHome(node, build.getEnvironment(listener));
                 if (home != null) {
                     covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
@@ -191,6 +243,16 @@ public class CoverityPublisher extends Recorder {
                 cmd.add(covAnalyze);
                 cmd.add("--dir");
                 cmd.add(temp.tempDir.getRemote());
+                
+                // For C# add the list of assemblies
+                if (isCsharp) {
+                	String csharpAssemblies = invocationAssistance.getCsharpAssemblies();
+                	if (csharpAssemblies != null) {
+                		cmd.add(csharpAssemblies);
+                	}
+                }
+                
+                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                 if (invocationAssistance.getAnalyzeArguments() != null) {
                     for (String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
                         cmd.add(arg);
@@ -200,6 +262,7 @@ public class CoverityPublisher extends Recorder {
                 int result = launcher.
                         launch().
                         cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+                        pwd(build.getWorkspace()).
                         stdout(listener).
                         join();
                 if (result != 0) {
@@ -310,7 +373,7 @@ public class CoverityPublisher extends Recorder {
                     }
                 }
             }
-
+            
             if (!matchingDefects.isEmpty()) {
                 listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
                 if (failBuild) {
@@ -358,6 +421,7 @@ public class CoverityPublisher extends Recorder {
 
         private String javaCheckers;
         private String cxxCheckers;
+        private String csharpCheckers;
 
         public DescriptorImpl() {
             super(CoverityPublisher.class);
@@ -365,6 +429,7 @@ public class CoverityPublisher extends Recorder {
 
             setJavaCheckers(javaCheckers);
             setCxxCheckers(cxxCheckers);
+            setCsharpCheckers(csharpCheckers);
         }
 
         @Override
@@ -394,7 +459,7 @@ public class CoverityPublisher extends Recorder {
         public String getJavaCheckers() {
             return javaCheckers;
         }
-
+        
         public void setJavaCheckers(String javaCheckers) {
             this.javaCheckers = Util.fixEmpty(javaCheckers);
             try {
@@ -417,6 +482,19 @@ public class CoverityPublisher extends Recorder {
             }
         }
 
+
+        public String getCsharpCheckers() {
+        	return csharpCheckers;
+        }
+        
+        public void setCsharpCheckers(String csharpCheckers) {
+            this.csharpCheckers = Util.fixEmpty(csharpCheckers);
+            try {
+                if (this.csharpCheckers == null)
+                    this.csharpCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
+            } catch (IOException e) {
+            }
+        }
         public String getHome(Node node, EnvVars environment) {
             CoverityInstallation install = node.getNodeProperties().get(CoverityInstallation.class);
             if (install != null) {
@@ -493,7 +571,7 @@ public class CoverityPublisher extends Recorder {
             CIMInstance instance = getInstance(cimInstance);
             if (instance != null) {
                 for (StreamDataObj stream : instance.getStaticStreams(project)) {
-                    if ("JAVA".equals(stream.getLanguage()) || "CXX".equals(stream.getLanguage())) {
+                    if ("JAVA".equals(stream.getLanguage()) || "CXX".equals(stream.getLanguage()) || "CSHARP".equals(stream.getLanguage())) {
                         result.add(stream.getId().getName());
                     }
                 }
@@ -552,7 +630,10 @@ public class CoverityPublisher extends Recorder {
                 return split(cxxCheckers);
             } else if ("JAVA".equals(type)) {
                 return split(javaCheckers);
-            } else {
+            } else if ("CSHARP".equals(type)) {
+            	return split(csharpCheckers);
+            }
+            else {
                 return new ListBoxModel();
             }
         }
@@ -623,6 +704,7 @@ public class CoverityPublisher extends Recorder {
         public String getCheckers(String language) {
             if ("CXX".equals(language)) return cxxCheckers;
             if ("JAVA".equals(language)) return javaCheckers;
+            if ("CSHARP".equals(language)) return csharpCheckers;
             throw new IllegalArgumentException("Unknown language: " + language);
         }
 
@@ -631,7 +713,10 @@ public class CoverityPublisher extends Recorder {
                 cxxCheckers = join(checkers);
             } else if ("JAVA".equals(language)) {
                 javaCheckers = join(checkers);
-            } else {
+            } else if ("CSHARP".equals(language)) {
+            	csharpCheckers = join(checkers);
+            }
+            else {
                 throw new IllegalArgumentException(language);
             }
         }
