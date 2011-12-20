@@ -542,11 +542,14 @@ public class CoverityPublisher extends Recorder {
         public ListBoxModel doFillProjectItems(@QueryParameter String cimInstance) throws IOException, CovRemoteServiceException_Exception {
             ListBoxModel result = new ListBoxModel();
             if (!StringUtils.isEmpty(cimInstance)) {
-                for (ProjectDataObj project : getInstance(cimInstance).getProjects()) {
-                    // don't add projects for which there are no valid streams
-                    ListBoxModel streams = doFillStreamItems(cimInstance, project.getId().getName());
-                    if (!streams.isEmpty()) {
-                        result.add(project.getId().getName());
+                CIMInstance instance = getInstance(cimInstance);
+                if (instance!=null) {
+                    for (ProjectDataObj project : instance.getProjects()) {
+                        // don't add projects for which there are no valid streams
+                        ListBoxModel streams = doFillStreamItems(cimInstance, project.getId().getName());
+                        if (!streams.isEmpty()) {
+                            result.add(project.getId().getName());
+                        }
                     }
                 }
             }
