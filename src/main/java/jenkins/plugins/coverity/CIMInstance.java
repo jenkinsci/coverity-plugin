@@ -14,6 +14,7 @@ package jenkins.plugins.coverity;
 import com.coverity.ws.v3.*;
 import hudson.model.Hudson;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import org.kohsuke.stapler.*;
 
 import javax.xml.namespace.QName;
@@ -64,7 +65,7 @@ public class CIMInstance {
     /**
      * Password for connecting to the CIM server
      */
-    private final String password;
+    private final Secret password;
 
     /**
      * Use SSL
@@ -87,7 +88,7 @@ public class CIMInstance {
     private transient ConfigurationServiceService configurationServiceService;
 
     @DataBoundConstructor
-    public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL) {
+    public CIMInstance(String name, String host, int port, String user, Secret password, boolean useSSL) {
         this.name = name;
         this.host = host;
         this.port = port;
@@ -112,7 +113,7 @@ public class CIMInstance {
         return user;
     }
 
-    public String getPassword() {
+    public Secret getPassword() {
         return password;
     }
 
@@ -157,7 +158,8 @@ public class CIMInstance {
      * Attach an authentication handler to the web service, that uses the configured user and password
      */
     private void attachAuthenticationHandler(BindingProvider service) {
-        service.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(user, password)));
+        service.getBinding().setHandlerChain(Arrays.<Handler>asList(
+                new ClientAuthenticationHandlerWSS(user, password.getPlainText())));
     }
 
     /**
