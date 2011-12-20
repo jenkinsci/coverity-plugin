@@ -64,6 +64,7 @@
     <f:entry title="Stream" field="stream">
         <f:select id="stream" onchange="loadDefectFilters()"/>
     </f:entry>
+    <f:optionalProperty field="mailSender" title="${%Notification of Defects}" />
 
     <!--
     <f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">

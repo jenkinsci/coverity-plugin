@@ -14,6 +14,7 @@ package jenkins.plugins.coverity;
 import com.coverity.ws.v3.CovRemoteServiceException_Exception;
 import com.coverity.ws.v3.DefectService;
 import com.coverity.ws.v3.MergedDefectDataObj;
+import hudson.Extension;
 import hudson.FilePath;
 import hudson.Util;
 import hudson.Functions;
@@ -43,7 +44,7 @@ import java.util.regex.Pattern;
  *
  * Not used at this point.
  */
-public class CoverityMailSender {
+public class CoverityMailSender extends AbstractDescribableImpl<CoverityMailSender> {
     /**
      * The charset to use for the text and subject.
      */
@@ -163,4 +164,11 @@ public class CoverityMailSender {
         return r;
     }
 
+    @Extension
+    public static class DescriptorImpl extends Descriptor<CoverityMailSender> {
+        @Override
+        public String getDisplayName() {
+            return "";
+        }
+    }
 }

@@ -84,7 +84,8 @@ public class CoverityPublisher extends Recorder {
     private final CoverityMailSender mailSender;
 
     @DataBoundConstructor
-    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, DefectFilters defectFilters, CoverityMailSender mailSender) {
+    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, DefectFilters defectFilters, CoverityMailSender
+            mailSender) {
         this.cimInstance = cimInstance;
         this.invocationAssistance = invocationAssistance;
         this.project = project;
