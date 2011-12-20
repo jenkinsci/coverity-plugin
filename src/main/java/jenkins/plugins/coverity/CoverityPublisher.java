@@ -184,7 +184,7 @@ public class CoverityPublisher extends Recorder {
             		listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
             	}
             	
-            	String covAnalyze = null;
+            	String covAnalyze;
             	if ("JAVA".equals(language)) {
             		covAnalyze = "cov-analyze-java";
             	} else if (isCsharp) {
@@ -239,19 +239,14 @@ public class CoverityPublisher extends Recorder {
                 CoverityLauncherDecorator.SKIP.set(true);
                 temp = build.getAction(CoverityTempDir.class);
 
-                List<String> cmd = new ArrayList<String>();
-                cmd.add(covAnalyze);
-                cmd.add("--dir");
-                cmd.add(temp.tempDir.getRemote());
-                
+                ArgumentListBuilder cmd = new ArgumentListBuilder();
+                cmd.add(covAnalyze,"--dir",temp.tempDir.getRemote());
+
                 // For C# add the list of assemblies
                 if (isCsharp) {
-                	String csharpAssemblies = invocationAssistance.getCsharpAssemblies();
-                	if (csharpAssemblies != null) {
-                		cmd.add(csharpAssemblies);
-                	}
+                    cmd.add(invocationAssistance.getCsharpAssemblies());
                 }
-                
+
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                 if (invocationAssistance.getAnalyzeArguments() != null) {
                     for (String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
@@ -261,7 +256,7 @@ public class CoverityPublisher extends Recorder {
 
                 int result = launcher.
                         launch().
-                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+                        cmds(cmd).
                         pwd(build.getWorkspace()).
                         stdout(listener).
                         join();
@@ -271,7 +266,7 @@ public class CoverityPublisher extends Recorder {
                     return false;
                 }
 
-                cmd = new ArrayList<String>();
+                cmd = new ArgumentListBuilder();
                 cmd.add(covCommitDefects);
                 cmd.add("--dir");
                 cmd.add(temp.tempDir.getRemote());
@@ -290,11 +285,9 @@ public class CoverityPublisher extends Recorder {
                     }
                 }
 
-                ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
                 result = launcher.
                         launch().
-                        cmds(args).
+                        cmds(cmd).
                         envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
                         stdout(listener).
                         stderr(listener.getLogger()).
