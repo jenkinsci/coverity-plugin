@@ -64,11 +64,6 @@ public class ClientAuthenticationHandlerWSS implements SOAPHandler<SOAPMessageCo
             throw new RuntimeException(se);
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
-            try {
-                if (xwssConfig != null) xwssConfig.close();
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
         }
 	}
 
