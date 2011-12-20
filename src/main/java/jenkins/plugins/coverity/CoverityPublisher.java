@@ -249,9 +249,7 @@ public class CoverityPublisher extends Recorder {
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                 if (invocationAssistance.getAnalyzeArguments() != null) {
-                    for (String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
-                        cmd.add(arg);
-                    }
+                    cmd.add(Util.tokenize(invocationAssistance.getAnalyzeArguments()));
                 }
 
                 int result = launcher.
@@ -280,22 +278,19 @@ public class CoverityPublisher extends Recorder {
                 cmd.add(cim.getUser());
 
                 if (invocationAssistance.getCommitArguments() != null) {
-                    for (String arg : Util.tokenize(invocationAssistance.getCommitArguments())) {
-                        cmd.add(arg);
-                    }
+                    cmd.add(Util.tokenize(invocationAssistance.getCommitArguments()));
                 }
 
                 result = launcher.
                         launch().
                         cmds(cmd).
-                        envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
+                        envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword().getPlainText())).
                         stdout(listener).
                         stderr(listener.getLogger()).
                         join();
 
                 if (result != 0) {
                     listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
-
                     build.setResult(Result.FAILURE);
                     return false;
                 }
@@ -326,11 +321,11 @@ public class CoverityPublisher extends Recorder {
             return false;
         }
 
-        listener.getLogger().println("[Coverity] Found snapshot ID " + snapshotId);
+        listener.getLogger().println(Messages.CoverityPublisher_FoundSnapshot(snapshotId));
 
 
         try {
-            listener.getLogger().println("[Coverity] Fetching defects for stream " + stream);
+            listener.getLogger().println(Messages.CoverityPublisher_FetchingDefect(stream));
             StreamIdDataObj streamId = new StreamIdDataObj();
             streamId.setName(stream);
             streamId.setType("STATIC");
@@ -522,7 +517,7 @@ public class CoverityPublisher extends Recorder {
             return "Coverity";
         }
 
-        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter boolean useSSL, @QueryParameter String user, @QueryParameter String password) throws IOException {
+        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter boolean useSSL, @QueryParameter String user, @QueryParameter Secret password) throws IOException {
             return new CIMInstance("", host, port, user, password, useSSL).doCheck();
         }
 

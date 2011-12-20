@@ -22,10 +22,14 @@ import hudson.slaves.NodeSpecific;
 import hudson.tools.ToolDescriptor;
 import hudson.tools.ToolInstallation;
 import hudson.tools.ToolProperty;
+import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.swing.text.html.FormView;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -66,12 +70,22 @@ public class CoverityInstallation extends NodeProperty<Node> implements Environm
 
         @Override
         public String getDisplayName() {
-            return "Coverity Static Analysis";
+            return Messages.CoverityInstallation_DisplayName();
         }
 
         @Override
         public boolean isApplicable(Class<? extends Node> targetType) {
             return targetType != Hudson.class;
+        }
+        
+        public FormValidation doCheckHome(@QueryParameter String value, @AncestorInPath Computer node) throws IOException, InterruptedException {
+            if (node==null || node.getChannel()==null) {
+                return FormValidation.ok(); // we can't check, so don't make a fuss about it
+            }
+            if (!new FilePath(node.getChannel(),value).exists()) {
+                return FormValidation.warning(value+" doesn't seem to exist");
+            }
+            return FormValidation.ok();
         }
     }
 }
