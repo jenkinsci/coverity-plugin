@@ -49,6 +49,15 @@
                 function(el) { el.checked = (state ? 'true' : null); }
             );
         }
+
+        function checkFiltersComponents(state) {
+        YAHOO.util.Dom.getElementsBy(
+        function(el) { return (el.name == 'components'); },
+        'input',
+        'filters',
+        function(el) { el.checked = (state ? 'true' : null); }
+        );
+        }
     </script>
 
     <tr>
