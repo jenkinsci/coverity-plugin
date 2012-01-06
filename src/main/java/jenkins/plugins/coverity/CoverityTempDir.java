@@ -19,8 +19,10 @@ import hudson.model.InvisibleAction;
  */
 class CoverityTempDir extends InvisibleAction {
     transient final FilePath tempDir;
+	transient final boolean def;
 
-    CoverityTempDir(FilePath tempDir) {
+    CoverityTempDir(FilePath tempDir, boolean def) {
         this.tempDir = tempDir;
+	    this.def = def;
     }
 }

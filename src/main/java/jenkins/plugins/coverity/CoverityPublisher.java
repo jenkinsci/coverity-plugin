@@ -13,8 +13,6 @@ package jenkins.plugins.coverity;
 
 import com.coverity.ws.v3.*;
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.SingleValueConverter;
 import hudson.*;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
@@ -24,15 +22,12 @@ import hudson.tasks.Recorder;
 import hudson.util.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.spi.LoggerRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import jenkins.plugins.coverity.*;
 
 import javax.servlet.ServletException;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.ParseException;
@@ -76,6 +71,11 @@ public class CoverityPublisher extends Recorder {
      */
     private final boolean failBuild;
 
+	/**
+	 * Should the intermediate directory be preserved after each build?
+	 */
+	private final boolean keepIntDir;
+
     /**
      * Defines how to filter discovered defects. Null for no filtering.
      */
@@ -84,7 +84,7 @@ public class CoverityPublisher extends Recorder {
     private final CoverityMailSender mailSender;
 
     @DataBoundConstructor
-    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, DefectFilters defectFilters, CoverityMailSender mailSender) {
+    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, boolean keepIntDir, DefectFilters defectFilters, CoverityMailSender mailSender) {
         this.cimInstance = cimInstance;
         this.invocationAssistance = invocationAssistance;
         this.project = project;
@@ -92,6 +92,7 @@ public class CoverityPublisher extends Recorder {
         this.defectFilters = defectFilters;
         this.failBuild = failBuild;
         this.mailSender = mailSender;
+	    this.keepIntDir = keepIntDir;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -117,6 +118,10 @@ public class CoverityPublisher extends Recorder {
     public boolean isFailBuild() {
         return failBuild;
     }
+
+	public boolean isKeepIntDir() {
+		return keepIntDir;
+	}
     
     public DefectFilters getDefectFilters() {
         return defectFilters;
@@ -308,7 +313,19 @@ public class CoverityPublisher extends Recorder {
                 }
             } finally {
                 CoverityLauncherDecorator.SKIP.set(false);
-                if (temp != null) temp.tempDir.deleteRecursive();
+	            //keep if keepIntDir is set, or if the int dir is the default (keepIntDir is only useful if a custom int
+	            //dir is set)
+                if (temp != null){
+	                //same as !(keepIntDir && !temp.def)
+	                if(!keepIntDir || temp.def) {
+		                listener.getLogger().println("[Coverity] deleting intermediate directory");
+		                temp.tempDir.deleteRecursive();
+	                }
+	                else
+	                {
+	                    listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.tempDir);
+	                }
+                }
             }
         }
 

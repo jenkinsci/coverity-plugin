@@ -96,7 +96,6 @@
         <f:entry title="Intermediate directory:" field="intermediateDir">
             <f:textbox/>
         </f:entry>
-        
         <f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
             <f:textbox/>
         </f:entry>
@@ -110,6 +109,15 @@
           <td class="setting-help">
             <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/failBuild"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
           </td>
+        </tr>
+        <f:helpArea />
+        <tr>
+            <td class="setting-name" colspan="3">
+                <f:checkbox field="keepIntDir"/><label class="attach-previous">Preserve the intermediate directory after each build</label>
+            </td>
+            <td class="setting-help">
+                <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/keepIntDir"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
+            </td>
         </tr>
         <f:helpArea />
         <tr>

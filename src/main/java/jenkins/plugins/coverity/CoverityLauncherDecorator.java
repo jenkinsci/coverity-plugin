@@ -93,7 +93,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 temp.mkdirs();
             }
 
-            build.addAction(new CoverityTempDir(temp));
+            build.addAction(new CoverityTempDir(temp, ii.getIntermediateDir() == null));
         } catch (IOException e) {
             throw new RuntimeException("Error while creating temporary directory for Coverity", e);
         } catch (InterruptedException e) {
