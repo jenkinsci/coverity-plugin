@@ -376,15 +376,15 @@ public class CoverityPublisher extends Recorder {
             XStream xs = new XStream2();
 
             if (defectFilters != null) {
-                listener.getLogger().println("matching defects against filters: " + xs.toXML(defectFilters));
+                //listener.getLogger().println("matching defects against filters: " + xs.toXML(defectFilters));
             }
             for (MergedDefectDataObj defect : defects) {
                 if (defectFilters == null) {
                     matchingDefects.add(defect.getCid());
                 } else {
-                    listener.getLogger().println("checking defect: " + xs.toXML(defect));
+                    //listener.getLogger().println("checking defect: " + xs.toXML(defect));
                     boolean match = defectFilters.matches(defect);
-                    listener.getLogger().println("defect match:" + match);
+                    //listener.getLogger().println("defect match:" + match);
                     if (match) {
                         matchingDefects.add(defect.getCid());
                     }
