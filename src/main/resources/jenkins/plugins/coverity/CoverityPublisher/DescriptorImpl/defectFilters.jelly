@@ -20,21 +20,11 @@
         <td colspan="3">
             <table id="filters" style="display: none;">
                 <f:entry title="Classification is among:">
-                    <input type="checkbox" disabled="true" checked="true"/>
-                    <label class="attach-previous">Unclassified</label>
-                    <st:nbsp/>
-                    <input type="checkbox" disabled="true" checked="true"/>
-                    <label class="attach-previous">Bug</label>
-                    <st:nbsp/>
-                    <input type="checkbox" disabled="true" checked="true"/>
-                    <label class="attach-previous">Pending</label>
-                    <st:nbsp/>
-                    <input type="checkbox" disabled="true" />
-                    <label class="attach-previous">False</label>
-                    <st:nbsp/>
-                    <input type="checkbox" disabled="true" />
-                    <label class="attach-previous">Intentional</label>
-                    <st:nbsp/>
+                    <j:forEach var="e" items="${descriptor.doFillClassificationDefectFilterItems(cimInstance)}">
+                        <f:checkbox name="classifications" json="${e.value}" checked="${defectFilters == null ? true : defectFilters.isClassificationSelected(e.value)}"/>
+                        <label class="attach-previous">${e.name}</label>
+                        <st:nbsp/>
+                    </j:forEach>
                 </f:entry>
                 <f:entry title="Action is among:">
                     <j:forEach var="e" items="${descriptor.doFillActionDefectFilterItems(cimInstance)}">
@@ -46,8 +36,7 @@
                 <f:entry title="Severity is among:">
                     <j:set var="instance" value="${defectFilters.severitiesDefectFilter}"/>
                     <j:forEach var="e" items="${descriptor.doFillSeveritiesDefectFilterItems(cimInstance)}">
-                            <f:checkbox name="severities" json="${e.value}"
-                                        checked="${defectFilters == null ? true : defectFilters.isSeveritySelected(e.value)}"/>
+                            <f:checkbox name="severities" json="${e.value}" checked="${defectFilters == null ? true : defectFilters.isSeveritySelected(e.value)}"/>
                             <label class="attach-previous">${e.name}</label>
                             <st:nbsp/>
                     </j:forEach>

@@ -596,6 +596,17 @@ public class CoverityPublisher extends Recorder {
             return result;
         }
 
+	    public ListBoxModel doFillClassificationDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
+		    ListBoxModel result = new ListBoxModel();
+		    CIMInstance instance = getInstance(cimInstance);
+		    if (instance != null) {
+			    for (String classification : getInstance(cimInstance).getConfigurationService().getClassifications()) {
+				    result.add(classification);
+			    }
+		    }
+		    return result;
+	    }
+
         public ListBoxModel doFillActionDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
             ListBoxModel result = new ListBoxModel();
             CIMInstance instance = getInstance(cimInstance);
@@ -694,6 +705,7 @@ public class CoverityPublisher extends Recorder {
                     if (defectFilters != null) {
                         publisher.getDefectFilters().invertCheckers(
                                 allCheckers,
+		                        toStrings(doFillClassificationDefectFilterItems(publisher.getCimInstance())),
                                 toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
                                 toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
                                 toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
@@ -780,6 +792,7 @@ public class CoverityPublisher extends Recorder {
                 if (defectFilters != null) {
                     defectFilters.invertCheckers(
                             allCheckers,
+		                    toStrings(doFillClassificationDefectFilterItems(publisher.getCimInstance())),
                             toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
                             toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
                             toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
@@ -797,6 +810,4 @@ public class CoverityPublisher extends Recorder {
             return result;
         }
     }
-
-
 }

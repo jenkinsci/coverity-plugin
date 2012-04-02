@@ -26,7 +26,7 @@ import java.util.*;
  */
 public class DefectFilters {
 
-    private List<String> classifications = Arrays.asList("Unclassified", "Bug", "Pending");
+    private List<String> classifications;
     private List<String> actions;
     private List<String> severities;
     private List<String> components;
@@ -35,7 +35,8 @@ public class DefectFilters {
     private Date cutOffDate;
 
     @DataBoundConstructor
-    public DefectFilters(List<String> actions, List<String> severities, List<String> components, List<String> checkers, String cutOffDate) throws Descriptor.FormException {
+    public DefectFilters(List<String> actions, List<String> classifications, List<String> severities, List<String> components, List<String> checkers, String cutOffDate) throws Descriptor.FormException {
+	    this.classifications = Util.fixNull(classifications);
         this.actions = Util.fixNull(actions);
         this.severities = Util.fixNull(severities);
         this.components = Util.fixNull(components);
@@ -53,12 +54,13 @@ public class DefectFilters {
         }
     }
 
-    void invertCheckers(Set<String> allCheckers, List<String> allActions, List<String> allSeverities, List<String> allComponents) {
-        if (checkers.isEmpty() && actions.isEmpty() && components.isEmpty() && severities.isEmpty()) {
+    void invertCheckers(Set<String> allCheckers, List<String> allClassifications, List<String> allActions, List<String> allSeverities, List<String> allComponents) {
+        if (classifications.isEmpty() && checkers.isEmpty() && actions.isEmpty() && components.isEmpty() && severities.isEmpty()) {
             ignoredCheckers = new ArrayList<String>();
             actions = allActions;
             severities = allSeverities;
             components = allComponents;
+	        classifications = allClassifications;
         } else {
             ignoredCheckers = new ArrayList<String>(allCheckers);
             ignoredCheckers.removeAll(checkers);
@@ -66,9 +68,9 @@ public class DefectFilters {
         }
     }
 
-    public List<String> getClassifications() {
-        return classifications;
-    }
+	public boolean isClassificationSelected(String action) {
+		return classifications.contains(action);
+	}
 
     public boolean isActionSelected(String action) {
         return actions.contains(action);
@@ -93,7 +95,7 @@ public class DefectFilters {
 
     public boolean matches(MergedDefectDataObj defect) {
         return isActionSelected(defect.getAction()) &&
-                classifications.contains(defect.getClassification()) &&
+                isClassificationSelected(defect.getClassification()) &&
                 isSeveritySelected(defect.getSeverity()) &&
                 isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getChecker()) &&
@@ -110,8 +112,7 @@ public class DefectFilters {
 
         if (actions != null ? !actions.equals(that.actions) : that.actions != null) return false;
         if (checkers != null ? !checkers.equals(that.checkers) : that.checkers != null) return false;
-        if (classifications != null ? !classifications.equals(that.classifications) : that.classifications != null)
-            return false;
+        if (classifications != null ? !classifications.equals(that.classifications) : that.classifications != null) return false;
         if (components != null ? !components.equals(that.components) : that.components != null) return false;
         if (cutOffDate != null ? !cutOffDate.equals(that.cutOffDate) : that.cutOffDate != null) return false;
         if (severities != null ? !severities.equals(that.severities) : that.severities != null) return false;
