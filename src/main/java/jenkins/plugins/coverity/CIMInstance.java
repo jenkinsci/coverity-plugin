@@ -320,6 +320,8 @@ public class CIMInstance {
             return FormValidation.error("Host name unknown");
         } catch (ConnectException e) {
             return FormValidation.error("Connection refused");
+        } catch(SocketException e) {
+	        return FormValidation.error("Error connecting to CIM. Please check your connection settings.");
         } catch (Throwable e) {
             String javaVersion = System.getProperty("java.version");
             if (javaVersion.startsWith("1.6.0_")) {
