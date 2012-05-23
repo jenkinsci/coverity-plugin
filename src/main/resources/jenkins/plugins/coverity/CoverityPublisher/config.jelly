@@ -130,7 +130,7 @@
           </td>
           <td class="setting-main">
                   <table width="100%" id="defectFilters" name="defectFilters">
-                      <st:include from="${d}" page="defectFilters.jelly"/>
+                      <st:include from="${descriptor}" page="defectFilters.jelly"/>
                   </table>
           </td>
           <td class="setting-help">
