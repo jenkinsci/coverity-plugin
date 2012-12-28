@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 import com.coverity.ws.v3.CovRemoteServiceException_Exception;
 
 /**
- * This makes sure that all commands executed (when invocation assistance is enabled) are run through cov-build
+ * This makes sure that all commands executed (when invocation assistance is enabled) are run through cov-build.
  */
 @Extension
 public class CoverityLauncherDecorator extends LauncherDecorator {
@@ -170,7 +170,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
     }
 
     /**
-     * Returns a decorated {@link Launcher} that puts the given set of arguments as a prefix to any commands
+     * A decorated {@link Launcher} that puts the given set of arguments as a prefix to any commands
      * that it invokes.
      */
     public class DecoratedLauncher extends Launcher {

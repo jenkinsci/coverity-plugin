@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Represents one Coverity Integrity Manager server
+ * Represents one Coverity Integrity Manager server. Abstracts functions like getting streams and defects.
  */
 public class CIMInstance {
 
