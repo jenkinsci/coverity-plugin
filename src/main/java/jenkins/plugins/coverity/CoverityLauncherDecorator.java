@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.coverity.ws.v3.CovRemoteServiceException_Exception;
@@ -106,44 +105,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         	
         	return launcher;
         }
-
-        TaskListener listener = launcher.getListener();
-        try {
-            /* 
-             * Check to see if /tmp/.covlk exists.  Coverity creates this file 
-             * when performing cov-build.  cov-build will fail if this file 
-             * already exists, so we'll block until it goes away.
-             */
-            File covLock = new File(System.getProperty("java.io.tmpdir"), ".covlk");
-            if(covLock.exists()){
-                listener.getLogger().println(
-                    "Coverity Lock File " + covLock + " exists.  " +
-                    "cov-build must already be running.  " + 
-                    "Waiting for it to free up.");
-
-                long startCheck = System.currentTimeMillis();
-                long lastCheck = startCheck;
-                // Check every second for the existence of the lock file. 
-                // Note: This could be indefinite, consider giving up after a predefined period.
-                while(covLock.exists()){
-                    long lastCheckDuration = System.currentTimeMillis() - lastCheck;
-                    // Update log an update every minute
-                    if(TimeUnit.MILLISECONDS.toMinutes(lastCheckDuration) >= 1){
-                        long totalCheckDuration = System.currentTimeMillis() - startCheck;
-                        listener.getLogger().println("Coverity Lock File still exists after " 
-                            + TimeUnit.MILLISECONDS.toMinutes(totalCheckDuration) + " minute(s).");
-                        lastCheck = System.currentTimeMillis();
-                    }
-                    TimeUnit.SECONDS.sleep(1);
-                }
-                listener.getLogger().println("Coverity Lock File disappeared.  Proceeding.");
-            }
-        } catch(InterruptedException e) {
-            throw new RuntimeException("Interrupted while checking status of Coverity Lock");
-        }
-
+        
         try {
             String covBuild = "cov-build";
+            TaskListener listener = launcher.getListener();
             String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
             if (home != null) {
                 covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
