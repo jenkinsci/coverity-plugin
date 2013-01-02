@@ -110,6 +110,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             String covBuild = "cov-build";
             TaskListener listener = launcher.getListener();
             String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
+			if(ii.getSaOverride() != null) {
+				home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+			}
             if (home != null) {
                 covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
             }

@@ -242,6 +242,9 @@ public class CoverityPublisher extends Recorder {
                 Node node = Executor.currentExecutor().getOwner().getNode();
                
                 String home = getDescriptor().getHome(node, build.getEnvironment(listener));
+	            if(invocationAssistance.getSaOverride() != null) {
+		            home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+	            }
                 if (home != null) {
                     covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
                     covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
@@ -520,6 +523,7 @@ public class CoverityPublisher extends Recorder {
             } catch (IOException e) {
             }
         }
+        
         public String getHome(Node node, EnvVars environment) {
             CoverityInstallation install = node.getNodeProperties().get(CoverityInstallation.class);
             if (install != null) {

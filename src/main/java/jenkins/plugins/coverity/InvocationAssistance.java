@@ -20,6 +20,7 @@ public class InvocationAssistance {
     private final String analyzeArguments;
     private final String commitArguments;
     private final String csharpAssemblies;
+	private final String saOverride;
 
     /**
      * Absolute path to the intermediate directory that Coverity should use. Null to use the default.
@@ -27,12 +28,13 @@ public class InvocationAssistance {
     private final String intermediateDir;
 
     @DataBoundConstructor
-    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies) {
+    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies, String saOverride) {
         this.intermediateDir = Util.fixEmpty(intermediateDir);
         this.buildArguments = Util.fixEmpty(buildArguments);
         this.analyzeArguments = Util.fixEmpty(analyzeArguments);
         this.commitArguments = Util.fixEmpty(commitArguments);
         this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
+	    this.saOverride = Util.fixEmpty(saOverride);
     }
 
     public String getBuildArguments() {
@@ -55,6 +57,10 @@ public class InvocationAssistance {
     	return csharpAssemblies;
     }
 
+	public String getSaOverride() {
+		return saOverride;
+	}
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,6 +76,8 @@ public class InvocationAssistance {
             return false;
         if (csharpAssemblies != null ? !csharpAssemblies.equals(that.csharpAssemblies) : that.csharpAssemblies != null)
             return false;
+	    if (saOverride != null ? !saOverride.equals(that.saOverride) : that.saOverride != null)
+		    return false;
         
         return true;
     }
@@ -80,6 +88,7 @@ public class InvocationAssistance {
         result = 31 * result + (analyzeArguments != null ? analyzeArguments.hashCode() : 0);
         result = 31 * result + (commitArguments != null ? commitArguments.hashCode() : 0);
         result = 31 * result + (csharpAssemblies != null ? csharpAssemblies.hashCode() : 0);
+	    result = 31 * result + (saOverride != null ? saOverride.hashCode() : 0);
 
         return result;
     }
