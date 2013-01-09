@@ -154,7 +154,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             args.add("--dir");
             args.add(temp.getRemote());
             if (ii.getBuildArguments() != null) {
-                for (String arg: Util.tokenize(ii.getBuildArguments())) {
+		 for (String arg: Util.tokenize(ii.getBuildArguments())) {
                     args.add(arg);
                 }
             }
@@ -185,8 +185,21 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
             @Override
             public Proc launch(ProcStarter starter) throws IOException {
-                if (!SKIP.get()) {
-                    List<String> cmds = starter.cmds();
+
+		boolean ignoreCmd = false;
+
+
+                List<String> cmds = starter.cmds();
+
+
+		// Ignore commands to 'hg' which are incorrectly wrapped
+		if(cmds.get(0).equalsIgnoreCase("hg")) { 
+			listener.getLogger().println("Coverity plugin ignoring SCM commands.");
+			listener.getLogger().println("cmds[0] is " + cmds.get(0));
+			ignoreCmd = true;
+		}
+		
+		if (!SKIP.get() && !ignoreCmd) {
                     cmds.addAll(0, Arrays.asList(prefix));
                     starter.cmds(cmds);
                     boolean[] masks = starter.masks();
