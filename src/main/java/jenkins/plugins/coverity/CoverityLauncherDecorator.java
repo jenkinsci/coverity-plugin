@@ -188,12 +188,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
 		boolean ignoreCmd = false;
 
-
                 List<String> cmds = starter.cmds();
 
-
 		// Ignore commands to 'hg' which are incorrectly wrapped
-		if(cmds.get(0).equalsIgnoreCase("hg")) { 
+		if(cmds != null && cmds.size() > 0 && cmds.get(0).equalsIgnoreCase("hg")) { 
 			listener.getLogger().println("Coverity plugin ignoring SCM commands.");
 			listener.getLogger().println("cmds[0] is " + cmds.get(0));
 			ignoreCmd = true;
