@@ -76,6 +76,11 @@ public class CoverityPublisher extends Recorder {
 	 */
 	private final boolean keepIntDir;
 
+    /* 
+     * Should the workspace path be stripped off via --strip-path to cov-commit-defects?
+     */
+    private final boolean stripWorkspacePath;
+
     /**
      * Defines how to filter discovered defects. Null for no filtering.
      */
@@ -84,7 +89,7 @@ public class CoverityPublisher extends Recorder {
     private final CoverityMailSender mailSender;
 
     @DataBoundConstructor
-    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, boolean keepIntDir, DefectFilters defectFilters, CoverityMailSender mailSender) {
+    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, boolean keepIntDir, DefectFilters defectFilters, CoverityMailSender mailSender, boolean stripWorkspacePath) {
         this.cimInstance = cimInstance;
         this.invocationAssistance = invocationAssistance;
         this.project = project;
@@ -93,6 +98,7 @@ public class CoverityPublisher extends Recorder {
         this.failBuild = failBuild;
         this.mailSender = mailSender;
 	    this.keepIntDir = keepIntDir;
+	this.stripWorkspacePath = stripWorkspacePath;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -121,6 +127,10 @@ public class CoverityPublisher extends Recorder {
 
 	public boolean isKeepIntDir() {
 		return keepIntDir;
+	}
+
+    public boolean isStripWorkspacePath() {
+		return stripWorkspacePath;
 	}
     
     public DefectFilters getDefectFilters() {
@@ -294,6 +304,14 @@ public class CoverityPublisher extends Recorder {
                         cmd.add(arg);
                     }
                 }
+
+		// Add the strip-path arguments
+		if(this.isStripWorkspacePath()) {
+			listener.getLogger().println("[Coverity] Strip workspace path option was enabled");
+			FilePath workspace = build.getWorkspace();
+			cmd.add("--strip-path");
+			cmd.add(workspace.getRemote());
+		}
 
                 ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
