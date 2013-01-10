@@ -22,7 +22,8 @@ import java.util.List;
 
 /**
  * Captures Coverity information for a single build, including a snapshot of cim instance, project and stream, and a
- * filtered list of defects.
+ * filtered list of defects. This shows a link on the left side of each build page, which goes to a list of defects from
+ * that build.
  */
 public class CoverityBuildAction implements Action {
     private final AbstractBuild build;

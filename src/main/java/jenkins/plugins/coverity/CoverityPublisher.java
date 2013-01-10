@@ -80,6 +80,10 @@ public class CoverityPublisher extends Recorder {
      * Should the workspace path be stripped off via --strip-path to cov-commit-defects?
      */
     private final boolean stripWorkspacePath;
+	/**
+	 * Should defects be fetched after each build? Enabling this prevents the build from being failed due to defects.
+	 */
+	private final boolean skipFetchingDefects;
 
     /**
      * Defines how to filter discovered defects. Null for no filtering.
@@ -89,7 +93,7 @@ public class CoverityPublisher extends Recorder {
     private final CoverityMailSender mailSender;
 
     @DataBoundConstructor
-    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, boolean keepIntDir, DefectFilters defectFilters, CoverityMailSender mailSender, boolean stripWorkspacePath) {
+    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, boolean keepIntDir, boolean skipFetchingDefects, DefectFilters defectFilters, CoverityMailSender mailSender, boolean stripWorkspacePath) {
         this.cimInstance = cimInstance;
         this.invocationAssistance = invocationAssistance;
         this.project = project;
@@ -99,6 +103,7 @@ public class CoverityPublisher extends Recorder {
         this.mailSender = mailSender;
 	    this.keepIntDir = keepIntDir;
 	this.stripWorkspacePath = stripWorkspacePath;
+	    this.skipFetchingDefects = skipFetchingDefects;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -246,6 +251,9 @@ public class CoverityPublisher extends Recorder {
                 Node node = Executor.currentExecutor().getOwner().getNode();
                
                 String home = getDescriptor().getHome(node, build.getEnvironment(listener));
+	            if(invocationAssistance.getSaOverride() != null) {
+		            home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+	            }
                 if (home != null) {
                     covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
                     covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
@@ -370,73 +378,75 @@ public class CoverityPublisher extends Recorder {
 
         listener.getLogger().println("[Coverity] Found snapshot ID " + snapshotId);
 
+		if(!skipFetchingDefects)
+		{
+	        try {
+	            listener.getLogger().println("[Coverity] Fetching defects for stream " + stream);
+	            StreamIdDataObj streamId = new StreamIdDataObj();
+	            streamId.setName(stream);
+	            streamId.setType("STATIC");
+	            SnapshotIdDataObj snapshot = new SnapshotIdDataObj();
+	            snapshot.setId(snapshotId);
+	            List<Long> cids = cim.getDefectService().getCIDsForSnapshot(snapshot);
+	            listener.getLogger().println("[Coverity] Found " + cids.size() + " defects");
 
-        try {
-            listener.getLogger().println("[Coverity] Fetching defects for stream " + stream);
-            StreamIdDataObj streamId = new StreamIdDataObj();
-            streamId.setName(stream);
-            streamId.setType("STATIC");
-            SnapshotIdDataObj snapshot = new SnapshotIdDataObj();
-            snapshot.setId(snapshotId);
-            List<Long> cids = cim.getDefectService().getCIDsForSnapshot(snapshot);
-            listener.getLogger().println("[Coverity] Found " + cids.size() + " defects");
+	            List<MergedDefectDataObj> defects = cim.getDefects(stream, cids);
 
-            List<MergedDefectDataObj> defects = cim.getDefects(stream, cids);
+	            Set<String> checkers = new HashSet<String>();
+	            for (MergedDefectDataObj defect : defects) {
+	                checkers.add(defect.getChecker());
+	            }
+	            getDescriptor().updateCheckers(language, checkers);
 
-            Set<String> checkers = new HashSet<String>();
-            for (MergedDefectDataObj defect : defects) {
-                checkers.add(defect.getChecker());
-            }
-            getDescriptor().updateCheckers(language, checkers);
+	            List<Long> matchingDefects = new ArrayList<Long>();
 
-            List<Long> matchingDefects = new ArrayList<Long>();
+	            XStream xs = new XStream2();
 
-            XStream xs = new XStream2();
+	            if (defectFilters != null) {
+	                //listener.getLogger().println("matching defects against filters: " + xs.toXML(defectFilters));
+	            }
+	            for (MergedDefectDataObj defect : defects) {
+	                if (defectFilters == null) {
+	                    matchingDefects.add(defect.getCid());
+	                } else {
+	                    //listener.getLogger().println("checking defect: " + xs.toXML(defect));
+	                    boolean match = defectFilters.matches(defect);
+	                    //listener.getLogger().println("defect match:" + match);
+	                    if (match) {
+	                        matchingDefects.add(defect.getCid());
+	                    }
+	                }
+	            }
 
-            if (defectFilters != null) {
-                //listener.getLogger().println("matching defects against filters: " + xs.toXML(defectFilters));
-            }
-            for (MergedDefectDataObj defect : defects) {
-                if (defectFilters == null) {
-                    matchingDefects.add(defect.getCid());
-                } else {
-                    //listener.getLogger().println("checking defect: " + xs.toXML(defect));
-                    boolean match = defectFilters.matches(defect);
-                    //listener.getLogger().println("defect match:" + match);
-                    if (match) {
-                        matchingDefects.add(defect.getCid());
-                    }
-                }
-            }
-            
-            if (!matchingDefects.isEmpty()) {
-                listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
-                if (failBuild) {
-                    if (build.getResult().isBetterThan(Result.FAILURE)) {
-                        build.setResult(Result.FAILURE);
-                    }
-                }
-            } else {
-                listener.getLogger().println("[Coverity] No defects matched all filters.");
-            }
+	            if (!matchingDefects.isEmpty()) {
+	                listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
+	                if (failBuild) {
+	                    if (build.getResult().isBetterThan(Result.FAILURE)) {
+	                        build.setResult(Result.FAILURE);
+	                    }
+	                }
+	            } else {
+	                listener.getLogger().println("[Coverity] No defects matched all filters.");
+	            }
 
-            CoverityBuildAction action = new CoverityBuildAction(build, project, stream, cimInstance, matchingDefects);
-            build.addAction(action);
+	            CoverityBuildAction action = new CoverityBuildAction(build, project, stream, cimInstance, matchingDefects);
+	            build.addAction(action);
 
-            if (!matchingDefects.isEmpty() && mailSender != null) {
-                mailSender.execute(action, listener);
-            }
+	            if (!matchingDefects.isEmpty() && mailSender != null) {
+	                mailSender.execute(action, listener);
+	            }
 
-            String rootUrl = Hudson.getInstance().getRootUrl();
-            if (rootUrl != null) {
-                listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
-            }
+	            String rootUrl = Hudson.getInstance().getRootUrl();
+	            if (rootUrl != null) {
+	                listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
+	            }
 
-        } catch (CovRemoteServiceException_Exception e) {
-            e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
-            build.setResult(Result.FAILURE);
-            return false;
-        }
+	        } catch (CovRemoteServiceException_Exception e) {
+	            e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
+	            build.setResult(Result.FAILURE);
+	            return false;
+	        }
+		}
         return true;
     }
 
@@ -530,6 +540,7 @@ public class CoverityPublisher extends Recorder {
             } catch (IOException e) {
             }
         }
+        
         public String getHome(Node node, EnvVars environment) {
             CoverityInstallation install = node.getNodeProperties().get(CoverityInstallation.class);
             if (install != null) {
