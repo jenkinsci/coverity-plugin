@@ -41,6 +41,9 @@ public class CIMInstance {
     public static final String STREAM_TYPE_STATIC = "STATIC";
     public static final String STREAM_TYPE_SOURCE = "SOURCE";
 
+	/** Pattern to ignore streams - this is used to filter out internal DA streams, which are irrelevant to this plugin */
+	public static final String STREAM_NAME_IGNORE_PATTERN = "__internal_.*";
+
     /**
      * The id for this instance, used as a key in CoverityPublisher
      */
@@ -280,7 +283,7 @@ public class CIMInstance {
         ProjectDataObj project = getProject(projectId);
         List<StreamDataObj> result = new ArrayList<StreamDataObj>();
         for (StreamDataObj stream : project.getStreams()) {
-            if (stream.getId().getType().equals("STATIC")) {
+            if (stream.getId().getType().equals("STATIC") && !stream.getId().getName().matches(STREAM_NAME_IGNORE_PATTERN)) {
                 result.add(stream);
             }
         }
