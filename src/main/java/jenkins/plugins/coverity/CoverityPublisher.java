@@ -81,6 +81,11 @@ public class CoverityPublisher extends Recorder {
 	 */
 	private final boolean skipFetchingDefects;
 
+	/**
+	 * Hide the chart to make page loads faster
+	 */
+	private final boolean hideChart;
+
     /**
      * Defines how to filter discovered defects. Null for no filtering.
      */
@@ -89,7 +94,7 @@ public class CoverityPublisher extends Recorder {
     private final CoverityMailSender mailSender;
 
     @DataBoundConstructor
-    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, boolean keepIntDir, boolean skipFetchingDefects, DefectFilters defectFilters, CoverityMailSender mailSender) {
+    public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, boolean keepIntDir, boolean skipFetchingDefects, boolean hideChart, DefectFilters defectFilters, CoverityMailSender mailSender) {
         this.cimInstance = cimInstance;
         this.invocationAssistance = invocationAssistance;
         this.project = project;
@@ -99,6 +104,7 @@ public class CoverityPublisher extends Recorder {
         this.mailSender = mailSender;
 	    this.keepIntDir = keepIntDir;
 	    this.skipFetchingDefects = skipFetchingDefects;
+	    this.hideChart = hideChart;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -131,6 +137,10 @@ public class CoverityPublisher extends Recorder {
 
 	public boolean isSkipFetchingDefects() {
 		return skipFetchingDefects;
+	}
+
+	public boolean isHideChart(){
+		return hideChart;
 	}
 
 	public DefectFilters getDefectFilters() {
@@ -171,7 +181,7 @@ public class CoverityPublisher extends Recorder {
 
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
-        return new CoverityProjectAction(project);
+        return hideChart ? super.getProjectAction(project) : new CoverityProjectAction(project);
     }
 
     @Override

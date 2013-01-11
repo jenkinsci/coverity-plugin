@@ -135,6 +135,15 @@
         </tr>
         <f:helpArea />
         <tr>
+            <td class="setting-name" colspan="3">
+                <f:checkbox field="hideChart"/><label class="attach-previous">Hide the defects chart on the project page</label>
+            </td>
+            <td class="setting-help">
+                <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/hideChart"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
+            </td>
+        </tr>
+        <f:helpArea />
+        <tr>
           <td class="setting-leftspace"><st:nbsp/></td>
           <td class="setting-name">
               <a href="#filters" id="showFilters"
