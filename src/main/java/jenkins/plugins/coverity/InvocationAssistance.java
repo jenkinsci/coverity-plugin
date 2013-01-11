@@ -22,19 +22,25 @@ public class InvocationAssistance {
     private final String csharpAssemblies;
 	private final String saOverride;
 
+	/**
+	 * Do not wrap any executables with these names with cov-build. Format is comma-separated list.
+	 */
+	private final String covBuildBlacklist;
+
     /**
      * Absolute path to the intermediate directory that Coverity should use. Null to use the default.
      */
     private final String intermediateDir;
 
     @DataBoundConstructor
-    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies, String saOverride) {
+    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies, String saOverride, String covBuildBlacklist) {
         this.intermediateDir = Util.fixEmpty(intermediateDir);
         this.buildArguments = Util.fixEmpty(buildArguments);
         this.analyzeArguments = Util.fixEmpty(analyzeArguments);
         this.commitArguments = Util.fixEmpty(commitArguments);
         this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
 	    this.saOverride = Util.fixEmpty(saOverride);
+	    this.covBuildBlacklist = Util.fixEmpty(covBuildBlacklist);
     }
 
     public String getBuildArguments() {
@@ -52,7 +58,7 @@ public class InvocationAssistance {
     public String getIntermediateDir() {
         return intermediateDir;
     }
-    
+
     public String getCsharpAssemblies() {
     	return csharpAssemblies;
     }
@@ -61,7 +67,11 @@ public class InvocationAssistance {
 		return saOverride;
 	}
 
-    @Override
+	public String getCovBuildBlacklist() {
+		return covBuildBlacklist;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

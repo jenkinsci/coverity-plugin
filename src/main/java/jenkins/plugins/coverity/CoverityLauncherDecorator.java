@@ -126,8 +126,19 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     args.add(arg);
                 }
             }
-            
-            return new DecoratedLauncher(launcher, args.toArray(new String[args.size()]));
+
+	        String blacklistTemp = ii.getCovBuildBlacklist();
+	        String[] blacklist;
+	        if(blacklistTemp != null){
+		        blacklist = blacklistTemp.split(",");
+		        for(int i = 0; i < blacklist.length; i++) {
+			        blacklist[i] = blacklist[i].trim();
+		        }
+	        } else {
+		        blacklist = new String[0];
+	        }
+
+            return new DecoratedLauncher(launcher, blacklist, args.toArray(new String[args.size()]));
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
         } catch (IOException e) {
@@ -144,52 +155,72 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
     public class DecoratedLauncher extends Launcher {
         private final Launcher decorated;
         private final String[] prefix;
+	    private final String[] blacklist;
 
-        public DecoratedLauncher(Launcher decorated, String... prefix) {
+        public DecoratedLauncher(Launcher decorated, String[] blacklist, String... prefix) {
             super(decorated);
             this.decorated = decorated;
             this.prefix = prefix;
+	        this.blacklist = blacklist;
         }
 
-            @Override
-            public Proc launch(ProcStarter starter) throws IOException {
-                if (!SKIP.get()) {
-                    List<String> cmds = starter.cmds();
-                    cmds.addAll(0, Arrays.asList(prefix));
-                    starter.cmds(cmds);
-                    boolean[] masks = starter.masks();
-                    if (masks == null) {
-                        masks = new boolean[cmds.size()];
-                        starter.masks(masks);
-                    } else {
-                        starter.masks(prefix(masks));
-                    }
+        @Override
+        public Proc launch(ProcStarter starter) throws IOException {
+            if (!SKIP.get()) {
+	            if(isBlacklisted(starter.cmds().get(0))) {
+		            logger.info(starter.cmds().get(0) + " is blacklisted, skipping cov-build");
+		            return decorated.launch(starter);
+	            }
+
+                List<String> cmds = starter.cmds();
+                cmds.addAll(0, Arrays.asList(prefix));
+                starter.cmds(cmds);
+                boolean[] masks = starter.masks();
+                if (masks == null) {
+                    masks = new boolean[cmds.size()];
+                    starter.masks(masks);
+                } else {
+                    starter.masks(prefix(masks));
                 }
-                return decorated.launch(starter);
             }
-
-            @Override
-            public Channel launchChannel(String[] cmd, OutputStream out, FilePath workDir, Map<String, String> envVars) throws IOException, InterruptedException {
-                return decorated.launchChannel(prefix(cmd),out,workDir,envVars);
-            }
-
-            @Override
-            public void kill(Map<String, String> modelEnvVars) throws IOException, InterruptedException {
-                decorated.kill(modelEnvVars);
-            }
-
-            private String[] prefix(String[] args) {
-                String[] newArgs = new String[args.length+prefix.length];
-                System.arraycopy(prefix,0,newArgs,0,prefix.length);
-                System.arraycopy(args,0,newArgs,prefix.length,args.length);
-                return newArgs;
-            }
-
-            private boolean[] prefix(boolean[] args) {
-                boolean[] newArgs = new boolean[args.length+prefix.length];
-                System.arraycopy(args,0,newArgs,prefix.length,args.length);
-                return newArgs;
-            }
+            return decorated.launch(starter);
         }
 
+        @Override
+        public Channel launchChannel(String[] cmd, OutputStream out, FilePath workDir, Map<String, String> envVars) throws IOException, InterruptedException {
+            System.out.println("launchChannel: " + cmd);
+            return decorated.launchChannel(prefix(cmd),out,workDir,envVars);
+        }
+
+        @Override
+        public void kill(Map<String, String> modelEnvVars) throws IOException, InterruptedException {
+            decorated.kill(modelEnvVars);
+        }
+
+        private String[] prefix(String[] args) {
+            if(isBlacklisted(args[0])) {
+	            return args;
+            }
+            String[] newArgs = new String[args.length+prefix.length];
+            System.arraycopy(prefix,0,newArgs,0,prefix.length);
+            System.arraycopy(args,0,newArgs,prefix.length,args.length);
+            return newArgs;
+        }
+
+        private boolean[] prefix(boolean[] args) {
+            System.out.println("prefix(b): " + Arrays.asList(args));
+            boolean[] newArgs = new boolean[args.length+prefix.length];
+            System.arraycopy(args,0,newArgs,prefix.length,args.length);
+            return newArgs;
+        }
+
+        private boolean isBlacklisted(String cmd) {
+	        for(String s : blacklist) {
+		        if(s.equals(cmd)) {
+			        return true;
+		        }
+	        }
+	        return false;
+        }
+    }
 }

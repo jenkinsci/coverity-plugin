@@ -102,7 +102,9 @@
         <f:entry title="Static analysis location override:" field="saOverride">
             <f:textbox/>
         </f:entry>
-        
+        <f:entry title="cov-build blacklist:" field="covBuildBlacklist">
+            <f:textbox/>
+        </f:entry>
     </f:optionalBlock>
 
         <tr>
