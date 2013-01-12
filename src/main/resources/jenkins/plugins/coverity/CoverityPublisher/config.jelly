@@ -63,105 +63,130 @@
     <tr>
         <td width="5%"/>
         <td colspan="3">
-    <table width="100%">
-    <f:entry title="Integrity Manager instance" field="cimInstance">
-        <f:select id="cimInstance" />
-    </f:entry>
-    <f:entry title="Project" field="project">
-        <f:select/>
-    </f:entry>
-    <f:entry title="Stream" field="stream">
-        <f:select id="stream" onchange="loadDefectFilters()"/>
-    </f:entry>
+            <table width="100%">
+                <f:entry title="Integrity Manager instance" field="cimInstance">
+                    <f:select id="cimInstance"/>
+                </f:entry>
+                <f:entry title="Project" field="project">
+                    <f:select/>
+                </f:entry>
+                <f:entry title="Stream" field="stream">
+                    <f:select id="stream" onchange="loadDefectFilters()"/>
+                </f:entry>
 
-    <!--
-    <f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">
-        <j:set var="instance" value="${instance.mailSender}"/>
-        <f:entry title="Additional recipients" field="recipients">
-            <f:textbox/>
-        </f:entry>
-    </f:optionalBlock>
-    -->
-    <f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance" checked="${instance.invocationAssistance != null}" name="invocationAssistance">
-        <j:set var="instance" value="${instance.invocationAssistance}"/>
-        <f:entry title="Additional cov-build arguments:" field="buildArguments">
-            <f:textbox/>
-        </f:entry>
-        <f:entry title="Additional cov-analyze[-java] arguments:" field="analyzeArguments">
-            <f:textbox/>
-        </f:entry>
-        <f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
-            <f:textbox/>
-        </f:entry>
-        <f:entry title="Intermediate directory:" field="intermediateDir">
-            <f:textbox/>
-        </f:entry>
-        <f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
-            <f:textbox/>
-        </f:entry>
-        <f:entry title="Static analysis location override:" field="saOverride">
-            <f:textbox/>
-        </f:entry>
-        <f:entry title="cov-build blacklist:" field="covBuildBlacklist">
-            <f:textbox/>
-        </f:entry>
-    </f:optionalBlock>
+                <!--
+                <f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">
+                    <j:set var="instance" value="${instance.mailSender}"/>
+                    <f:entry title="Additional recipients" field="recipients">
+                        <f:textbox/>
+                    </f:entry>
+                </f:optionalBlock>
+                -->
+                <f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
+                                 checked="${instance.invocationAssistance != null}" name="invocationAssistance">
+                    <j:set var="instance" value="${instance.invocationAssistance}"/>
+                    <f:entry title="Additional cov-build arguments:" field="buildArguments">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="Additional cov-analyze[-java] arguments:" field="analyzeArguments">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="Intermediate directory:" field="intermediateDir">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="Static analysis location override:" field="saOverride">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="cov-build blacklist:" field="covBuildBlacklist">
+                        <f:textbox/>
+                    </f:entry>
+                </f:optionalBlock>
 
-        <tr>
-          <td class="setting-name" colspan="3">
-              <f:checkbox field="failBuild"/><label class="attach-previous">Fail the build if matching defects are found</label>
-          </td>
-          <td class="setting-help">
-            <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/failBuild"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
-          </td>
-        </tr>
-        <f:helpArea />
-        <tr>
-            <td class="setting-name" colspan="3">
-                <f:checkbox field="skipFetchingDefects"/><label class="attach-previous">Do not fetch defects after the build</label>
-            </td>
-            <td class="setting-help">
-                <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/skipFetchingDefects"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
-            </td>
-        </tr>
-        <f:helpArea />
-        <tr>
-            <td class="setting-name" colspan="3">
-                <f:checkbox field="keepIntDir"/><label class="attach-previous">Preserve the intermediate directory after each build</label>
-            </td>
-            <td class="setting-help">
-                <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/keepIntDir"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
-            </td>
-        </tr>
-        <f:helpArea />
-        <tr>
-            <td class="setting-name" colspan="3">
-                <f:checkbox field="hideChart"/><label class="attach-previous">Hide the defects chart on the project page</label>
-            </td>
-            <td class="setting-help">
-                <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/hideChart"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
-            </td>
-        </tr>
-        <f:helpArea />
-        <tr>
-          <td class="setting-leftspace"><st:nbsp/></td>
-          <td class="setting-name">
-              <a href="#filters" id="showFilters"
-                 onclick="document.getElementById('filters').style.display='block';document.getElementById('hideFilters').style.display='block';this.style.display='none';">Defect Filters >>></a>
-              <a href="#filters" id="hideFilters" style="display: none;"
-                 onclick="document.getElementById('filters').style.display='none';document.getElementById('showFilters').style.display='block';this.style.display='none';">Defect Filters &lt;&lt;&lt;</a>
-          </td>
-          <td class="setting-main">
-                  <table width="100%" id="defectFilters" name="defectFilters">
-                      <st:include from="${descriptor}" page="defectFilters.jelly"/>
-                  </table>
-          </td>
-          <td class="setting-help">
-            <a href="#" class="help-button" helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/defectFilters"><img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}" /></a>
-          </td>
-        </tr>
-        <f:helpArea />
-    </table>
+                <tr>
+                    <td class="setting-name" colspan="3">
+                        <f:checkbox field="failBuild"/>
+                        <label class="attach-previous">Fail the build if matching defects are found</label>
+                    </td>
+                    <td class="setting-help">
+                        <a href="#" class="help-button"
+                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/failBuild">
+                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                        </a>
+                    </td>
+                </tr>
+                <f:helpArea/>
+                <tr>
+                    <td class="setting-name" colspan="3">
+                        <f:checkbox field="skipFetchingDefects"/>
+                        <label class="attach-previous">Do not fetch defects after the build</label>
+                    </td>
+                    <td class="setting-help">
+                        <a href="#" class="help-button"
+                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/skipFetchingDefects">
+                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                        </a>
+                    </td>
+                </tr>
+                <f:helpArea/>
+                <tr>
+                    <td class="setting-name" colspan="3">
+                        <f:checkbox field="keepIntDir"/>
+                        <label class="attach-previous">Preserve the intermediate directory after each build</label>
+                    </td>
+                    <td class="setting-help">
+                        <a href="#" class="help-button"
+                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/keepIntDir">
+                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                        </a>
+                    </td>
+                </tr>
+                <f:helpArea/>
+                <tr>
+                    <td class="setting-name" colspan="3">
+                        <f:checkbox field="hideChart"/>
+                        <label class="attach-previous">Hide the defects chart on the project page</label>
+                    </td>
+                    <td class="setting-help">
+                        <a href="#" class="help-button"
+                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/hideChart">
+                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                        </a>
+                    </td>
+                </tr>
+                <f:helpArea/>
+                <tr>
+                    <td class="setting-leftspace">
+                        <st:nbsp/>
+                    </td>
+                    <td class="setting-name">
+                        <a href="#filters" id="showFilters"
+                           onclick="document.getElementById('filters').style.display='block';document.getElementById('hideFilters').style.display='block';this.style.display='none';">
+                            Defect Filters >>>
+                        </a>
+                        <a href="#filters" id="hideFilters" style="display: none;"
+                           onclick="document.getElementById('filters').style.display='none';document.getElementById('showFilters').style.display='block';this.style.display='none';">
+                            Defect Filters &lt;&lt;&lt;</a>
+                    </td>
+                    <td class="setting-main">
+                        <table width="100%" id="defectFilters" name="defectFilters">
+                            <st:include from="${descriptor}" page="defectFilters.jelly"/>
+                        </table>
+                    </td>
+                    <td class="setting-help">
+                        <a href="#" class="help-button"
+                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/defectFilters">
+                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                        </a>
+                    </td>
+                </tr>
+                <f:helpArea/>
+            </table>
         </td>
     </tr>
 </j:jelly>

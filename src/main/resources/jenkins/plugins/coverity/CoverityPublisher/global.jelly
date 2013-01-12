@@ -12,10 +12,11 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:section title="Coverity">
         <f:entry title="Coverity Static Analysis location" field="home">
-            <f:textbox />
+            <f:textbox/>
         </f:entry>
         <f:entry title="Integrity Manager instances" field="instances">
-            <f:repeatable var="instance" name="instances" items="${descriptor.instances}" add="Add" header="CIM Instance">
+            <f:repeatable var="instance" name="instances" items="${descriptor.instances}" add="Add"
+                          header="CIM Instance">
                 <table width="100%">
                     <f:entry title="Name" field="name">
                         <f:textbox/>
@@ -35,7 +36,8 @@
                     <f:entry title="Password" field="password">
                         <f:password/>
                     </f:entry>
-                    <f:validateButton method="checkInstance" title="Check" progress="Checking..." with="host,port,user,password,useSSL"/>
+                    <f:validateButton method="checkInstance" title="Check" progress="Checking..."
+                                      with="host,port,user,password,useSSL"/>
                     <f:entry title="">
                         <div align="right">
                             <f:repeatableDeleteButton value="Delete"/>

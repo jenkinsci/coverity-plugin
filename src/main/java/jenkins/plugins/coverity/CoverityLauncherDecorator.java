@@ -11,18 +11,18 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import com.coverity.ws.v3.CovRemoteServiceException_Exception;
 import hudson.*;
 import hudson.model.*;
-import hudson.model.Queue;
 import hudson.remoting.Channel;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
-
-import com.coverity.ws.v3.CovRemoteServiceException_Exception;
 
 /**
  * This makes sure that all commands executed (when invocation assistance is enabled) are run through cov-build.
@@ -30,197 +30,197 @@ import com.coverity.ws.v3.CovRemoteServiceException_Exception;
 @Extension
 public class CoverityLauncherDecorator extends LauncherDecorator {
 
-    private static final Logger logger = Logger.getLogger(CoverityLauncherDecorator.class.getName());
+	private static final Logger logger = Logger.getLogger(CoverityLauncherDecorator.class.getName());
 
-    /**
-     * A ThreadLocal that is used to disable cov-build when running other Coverity tools during the build.
-     */
-    public static ThreadLocal<Boolean> SKIP = new ThreadLocal<Boolean>() {
-        @Override
-        protected Boolean initialValue() {
-            return false;
-        }
-    };
+	/**
+	 * A ThreadLocal that is used to disable cov-build when running other Coverity tools during the build.
+	 */
+	public static ThreadLocal<Boolean> SKIP = new ThreadLocal<Boolean>() {
+		@Override
+		protected Boolean initialValue() {
+			return false;
+		}
+	};
 
-    @Override
-    public Launcher decorate(Launcher launcher, Node node) {
-        Executor executor = Executor.currentExecutor();
-        if (executor == null) {
-            return launcher;
-        }
+	@Override
+	public Launcher decorate(Launcher launcher, Node node) {
+		Executor executor = Executor.currentExecutor();
+		if(executor == null) {
+			return launcher;
+		}
 
-        Queue.Executable exec = executor.getCurrentExecutable();
-        if (!(exec instanceof AbstractBuild)) {
-            return launcher;
-        }
-        AbstractBuild build = (AbstractBuild) exec;
+		Queue.Executable exec = executor.getCurrentExecutable();
+		if(!(exec instanceof AbstractBuild)) {
+			return launcher;
+		}
+		AbstractBuild build = (AbstractBuild) exec;
 
-        AbstractProject project = build.getProject();
+		AbstractProject project = build.getProject();
 
-        CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-        if (publisher == null) {
-            return launcher;
-        }
+		CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
+		if(publisher == null) {
+			return launcher;
+		}
 
-        InvocationAssistance ii = publisher.getInvocationAssistance();
-        if (ii == null) {
-            return launcher;
-        }
-        
-        // Do not run cov-build if language is "CSHARP"
-        String cimInstanceName = publisher.getCimInstance();
-        CIMInstance cim = publisher.getDescriptor().getInstance(publisher.getCimInstance());
-        
-        String streamName = publisher.getStream();
-        String language = null;
-        try {
-            language = cim.getStream(streamName).getLanguage();
-        } catch (CovRemoteServiceException_Exception e) {
-        	throw new RuntimeException("Error while retrieving stream information for " + streamName, e);
-        } catch (IOException e) {
-        	throw new RuntimeException("Error while retrieving stream information for " + streamName, e);
-        }
+		InvocationAssistance ii = publisher.getInvocationAssistance();
+		if(ii == null) {
+			return launcher;
+		}
 
-        FilePath temp;
+		// Do not run cov-build if language is "CSHARP"
+		String cimInstanceName = publisher.getCimInstance();
+		CIMInstance cim = publisher.getDescriptor().getInstance(publisher.getCimInstance());
 
-        try {
-            if (ii.getIntermediateDir() == null) {
-                FilePath coverityDir = node.getRootPath().child("coverity");
-                coverityDir.mkdirs();
-                temp = coverityDir.createTempDir("temp-", null);
-            } else {
-                temp = new FilePath(node.getChannel(), ii.getIntermediateDir());
-                temp.mkdirs();
-            }
+		String streamName = publisher.getStream();
+		String language = null;
+		try {
+			language = cim.getStream(streamName).getLanguage();
+		} catch(CovRemoteServiceException_Exception e) {
+			throw new RuntimeException("Error while retrieving stream information for " + streamName, e);
+		} catch(IOException e) {
+			throw new RuntimeException("Error while retrieving stream information for " + streamName, e);
+		}
 
-            build.addAction(new CoverityTempDir(temp, ii.getIntermediateDir() == null));
-        } catch (IOException e) {
-            throw new RuntimeException("Error while creating temporary directory for Coverity", e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
-        }
+		FilePath temp;
 
-        if ("CSHARP".equals(language)) {
-        	logger.info("Stream " + streamName + " is of type CSHARP, skipping cov-build");
-        	
-        	return launcher;
-        }
-        
-        try {
-            String covBuild = "cov-build";
-            TaskListener listener = launcher.getListener();
-            String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
+		try {
+			if(ii.getIntermediateDir() == null) {
+				FilePath coverityDir = node.getRootPath().child("coverity");
+				coverityDir.mkdirs();
+				temp = coverityDir.createTempDir("temp-", null);
+			} else {
+				temp = new FilePath(node.getChannel(), ii.getIntermediateDir());
+				temp.mkdirs();
+			}
+
+			build.addAction(new CoverityTempDir(temp, ii.getIntermediateDir() == null));
+		} catch(IOException e) {
+			throw new RuntimeException("Error while creating temporary directory for Coverity", e);
+		} catch(InterruptedException e) {
+			throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
+		}
+
+		if("CSHARP".equals(language)) {
+			logger.info("Stream " + streamName + " is of type CSHARP, skipping cov-build");
+
+			return launcher;
+		}
+
+		try {
+			String covBuild = "cov-build";
+			TaskListener listener = launcher.getListener();
+			String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
 			if(ii.getSaOverride() != null) {
 				home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
 			}
-            if (home != null) {
-                covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
-            }
+			if(home != null) {
+				covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
+			}
 
-            List<String> args = new ArrayList<String>();
-            args.add(covBuild);
-            args.add("--dir");
-            args.add(temp.getRemote());
-            if (ii.getBuildArguments() != null) {
-                for (String arg: Util.tokenize(ii.getBuildArguments())) {
-                    args.add(arg);
-                }
-            }
+			List<String> args = new ArrayList<String>();
+			args.add(covBuild);
+			args.add("--dir");
+			args.add(temp.getRemote());
+			if(ii.getBuildArguments() != null) {
+				for(String arg : Util.tokenize(ii.getBuildArguments())) {
+					args.add(arg);
+				}
+			}
 
-	        String blacklistTemp = ii.getCovBuildBlacklist();
-	        String[] blacklist;
-	        if(blacklistTemp != null){
-		        blacklist = blacklistTemp.split(",");
-		        for(int i = 0; i < blacklist.length; i++) {
-			        blacklist[i] = blacklist[i].trim();
-		        }
-	        } else {
-		        blacklist = new String[0];
-	        }
+			String blacklistTemp = ii.getCovBuildBlacklist();
+			String[] blacklist;
+			if(blacklistTemp != null) {
+				blacklist = blacklistTemp.split(",");
+				for(int i = 0; i < blacklist.length; i++) {
+					blacklist[i] = blacklist[i].trim();
+				}
+			} else {
+				blacklist = new String[0];
+			}
 
-            return new DecoratedLauncher(launcher, blacklist, args.toArray(new String[args.size()]));
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
-        } catch (IOException e) {
-            throw new RuntimeException("Error while creating temporary directory for Coverity", e);
-        }
+			return new DecoratedLauncher(launcher, blacklist, args.toArray(new String[args.size()]));
+		} catch(InterruptedException e) {
+			throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
+		} catch(IOException e) {
+			throw new RuntimeException("Error while creating temporary directory for Coverity", e);
+		}
 
 
-    }
+	}
 
-    /**
-     * A decorated {@link Launcher} that puts the given set of arguments as a prefix to any commands
-     * that it invokes.
-     */
-    public class DecoratedLauncher extends Launcher {
-        private final Launcher decorated;
-        private final String[] prefix;
-	    private final String[] blacklist;
+	/**
+	 * A decorated {@link Launcher} that puts the given set of arguments as a prefix to any commands
+	 * that it invokes.
+	 */
+	public class DecoratedLauncher extends Launcher {
+		private final Launcher decorated;
+		private final String[] prefix;
+		private final String[] blacklist;
 
-        public DecoratedLauncher(Launcher decorated, String[] blacklist, String... prefix) {
-            super(decorated);
-            this.decorated = decorated;
-            this.prefix = prefix;
-	        this.blacklist = blacklist;
-        }
+		public DecoratedLauncher(Launcher decorated, String[] blacklist, String... prefix) {
+			super(decorated);
+			this.decorated = decorated;
+			this.prefix = prefix;
+			this.blacklist = blacklist;
+		}
 
-        @Override
-        public Proc launch(ProcStarter starter) throws IOException {
-            if (!SKIP.get()) {
-	            if(isBlacklisted(starter.cmds().get(0))) {
-		            logger.info(starter.cmds().get(0) + " is blacklisted, skipping cov-build");
-		            return decorated.launch(starter);
-	            }
+		@Override
+		public Proc launch(ProcStarter starter) throws IOException {
+			if(!SKIP.get()) {
+				if(isBlacklisted(starter.cmds().get(0))) {
+					logger.info(starter.cmds().get(0) + " is blacklisted, skipping cov-build");
+					return decorated.launch(starter);
+				}
 
-                List<String> cmds = starter.cmds();
-                cmds.addAll(0, Arrays.asList(prefix));
-                starter.cmds(cmds);
-                boolean[] masks = starter.masks();
-                if (masks == null) {
-                    masks = new boolean[cmds.size()];
-                    starter.masks(masks);
-                } else {
-                    starter.masks(prefix(masks));
-                }
-            }
-            return decorated.launch(starter);
-        }
+				List<String> cmds = starter.cmds();
+				cmds.addAll(0, Arrays.asList(prefix));
+				starter.cmds(cmds);
+				boolean[] masks = starter.masks();
+				if(masks == null) {
+					masks = new boolean[cmds.size()];
+					starter.masks(masks);
+				} else {
+					starter.masks(prefix(masks));
+				}
+			}
+			return decorated.launch(starter);
+		}
 
-        @Override
-        public Channel launchChannel(String[] cmd, OutputStream out, FilePath workDir, Map<String, String> envVars) throws IOException, InterruptedException {
-            System.out.println("launchChannel: " + cmd);
-            return decorated.launchChannel(prefix(cmd),out,workDir,envVars);
-        }
+		@Override
+		public Channel launchChannel(String[] cmd, OutputStream out, FilePath workDir, Map<String, String> envVars) throws IOException, InterruptedException {
+			System.out.println("launchChannel: " + cmd);
+			return decorated.launchChannel(prefix(cmd), out, workDir, envVars);
+		}
 
-        @Override
-        public void kill(Map<String, String> modelEnvVars) throws IOException, InterruptedException {
-            decorated.kill(modelEnvVars);
-        }
+		@Override
+		public void kill(Map<String, String> modelEnvVars) throws IOException, InterruptedException {
+			decorated.kill(modelEnvVars);
+		}
 
-        private String[] prefix(String[] args) {
-            if(isBlacklisted(args[0])) {
-	            return args;
-            }
-            String[] newArgs = new String[args.length+prefix.length];
-            System.arraycopy(prefix,0,newArgs,0,prefix.length);
-            System.arraycopy(args,0,newArgs,prefix.length,args.length);
-            return newArgs;
-        }
+		private String[] prefix(String[] args) {
+			if(isBlacklisted(args[0])) {
+				return args;
+			}
+			String[] newArgs = new String[args.length + prefix.length];
+			System.arraycopy(prefix, 0, newArgs, 0, prefix.length);
+			System.arraycopy(args, 0, newArgs, prefix.length, args.length);
+			return newArgs;
+		}
 
-        private boolean[] prefix(boolean[] args) {
-            System.out.println("prefix(b): " + Arrays.asList(args));
-            boolean[] newArgs = new boolean[args.length+prefix.length];
-            System.arraycopy(args,0,newArgs,prefix.length,args.length);
-            return newArgs;
-        }
+		private boolean[] prefix(boolean[] args) {
+			System.out.println("prefix(b): " + Arrays.asList(args));
+			boolean[] newArgs = new boolean[args.length + prefix.length];
+			System.arraycopy(args, 0, newArgs, prefix.length, args.length);
+			return newArgs;
+		}
 
-        private boolean isBlacklisted(String cmd) {
-	        for(String s : blacklist) {
-		        if(s.equals(cmd)) {
-			        return true;
-		        }
-	        }
-	        return false;
-        }
-    }
+		private boolean isBlacklisted(String cmd) {
+			for(String s : blacklist) {
+				if(s.equals(cmd)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 }

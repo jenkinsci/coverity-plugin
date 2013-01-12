@@ -10,11 +10,11 @@
 -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
     <div align="right">
-    <div class="test-trend-caption">
-        ${%Coverity Defects}
-      </div>
-      <div>
-        <img src="coverity/graph/png" lazymap="coverity/graph/map" alt="[Coverity Defects]"/>
-      </div>
+        <div class="test-trend-caption">
+            ${%Coverity Defects}
+        </div>
+        <div>
+            <img src="coverity/graph/png" lazymap="coverity/graph/map" alt="[Coverity Defects]"/>
+        </div>
     </div>
 </j:jelly>
