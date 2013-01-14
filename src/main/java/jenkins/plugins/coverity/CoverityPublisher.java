@@ -128,8 +128,12 @@ public class CoverityPublisher extends Recorder {
 	public boolean isKeepIntDir() {
 		return keepIntDir;
 	}
-    
-    public DefectFilters getDefectFilters() {
+
+	public boolean isSkipFetchingDefects() {
+		return skipFetchingDefects;
+	}
+
+	public DefectFilters getDefectFilters() {
         return defectFilters;
     }
 
@@ -187,14 +191,14 @@ public class CoverityPublisher extends Recorder {
         if (invocationAssistance != null) {
             try {
             	boolean isCsharp = "CSHARP".equals(language);
-            	
+
             	// TODO Handle language is "CSHARP"
             	if (isCsharp && invocationAssistance.getCsharpAssemblies() != null) {
             		String csharpAssembliesStr = invocationAssistance.getCsharpAssemblies();
-            		
+
             		listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
             	}
-            	
+
             	String covAnalyze = null;
             	if ("JAVA".equals(language)) {
             		covAnalyze = "cov-analyze-java";
@@ -203,23 +207,23 @@ public class CoverityPublisher extends Recorder {
             	} else {
             		covAnalyze = "cov-analyze";
             	}
-            	
+
             	/*
             	 * TODO - Automatically detect CLR assemblies in build workspace
             	 * Work in progress
             	 */
-            	
+
             	/*
             	if (isCsharp) {
             		// For CSHARP builds, generate a list of assemblies
             		String vsGetSolutionAssemblies = "VSGetSolutionAssemblies";
-            		
+
             		List<String> cmd = new ArrayList<String>();
             		cmd.add("echo");
             		cmd.add("Hello, world");
             		cmd.add(build.getArtifactsDir().toString());
             		//Jenkins.getInstance().
-            		
+
                     int result = launcher.
                                  launch().
                                  cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
@@ -234,13 +238,13 @@ public class CoverityPublisher extends Recorder {
 
             	}
             	*/
-            	
+
                 //String covAnalyze = "JAVA".equals(language) ? "cov-analyze-java" : "cov-analyze";
-            	
+
                 String covCommitDefects = "cov-commit-defects";
 
                 Node node = Executor.currentExecutor().getOwner().getNode();
-               
+
                 String home = getDescriptor().getHome(node, build.getEnvironment(listener));
 	            if(invocationAssistance.getSaOverride() != null) {
 		            home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
@@ -257,7 +261,7 @@ public class CoverityPublisher extends Recorder {
                 cmd.add(covAnalyze);
                 cmd.add("--dir");
                 cmd.add(temp.tempDir.getRemote());
-                
+
                 // For C# add the list of assemblies
                 if (isCsharp) {
                 	String csharpAssemblies = invocationAssistance.getCsharpAssemblies();
@@ -265,7 +269,7 @@ public class CoverityPublisher extends Recorder {
                 		cmd.add(csharpAssemblies);
                 	}
                 }
-                
+
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                 if (invocationAssistance.getAnalyzeArguments() != null) {
                     for (String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
@@ -487,7 +491,7 @@ public class CoverityPublisher extends Recorder {
         public String getJavaCheckers() {
             return javaCheckers;
         }
-        
+
         public void setJavaCheckers(String javaCheckers) {
             this.javaCheckers = Util.fixEmpty(javaCheckers);
             try {
@@ -514,7 +518,7 @@ public class CoverityPublisher extends Recorder {
         public String getCsharpCheckers() {
         	return csharpCheckers;
         }
-        
+
         public void setCsharpCheckers(String csharpCheckers) {
             this.csharpCheckers = Util.fixEmpty(csharpCheckers);
             try {
@@ -523,7 +527,7 @@ public class CoverityPublisher extends Recorder {
             } catch (IOException e) {
             }
         }
-        
+
         public String getHome(Node node, EnvVars environment) {
             CoverityInstallation install = node.getNodeProperties().get(CoverityInstallation.class);
             if (install != null) {
