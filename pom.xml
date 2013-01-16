@@ -7,7 +7,8 @@
  * Contributors:
  *    Tom Huybrechts - initial implementation and documentation
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!--
     <parent>
@@ -34,24 +35,24 @@
         </license>
     </licenses>
 
-	<developers>
-		<developer>
-			<id>joshvinson</id>
-			<name>Josh Vinson</name>
-		</developer>
-	</developers>
+    <developers>
+        <developer>
+            <id>joshvinson</id>
+            <name>Josh Vinson</name>
+        </developer>
+    </developers>
 
-	<scm>
-		<connection>scm:git:git://github.com/jenkinsci/coverity-plugin.git</connection>
-		<developerConnection>scm:git:git@github.com:jenkinsci/coverity-plugin.git</developerConnection>
-		<url>https://github.com/jenkinsci/coverity-plugin</url>
-	</scm>
+    <scm>
+        <connection>scm:git:git://github.com/jenkinsci/coverity-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/coverity-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/coverity-plugin</url>
+    </scm>
 
     <repositories>
-      <repository>
-        <id>repo.jenkins-ci.org</id>
-        <url>http://repo.jenkins-ci.org/public/</url>
-      </repository>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </repository>
         <repository>
             <id>local</id>
             <releases>
@@ -140,5 +141,5 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-</project>  
+</project>
 
