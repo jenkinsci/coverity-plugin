@@ -11,15 +11,36 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v3.*;
+import com.coverity.ws.v3.CovRemoteServiceException_Exception;
+import com.coverity.ws.v3.MergedDefectDataObj;
+import com.coverity.ws.v3.SnapshotIdDataObj;
+import com.coverity.ws.v3.StreamIdDataObj;
 import com.thoughtworks.xstream.XStream;
-import hudson.*;
-import hudson.model.*;
+import hudson.EnvVars;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.Util;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.Descriptor;
+import hudson.model.Executor;
+import hudson.model.Hudson;
+import hudson.model.Node;
+import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.util.*;
+import hudson.util.ArgumentListBuilder;
+import hudson.util.FormValidation;
+import hudson.util.IOUtils;
+import hudson.util.ListBoxModel;
+import hudson.util.XStream2;
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -32,74 +53,55 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This publisher optionally invokes cov-analyze/cov-analyze-java and cov-commit-defects.
- * Afterwards the latest list of defects is queried from the webservice, filtered, and attached to the build.
- * If defects are found, the build can be flagged as failed and a mail is sent.
+ * This publisher optionally invokes cov-analyze/cov-analyze-java and cov-commit-defects. Afterwards the latest list of
+ * defects is queried from the webservice, filtered, and attached to the build. If defects are found, the build can be
+ * flagged as failed and a mail is sent.
  */
 public class CoverityPublisher extends Recorder {
 
 	private static final Logger logger = Logger.getLogger(CoverityPublisher.class.getName());
-
 	/**
 	 * ID of the CIM instance used
 	 */
-	private final String cimInstance;
-
+	private final List<CIMStream> cimStreams;
 	/**
 	 * Configuration for the invocation assistance feature. Null if this should not be used.
 	 */
 	private final InvocationAssistance invocationAssistance;
-
-	/**
-	 * Name of Coverity project corresponding to this build.
-	 */
-	private final String project;
-
-	/**
-	 * Name of Coverity stream
-	 */
-	private final String stream;
-
 	/**
 	 * Should the build be marked as failed if defects are present ?
 	 */
 	private final boolean failBuild;
-
 	/**
 	 * Should the intermediate directory be preserved after each build?
 	 */
 	private final boolean keepIntDir;
-
 	/**
 	 * Should defects be fetched after each build? Enabling this prevents the build from being failed due to defects.
 	 */
 	private final boolean skipFetchingDefects;
-
 	/**
 	 * Hide the chart to make page loads faster
 	 */
 	private final boolean hideChart;
-
-	/**
-	 * Defines how to filter discovered defects. Null for no filtering.
-	 */
-	private final DefectFilters defectFilters;
-
 	private final CoverityMailSender mailSender;
 
 	@DataBoundConstructor
-	public CoverityPublisher(String cimInstance, InvocationAssistance invocationAssistance, String project, String stream, boolean failBuild, boolean keepIntDir, boolean skipFetchingDefects, boolean hideChart, DefectFilters defectFilters, CoverityMailSender mailSender) {
-		this.cimInstance = cimInstance;
+	public CoverityPublisher(List<CIMStream> cimStreams, InvocationAssistance invocationAssistance, boolean failBuild, boolean keepIntDir, boolean skipFetchingDefects, boolean hideChart, CoverityMailSender mailSender) {
+		this.cimStreams = cimStreams;
 		this.invocationAssistance = invocationAssistance;
-		this.project = project;
-		this.stream = stream;
-		this.defectFilters = defectFilters;
 		this.failBuild = failBuild;
 		this.mailSender = mailSender;
 		this.keepIntDir = keepIntDir;
@@ -111,20 +113,8 @@ public class CoverityPublisher extends Recorder {
 		return BuildStepMonitor.STEP;
 	}
 
-	public String getCimInstance() {
-		return cimInstance;
-	}
-
 	public InvocationAssistance getInvocationAssistance() {
 		return invocationAssistance;
-	}
-
-	public String getProject() {
-		return project;
-	}
-
-	public String getStream() {
-		return stream;
 	}
 
 	public boolean isFailBuild() {
@@ -143,40 +133,15 @@ public class CoverityPublisher extends Recorder {
 		return hideChart;
 	}
 
-	public DefectFilters getDefectFilters() {
-		return defectFilters;
-	}
-
 	public CoverityMailSender getMailSender() {
 		return mailSender;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if(this == o) return true;
-		if(o == null || getClass() != o.getClass()) return false;
-
-		CoverityPublisher that = (CoverityPublisher) o;
-
-		if(!cimInstance.equals(that.cimInstance)) return false;
-		if(defectFilters != null ? !defectFilters.equals(that.defectFilters) : that.defectFilters != null)
-			return false;
-		if(invocationAssistance != null ? !invocationAssistance.equals(that.invocationAssistance) : that.invocationAssistance != null)
-			return false;
-		if(!project.equals(that.project)) return false;
-		if(!stream.equals(that.stream)) return false;
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = cimInstance.hashCode();
-		result = 31 * result + (invocationAssistance != null ? invocationAssistance.hashCode() : 0);
-		result = 31 * result + project.hashCode();
-		result = 31 * result + stream.hashCode();
-		result = 31 * result + (defectFilters != null ? defectFilters.hashCode() : 0);
-		return result;
+	public List<CIMStream> getCimStreams() {
+		if(cimStreams == null) {
+			return new ArrayList<CIMStream>();
+		}
+		return cimStreams;
 	}
 
 	@Override
@@ -188,264 +153,247 @@ public class CoverityPublisher extends Recorder {
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		if(build.getResult().isWorseOrEqualTo(Result.FAILURE)) return true;
 
-		CIMInstance cim = getDescriptor().getInstance(cimInstance);
-
 		CoverityTempDir temp = null;
-		String language = null;
-		try {
-			language = cim.getStream(stream).getLanguage();
-		} catch(CovRemoteServiceException_Exception e) {
-			e.printStackTrace(listener.error("Error while retrieving stream information for " + stream));
-			return false;
+
+		Node node = Executor.currentExecutor().getOwner().getNode();
+		String home = getDescriptor().getHome(node, build.getEnvironment(listener));
+		if(invocationAssistance.getSaOverride() != null) {
+			home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
 		}
-		if(invocationAssistance != null) {
+
+		Set<String> analyzedLanguages = new HashSet<String>();
+
+		for(CIMStream cimStream : getCimStreams()) {
+			CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
+
+			String language = null;
 			try {
-				boolean isCsharp = "CSHARP".equals(language);
+				language = getLanguage(cimStream);
+			} catch(CovRemoteServiceException_Exception e) {
+				e.printStackTrace(listener.error("Error while retrieving stream information for " + cimStream.getStream()));
+				return false;
+			}
 
-				// TODO Handle language is "CSHARP"
-				if(isCsharp && invocationAssistance.getCsharpAssemblies() != null) {
-					String csharpAssembliesStr = invocationAssistance.getCsharpAssemblies();
-
-					listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
-				}
-
-				String covAnalyze = null;
-				if("JAVA".equals(language)) {
-					covAnalyze = "cov-analyze-java";
-				} else if(isCsharp) {
-					covAnalyze = "cov-analyze-cs";
-				} else {
-					covAnalyze = "cov-analyze";
-				}
-
-            	/*
-				 * TODO - Automatically detect CLR assemblies in build workspace
-            	 * Work in progress
-            	 */
-
-            	/*
-            	if (isCsharp) {
-            		// For CSHARP builds, generate a list of assemblies
-            		String vsGetSolutionAssemblies = "VSGetSolutionAssemblies";
-
-            		List<String> cmd = new ArrayList<String>();
-            		cmd.add("echo");
-            		cmd.add("Hello, world");
-            		cmd.add(build.getArtifactsDir().toString());
-            		//Jenkins.getInstance().
-
-                    int result = launcher.
-                                 launch().
-                                 cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                                 stdout(listener).
-                                 join();
-
-                    if (result != 0) {
-                    	listener.getLogger().println("[Coverity] " + vsGetSolutionAssemblies + " returned " + result + ", aborting...");
-                    	build.setResult(Result.FAILURE);
-                    	return false;
-                    }
-
-            	}
-            	*/
-
-				//String covAnalyze = "JAVA".equals(language) ? "cov-analyze-java" : "cov-analyze";
-
-				String covCommitDefects = "cov-commit-defects";
-
-				Node node = Executor.currentExecutor().getOwner().getNode();
-
-				String home = getDescriptor().getHome(node, build.getEnvironment(listener));
-				if(invocationAssistance.getSaOverride() != null) {
-					home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
-				}
-				if(home != null) {
-					covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
-					covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
-				}
-
-				CoverityLauncherDecorator.SKIP.set(true);
-				temp = build.getAction(CoverityTempDir.class);
-
-				List<String> cmd = new ArrayList<String>();
-				cmd.add(covAnalyze);
-				cmd.add("--dir");
-				cmd.add(temp.tempDir.getRemote());
-
-				// For C# add the list of assemblies
-				if(isCsharp) {
-					String csharpAssemblies = invocationAssistance.getCsharpAssemblies();
-					if(csharpAssemblies != null) {
-						cmd.add(csharpAssemblies);
+			if(invocationAssistance != null) {
+				try {
+					if("CSHARP".equals(language) && invocationAssistance.getCsharpAssemblies() != null) {
+						String csharpAssembliesStr = invocationAssistance.getCsharpAssemblies();
+						listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
 					}
-				}
 
-				listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-				if(invocationAssistance.getAnalyzeArguments() != null) {
-					for(String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
-						cmd.add(arg);
-					}
-				}
-
-				int result = launcher.
-						launch().
-						cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-						pwd(build.getWorkspace()).
-						stdout(listener).
-						join();
-				if(result != 0) {
-					listener.getLogger().println("[Coverity] " + covAnalyze + " returned " + result + ", aborting...");
-					build.setResult(Result.FAILURE);
-					return false;
-				}
-
-				cmd = new ArrayList<String>();
-				cmd.add(covCommitDefects);
-				cmd.add("--dir");
-				cmd.add(temp.tempDir.getRemote());
-				cmd.add("--host");
-				cmd.add(cim.getHost());
-				cmd.add("--port");
-				cmd.add(Integer.toString(cim.getPort()));
-				cmd.add("--stream");
-				cmd.add(stream);
-				cmd.add("--user");
-				cmd.add(cim.getUser());
-
-				if(invocationAssistance.getCommitArguments() != null) {
-					for(String arg : Util.tokenize(invocationAssistance.getCommitArguments())) {
-						cmd.add(arg);
-					}
-				}
-
-				ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
-				result = launcher.
-						launch().
-						cmds(args).
-						envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
-						stdout(listener).
-						stderr(listener.getLogger()).
-						join();
-
-				if(result != 0) {
-					listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
-
-					build.setResult(Result.FAILURE);
-					return false;
-				}
-			} finally {
-				CoverityLauncherDecorator.SKIP.set(false);
-				//keep if keepIntDir is set, or if the int dir is the default (keepIntDir is only useful if a custom int
-				//dir is set)
-				if(temp != null) {
-					//same as !(keepIntDir && !temp.def)
-					if(!keepIntDir || temp.def) {
-						listener.getLogger().println("[Coverity] deleting intermediate directory");
-						temp.tempDir.deleteRecursive();
+					String covAnalyze = null;
+					if("JAVA".equals(language)) {
+						covAnalyze = "cov-analyze-java";
+					} else if("CSHARP".equals(language)) {
+						covAnalyze = "cov-analyze-cs";
 					} else {
-						listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.tempDir);
+						covAnalyze = "cov-analyze";
 					}
+
+					String covCommitDefects = "cov-commit-defects";
+
+					if(home != null) {
+						covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
+						covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
+					}
+
+					CoverityLauncherDecorator.SKIP.set(true);
+					temp = build.getAction(CoverityTempDir.class);
+
+					if(!analyzedLanguages.contains(language)) {
+						List<String> cmd = new ArrayList<String>();
+						cmd.add(covAnalyze);
+						cmd.add("--dir");
+						cmd.add(temp.tempDir.getRemote());
+
+						// For C# add the list of assemblies
+						if("CSHARP".equals(language)) {
+							String csharpAssemblies = invocationAssistance.getCsharpAssemblies();
+							if(csharpAssemblies != null) {
+								cmd.add(csharpAssemblies);
+							}
+						}
+
+						listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+						if(invocationAssistance.getAnalyzeArguments() != null) {
+							for(String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
+								cmd.add(arg);
+							}
+						}
+
+						int result = launcher.
+								launch().
+								cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+								pwd(build.getWorkspace()).
+								stdout(listener).
+								join();
+
+						analyzedLanguages.add(language);
+
+						if(result != 0) {
+							listener.getLogger().println("[Coverity] " + covAnalyze + " returned " + result + ", aborting...");
+							build.setResult(Result.FAILURE);
+							return false;
+						}
+					} else {
+						listener.getLogger().println("Skipping analysis, because language " + language + " has already been analyzed");
+					}
+
+					List<String> cmd = new ArrayList<String>();
+					cmd.add(covCommitDefects);
+					cmd.add("--dir");
+					cmd.add(temp.tempDir.getRemote());
+					cmd.add("--host");
+					cmd.add(cim.getHost());
+					cmd.add("--port");
+					cmd.add(Integer.toString(cim.getPort()));
+					cmd.add("--stream");
+					cmd.add(cimStream.getStream());
+					cmd.add("--user");
+					cmd.add(cim.getUser());
+
+					if(invocationAssistance.getCommitArguments() != null) {
+						for(String arg : Util.tokenize(invocationAssistance.getCommitArguments())) {
+							cmd.add(arg);
+						}
+					}
+
+					ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
+
+					int result = launcher.
+							launch().
+							cmds(args).
+							envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
+							stdout(listener).
+							stderr(listener.getLogger()).
+							join();
+
+					if(result != 0) {
+						listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
+
+						build.setResult(Result.FAILURE);
+						return false;
+					}
+				} finally {
+					CoverityLauncherDecorator.SKIP.set(false);
 				}
 			}
 		}
 
+		//keep if keepIntDir is set, or if the int dir is the default (keepIntDir is only useful if a custom int
+		//dir is set)
+		if(temp != null) {
+			//same as !(keepIntDir && !temp.def)
+			if(!keepIntDir || temp.def) {
+				listener.getLogger().println("[Coverity] deleting intermediate directory");
+				temp.tempDir.deleteRecursive();
+			} else {
+				listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.tempDir);
+			}
+		}
+
+		//TODO: handle multiple snapshots
 		Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
 		BufferedReader reader = new BufferedReader(build.getLogReader());
 		String line = null;
-		long snapshotId = -1;
+		List<Long> snapshotIds = new ArrayList<Long>();
 		try {
-			while((line = reader.readLine()) != null && snapshotId < 0) {
+			while((line = reader.readLine()) != null) {
 				Matcher m = snapshotPattern.matcher(line);
 				if(m.matches()) {
-					snapshotId = Long.parseLong(m.group(1));
+					snapshotIds.add(Long.parseLong(m.group(1)));
 				}
 			}
 		} finally {
 			reader.close();
 		}
 
-		if(snapshotId == -1) {
-			listener.getLogger().println("[Coverity] No snapshot ID found in build log");
+		if(snapshotIds.size() != getCimStreams().size()) {
+			listener.getLogger().println("[Coverity] Wrong number of snapshot IDs found in build log");
 			build.setResult(Result.FAILURE);
 			return false;
 		}
 
-		listener.getLogger().println("[Coverity] Found snapshot ID " + snapshotId);
+		listener.getLogger().println("[Coverity] Found snapshot IDs " + snapshotIds);
 
 		if(!skipFetchingDefects) {
-			try {
-				listener.getLogger().println("[Coverity] Fetching defects for stream " + stream);
-				StreamIdDataObj streamId = new StreamIdDataObj();
-				streamId.setName(stream);
-				streamId.setType("STATIC");
-				SnapshotIdDataObj snapshot = new SnapshotIdDataObj();
-				snapshot.setId(snapshotId);
-				List<Long> cids = cim.getDefectService().getCIDsForSnapshot(snapshot);
-				listener.getLogger().println("[Coverity] Found " + cids.size() + " defects");
+			for(int i = 0; i < cimStreams.size(); i++) {
+				CIMStream cimStream = cimStreams.get(i);
+				try {
+					CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
 
-				List<MergedDefectDataObj> defects = cim.getDefects(stream, cids);
+					listener.getLogger().println("[Coverity] Fetching defects for stream " + cimStream.getStream());
+					StreamIdDataObj streamId = new StreamIdDataObj();
+					streamId.setName(cimStream.getStream());
+					streamId.setType("STATIC");
+					SnapshotIdDataObj snapshot = new SnapshotIdDataObj();
+					snapshot.setId(snapshotIds.get(i));
+					List<Long> cids = cim.getDefectService().getCIDsForSnapshot(snapshot);
+					listener.getLogger().println("[Coverity] Found " + cids.size() + " defects");
 
-				Set<String> checkers = new HashSet<String>();
-				for(MergedDefectDataObj defect : defects) {
-					checkers.add(defect.getChecker());
-				}
-				getDescriptor().updateCheckers(language, checkers);
+					List<MergedDefectDataObj> defects = cim.getDefects(cimStream.getStream(), cids);
 
-				List<Long> matchingDefects = new ArrayList<Long>();
+					Set<String> checkers = new HashSet<String>();
+					for(MergedDefectDataObj defect : defects) {
+						checkers.add(defect.getChecker());
+					}
+					getDescriptor().updateCheckers(getLanguage(cimStream), checkers);
 
-				XStream xs = new XStream2();
+					List<Long> matchingDefects = new ArrayList<Long>();
 
-				if(defectFilters != null) {
-					//listener.getLogger().println("matching defects against filters: " + xs.toXML(defectFilters));
-				}
-				for(MergedDefectDataObj defect : defects) {
-					if(defectFilters == null) {
-						matchingDefects.add(defect.getCid());
-					} else {
-						//listener.getLogger().println("checking defect: " + xs.toXML(defect));
-						boolean match = defectFilters.matches(defect);
-						//listener.getLogger().println("defect match:" + match);
-						if(match) {
+					XStream xs = new XStream2();
+
+					if(cimStream.getDefectFilters() != null) {
+						//listener.getLogger().println("matching defects against filters: " + xs.toXML(defectFilters));
+					}
+					for(MergedDefectDataObj defect : defects) {
+						if(cimStream.getDefectFilters() == null) {
 							matchingDefects.add(defect.getCid());
+						} else {
+							//listener.getLogger().println("checking defect: " + xs.toXML(defect));
+							boolean match = cimStream.getDefectFilters().matches(defect);
+							//listener.getLogger().println("defect match:" + match);
+							if(match) {
+								matchingDefects.add(defect.getCid());
+							}
 						}
 					}
-				}
 
-				if(!matchingDefects.isEmpty()) {
-					listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
-					if(failBuild) {
-						if(build.getResult().isBetterThan(Result.FAILURE)) {
-							build.setResult(Result.FAILURE);
+					if(!matchingDefects.isEmpty()) {
+						listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
+						if(failBuild) {
+							if(build.getResult().isBetterThan(Result.FAILURE)) {
+								build.setResult(Result.FAILURE);
+							}
 						}
+					} else {
+						listener.getLogger().println("[Coverity] No defects matched all filters.");
 					}
-				} else {
-					listener.getLogger().println("[Coverity] No defects matched all filters.");
+
+					CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
+					build.addAction(action);
+
+					if(!matchingDefects.isEmpty() && mailSender != null) {
+						mailSender.execute(action, listener);
+					}
+
+					String rootUrl = Hudson.getInstance().getRootUrl();
+					if(rootUrl != null) {
+						listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
+					}
+
+				} catch(CovRemoteServiceException_Exception e) {
+					e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
+					build.setResult(Result.FAILURE);
+					return false;
 				}
-
-				CoverityBuildAction action = new CoverityBuildAction(build, project, stream, cimInstance, matchingDefects);
-				build.addAction(action);
-
-				if(!matchingDefects.isEmpty() && mailSender != null) {
-					mailSender.execute(action, listener);
-				}
-
-				String rootUrl = Hudson.getInstance().getRootUrl();
-				if(rootUrl != null) {
-					listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
-				}
-
-			} catch(CovRemoteServiceException_Exception e) {
-				e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
-				build.setResult(Result.FAILURE);
-				return false;
 			}
 		}
 		return true;
 	}
 
-	public String getLanguage() throws IOException, CovRemoteServiceException_Exception {
-		return getDescriptor().getInstance(cimInstance).getStream(stream).getLanguage();
+	public String getLanguage(CIMStream cimStream) throws IOException, CovRemoteServiceException_Exception {
+		return getDescriptor().getInstance(cimStream.getInstance()).getStream(cimStream.getStream()).getLanguage();
 	}
 
 	public DescriptorImpl getDescriptor() {
@@ -457,7 +405,6 @@ public class CoverityPublisher extends Recorder {
 
 		private List<CIMInstance> instances = new ArrayList<CIMInstance>();
 		private String home;
-
 		private String javaCheckers;
 		private String cxxCheckers;
 		private String csharpCheckers;
@@ -469,6 +416,12 @@ public class CoverityPublisher extends Recorder {
 			setJavaCheckers(javaCheckers);
 			setCxxCheckers(cxxCheckers);
 			setCsharpCheckers(csharpCheckers);
+		}
+
+		public static List<String> toStrings(ListBoxModel list) {
+			List<String> result = new ArrayList<String>();
+			for(ListBoxModel.Option option : list) result.add(option.name);
+			return result;
 		}
 
 		@Override
@@ -503,7 +456,7 @@ public class CoverityPublisher extends Recorder {
 			this.javaCheckers = Util.fixEmpty(javaCheckers);
 			try {
 				//if(this.javaCheckers == null)
-					this.javaCheckers = IOUtils.toString(getClass().getResourceAsStream("java-checkers.txt"));
+				this.javaCheckers = IOUtils.toString(getClass().getResourceAsStream("java-checkers.txt"));
 			} catch(IOException e) {
 			}
 		}
@@ -516,11 +469,10 @@ public class CoverityPublisher extends Recorder {
 			this.cxxCheckers = Util.fixEmpty(cxxCheckers);
 			try {
 				//if(this.cxxCheckers == null)
-					this.cxxCheckers = IOUtils.toString(getClass().getResourceAsStream("cxx-checkers.txt"));
+				this.cxxCheckers = IOUtils.toString(getClass().getResourceAsStream("cxx-checkers.txt"));
 			} catch(IOException e) {
 			}
 		}
-
 
 		public String getCsharpCheckers() {
 			return csharpCheckers;
@@ -530,7 +482,7 @@ public class CoverityPublisher extends Recorder {
 			this.csharpCheckers = Util.fixEmpty(csharpCheckers);
 			try {
 				//if(this.csharpCheckers == null)
-					this.csharpCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
+				this.csharpCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
 			} catch(IOException e) {
 			}
 		}
@@ -546,12 +498,12 @@ public class CoverityPublisher extends Recorder {
 			}
 		}
 
-		public void setInstances(List<CIMInstance> instances) {
-			this.instances = instances;
-		}
-
 		public List<CIMInstance> getInstances() {
 			return instances;
+		}
+
+		public void setInstances(List<CIMInstance> instances) {
+			this.instances = instances;
 		}
 
 		public CIMInstance getInstance(String name) {
@@ -562,7 +514,6 @@ public class CoverityPublisher extends Recorder {
 			}
 			return null;
 		}
-
 
 		@Override
 		public String getDisplayName() {
@@ -582,113 +533,7 @@ public class CoverityPublisher extends Recorder {
 			}
 		}
 
-		public ListBoxModel doFillCimInstanceItems() {
-			ListBoxModel result = new ListBoxModel();
-			result.add("");
-			for(CIMInstance instance : instances) {
-				result.add(instance.getName());
-			}
-			return result;
-		}
-
-		public ListBoxModel doFillProjectItems(@QueryParameter String cimInstance) throws IOException, CovRemoteServiceException_Exception {
-			ListBoxModel result = new ListBoxModel();
-			if(!StringUtils.isEmpty(cimInstance)) {
-				for(ProjectDataObj project : getInstance(cimInstance).getProjects()) {
-					// don't add projects for which there are no valid streams
-					ListBoxModel streams = doFillStreamItems(cimInstance, project.getId().getName());
-					if(!streams.isEmpty()) {
-						result.add(project.getId().getName());
-					}
-				}
-			}
-			return result;
-		}
-
-		public ListBoxModel doFillStreamItems(@QueryParameter String cimInstance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
-			ListBoxModel result = new ListBoxModel();
-			if(StringUtils.isEmpty(project)) return result;
-			CIMInstance instance = getInstance(cimInstance);
-			if(instance != null) {
-				for(StreamDataObj stream : instance.getStaticStreams(project)) {
-					if("JAVA".equals(stream.getLanguage()) || "CXX".equals(stream.getLanguage()) || "CSHARP".equals(stream.getLanguage())) {
-						result.add(stream.getId().getName());
-					}
-				}
-			}
-			return result;
-		}
-
-		public ListBoxModel doFillClassificationDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
-			ListBoxModel result = new ListBoxModel();
-			CIMInstance instance = getInstance(cimInstance);
-			if(instance != null) {
-				for(String classification : getInstance(cimInstance).getConfigurationService().getClassifications()) {
-					result.add(classification);
-				}
-			}
-			return result;
-		}
-
-		public ListBoxModel doFillActionDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
-			ListBoxModel result = new ListBoxModel();
-			CIMInstance instance = getInstance(cimInstance);
-			if(instance != null) {
-				for(String action : getInstance(cimInstance).getConfigurationService().getActions()) {
-					result.add(action);
-				}
-			}
-			return result;
-		}
-
-		public ListBoxModel doFillSeveritiesDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
-			ListBoxModel result = new ListBoxModel();
-			CIMInstance instance = getInstance(cimInstance);
-			if(instance != null) {
-				for(String action : getInstance(cimInstance).getConfigurationService().getSeverities()) {
-					result.add(action);
-				}
-			}
-			return result;
-		}
-
-		public ListBoxModel doFillComponentDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance, @QueryParameter(value = "../stream") String streamId) throws IOException, CovRemoteServiceException_Exception {
-			ListBoxModel result = new ListBoxModel();
-			CIMInstance instance = getInstance(cimInstance);
-			if(instance != null && !StringUtils.isEmpty(streamId)) {
-				StreamDataObj stream = instance.getStream(streamId);
-				String componentMapId = stream.getComponentMapId().getName();
-
-				ComponentMapFilterSpecDataObj componentMapFilterSpec = new ComponentMapFilterSpecDataObj();
-				componentMapFilterSpec.setNamePattern(componentMapId);
-				for(ComponentMapDataObj map : instance.getConfigurationService().getComponentMaps(componentMapFilterSpec)) {
-					for(ComponentDataObj component : map.getComponents()) {
-						result.add(component.getComponentId().getName());
-					}
-				}
-			}
-			return result;
-		}
-
-		public ListBoxModel doFillCheckerDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance, @QueryParameter(value = "../stream") String streamId) throws IOException, CovRemoteServiceException_Exception {
-			if(StringUtils.isEmpty(streamId)) return new ListBoxModel();
-			CIMInstance instance = getInstance(cimInstance);
-			if(instance == null) return new ListBoxModel();
-
-			StreamDataObj stream = instance.getStream(streamId);
-			String type = stream.getLanguage();
-			if("CXX".equals(type)) {
-				return split(cxxCheckers);
-			} else if("JAVA".equals(type)) {
-				return split(javaCheckers);
-			} else if("CSHARP".equals(type)) {
-				return split(csharpCheckers);
-			} else {
-				return new ListBoxModel();
-			}
-		}
-
-		private ListBoxModel split(String string) {
+		public ListBoxModel split(String string) {
 			ListBoxModel result = new ListBoxModel();
 			for(String s : string.split("[\r\n]")) {
 				s = Util.fixEmptyAndTrim(s);
@@ -699,7 +544,7 @@ public class CoverityPublisher extends Recorder {
 			return result;
 		}
 
-		private Set<String> split2(String string) {
+		public Set<String> split2(String string) {
 			Set<String> result = new TreeSet<String>();
 			for(String s : string.split("[\r\n]")) {
 				s = Util.fixEmptyAndTrim(s);
@@ -708,38 +553,6 @@ public class CoverityPublisher extends Recorder {
 				}
 			}
 			return result;
-		}
-
-		public void doDefectFiltersConfig(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-			logger.info(req.getSubmittedForm().toString());
-
-			req.setAttribute("descriptor", this);
-
-			JSONObject json = req.getSubmittedForm().getJSONObject(getJsonSafeClassName());
-			if(json != null && !json.isNullObject()) {
-				CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
-				if(StringUtils.isEmpty(publisher.getCimInstance()) || StringUtils.isEmpty(publisher.getStream()) || StringUtils.isEmpty(publisher.getProject())) {
-
-				} else
-					try {
-						String language = publisher.getLanguage();
-						Set<String> allCheckers = split2(getCheckers(language));
-						DefectFilters defectFilters = publisher.getDefectFilters();
-						if(defectFilters != null) {
-							publisher.getDefectFilters().invertCheckers(
-									allCheckers,
-									toStrings(doFillClassificationDefectFilterItems(publisher.getCimInstance())),
-									toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
-									toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
-									toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
-							);
-						}
-					} catch(CovRemoteServiceException_Exception e) {
-						throw new IOException(e);
-					}
-				req.setAttribute("instance", publisher);
-			}
-			rsp.forward(this, "defectFilters", req);
 		}
 
 		public FormValidation doCheckDate(@QueryParameter String date) {
@@ -808,30 +621,96 @@ public class CoverityPublisher extends Recorder {
 			}
 			CoverityPublisher publisher = (CoverityPublisher) super.newInstance(req, formData);
 
-			try {
-				String language = publisher.getLanguage();
-				Set<String> allCheckers = split2(getCheckers(language));
-				DefectFilters defectFilters = publisher.getDefectFilters();
+			for(CIMStream current : publisher.getCimStreams()) {
+				CIMStream.DescriptorImpl currentDescriptor = ((CIMStream.DescriptorImpl) current.getDescriptor());
 
-				if(defectFilters != null) {
-					defectFilters.invertCheckers(
-							allCheckers,
-							toStrings(doFillClassificationDefectFilterItems(publisher.getCimInstance())),
-							toStrings(doFillActionDefectFilterItems(publisher.getCimInstance())),
-							toStrings(doFillSeveritiesDefectFilterItems(publisher.getCimInstance())),
-							toStrings(doFillComponentDefectFilterItems(publisher.getCimInstance(), publisher.getStream()))
-					);
+				String cimInstance = current.getInstance();
+
+				try {
+					String language = publisher.getLanguage(current);
+					Set<String> allCheckers = split2(getCheckers(language));
+					DefectFilters defectFilters = current.getDefectFilters();
+
+					if(defectFilters != null) {
+						defectFilters.invertCheckers(
+								allCheckers,
+								toStrings(currentDescriptor.doFillClassificationDefectFilterItems(cimInstance)),
+								toStrings(currentDescriptor.doFillActionDefectFilterItems(cimInstance)),
+								toStrings(currentDescriptor.doFillSeveritiesDefectFilterItems(cimInstance)),
+								toStrings(currentDescriptor.doFillComponentDefectFilterItems(cimInstance, current.getStream()))
+						);
+					}
+				} catch(Exception e) {
+					throw new RuntimeException(e);
 				}
-				return publisher;
-			} catch(Exception e) {
-				throw new RuntimeException(e);
 			}
+			return publisher;
 		}
 
-		private static List<String> toStrings(ListBoxModel list) {
-			List<String> result = new ArrayList<String>();
-			for(ListBoxModel.Option option : list) result.add(option.name);
-			return result;
+		public void doDefectFiltersConfig(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+			logger.info(req.getSubmittedForm().toString());
+
+			JSONObject json = null;
+			//try old-style json format
+			JSONObject jsonA = req.getSubmittedForm().getJSONObject(getJsonSafeClassName());
+			if(jsonA == null) {
+				//new style json format
+				JSON jsonB = (JSON) req.getSubmittedForm().get("publisher");
+				String targetClass = getId();
+				if(jsonB.isArray()) {
+					JSONArray arr = (JSONArray) jsonB;
+					for(Object i : arr) {
+						JSONObject ji = (JSONObject) i;
+						if(targetClass.equals(ji.get("stapler-class"))) {
+							json = ji;
+							break;
+						}
+					}
+				} else {
+					json = (JSONObject) jsonB;
+				}
+			} else {
+				json = jsonA;
+			}
+
+			CIMStream current = null;
+			CIMStream.DescriptorImpl currentDescriptor = null;
+			if(json != null && !json.isNullObject()) {
+				CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
+				String id = ((String[]) req.getParameterMap().get("id"))[0];
+				for(CIMStream cs : publisher.getCimStreams()) {
+					if(id.equals(cs.getId())) {
+						current = cs;
+					}
+				}
+
+				currentDescriptor = ((CIMStream.DescriptorImpl) current.getDescriptor());
+
+				if(StringUtils.isEmpty(current.getInstance()) || StringUtils.isEmpty(current.getStream()) || StringUtils.isEmpty(current.getProject())) {
+					//do nothing
+				} else {
+					try {
+						String language = publisher.getLanguage(current);
+						Set<String> allCheckers = split2(getCheckers(language));
+						DefectFilters defectFilters = current.getDefectFilters();
+						if(defectFilters != null) {
+							current.getDefectFilters().invertCheckers(
+									allCheckers,
+									toStrings(currentDescriptor.doFillClassificationDefectFilterItems(current.getInstance())),
+									toStrings(currentDescriptor.doFillActionDefectFilterItems(current.getInstance())),
+									toStrings(currentDescriptor.doFillSeveritiesDefectFilterItems(current.getInstance())),
+									toStrings(currentDescriptor.doFillComponentDefectFilterItems(current.getInstance(), current.getStream()))
+							);
+						}
+					} catch(CovRemoteServiceException_Exception e) {
+						throw new IOException(e);
+					}
+				}
+				req.setAttribute("descriptor", currentDescriptor);
+				req.setAttribute("instance", current);
+				req.setAttribute("id", id);
+			}
+			rsp.forward(currentDescriptor, "defectFilters", req);
 		}
 	}
 }

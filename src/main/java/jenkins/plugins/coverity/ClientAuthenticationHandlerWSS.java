@@ -11,11 +11,11 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-import java.util.HashSet;
-import java.util.Set;
+import com.sun.xml.wss.ProcessingContext;
+import com.sun.xml.wss.XWSSProcessor;
+import com.sun.xml.wss.XWSSProcessorFactory;
+import com.sun.xml.wss.XWSSecurityException;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.security.auth.callback.Callback;
@@ -26,11 +26,10 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import com.sun.xml.wss.ProcessingContext;
-import com.sun.xml.wss.XWSSProcessor;
-import com.sun.xml.wss.XWSSProcessorFactory;
-import com.sun.xml.wss.XWSSecurityException;
-import hudson.model.Hudson;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * SOAP handler for user authentication using ws-security.  This mechanism

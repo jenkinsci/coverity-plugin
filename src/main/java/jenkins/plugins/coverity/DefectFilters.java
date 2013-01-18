@@ -18,7 +18,11 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Responsible for filtering the full list of defects to determine if a build should fail or not.
@@ -40,6 +44,7 @@ public class DefectFilters {
 		this.severities = Util.fixNull(severities);
 		this.components = Util.fixNull(components);
 		this.checkers = Util.fixNull(checkers);
+		this.ignoredCheckers = new ArrayList<String>();
 
 		cutOffDate = Util.fixEmpty(cutOffDate);
 		if(cutOffDate != null) {
@@ -84,6 +89,9 @@ public class DefectFilters {
 	}
 
 	public boolean isCheckerSelected(String checker) {
+		if(ignoredCheckers == null) {
+			return false;
+		}
 		return !ignoredCheckers.contains(checker);
 	}
 

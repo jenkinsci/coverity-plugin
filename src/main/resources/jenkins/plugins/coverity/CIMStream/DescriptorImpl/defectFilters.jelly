@@ -11,14 +11,22 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-    <j:set var="publisher" value="${instance}"/>
     <j:set var="defectFilters" value="${instance.defectFilters}"/>
-    <j:set var="cimInstance" value="${publisher.cimInstance}"/>
-    <j:set var="stream" value="${publisher.stream}"/>
+    <j:set var="cimInstance" value="${instance.instance}"/>
+    <j:set var="stream" value="${instance.stream}"/>
 
     <tr>
         <td colspan="3">
-            <table id="filters" style="display: none;">
+            <table id="filters-${id}" style="display: none;">
+				<!--f:entry>
+					instance=${instance}<br />
+					cimInstance=${cimInstance}<br />
+					stream=${stream}<br />
+					it=${it}<br />
+					descriptor=${descriptor}<br />
+					id=${id}<br />
+					d.dfcdfi=${descriptor.doFillClassificationDefectFilterItems(cimInstance)}<br />
+				</f:entry-->
                 <f:entry title="Classification is among:">
                     <j:forEach var="e" items="${descriptor.doFillClassificationDefectFilterItems(cimInstance)}">
                         <f:checkbox name="classifications" json="${e.value}"
@@ -45,9 +53,9 @@
                     </j:forEach>
                 </f:entry>
                 <f:entry title="Component is among:">
-                    <input type="button" class="yui-button" value="Select All" onclick="checkFiltersComponents(true);"/>
+                    <input type="button" class="yui-button" value="Select All" onclick="checkFiltersComponents(true, ${id});"/>
                     <input type="button" class="yui-button" value="Select None"
-                           onclick="checkFiltersComponents(false);"/>
+                           onclick="checkFiltersComponents(false, ${id});"/>
                     <j:forEach var="e" items="${descriptor.doFillComponentDefectFilterItems(cimInstance,stream)}">
                         <f:checkbox name="components" json="${e.value}"
                                     checked="${defectFilters == null ? true : defectFilters.isComponentSelected(e.value)}"/>
@@ -57,18 +65,18 @@
                 </f:entry>
                 <f:entry title="Checker is among:">
                     <j:set var="checkers" value="${descriptor.doFillCheckerDefectFilterItems(cimInstance,stream)}"/>
-                    <a name="#checkers"/>
-                    <a href="#checkers" id="showCheckers"
-                       onclick="document.getElementById('checkers').style.display='block';document.getElementById('hideCheckers').style.display='block';this.style.display='none';">
+                    <a name="#checkers-${id}"/>
+                    <a href="#checkers-${id}" id="showCheckers-${id}"
+                       onclick="document.getElementById('checkers-${id}').style.display='block';document.getElementById('hideCheckers-${id}').style.display='block';this.style.display='none';">
                         (Show ${checkers.size()} checkers)
                     </a>
-                    <a href="#checkers" id="hideCheckers" style="display: none;"
-                       onclick="document.getElementById('checkers').style.display='none';document.getElementById('showCheckers').style.display='block';this.style.display='none';">
+                    <a href="#checkers-${id}" id="hideCheckers-${id}" style="display: none;"
+                       onclick="document.getElementById('checkers-${id}').style.display='none';document.getElementById('showCheckers-${id}').style.display='block';this.style.display='none';">
                         (Hide ${checkers.size()} checkers)
                     </a>
-                    <div id="checkers" style="display: none;">
-                        <input type="button" class="yui-button" value="Select All" onclick="checkFilters(true);"/>
-                        <input type="button" class="yui-button" value="Select None" onclick="checkFilters(false);"/>
+                    <div id="checkers-${id}" style="display: none;">
+                        <input type="button" class="yui-button" value="Select All" onclick="checkFilters(true, ${id});"/>
+                        <input type="button" class="yui-button" value="Select None" onclick="checkFilters(false, ${id});"/>
                         <j:forEach var="e" items="${checkers}">
                             <div style="white-space: nowrap">
                                 <f:checkbox name="checkers" json="${e.value}"

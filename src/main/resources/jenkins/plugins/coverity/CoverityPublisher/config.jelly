@@ -6,187 +6,221 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Coverity, Inc - initial implementation and documentation
+ *	Coverity, Inc - initial implementation and documentation
 -->
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+	<script type="text/javascript">
+		function loadDefectFilters(id) {
+			var form = document.getElementById('cimInstance-' + id).form;
+			buildFormTree(form);
 
-    <script type="text/javascript">
-        function loadDefectFilters() {
-            var cimInstance = document.getElementById("cimInstance").value
-            var streamId = document.getElementById("stream").value
+			var json = form.elements["json"].value;
 
-            var form = document.getElementById("cimInstance").form
-            buildFormTree(form)
+			new Ajax.Request("${app.rootUrl}descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
+				parameters: { json: json, id: id },
+				onComplete: function (rsp) {
+					var target = document.getElementById("defectFilters-" + id);
+					target.innerHTML = rsp.status == 200 ? rsp.responseText
+							: '&lt;a href="" onclick="document.getElementById(\'valerr' +
+							(i = iota++) +
+							'\').style.display=\'block\';return false"&gt;ERROR' +
+							'&lt;/a&gt;' +
+							'&lt;div id="valerr' + i + '" style="display:none"&gt;' +
+							rsp.responseText +
+							'&lt;/div&gt;';
+					Behaviour.applySubtree(target);
 
-            var json = form.elements["json"].value;
+					document.getElementById('filters-' + id).style.display = 'none';
+					document.getElementById('showFilters-' + id).style.display = 'block';
+					document.getElementById('hideFilters-' + id).style.display = 'none';
+				}
+			});
+		}
+	</script>
+	<script type="text/javascript">
+		function checkFilters(state, id) {
+			YAHOO.util.Dom.getElementsBy(
+					function (el) {
+						return (el.name == 'checkers-'+id);
+					},
+					'input',
+					'filters-'+id,
+					function (el) {
+						el.checked = (state ? 'true' : null);
+					}
+			);
+		}
 
-            var parameters = { cimInstance: cimInstance, streamId: streamId }
-            new Ajax.Request("${app.rootUrl}descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
-                parameters: { json: json },
-                onComplete: function(rsp) {
-                    var target = document.getElementById("defectFilters");
-                    target.innerHTML = rsp.status==200 ? rsp.responseText
-                          : '<a href="" onclick="document.getElementById(\'valerr' + (i=iota++)
-                          + '\').style.display=\'block\';return false">ERROR</a><div id="valerr'
-                          + i + '" style="display:none">' + rsp.responseText + '</div>';
-                    Behaviour.applySubtree(target);
+		function checkFiltersComponents(state, id) {
+			YAHOO.util.Dom.getElementsBy(
+					function (el) {
+						return (el.name == 'components-'+id);
+					},
+					'input',
+					'filters-'+id,
+					function (el) {
+						el.checked = (state ? 'true' : null);
+					}
+			);
+		}
+	</script>
 
-                    document.getElementById('filters').style.display='none';
-                    document.getElementById('showFilters').style.display='block';
-                    document.getElementById('hideFilters').style.display='none';
-                }
+	<tr>
+		<td width="5%"/>
+		<td colspan="3">
+			<table width="100%">
+				<f:entry field="cimStreams"
+						 title="Streams"
+						 description="Streams to perform analysis for and commit to">
+					<f:repeatable field="cimStreams"
+								  add="Add Stream" minimum="1" varStatus="loopItem" var="loopItem2">
+						<!--j:set var="id" value="${instance.instance}_${instance.project}_${instance.stream}" /-->
+						<j:set var="id" value="${descriptor.getRandomID(instance)}" />
+						<table width="100%">
+							<input type="hidden" name="id" value="${id}" />
+							<br/>
+							<!--f:entry>
+								instance=${instance}<br />
+								it=${it}<br />
+								descriptor=${descriptor}<br />
+								id=${id}<br />
+								loopItem=${loopItem}<br />
+								loopItem.index=${loopItem.index}<br />
+								loopItem2=${loopItem2}<br />
+								loopItem2.index=${loopItem2.index}<br />
+							</f:entry-->
+							<f:entry title="Integrity Manager instance" field="instance">
+								<f:select id="cimInstance-${id}"/>
+							</f:entry>
+							<f:entry title="Project" field="project">
+								<f:select/>
+							</f:entry>
+							<f:entry title="Stream" field="stream">
+								<f:select onchange="loadDefectFilters(${id})"/>
+							</f:entry>
+							<f:entry title="" field="defectFilters">
+								<tr>
+									<td class="setting-leftspace">
+										<st:nbsp/>
+									</td>
+									<td class="setting-name">
+										<a href="#filters-${id}" id="showFilters-${id}"
+										   onclick="document.getElementById('filters-${id}').style.display='block';document.getElementById('hideFilters-${id}').style.display='block';this.style.display='none';">
+											Defect Filters >>>
+										</a>
+										<a href="#filters-${id}" id="hideFilters-${id}"
+										   style="display: none;"
+										   onclick="document.getElementById('filters-${id}').style.display='none';document.getElementById('showFilters-${id}').style.display='block';this.style.display='none';">
+											Defect Filters &lt;&lt;&lt;</a>
+									</td>
+									<td class="setting-main">
+										<table width="100%" id="defectFilters-${id}" name="defectFilters">
+											<st:include from="${descriptor}" page="defectFilters.jelly" />
+										</table>
+									</td>
+									<td class="setting-help">
+										<a href="#" class="help-button"
+										   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/defectFilters">
+											<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+										</a>
+									</td>
+								</tr>
+							</f:entry>
+						</table>
+						<div align="right">
+							<input type="button" value="Remove Stream for Analysis" class="repeatable-delete"
+								   style="margin-left: 1em;"/>
+						</div>
+					</f:repeatable>
+				</f:entry>
 
-            });
-        }
-    </script>
-    <script type="text/javascript">
-        function checkFilters(state) {
-            YAHOO.util.Dom.getElementsBy(
-                function(el) { return (el.name == 'checkers'); },
-                'input',
-                'filters',
-                function(el) { el.checked = (state ? 'true' : null); }
-            );
-        }
+				<!--
+				<f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">
+					<j:set var="instance" value="${instance.mailSender}"/>
+					<f:entry title="Additional recipients" field="recipients">
+						<f:textbox/>
+					</f:entry>
+				</f:optionalBlock>
+				-->
+				<f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
+								 checked="${instance.invocationAssistance != null}" name="invocationAssistance">
+					<j:set var="instance" value="${instance.invocationAssistance}"/>
+					<f:entry title="Additional cov-build arguments:" field="buildArguments">
+						<f:textbox/>
+					</f:entry>
+					<f:entry title="Additional cov-analyze[-java] arguments:" field="analyzeArguments">
+						<f:textbox/>
+					</f:entry>
+					<f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
+						<f:textbox/>
+					</f:entry>
+					<f:entry title="Intermediate directory:" field="intermediateDir">
+						<f:textbox/>
+					</f:entry>
+					<f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
+						<f:textbox/>
+					</f:entry>
+					<f:entry title="Static analysis location override:" field="saOverride">
+						<f:textbox/>
+					</f:entry>
+					<f:entry title="cov-build blacklist:" field="covBuildBlacklist">
+						<f:textbox/>
+					</f:entry>
+				</f:optionalBlock>
 
-        function checkFiltersComponents(state) {
-        YAHOO.util.Dom.getElementsBy(
-        function(el) { return (el.name == 'components'); },
-        'input',
-        'filters',
-        function(el) { el.checked = (state ? 'true' : null); }
-        );
-        }
-    </script>
-
-    <tr>
-        <td width="5%"/>
-        <td colspan="3">
-            <table width="100%">
-                <f:entry title="Integrity Manager instance" field="cimInstance">
-                    <f:select id="cimInstance"/>
-                </f:entry>
-                <f:entry title="Project" field="project">
-                    <f:select/>
-                </f:entry>
-                <f:entry title="Stream" field="stream">
-                    <f:select id="stream" onchange="loadDefectFilters()"/>
-                </f:entry>
-
-                <!--
-                <f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">
-                    <j:set var="instance" value="${instance.mailSender}"/>
-                    <f:entry title="Additional recipients" field="recipients">
-                        <f:textbox/>
-                    </f:entry>
-                </f:optionalBlock>
-                -->
-                <f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
-                                 checked="${instance.invocationAssistance != null}" name="invocationAssistance">
-                    <j:set var="instance" value="${instance.invocationAssistance}"/>
-                    <f:entry title="Additional cov-build arguments:" field="buildArguments">
-                        <f:textbox/>
-                    </f:entry>
-                    <f:entry title="Additional cov-analyze[-java] arguments:" field="analyzeArguments">
-                        <f:textbox/>
-                    </f:entry>
-                    <f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
-                        <f:textbox/>
-                    </f:entry>
-                    <f:entry title="Intermediate directory:" field="intermediateDir">
-                        <f:textbox/>
-                    </f:entry>
-                    <f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
-                        <f:textbox/>
-                    </f:entry>
-                    <f:entry title="Static analysis location override:" field="saOverride">
-                        <f:textbox/>
-                    </f:entry>
-                    <f:entry title="cov-build blacklist:" field="covBuildBlacklist">
-                        <f:textbox/>
-                    </f:entry>
-                </f:optionalBlock>
-
-                <tr>
-                    <td class="setting-name" colspan="3">
-                        <f:checkbox field="failBuild"/>
-                        <label class="attach-previous">Fail the build if matching defects are found</label>
-                    </td>
-                    <td class="setting-help">
-                        <a href="#" class="help-button"
-                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/failBuild">
-                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
-                        </a>
-                    </td>
-                </tr>
-                <f:helpArea/>
-                <tr>
-                    <td class="setting-name" colspan="3">
-                        <f:checkbox field="skipFetchingDefects"/>
-                        <label class="attach-previous">Do not fetch defects after the build</label>
-                    </td>
-                    <td class="setting-help">
-                        <a href="#" class="help-button"
-                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/skipFetchingDefects">
-                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
-                        </a>
-                    </td>
-                </tr>
-                <f:helpArea/>
-                <tr>
-                    <td class="setting-name" colspan="3">
-                        <f:checkbox field="keepIntDir"/>
-                        <label class="attach-previous">Preserve the intermediate directory after each build</label>
-                    </td>
-                    <td class="setting-help">
-                        <a href="#" class="help-button"
-                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/keepIntDir">
-                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
-                        </a>
-                    </td>
-                </tr>
-                <f:helpArea/>
-                <tr>
-                    <td class="setting-name" colspan="3">
-                        <f:checkbox field="hideChart"/>
-                        <label class="attach-previous">Hide the defects chart on the project page</label>
-                    </td>
-                    <td class="setting-help">
-                        <a href="#" class="help-button"
-                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/hideChart">
-                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
-                        </a>
-                    </td>
-                </tr>
-                <f:helpArea/>
-                <tr>
-                    <td class="setting-leftspace">
-                        <st:nbsp/>
-                    </td>
-                    <td class="setting-name">
-                        <a href="#filters" id="showFilters"
-                           onclick="document.getElementById('filters').style.display='block';document.getElementById('hideFilters').style.display='block';this.style.display='none';">
-                            Defect Filters >>>
-                        </a>
-                        <a href="#filters" id="hideFilters" style="display: none;"
-                           onclick="document.getElementById('filters').style.display='none';document.getElementById('showFilters').style.display='block';this.style.display='none';">
-                            Defect Filters &lt;&lt;&lt;</a>
-                    </td>
-                    <td class="setting-main">
-                        <table width="100%" id="defectFilters" name="defectFilters">
-                            <st:include from="${descriptor}" page="defectFilters.jelly"/>
-                        </table>
-                    </td>
-                    <td class="setting-help">
-                        <a href="#" class="help-button"
-                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/defectFilters">
-                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
-                        </a>
-                    </td>
-                </tr>
-                <f:helpArea/>
-            </table>
-        </td>
-    </tr>
+				<tr>
+					<td class="setting-name" colspan="3">
+						<f:checkbox field="failBuild"/>
+						<label class="attach-previous">Fail the build if matching defects are found</label>
+					</td>
+					<td class="setting-help">
+						<a href="#" class="help-button"
+						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/failBuild">
+							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+						</a>
+					</td>
+				</tr>
+				<f:helpArea/>
+				<tr>
+					<td class="setting-name" colspan="3">
+						<f:checkbox field="skipFetchingDefects"/>
+						<label class="attach-previous">Do not fetch defects after the build</label>
+					</td>
+					<td class="setting-help">
+						<a href="#" class="help-button"
+						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/skipFetchingDefects">
+							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+						</a>
+					</td>
+				</tr>
+				<f:helpArea/>
+				<tr>
+					<td class="setting-name" colspan="3">
+						<f:checkbox field="keepIntDir"/>
+						<label class="attach-previous">Preserve the intermediate directory after each build</label>
+					</td>
+					<td class="setting-help">
+						<a href="#" class="help-button"
+						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/keepIntDir">
+							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+						</a>
+					</td>
+				</tr>
+				<f:helpArea/>
+				<tr>
+					<td class="setting-name" colspan="3">
+						<f:checkbox field="hideChart"/>
+						<label class="attach-previous">Hide the defects chart on the project page</label>
+					</td>
+					<td class="setting-help">
+						<a href="#" class="help-button"
+						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/hideChart">
+							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+						</a>
+					</td>
+				</tr>
+				<f:helpArea/>
+			</table>
+		</td>
+	</tr>
 </j:jelly>

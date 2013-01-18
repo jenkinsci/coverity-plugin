@@ -12,8 +12,18 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v3.CovRemoteServiceException_Exception;
-import hudson.*;
-import hudson.model.*;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.LauncherDecorator;
+import hudson.Proc;
+import hudson.Util;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Executor;
+import hudson.model.Node;
+import hudson.model.Queue;
+import hudson.model.TaskListener;
 import hudson.remoting.Channel;
 
 import java.io.IOException;
@@ -31,7 +41,6 @@ import java.util.logging.Logger;
 public class CoverityLauncherDecorator extends LauncherDecorator {
 
 	private static final Logger logger = Logger.getLogger(CoverityLauncherDecorator.class.getName());
-
 	/**
 	 * A ThreadLocal that is used to disable cov-build when running other Coverity tools during the build.
 	 */
@@ -68,17 +77,26 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 		}
 
 		// Do not run cov-build if language is "CSHARP"
-		String cimInstanceName = publisher.getCimInstance();
-		CIMInstance cim = publisher.getDescriptor().getInstance(publisher.getCimInstance());
+		boolean onlyCS = true;
+		for(CIMStream cs : publisher.getCimStreams()) {
+			CIMInstance cim = publisher.getDescriptor().getInstance(cs.getInstance());
+			String id = cs.getInstance() + "/" + cs.getStream();
+			try {
+				String language = cim.getStream(cs.getStream()).getLanguage();
+				if(!"CSHARP".equals(language)) {
+					onlyCS = false;
+					break;
+				}
+			} catch(CovRemoteServiceException_Exception e) {
+				throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
+			} catch(IOException e) {
+				throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
+			}
+		}
+		if(onlyCS) {
+			logger.info("Only streams of type CSHARP were found, skipping cov-build");
 
-		String streamName = publisher.getStream();
-		String language = null;
-		try {
-			language = cim.getStream(streamName).getLanguage();
-		} catch(CovRemoteServiceException_Exception e) {
-			throw new RuntimeException("Error while retrieving stream information for " + streamName, e);
-		} catch(IOException e) {
-			throw new RuntimeException("Error while retrieving stream information for " + streamName, e);
+			return launcher;
 		}
 
 		FilePath temp;
@@ -98,12 +116,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			throw new RuntimeException("Error while creating temporary directory for Coverity", e);
 		} catch(InterruptedException e) {
 			throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
-		}
-
-		if("CSHARP".equals(language)) {
-			logger.info("Stream " + streamName + " is of type CSHARP, skipping cov-build");
-
-			return launcher;
 		}
 
 		try {
@@ -149,8 +161,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 	}
 
 	/**
-	 * A decorated {@link Launcher} that puts the given set of arguments as a prefix to any commands
-	 * that it invokes.
+	 * A decorated {@link Launcher} that puts the given set of arguments as a prefix to any commands that it invokes.
 	 */
 	public class DecoratedLauncher extends Launcher {
 		private final Launcher decorated;

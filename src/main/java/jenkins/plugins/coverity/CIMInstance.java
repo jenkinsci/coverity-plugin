@@ -11,7 +11,22 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v3.*;
+import com.coverity.ws.v3.AdministrationService;
+import com.coverity.ws.v3.AdministrationServiceService;
+import com.coverity.ws.v3.ConfigurationService;
+import com.coverity.ws.v3.ConfigurationServiceService;
+import com.coverity.ws.v3.CovRemoteServiceException_Exception;
+import com.coverity.ws.v3.DefectService;
+import com.coverity.ws.v3.DefectServiceService;
+import com.coverity.ws.v3.MergedDefectDataObj;
+import com.coverity.ws.v3.MergedDefectFilterSpecDataObj;
+import com.coverity.ws.v3.MergedDefectsPageDataObj;
+import com.coverity.ws.v3.PageSpecDataObj;
+import com.coverity.ws.v3.ProjectDataObj;
+import com.coverity.ws.v3.ProjectFilterSpecDataObj;
+import com.coverity.ws.v3.StreamDataObj;
+import com.coverity.ws.v3.StreamFilterSpecDataObj;
+import com.coverity.ws.v3.StreamIdDataObj;
 import hudson.model.Hudson;
 import hudson.util.FormValidation;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -21,7 +36,12 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.*;
+import java.net.ConnectException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
