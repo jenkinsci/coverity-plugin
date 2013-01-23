@@ -502,7 +502,7 @@ public class CoverityPublisher extends Recorder {
 		public void setJavaCheckers(String javaCheckers) {
 			this.javaCheckers = Util.fixEmpty(javaCheckers);
 			try {
-				if(this.javaCheckers == null)
+				//if(this.javaCheckers == null)
 					this.javaCheckers = IOUtils.toString(getClass().getResourceAsStream("java-checkers.txt"));
 			} catch(IOException e) {
 			}
@@ -515,7 +515,7 @@ public class CoverityPublisher extends Recorder {
 		public void setCxxCheckers(String cxxCheckers) {
 			this.cxxCheckers = Util.fixEmpty(cxxCheckers);
 			try {
-				if(this.cxxCheckers == null)
+				//if(this.cxxCheckers == null)
 					this.cxxCheckers = IOUtils.toString(getClass().getResourceAsStream("cxx-checkers.txt"));
 			} catch(IOException e) {
 			}
@@ -529,7 +529,7 @@ public class CoverityPublisher extends Recorder {
 		public void setCsharpCheckers(String csharpCheckers) {
 			this.csharpCheckers = Util.fixEmpty(csharpCheckers);
 			try {
-				if(this.csharpCheckers == null)
+				//if(this.csharpCheckers == null)
 					this.csharpCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
 			} catch(IOException e) {
 			}
@@ -777,7 +777,9 @@ public class CoverityPublisher extends Recorder {
 
 			Set<String> newCheckers = new TreeSet<String>();
 			Set<String> c = new TreeSet<String>();
-			for(ListBoxModel.Option s : split(oldCheckers)) c.add(s.name);
+			for(ListBoxModel.Option s : split(oldCheckers)) {
+				c.add(s.name);
+			}
 			for(String s : checkers) {
 				if(c.add(s)) {
 					newCheckers.add(s);
