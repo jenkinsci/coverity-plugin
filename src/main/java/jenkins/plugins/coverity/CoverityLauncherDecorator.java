@@ -188,7 +188,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
 		@Override
 		public Channel launchChannel(String[] cmd, OutputStream out, FilePath workDir, Map<String, String> envVars) throws IOException, InterruptedException {
-			System.out.println("launchChannel: " + cmd);
 			return decorated.launchChannel(prefix(cmd), out, workDir, envVars);
 		}
 
@@ -208,7 +207,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 		}
 
 		private boolean[] prefix(boolean[] args) {
-			System.out.println("prefix(b): " + Arrays.asList(args));
 			boolean[] newArgs = new boolean[args.length + prefix.length];
 			System.arraycopy(args, 0, newArgs, prefix.length, args.length);
 			return newArgs;
