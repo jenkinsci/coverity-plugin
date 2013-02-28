@@ -72,6 +72,11 @@ import java.util.regex.Pattern;
 public class CoverityPublisher extends Recorder {
 
 	private static final Logger logger = Logger.getLogger(CoverityPublisher.class.getName());
+	//deprecated fields
+	private final transient String cimInstance;
+	private final transient String project;
+	private final transient String stream;
+	private final transient DefectFilters defectFilters;
 	/**
 	 * ID of the CIM instance used
 	 */
@@ -99,7 +104,17 @@ public class CoverityPublisher extends Recorder {
 	private final CoverityMailSender mailSender;
 
 	@DataBoundConstructor
-	public CoverityPublisher(List<CIMStream> cimStreams, InvocationAssistance invocationAssistance, boolean failBuild, boolean keepIntDir, boolean skipFetchingDefects, boolean hideChart, CoverityMailSender mailSender) {
+	public CoverityPublisher(List<CIMStream> cimStreams,
+							 InvocationAssistance invocationAssistance,
+							 boolean failBuild,
+							 boolean keepIntDir,
+							 boolean skipFetchingDefects,
+							 boolean hideChart,
+							 CoverityMailSender mailSender,
+							 String cimInstance,
+							 String project,
+							 String stream,
+							 DefectFilters defectFilters) {
 		this.cimStreams = cimStreams;
 		this.invocationAssistance = invocationAssistance;
 		this.failBuild = failBuild;
@@ -107,6 +122,23 @@ public class CoverityPublisher extends Recorder {
 		this.keepIntDir = keepIntDir;
 		this.skipFetchingDefects = skipFetchingDefects;
 		this.hideChart = hideChart;
+		this.cimInstance = cimInstance;
+		this.project = project;
+		this.stream = stream;
+		this.defectFilters = defectFilters;
+
+		if(isOldDataPresent()) {
+			logger.info("Old data format detected. Converting to new format.");
+			convertOldData();
+		}
+	}
+
+	private void convertOldData() {
+		cimStreams.add(new CIMStream(cimInstance, project, stream, defectFilters, null));
+	}
+
+	private boolean isOldDataPresent() {
+		return cimInstance != null || project != null || stream != null || defectFilters != null;
 	}
 
 	public BuildStepMonitor getRequiredMonitorService() {
