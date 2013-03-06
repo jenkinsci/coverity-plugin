@@ -100,6 +100,12 @@
                     <f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
                         <f:textbox/>
                     </f:entry>
+                    <f:entry title="(Only for C#) Search for DLL and EXE files to analyze:" field="csharpAutomaticAssemblies">
+                        <f:checkbox/>
+                    </f:entry>
+                    <f:entry title="(Only for C#) Import Microsoft Code Analysis results:" field="csharpMsvsca">
+                        <f:checkbox/>
+                    </f:entry>
                     <f:entry title="Static analysis location override:" field="saOverride">
                         <f:textbox/>
                     </f:entry>
