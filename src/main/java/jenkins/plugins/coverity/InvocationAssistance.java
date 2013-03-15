@@ -19,6 +19,7 @@ public class InvocationAssistance {
 	private final String analyzeArguments;
 	private final String commitArguments;
 	private final String csharpAssemblies;
+	private final String csharpMsvscaOutputFiles;
   private final boolean csharpAutomaticAssemblies;
   private final boolean csharpMsvsca;
 	private final String saOverride;
@@ -34,12 +35,13 @@ public class InvocationAssistance {
 	private final String intermediateDir;
 
 	@DataBoundConstructor
-	public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies, boolean csharpMsvsca, boolean csharpAutomaticAssemblies, String saOverride, String covBuildBlacklist) {
+	public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies, String csharpMsvscaOutputFiles, boolean csharpMsvsca, boolean csharpAutomaticAssemblies, String saOverride, String covBuildBlacklist) {
 		this.intermediateDir = Util.fixEmpty(intermediateDir);
 		this.buildArguments = Util.fixEmpty(buildArguments);
 		this.analyzeArguments = Util.fixEmpty(analyzeArguments);
 		this.commitArguments = Util.fixEmpty(commitArguments);
 		this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
+		this.csharpMsvscaOutputFiles = Util.fixEmpty(csharpMsvscaOutputFiles);
     this.csharpMsvsca = csharpMsvsca;
     this.csharpAutomaticAssemblies = csharpAutomaticAssemblies;
 		this.saOverride = Util.fixEmpty(saOverride);
@@ -65,6 +67,10 @@ public class InvocationAssistance {
 	public String getCsharpAssemblies() {
 		return csharpAssemblies;
 	}
+
+  public String getCsharpMsvscaOutputFiles() {
+    return csharpMsvscaOutputFiles;
+  }
 
   public boolean getCsharpMsvsca() {
     return csharpMsvsca;
@@ -97,6 +103,8 @@ public class InvocationAssistance {
 			return false;
 		if(csharpAssemblies != null ? !csharpAssemblies.equals(that.csharpAssemblies) : that.csharpAssemblies != null)
 			return false;
+		if(csharpMsvscaOutputFiles != null ? !csharpMsvscaOutputFiles.equals(that.csharpMsvscaOutputFiles) : that.csharpMsvscaOutputFiles != null)
+			return false;
     if(csharpAutomaticAssemblies != that.csharpAutomaticAssemblies)
       return false;
     if(csharpMsvsca != that.csharpMsvsca)
@@ -113,6 +121,7 @@ public class InvocationAssistance {
 		result = 31 * result + (analyzeArguments != null ? analyzeArguments.hashCode() : 0);
 		result = 31 * result + (commitArguments != null ? commitArguments.hashCode() : 0);
 		result = 31 * result + (csharpAssemblies != null ? csharpAssemblies.hashCode() : 0);
+		result = 31 * result + (csharpMsvscaOutputFiles != null ? csharpMsvscaOutputFiles.hashCode() : 0);
     result = 31 * result + (csharpAutomaticAssemblies ? 1 : 0);
     result = 31 * result + (csharpMsvsca ? 1 : 0);
 		result = 31 * result + (saOverride != null ? saOverride.hashCode() : 0);
