@@ -59,6 +59,11 @@
             </releases>
             <url>file:///${project.basedir}/repo</url>
         </repository>
+		<repository>
+			<id>deprecated</id>
+			<name>JBoss Deprecated</name>
+			<url>https://repository.jboss.org/nexus/content/repositories/deprecated</url>
+		</repository>
     </repositories>
 
     <build>
