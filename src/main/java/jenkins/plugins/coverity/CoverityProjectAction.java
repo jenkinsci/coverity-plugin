@@ -33,6 +33,8 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.ui.RectangleInsets;
 
 import java.awt.*;
+import java.util.List;
+
 
 /**
  * Project-level action for Coverity. This is used to to display the history graph.
@@ -74,9 +76,12 @@ public class CoverityProjectAction implements Action {
 			DataSetBuilder<String, ChartLabel> data = new DataSetBuilder<String, ChartLabel>();
 			AbstractBuild<?, ?> build = project.getLastCompletedBuild();
 			while(build != null) {
-				final CoverityBuildAction action = build.getAction(CoverityBuildAction.class);
-				if(action != null) {
-					data.add(action.getDefectIds().size(), "", new ChartLabel(build));
+				final List<CoverityBuildAction> actions = build.getActions(CoverityBuildAction.class);
+
+				for(CoverityBuildAction action : actions) {
+					if(action != null) {
+						data.add(action.getDefectIds().size(), action.getId(), new ChartLabel(build));
+					}
 				}
 				build = build.getPreviousBuild();
 			}
@@ -93,7 +98,7 @@ public class CoverityProjectAction implements Action {
 					"Defect Count", // range axis label
 					dataset, // data
 					PlotOrientation.VERTICAL, // orientation
-					false, // include legend
+					true, // include legend
 					true, // tooltips
 					false // urls
 			);
@@ -135,19 +140,22 @@ public class CoverityProjectAction implements Action {
 				public String generateURL(CategoryDataset dataset, int row,
 										  int column) {
 					ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
-					return label.getUrl();
+					return label.getUrl() + "coverity_" + dataset.getRowKey(row);
 				}
 
 				@Override
 				public String generateToolTip(CategoryDataset dataset, int row,
 											  int column) {
 					ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
-					return label.build.getDisplayName() + " has "
-							+ label.build.getAction(CoverityBuildAction.class).getDefectIds().size() + " defects";
+					int defects = 0;
+					for(CoverityBuildAction a : label.build.getActions(CoverityBuildAction.class)) {
+						defects += a.getDefectIds().size();
+					}
+					return label.build.getDisplayName() + " has " + defects + " total defects";
 				}
 			};
 			plot.setRenderer(ar);
-			ar.setSeriesPaint(0, ColorPalette.RED);
+			//ar.setSeriesPaint(0, ColorPalette.RED);
 
 			// crop extra space around the graph
 			plot.setInsets(new RectangleInsets(0, 0, 0, 5.0));
@@ -164,7 +172,7 @@ public class CoverityProjectAction implements Action {
 		}
 
 		public String getUrl() {
-			return Hudson.getInstance().getRootUrl() + build.getUrl() + "coverity";
+			return Hudson.getInstance().getRootUrl() + build.getUrl();
 		}
 
 		public int compareTo(ChartLabel that) {
