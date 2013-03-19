@@ -78,11 +78,11 @@ public class CoverityBuildAction implements Action {
 	}
 
 	public String getDisplayName() {
-		return "Coverity Defects";
+		return "Coverity Defects (" + getId() + ")";
 	}
 
 	public String getUrlName() {
-		return "coverity";
+		return "coverity_" + getId();
 	}
 
 	/**
@@ -96,5 +96,9 @@ public class CoverityBuildAction implements Action {
 
 	public String getUrl() {
 		return build.getUrl() + getUrlName();
+	}
+
+	public String getId() {
+		return cimInstance + "_" + projectId + "_" + streamId;
 	}
 }
