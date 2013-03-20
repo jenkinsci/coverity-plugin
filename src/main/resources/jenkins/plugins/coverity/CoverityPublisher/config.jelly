@@ -69,9 +69,18 @@
 		<td width="5%"/>
 		<td colspan="3">
 			<table width="100%">
+				<j:if test="${instance.cimInstance != null}">
+					<f:entry>
+						<span style="color: #ff0000; font-weight: bold;">
+							You have deprecated data in your job config. Please save your configuration or
+							run a build of this job, then reload this page before changing any values.
+						</span>
+					</f:entry>
+				</j:if>
 				<f:entry field="cimStreams"
 						 title="Streams"
 						 description="Streams to perform analysis for and commit to">
+
 					<f:repeatable field="cimStreams"
 								  add="Add Stream" minimum="1" varStatus="loopItem" var="loopItem2">
 						<!--j:set var="id" value="${instance.instance}_${instance.project}_${instance.stream}" /-->
@@ -89,6 +98,7 @@
 								loopItem2=${loopItem2}<br />
 								loopItem2.index=${loopItem2.index}<br />
 							</f:entry-->
+
 							<f:entry title="Integrity Manager instance" field="instance">
 								<f:select id="cimInstance-${id}"/>
 							</f:entry>
@@ -220,6 +230,20 @@
 					</td>
 				</tr>
 				<f:helpArea/>
+				<j:if test="${instance.cimInstance != null}">
+					<f:advanced
+							title="Deprecated Fields (Save your config or run a build to upgrade your job to the current format)">
+						<f:entry title="Integrity Manager instance" field="cimInstance">
+							<f:textbox disabled="disabled"/>
+						</f:entry>
+						<f:entry title="Project" field="project">
+							<f:textbox disabled="disabled"/>
+						</f:entry>
+						<f:entry title="Stream" field="stream">
+							<f:textbox disabled="disabled"/>
+						</f:entry>
+					</f:advanced>
+				</j:if>
 			</table>
 		</td>
 	</tr>

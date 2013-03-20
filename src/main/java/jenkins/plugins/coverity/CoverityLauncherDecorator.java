@@ -93,6 +93,21 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 				throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
 			}
 		}
+		//look for old-style stream format
+		if(publisher.getCimInstance() != null) {
+			CIMInstance cim = publisher.getDescriptor().getInstance(publisher.getCimInstance());
+			String id = publisher.getCimInstance() + "/" + publisher.getStream();
+			try {
+				String language = cim.getStream(publisher.getStream()).getLanguage();
+				if(!"CSHARP".equals(language)) {
+					onlyCS = false;
+				}
+			} catch(CovRemoteServiceException_Exception e) {
+				throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
+			} catch(IOException e) {
+				throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
+			}
+		}
 		if(onlyCS) {
 			logger.info("Only streams of type CSHARP were found, skipping cov-build");
 

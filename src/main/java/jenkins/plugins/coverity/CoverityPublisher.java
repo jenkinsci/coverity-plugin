@@ -57,6 +57,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -72,15 +74,16 @@ import java.util.regex.Pattern;
 public class CoverityPublisher extends Recorder {
 
 	private static final Logger logger = Logger.getLogger(CoverityPublisher.class.getName());
+
 	//deprecated fields
-	private final transient String cimInstance;
-	private final transient String project;
-	private final transient String stream;
-	private final transient DefectFilters defectFilters;
+	private transient String cimInstance;
+	private transient String project;
+	private transient String stream;
+	private transient DefectFilters defectFilters;
 	/**
 	 * ID of the CIM instance used
 	 */
-	private final List<CIMStream> cimStreams;
+	private List<CIMStream> cimStreams;
 	/**
 	 * Configuration for the invocation assistance feature. Null if this should not be used.
 	 */
@@ -134,11 +137,59 @@ public class CoverityPublisher extends Recorder {
 	}
 
 	private void convertOldData() {
-		cimStreams.add(new CIMStream(cimInstance, project, stream, defectFilters, null));
+		CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null);
+
+		cimInstance = null;
+		project = null;
+		stream = null;
+		defectFilters = null;
+
+		if(cimStreams == null) {
+			this.cimStreams = new ArrayList<CIMStream>();
+		}
+		cimStreams.add(newcs);
+		trimInvalidStreams();
 	}
 
 	private boolean isOldDataPresent() {
 		return cimInstance != null || project != null || stream != null || defectFilters != null;
+	}
+
+	private void trimInvalidStreams() {
+		Iterator<CIMStream> i = getCimStreams().iterator();
+		while(i.hasNext()) {
+			CIMStream cs = i.next();
+			if(!cs.isValid()) {
+				i.remove();
+				continue;
+			}
+			if(cs.getInstance().equals("null") && cs.getProject().equals("null") && cs.getStream().equals("null")) {
+				i.remove();
+				continue;
+			}
+		}
+
+		//remove duplicates
+		Set<CIMStream> temp = new LinkedHashSet<CIMStream>();
+		temp.addAll(cimStreams);
+		cimStreams.clear();
+		cimStreams.addAll(temp);
+	}
+
+	public String getCimInstance() {
+		return cimInstance;
+	}
+
+	public String getProject() {
+		return project;
+	}
+
+	public String getStream() {
+		return stream;
+	}
+
+	public DefectFilters getDefectFilters() {
+		return defectFilters;
 	}
 
 	public BuildStepMonitor getRequiredMonitorService() {
@@ -183,6 +234,11 @@ public class CoverityPublisher extends Recorder {
 
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+		if(isOldDataPresent()) {
+			logger.info("Old data format detected. Converting to new format.");
+			convertOldData();
+		}
+
 		if(build.getResult().isWorseOrEqualTo(Result.FAILURE)) return true;
 
 		CoverityTempDir temp = null;
@@ -659,18 +715,20 @@ public class CoverityPublisher extends Recorder {
 				String cimInstance = current.getInstance();
 
 				try {
-					String language = publisher.getLanguage(current);
-					Set<String> allCheckers = split2(getCheckers(language));
-					DefectFilters defectFilters = current.getDefectFilters();
+					if(current.isValid()) {
+						String language = publisher.getLanguage(current);
+						Set<String> allCheckers = split2(getCheckers(language));
+						DefectFilters defectFilters = current.getDefectFilters();
 
-					if(defectFilters != null) {
-						defectFilters.invertCheckers(
-								allCheckers,
-								toStrings(currentDescriptor.doFillClassificationDefectFilterItems(cimInstance)),
-								toStrings(currentDescriptor.doFillActionDefectFilterItems(cimInstance)),
-								toStrings(currentDescriptor.doFillSeveritiesDefectFilterItems(cimInstance)),
-								toStrings(currentDescriptor.doFillComponentDefectFilterItems(cimInstance, current.getStream()))
-						);
+						if(defectFilters != null) {
+							defectFilters.invertCheckers(
+									allCheckers,
+									toStrings(currentDescriptor.doFillClassificationDefectFilterItems(cimInstance)),
+									toStrings(currentDescriptor.doFillActionDefectFilterItems(cimInstance)),
+									toStrings(currentDescriptor.doFillSeveritiesDefectFilterItems(cimInstance)),
+									toStrings(currentDescriptor.doFillComponentDefectFilterItems(cimInstance, current.getStream()))
+							);
+						}
 					}
 				} catch(Exception e) {
 					throw new RuntimeException(e);

@@ -72,6 +72,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 				'}';
 	}
 
+	public boolean isValid() {
+		return instance != null && project != null && stream != null;
+	}
+
 	@Extension
 	public static class DescriptorImpl extends Descriptor<CIMStream> {
 
