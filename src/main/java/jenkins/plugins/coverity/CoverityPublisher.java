@@ -743,7 +743,7 @@ public class CoverityPublisher extends Recorder {
 			JSONObject json = null;
 			//try old-style json format
 			JSONObject jsonA = req.getSubmittedForm().getJSONObject(getJsonSafeClassName());
-			if(jsonA == null) {
+			if(jsonA == null || jsonA.toString().equals("null")) {
 				//new style json format
 				JSON jsonB = (JSON) req.getSubmittedForm().get("publisher");
 				String targetClass = getId();
