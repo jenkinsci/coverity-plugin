@@ -52,18 +52,6 @@
             <id>repo.jenkins-ci.org</id>
             <url>http://repo.jenkins-ci.org/public/</url>
         </repository>
-        <repository>
-            <id>local</id>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <url>file:///${project.basedir}/repo</url>
-        </repository>
-		<repository>
-			<id>deprecated</id>
-			<name>JBoss Deprecated</name>
-			<url>https://repository.jboss.org/nexus/content/repositories/deprecated</url>
-		</repository>
     </repositories>
 
     <build>
@@ -86,6 +74,7 @@
         </dependency>
         -->
         <dependency>
+            <!-- XXX is this distinct from com.sun.xml.wss:xws-security:3.0 in Central? JARs are not identical. -->
             <groupId>com.sun.xml.xws</groupId>
             <artifactId>xws-security</artifactId>
             <version>3.0</version>
