@@ -170,6 +170,9 @@
 					<f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
 						<f:textbox/>
 					</f:entry>
+					<f:entry title="(Only for Java) WAR file:" field="javaWarFile">
+						<f:textbox/>
+					</f:entry>
 					<f:entry title="Static analysis location override:" field="saOverride">
 						<f:textbox/>
 					</f:entry>
