@@ -76,6 +76,25 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			return launcher;
 		}
 
+		FilePath temp;
+
+		try {
+			if(ii.getIntermediateDir() == null) {
+				FilePath coverityDir = node.getRootPath().child("coverity");
+				coverityDir.mkdirs();
+				temp = coverityDir.createTempDir("temp-", null);
+			} else {
+				temp = new FilePath(node.getChannel(), ii.getIntermediateDir());
+				temp.mkdirs();
+			}
+
+			build.addAction(new CoverityTempDir(temp, ii.getIntermediateDir() == null));
+		} catch(IOException e) {
+			throw new RuntimeException("Error while creating temporary directory for Coverity", e);
+		} catch(InterruptedException e) {
+			throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
+		}
+
 		// Do not run cov-build if language is "CSHARP"
 		boolean onlyCS = true;
 		for(CIMStream cs : publisher.getCimStreams()) {
@@ -112,25 +131,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			logger.info("Only streams of type CSHARP were found, skipping cov-build");
 
 			return launcher;
-		}
-
-		FilePath temp;
-
-		try {
-			if(ii.getIntermediateDir() == null) {
-				FilePath coverityDir = node.getRootPath().child("coverity");
-				coverityDir.mkdirs();
-				temp = coverityDir.createTempDir("temp-", null);
-			} else {
-				temp = new FilePath(node.getChannel(), ii.getIntermediateDir());
-				temp.mkdirs();
-			}
-
-			build.addAction(new CoverityTempDir(temp, ii.getIntermediateDir() == null));
-		} catch(IOException e) {
-			throw new RuntimeException("Error while creating temporary directory for Coverity", e);
-		} catch(InterruptedException e) {
-			throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
 		}
 
 		try {
