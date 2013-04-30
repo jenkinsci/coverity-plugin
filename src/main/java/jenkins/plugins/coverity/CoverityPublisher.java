@@ -327,14 +327,16 @@ public class CoverityPublisher extends Recorder {
 						listener.getLogger().println("Skipping analysis, because language " + language + " has already been analyzed");
 					}
 
+					boolean useDataPort = cim.getDataPort() != 0;
+
 					List<String> cmd = new ArrayList<String>();
 					cmd.add(covCommitDefects);
 					cmd.add("--dir");
 					cmd.add(temp.tempDir.getRemote());
 					cmd.add("--host");
 					cmd.add(cim.getHost());
-					cmd.add("--port");
-					cmd.add(Integer.toString(cim.getPort()));
+					cmd.add(useDataPort ? "--dataport" : "--port");
+					cmd.add(useDataPort ? Integer.toString(cim.getDataPort()) : Integer.toString(cim.getPort()));
 					cmd.add("--stream");
 					cmd.add(cimStream.getStream());
 					cmd.add("--user");
@@ -608,8 +610,8 @@ public class CoverityPublisher extends Recorder {
 			return "Coverity";
 		}
 
-		public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter boolean useSSL, @QueryParameter String user, @QueryParameter String password) throws IOException {
-			return new CIMInstance("", host, port, user, password, useSSL).doCheck();
+		public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter boolean useSSL, @QueryParameter String user, @QueryParameter String password, @QueryParameter int dataPort) throws IOException {
+			return new CIMInstance("", host, port, user, password, useSSL, dataPort).doCheck();
 		}
 
 		public FormValidation doCheckCutOffDate(@QueryParameter String value) throws FormException {

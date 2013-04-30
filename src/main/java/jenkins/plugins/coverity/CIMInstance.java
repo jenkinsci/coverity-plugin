@@ -85,6 +85,11 @@ public class CIMInstance {
 	private final int port;
 
 	/**
+	 * The commit port for the CIM server. This is only for cov-commit-defects.
+	 */
+	private final int dataPort;
+
+	/**
 	 * Username for connecting to the CIM server
 	 */
 	private final String user;
@@ -115,13 +120,14 @@ public class CIMInstance {
 	private transient ConfigurationServiceService configurationServiceService;
 
 	@DataBoundConstructor
-	public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL) {
+	public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort) {
 		this.name = name;
 		this.host = host;
 		this.port = port;
 		this.user = user;
 		this.password = password;
 		this.useSSL = useSSL;
+		this.dataPort = dataPort;
 	}
 
 	public String getHost() {
@@ -146,6 +152,10 @@ public class CIMInstance {
 
 	public boolean isUseSSL() {
 		return useSSL;
+	}
+
+	public int getDataPort() {
+		return dataPort;
 	}
 
 	/**
