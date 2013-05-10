@@ -241,6 +241,10 @@ public class CoverityPublisher extends Recorder {
 
 		if(build.getResult().isWorseOrEqualTo(Result.FAILURE)) return true;
 
+		if(invocationAssistance == null) {
+			return true;
+		}
+
 		CoverityTempDir temp = null;
 
 		Node node = Executor.currentExecutor().getOwner().getNode();
@@ -262,113 +266,112 @@ public class CoverityPublisher extends Recorder {
 				return false;
 			}
 
-			if(invocationAssistance != null) {
-				try {
-					if("CSHARP".equals(language) && invocationAssistance.getCsharpAssemblies() != null) {
-						String csharpAssembliesStr = invocationAssistance.getCsharpAssemblies();
-						listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
-					}
+			try {
+				if("CSHARP".equals(language) && invocationAssistance.getCsharpAssemblies() != null) {
+					String csharpAssembliesStr = invocationAssistance.getCsharpAssemblies();
+					listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
+				}
 
-					String covAnalyze = null;
-					if("JAVA".equals(language)) {
-						covAnalyze = "cov-analyze-java";
-					} else if("CSHARP".equals(language)) {
-						covAnalyze = "cov-analyze-cs";
-					} else {
-						covAnalyze = "cov-analyze";
-					}
+				String covAnalyze = null;
+				if("JAVA".equals(language)) {
+					covAnalyze = "cov-analyze-java";
+				} else if("CSHARP".equals(language)) {
+					covAnalyze = "cov-analyze-cs";
+				} else {
+					covAnalyze = "cov-analyze";
+				}
 
-					String covCommitDefects = "cov-commit-defects";
+				String covCommitDefects = "cov-commit-defects";
 
-					if(home != null) {
-						covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
-						covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
-					}
+				if(home != null) {
+					covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
+					covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
+				}
 
-					CoverityLauncherDecorator.SKIP.set(true);
-					temp = build.getAction(CoverityTempDir.class);
+				CoverityLauncherDecorator.SKIP.set(true);
+				temp = build.getAction(CoverityTempDir.class);
 
-					if(!analyzedLanguages.contains(language)) {
-						List<String> cmd = new ArrayList<String>();
-						cmd.add(covAnalyze);
-						cmd.add("--dir");
-						cmd.add(temp.tempDir.getRemote());
-
-						// For C# add the list of assemblies
-						if("CSHARP".equals(language)) {
-							String csharpAssemblies = invocationAssistance.getCsharpAssemblies();
-							if(csharpAssemblies != null) {
-								cmd.add(csharpAssemblies);
-							}
-						}
-
-						listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-						if(invocationAssistance.getAnalyzeArguments() != null) {
-							for(String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
-								cmd.add(arg);
-							}
-						}
-
-						int result = launcher.
-								launch().
-								cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-								pwd(build.getWorkspace()).
-								stdout(listener).
-								join();
-
-						analyzedLanguages.add(language);
-
-						if(result != 0) {
-							listener.getLogger().println("[Coverity] " + covAnalyze + " returned " + result + ", aborting...");
-							build.setResult(Result.FAILURE);
-							return false;
-						}
-					} else {
-						listener.getLogger().println("Skipping analysis, because language " + language + " has already been analyzed");
-					}
-
-					boolean useDataPort = cim.getDataPort() != 0;
-
+				if(!analyzedLanguages.contains(language)) {
 					List<String> cmd = new ArrayList<String>();
-					cmd.add(covCommitDefects);
+					cmd.add(covAnalyze);
 					cmd.add("--dir");
 					cmd.add(temp.tempDir.getRemote());
-					cmd.add("--host");
-					cmd.add(cim.getHost());
-					cmd.add(useDataPort ? "--dataport" : "--port");
-					cmd.add(useDataPort ? Integer.toString(cim.getDataPort()) : Integer.toString(cim.getPort()));
-					cmd.add("--stream");
-					cmd.add(cimStream.getStream());
-					cmd.add("--user");
-					cmd.add(cim.getUser());
 
-					if(invocationAssistance.getCommitArguments() != null) {
-						for(String arg : Util.tokenize(invocationAssistance.getCommitArguments())) {
+					// For C# add the list of assemblies
+					if("CSHARP".equals(language)) {
+						String csharpAssemblies = invocationAssistance.getCsharpAssemblies();
+						if(csharpAssemblies != null) {
+							cmd.add(csharpAssemblies);
+						}
+					}
+
+					listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+					if(invocationAssistance.getAnalyzeArguments() != null) {
+						for(String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
 							cmd.add(arg);
 						}
 					}
 
-					ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
 					int result = launcher.
 							launch().
-							cmds(args).
-							envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
+							cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+							pwd(build.getWorkspace()).
 							stdout(listener).
-							stderr(listener.getLogger()).
 							join();
 
-					if(result != 0) {
-						listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
+					analyzedLanguages.add(language);
 
+					if(result != 0) {
+						listener.getLogger().println("[Coverity] " + covAnalyze + " returned " + result + ", aborting...");
 						build.setResult(Result.FAILURE);
 						return false;
 					}
-				} finally {
-					CoverityLauncherDecorator.SKIP.set(false);
+				} else {
+					listener.getLogger().println("Skipping analysis, because language " + language + " has already been analyzed");
 				}
+
+				boolean useDataPort = cim.getDataPort() != 0;
+
+				List<String> cmd = new ArrayList<String>();
+				cmd.add(covCommitDefects);
+				cmd.add("--dir");
+				cmd.add(temp.tempDir.getRemote());
+				cmd.add("--host");
+				cmd.add(cim.getHost());
+				cmd.add(useDataPort ? "--dataport" : "--port");
+				cmd.add(useDataPort ? Integer.toString(cim.getDataPort()) : Integer.toString(cim.getPort()));
+				cmd.add("--stream");
+				cmd.add(cimStream.getStream());
+				cmd.add("--user");
+				cmd.add(cim.getUser());
+
+				if(invocationAssistance.getCommitArguments() != null) {
+					for(String arg : Util.tokenize(invocationAssistance.getCommitArguments())) {
+						cmd.add(arg);
+					}
+				}
+
+				ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
+
+				int result = launcher.
+						launch().
+						cmds(args).
+						envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
+						stdout(listener).
+						stderr(listener.getLogger()).
+						join();
+
+				if(result != 0) {
+					listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
+
+					build.setResult(Result.FAILURE);
+					return false;
+				}
+			} finally {
+				CoverityLauncherDecorator.SKIP.set(false);
 			}
 		}
+
 
 		//keep if keepIntDir is set, or if the int dir is the default (keepIntDir is only useful if a custom int
 		//dir is set)
@@ -382,7 +385,6 @@ public class CoverityPublisher extends Recorder {
 			}
 		}
 
-		//TODO: handle multiple snapshots
 		Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
 		BufferedReader reader = new BufferedReader(build.getLogReader());
 		String line = null;
