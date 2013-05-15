@@ -253,6 +253,7 @@ public class CoverityPublisher extends Recorder {
 			home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
 		}
 
+        EnvVars env = build.getEnvironment(listener);
 		Set<String> analyzedLanguages = new HashSet<String>();
 
 		for(CIMStream cimStream : getCimStreams()) {
@@ -307,7 +308,7 @@ public class CoverityPublisher extends Recorder {
 
 					listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 					if(invocationAssistance.getAnalyzeArguments() != null) {
-						for(String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
+						for(String arg : Util.tokenize(env.expand(invocationAssistance.getAnalyzeArguments()))) {
 							cmd.add(arg);
 						}
 					}
@@ -345,8 +346,8 @@ public class CoverityPublisher extends Recorder {
 				cmd.add("--user");
 				cmd.add(cim.getUser());
 
-				if(invocationAssistance.getCommitArguments() != null) {
-					for(String arg : Util.tokenize(invocationAssistance.getCommitArguments())) {
+                                if(invocationAssistance.getCommitArguments() != null) {
+					for(String arg : Util.tokenize(env.expand(invocationAssistance.getCommitArguments()))) {
 						cmd.add(arg);
 					}
 				}
