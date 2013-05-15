@@ -287,6 +287,7 @@ public class CoverityPublisher extends Recorder {
 			}
 		}
 
+        EnvVars env = build.getEnvironment(listener);
 		Set<String> analyzedLanguages = new HashSet<String>();
 
 		for(CIMStream cimStream : getCimStreams()) {
@@ -346,7 +347,7 @@ public class CoverityPublisher extends Recorder {
 
 						listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 						if(effectiveIA.getAnalyzeArguments() != null) {
-							for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
+							for(String arg : Util.tokenize(env.expand(effectiveIA.getAnalyzeArguments()))) {
 								cmd.add(arg);
 							}
 						}

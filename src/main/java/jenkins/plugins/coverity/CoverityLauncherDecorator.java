@@ -13,6 +13,7 @@ package jenkins.plugins.coverity;
 
 import com.coverity.ws.v5.CovRemoteServiceException_Exception;
 import com.coverity.ws.v5.StreamDataObj;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -152,13 +153,24 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			}
 		}
 
+            EnvVars env = build.getEnvironment(listener);
+			List<String> args = new ArrayList<String>();
+			args.add(covBuild);
+			args.add("--dir");
+			args.add(temp.getRemote());
+			if(ii.getBuildArguments() != null) {
+				for(String arg : Util.tokenize(env.expand(ii.getBuildArguments()))) {
+					args.add(arg);
+				}
+		}
+
 		String blacklistTemp = ii.getCovBuildBlacklist();
 		String[] blacklist;
 		if(blacklistTemp != null) {
 			blacklist = blacklistTemp.split(",");
 			for(int i = 0; i < blacklist.length; i++) {
 				blacklist[i] = blacklist[i].trim();
-			}
+		}
 		} else {
 			blacklist = new String[0];
 		}
