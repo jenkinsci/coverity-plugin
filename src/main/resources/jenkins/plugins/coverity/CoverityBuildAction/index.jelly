@@ -9,7 +9,7 @@
  *    Coverity, Inc - initial implementation and documentation
 -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson">
-    <l:layout title="${it.build.parent.displayName} #${it.build.number} Coverity Defects">
+     <l:layout title="Coverity Defects : ${it.build.project.displayName} ${it.build.displayName}">
         <st:include page="sidepanel.jelly" it="${it.build}" optional="true"/>
         <l:main-panel>
 
