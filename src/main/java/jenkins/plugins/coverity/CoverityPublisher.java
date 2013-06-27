@@ -11,10 +11,15 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v3.CovRemoteServiceException_Exception;
-import com.coverity.ws.v3.MergedDefectDataObj;
-import com.coverity.ws.v3.SnapshotIdDataObj;
-import com.coverity.ws.v3.StreamIdDataObj;
+import com.coverity.ws.v5.CovRemoteServiceException_Exception;
+import com.coverity.ws.v5.DefectService;
+import com.coverity.ws.v5.MergedDefectDataObj;
+import com.coverity.ws.v5.MergedDefectFilterSpecDataObj;
+import com.coverity.ws.v5.MergedDefectsPageDataObj;
+import com.coverity.ws.v5.PageSpecDataObj;
+import com.coverity.ws.v5.SnapshotIdDataObj;
+import com.coverity.ws.v5.StreamIdDataObj;
+import com.coverity.ws.v5.StreamSnapshotFilterSpecDataObj;
 import com.thoughtworks.xstream.XStream;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -54,6 +59,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -409,40 +415,29 @@ public class CoverityPublisher extends Recorder {
 		if(!skipFetchingDefects) {
 			for(int i = 0; i < cimStreams.size(); i++) {
 				CIMStream cimStream = cimStreams.get(i);
+				long snapshotId = snapshotIds.get(i);
 				try {
 					CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
 
 					listener.getLogger().println("[Coverity] Fetching defects for stream " + cimStream.getStream());
-					StreamIdDataObj streamId = new StreamIdDataObj();
-					streamId.setName(cimStream.getStream());
-					streamId.setType("STATIC");
-					SnapshotIdDataObj snapshot = new SnapshotIdDataObj();
-					snapshot.setId(snapshotIds.get(i));
-					List<Long> cids = cim.getDefectService().getCIDsForSnapshot(snapshot);
-					listener.getLogger().println("[Coverity] Found " + cids.size() + " defects");
 
-					List<MergedDefectDataObj> defects = cim.getDefects(cimStream.getStream(), cids);
+					List<MergedDefectDataObj> defects = getDefectsForSnapshot(cimStream, snapshotId);
+
+					listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
 
 					Set<String> checkers = new HashSet<String>();
 					for(MergedDefectDataObj defect : defects) {
-						checkers.add(defect.getChecker());
+						checkers.add(defect.getCheckerName());
 					}
 					getDescriptor().updateCheckers(getLanguage(cimStream), checkers);
 
 					List<Long> matchingDefects = new ArrayList<Long>();
 
-					XStream xs = new XStream2();
-
-					if(cimStream.getDefectFilters() != null) {
-						//listener.getLogger().println("matching defects against filters: " + xs.toXML(defectFilters));
-					}
 					for(MergedDefectDataObj defect : defects) {
 						if(cimStream.getDefectFilters() == null) {
 							matchingDefects.add(defect.getCid());
 						} else {
-							//listener.getLogger().println("checking defect: " + xs.toXML(defect));
 							boolean match = cimStream.getDefectFilters().matches(defect);
-							//listener.getLogger().println("defect match:" + match);
 							if(match) {
 								matchingDefects.add(defect.getCid());
 							}
@@ -480,6 +475,30 @@ public class CoverityPublisher extends Recorder {
 			}
 		}
 		return true;
+	}
+
+	public List<MergedDefectDataObj> getDefectsForSnapshot(CIMStream cimStream, long snapshotId) throws IOException, CovRemoteServiceException_Exception {
+		CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
+		DefectService ds = cim.getDefectService();
+
+		PageSpecDataObj pageSpec = new PageSpecDataObj();
+		pageSpec.setPageSize(100);
+		pageSpec.setSortAscending(true);
+
+		StreamIdDataObj streamId = new StreamIdDataObj();
+		streamId.setName(cimStream.getStream());
+
+		MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
+		StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
+		SnapshotIdDataObj snapid = new SnapshotIdDataObj();
+		snapid.setId(snapshotId);
+
+		sfilter.setStreamId(streamId);
+
+		sfilter.getSnapshotIdIncludeList().add(snapid);
+		filter.getStreamSnapshotFilterSpecIncludeList().add(sfilter);
+
+		return ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec).getMergedDefects();
 	}
 
 	public String getLanguage(CIMStream cimStream) throws IOException, CovRemoteServiceException_Exception {

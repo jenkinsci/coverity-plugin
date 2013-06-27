@@ -1,11 +1,14 @@
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v3.ComponentDataObj;
-import com.coverity.ws.v3.ComponentMapDataObj;
-import com.coverity.ws.v3.ComponentMapFilterSpecDataObj;
-import com.coverity.ws.v3.CovRemoteServiceException_Exception;
-import com.coverity.ws.v3.ProjectDataObj;
-import com.coverity.ws.v3.StreamDataObj;
+import com.coverity.ws.v5.AttributeDefinitionDataObj;
+import com.coverity.ws.v5.AttributeDefinitionIdDataObj;
+import com.coverity.ws.v5.AttributeValueDataObj;
+import com.coverity.ws.v5.ComponentDataObj;
+import com.coverity.ws.v5.ComponentMapDataObj;
+import com.coverity.ws.v5.ComponentMapFilterSpecDataObj;
+import com.coverity.ws.v5.CovRemoteServiceException_Exception;
+import com.coverity.ws.v5.ProjectDataObj;
+import com.coverity.ws.v5.StreamDataObj;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
@@ -158,8 +161,11 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 			ListBoxModel result = new ListBoxModel();
 			CIMInstance instance = getInstance(cimInstance);
 			if(instance != null) {
-				for(String classification : getInstance(cimInstance).getConfigurationService().getClassifications()) {
-					result.add(classification);
+				AttributeDefinitionIdDataObj adido = new AttributeDefinitionIdDataObj();
+				adido.setName("Classification");
+				AttributeDefinitionDataObj addo = getInstance(cimInstance).getConfigurationService().getAttribute(adido);
+				for(AttributeValueDataObj classification : addo.getConfigurableValues()) {
+					result.add(classification.getAttributeValueId().getName());
 				}
 			}
 			return result;
@@ -169,8 +175,11 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 			ListBoxModel result = new ListBoxModel();
 			CIMInstance instance = getInstance(cimInstance);
 			if(instance != null) {
-				for(String action : getInstance(cimInstance).getConfigurationService().getActions()) {
-					result.add(action);
+				AttributeDefinitionIdDataObj adido = new AttributeDefinitionIdDataObj();
+				adido.setName("Action");
+				AttributeDefinitionDataObj addo = getInstance(cimInstance).getConfigurationService().getAttribute(adido);
+				for(AttributeValueDataObj classification : addo.getConfigurableValues()) {
+					result.add(classification.getAttributeValueId().getName());
 				}
 			}
 			return result;
@@ -180,8 +189,11 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 			ListBoxModel result = new ListBoxModel();
 			CIMInstance instance = getInstance(cimInstance);
 			if(instance != null) {
-				for(String action : getInstance(cimInstance).getConfigurationService().getSeverities()) {
-					result.add(action);
+				AttributeDefinitionIdDataObj adido = new AttributeDefinitionIdDataObj();
+				adido.setName("Severity");
+				AttributeDefinitionDataObj addo = getInstance(cimInstance).getConfigurationService().getAttribute(adido);
+				for(AttributeValueDataObj classification : addo.getConfigurableValues()) {
+					result.add(classification.getAttributeValueId().getName());
 				}
 			}
 			return result;

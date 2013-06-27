@@ -11,22 +11,20 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v3.AdministrationService;
-import com.coverity.ws.v3.AdministrationServiceService;
-import com.coverity.ws.v3.ConfigurationService;
-import com.coverity.ws.v3.ConfigurationServiceService;
-import com.coverity.ws.v3.CovRemoteServiceException_Exception;
-import com.coverity.ws.v3.DefectService;
-import com.coverity.ws.v3.DefectServiceService;
-import com.coverity.ws.v3.MergedDefectDataObj;
-import com.coverity.ws.v3.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v3.MergedDefectsPageDataObj;
-import com.coverity.ws.v3.PageSpecDataObj;
-import com.coverity.ws.v3.ProjectDataObj;
-import com.coverity.ws.v3.ProjectFilterSpecDataObj;
-import com.coverity.ws.v3.StreamDataObj;
-import com.coverity.ws.v3.StreamFilterSpecDataObj;
-import com.coverity.ws.v3.StreamIdDataObj;
+import com.coverity.ws.v5.ConfigurationService;
+import com.coverity.ws.v5.ConfigurationServiceService;
+import com.coverity.ws.v5.CovRemoteServiceException_Exception;
+import com.coverity.ws.v5.DefectService;
+import com.coverity.ws.v5.DefectServiceService;
+import com.coverity.ws.v5.MergedDefectDataObj;
+import com.coverity.ws.v5.MergedDefectFilterSpecDataObj;
+import com.coverity.ws.v5.MergedDefectsPageDataObj;
+import com.coverity.ws.v5.PageSpecDataObj;
+import com.coverity.ws.v5.ProjectDataObj;
+import com.coverity.ws.v5.ProjectFilterSpecDataObj;
+import com.coverity.ws.v5.StreamDataObj;
+import com.coverity.ws.v5.StreamFilterSpecDataObj;
+import com.coverity.ws.v5.StreamIdDataObj;
 import hudson.model.Hudson;
 import hudson.util.FormValidation;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -53,16 +51,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CIMInstance {
 
-	public static final String COVERITY_V3_NAMESPACE = "http://ws.coverity.com/v3";
+	public static final String COVERITY_V5_NAMESPACE = "http://ws.coverity.com/v5";
 
-	public static final String ADMINISTRATION_SERVICE_V1_WSDL = "/ws/v1/administrationservice?wsdl";
-	public static final String ADMINISTRATION_SERVICE_V2_WSDL = "/ws/v2/administrationservice?wsdl";
-	public static final String ADMINISTRATION_SERVICE_V3_WSDL = "/ws/v3/administrationservice?wsdl";
-	public static final String CONFIGURATION_SERVICE_V3_WSDL = "/ws/v3/configurationservice?wsdl";
-	public static final String DEFECT_SERVICE_V3_WSDL = "/ws/v3/defectservice?wsdl";
-
-	public static final String STREAM_TYPE_STATIC = "STATIC";
-	public static final String STREAM_TYPE_SOURCE = "SOURCE";
+	public static final String CONFIGURATION_SERVICE_V5_WSDL = "/ws/v5/configurationservice?wsdl";
+	public static final String DEFECT_SERVICE_V5_WSDL = "/ws/v5/defectservice?wsdl";
 
 	/**
 	 * Pattern to ignore streams - this is used to filter out internal DA streams, which are irrelevant to this plugin
@@ -103,11 +95,6 @@ public class CIMInstance {
 	 * Use SSL
 	 */
 	private final boolean useSSL;
-
-	/**
-	 * cached webservice port for Administration service
-	 */
-	private transient AdministrationServiceService administrationServiceService;
 
 	/**
 	 * cached webservice port for Defect service
@@ -175,8 +162,8 @@ public class CIMInstance {
 		synchronized(this) {
 			if(defectServiceService == null) {
 				defectServiceService = new DefectServiceService(
-						new URL(getURL(), DEFECT_SERVICE_V3_WSDL),
-						new QName(COVERITY_V3_NAMESPACE, "DefectServiceService"));
+						new URL(getURL(), DEFECT_SERVICE_V5_WSDL),
+						new QName(COVERITY_V5_NAMESPACE, "DefectServiceService"));
 			}
 		}
 
@@ -206,8 +193,8 @@ public class CIMInstance {
 			if(configurationServiceService == null) {
 				// Create a Web Services port to the server
 				configurationServiceService = new ConfigurationServiceService(
-						new URL(getURL(), CONFIGURATION_SERVICE_V3_WSDL),
-						new QName(COVERITY_V3_NAMESPACE, "ConfigurationServiceService"));
+						new URL(getURL(), CONFIGURATION_SERVICE_V5_WSDL),
+						new QName(COVERITY_V5_NAMESPACE, "ConfigurationServiceService"));
 			}
 		}
 
@@ -222,37 +209,10 @@ public class CIMInstance {
 		}
 	}
 
-	/**
-	 * Returns an Administration service client
-	 */
-	public AdministrationService getAdministrationService() throws IOException {
-		synchronized(this) {
-			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-			if(administrationServiceService == null) {
-				// Create a Web Services port to the server
-				administrationServiceService = new AdministrationServiceService(
-						new URL(getURL(), ADMINISTRATION_SERVICE_V3_WSDL),
-						new QName(COVERITY_V3_NAMESPACE, "AdministrationServiceService"));
-			}
-		}
-
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		try {
-			AdministrationService administrationService = administrationServiceService.getAdministrationServicePort();
-			attachAuthenticationHandler((BindingProvider) administrationService);
-
-			return administrationService;
-		} finally {
-			Thread.currentThread().setContextClassLoader(cl);
-		}
-	}
-
 	public List<MergedDefectDataObj> getDefects(String streamId, List<Long> defectIds) throws IOException, CovRemoteServiceException_Exception {
 		MergedDefectFilterSpecDataObj filterSpec1 = new MergedDefectFilterSpecDataObj();
 		StreamIdDataObj stream = new StreamIdDataObj();
 		stream.setName(streamId);
-		stream.setType(STREAM_TYPE_STATIC);
-		filterSpec1.getStreamIdIncludeList().add(stream);
 		PageSpecDataObj pageSpec = new PageSpecDataObj();
 		pageSpec.setPageSize(2500);
 
@@ -317,7 +277,7 @@ public class CIMInstance {
 		ProjectDataObj project = getProject(projectId);
 		List<StreamDataObj> result = new ArrayList<StreamDataObj>();
 		for(StreamDataObj stream : project.getStreams()) {
-			if(stream.getId().getType().equals("STATIC") && !stream.getId().getName().matches(STREAM_NAME_IGNORE_PATTERN)) {
+			if(!stream.getId().getName().matches(STREAM_NAME_IGNORE_PATTERN)) {
 				result.add(stream);
 			}
 		}
@@ -327,7 +287,6 @@ public class CIMInstance {
 
 	public StreamDataObj getStream(String streamId) throws IOException, CovRemoteServiceException_Exception {
 		StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
-		filter.getTypeList().add(STREAM_TYPE_SOURCE);
 		filter.setNamePattern(streamId);
 
 		List<StreamDataObj> streams = getConfigurationService().getStreams(filter);
@@ -341,17 +300,11 @@ public class CIMInstance {
 	public FormValidation doCheck() throws IOException {
 		try {
 			URL url = getURL();
-			int responseCode = getURLResponseCode(new URL(url, ADMINISTRATION_SERVICE_V3_WSDL));
+			int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V5_WSDL));
 			if(responseCode != 200) {
-				if(getURLResponseCode(new URL(url, ADMINISTRATION_SERVICE_V2_WSDL)) == 200) {
-					return FormValidation.error("Detected Coverity web services v2, but v3 is required");
-				} else if(getURLResponseCode(new URL(url, ADMINISTRATION_SERVICE_V1_WSDL)) == 200) {
-					return FormValidation.error("Detected Coverity web services v1, but v3 is required");
-				} else {
-					return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
-				}
+				return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
 			}
-			getAdministrationService().getServerTime();
+			getConfigurationService().getServerTime();
 			return FormValidation.ok("Successfully connected to the instance.");
 		} catch(UnknownHostException e) {
 			return FormValidation.error("Host name unknown");

@@ -11,8 +11,8 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v3.CovRemoteServiceException_Exception;
-import com.coverity.ws.v3.MergedDefectDataObj;
+import com.coverity.ws.v5.CovRemoteServiceException_Exception;
+import com.coverity.ws.v5.MergedDefectDataObj;
 import hudson.Util;
 import hudson.model.BuildListener;
 import hudson.model.User;
@@ -107,7 +107,7 @@ public class CoverityMailSender {
 		for(MergedDefectDataObj defect : defects) {
 			buf.append("<tr>\n");
 			buf.append("<td align='left'><a href=\"").append(action.getURL(defect)).append("\">").append(Long.toString(defect.getCid())).append("</a></td>\n");
-			buf.append("<td align='left'>").append(Util.escape(defect.getChecker())).append("</td>\n");
+			buf.append("<td align='left'>").append(Util.escape(defect.getCheckerName())).append("</td>\n");
 			buf.append("<td align='left'>").append(Util.escape(defect.getFunctionDisplayName())).append("</td>\n");
 			buf.append("</tr>\n");
 		}

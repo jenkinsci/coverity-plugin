@@ -11,7 +11,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v3.MergedDefectDataObj;
+import com.coverity.ws.v5.MergedDefectDataObj;
 import hudson.Util;
 import hudson.model.Descriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -105,7 +105,7 @@ public class DefectFilters {
 				isClassificationSelected(defect.getClassification()) &&
 				isSeveritySelected(defect.getSeverity()) &&
 				isComponentSelected(defect.getComponentName()) &&
-				isCheckerSelected(defect.getChecker()) &&
+				isCheckerSelected(defect.getCheckerName()) &&
 				Arrays.asList("New", "Triaged", "Various").contains(defect.getStatus()) &&
 				(cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
 	}

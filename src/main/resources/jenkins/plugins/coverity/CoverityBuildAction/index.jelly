@@ -25,7 +25,7 @@
                         <td>
                             <a href="${it.getURL(defect)}">${defect.cid}</a>
                         </td>
-                        <td>${defect.checker}</td>
+                        <td>${defect.checkerName}</td>
                         <td>${defect.functionDisplayName}</td>
                     </tr>
                 </j:forEach>
