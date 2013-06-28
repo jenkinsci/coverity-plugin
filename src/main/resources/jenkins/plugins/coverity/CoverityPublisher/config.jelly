@@ -41,10 +41,10 @@
 		function checkFilters(state, id) {
 			YAHOO.util.Dom.getElementsBy(
 					function (el) {
-						return (el.name == 'checkers-'+id);
+						return (el.name == 'checkers');
 					},
 					'input',
-					'filters-'+id,
+					'checkers-'+id,
 					function (el) {
 						el.checked = (state ? 'true' : null);
 					}
@@ -54,7 +54,7 @@
 		function checkFiltersComponents(state, id) {
 			YAHOO.util.Dom.getElementsBy(
 					function (el) {
-						return (el.name == 'components-'+id);
+						return (el.name == 'components');
 					},
 					'input',
 					'filters-'+id,

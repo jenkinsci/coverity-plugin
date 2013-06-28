@@ -54,8 +54,7 @@
                 </f:entry>
                 <f:entry title="Component is among:">
                     <input type="button" class="yui-button" value="Select All" onclick="checkFiltersComponents(true, ${id});"/>
-                    <input type="button" class="yui-button" value="Select None"
-                           onclick="checkFiltersComponents(false, ${id});"/>
+                    <input type="button" class="yui-button" value="Select None" onclick="checkFiltersComponents(false, ${id});"/>
                     <j:forEach var="e" items="${descriptor.doFillComponentDefectFilterItems(cimInstance,stream)}">
                         <f:checkbox name="components" json="${e.value}"
                                     checked="${defectFilters == null ? true : defectFilters.isComponentSelected(e.value)}"/>
