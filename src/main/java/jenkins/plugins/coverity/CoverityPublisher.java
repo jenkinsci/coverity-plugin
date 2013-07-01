@@ -15,12 +15,10 @@ import com.coverity.ws.v5.CovRemoteServiceException_Exception;
 import com.coverity.ws.v5.DefectService;
 import com.coverity.ws.v5.MergedDefectDataObj;
 import com.coverity.ws.v5.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v5.MergedDefectsPageDataObj;
 import com.coverity.ws.v5.PageSpecDataObj;
 import com.coverity.ws.v5.SnapshotIdDataObj;
 import com.coverity.ws.v5.StreamIdDataObj;
 import com.coverity.ws.v5.StreamSnapshotFilterSpecDataObj;
-import com.thoughtworks.xstream.XStream;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -43,7 +41,6 @@ import hudson.util.ArgumentListBuilder;
 import hudson.util.FormValidation;
 import hudson.util.IOUtils;
 import hudson.util.ListBoxModel;
-import hudson.util.XStream2;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -143,7 +140,7 @@ public class CoverityPublisher extends Recorder {
 	}
 
 	private void convertOldData() {
-		CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null);
+		CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null, null);
 
 		cimInstance = null;
 		project = null;
@@ -269,9 +266,14 @@ public class CoverityPublisher extends Recorder {
 			}
 
 			if(invocationAssistance != null) {
+				InvocationAssistance effectiveIA = invocationAssistance;
+				if(cimStream.getInvocationAssistanceOverride() != null) {
+					effectiveIA = invocationAssistance.merge(cimStream.getInvocationAssistanceOverride());
+				}
+
 				try {
-					if("CSHARP".equals(language) && invocationAssistance.getCsharpAssemblies() != null) {
-						String csharpAssembliesStr = invocationAssistance.getCsharpAssemblies();
+					if("CSHARP".equals(language) && effectiveIA.getCsharpAssemblies() != null) {
+						String csharpAssembliesStr = effectiveIA.getCsharpAssemblies();
 						listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
 					}
 
@@ -302,15 +304,15 @@ public class CoverityPublisher extends Recorder {
 
 						// For C# add the list of assemblies
 						if("CSHARP".equals(language)) {
-							String csharpAssemblies = invocationAssistance.getCsharpAssemblies();
+							String csharpAssemblies = effectiveIA.getCsharpAssemblies();
 							if(csharpAssemblies != null) {
 								cmd.add(csharpAssemblies);
 							}
 						}
 
 						listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-						if(invocationAssistance.getAnalyzeArguments() != null) {
-							for(String arg : Util.tokenize(invocationAssistance.getAnalyzeArguments())) {
+						if(effectiveIA.getAnalyzeArguments() != null) {
+							for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
 								cmd.add(arg);
 							}
 						}
@@ -348,8 +350,8 @@ public class CoverityPublisher extends Recorder {
 					cmd.add("--user");
 					cmd.add(cim.getUser());
 
-					if(invocationAssistance.getCommitArguments() != null) {
-						for(String arg : Util.tokenize(invocationAssistance.getCommitArguments())) {
+					if(effectiveIA.getCommitArguments() != null) {
+						for(String arg : Util.tokenize(effectiveIA.getCommitArguments())) {
 							cmd.add(arg);
 						}
 					}

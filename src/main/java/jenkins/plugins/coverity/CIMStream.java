@@ -30,18 +30,22 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 	private final String project;
 	private final String stream;
 	private final String id;
+
 	/**
 	 * Defines how to filter discovered defects. Null for no filtering.
 	 */
 	private final DefectFilters defectFilters;
 
+	private final InvocationAssistance invocationAssistanceOverride;
+
 	@DataBoundConstructor
-	public CIMStream(String instance, String project, String stream, DefectFilters defectFilters, String id) {
+	public CIMStream(String instance, String project, String stream, DefectFilters defectFilters, String id, InvocationAssistance invocationAssistanceOverride) {
 		this.instance = Util.fixEmpty(instance);
 		this.project = Util.fixEmpty(project);
 		this.stream = Util.fixEmpty(stream);
 		this.id = Util.fixEmpty(id);
 		this.defectFilters = defectFilters;
+		this.invocationAssistanceOverride = invocationAssistanceOverride;
 	}
 
 	public String getInstance() {
@@ -64,6 +68,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 		return defectFilters;
 	}
 
+	public InvocationAssistance getInvocationAssistanceOverride() {
+		return invocationAssistanceOverride;
+	}
+
 	@Override
 	public String toString() {
 		return "CIMStream{" +
@@ -72,6 +80,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 				", stream='" + stream + '\'' +
 				", id='" + id + '\'' +
 				", defectFilters=" + defectFilters +
+				", invocationAssistanceOverride=" + invocationAssistanceOverride +
 				'}';
 	}
 

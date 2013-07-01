@@ -101,4 +101,20 @@ public class InvocationAssistance {
 
 		return result;
 	}
+
+	/**
+	 * For each variable in override, use that value, otherwise, use the value in this object.
+	 * @param override source
+	 * @return a new, merged InvocationAssistance
+	 */
+	public InvocationAssistance merge(InvocationAssistance override) {
+		String analyzeArguments = override.getAnalyzeArguments() != null ? override.getAnalyzeArguments() : getAnalyzeArguments();
+		String buildArguments = override.getBuildArguments() != null ? override.getBuildArguments() : getBuildArguments();
+		String commitArguments = override.getCommitArguments() != null ? override.getCommitArguments() : getCommitArguments();
+		String covBuildBlacklist = override.getCovBuildBlacklist() != null ? override.getCovBuildBlacklist() : getCovBuildBlacklist();
+		String csharpAssemblies = override.getCsharpAssemblies() != null ? override.getCsharpAssemblies() : getCsharpAssemblies();
+		String intermediateDir = override.getIntermediateDir() != null ? override.getIntermediateDir() : getIntermediateDir();
+		String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
+		return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, csharpAssemblies, saOverride, covBuildBlacklist);
+	}
 }

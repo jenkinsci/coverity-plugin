@@ -80,24 +80,12 @@
 				<f:entry field="cimStreams"
 						 title="Streams"
 						 description="Streams to perform analysis for and commit to">
-
 					<f:repeatable field="cimStreams"
 								  add="Add Stream" minimum="1" varStatus="loopItem" var="loopItem2">
-						<!--j:set var="id" value="${instance.instance}_${instance.project}_${instance.stream}" /-->
 						<j:set var="id" value="${descriptor.getRandomID(instance)}" />
 						<table width="100%">
 							<input type="hidden" name="id" value="${id}" />
 							<br/>
-							<!--f:entry>
-								instance=${instance}<br />
-								it=${it}<br />
-								descriptor=${descriptor}<br />
-								id=${id}<br />
-								loopItem=${loopItem}<br />
-								loopItem.index=${loopItem.index}<br />
-								loopItem2=${loopItem2}<br />
-								loopItem2.index=${loopItem2.index}<br />
-							</f:entry-->
 
 							<f:entry title="Integrity Manager instance" field="instance">
 								<f:select id="cimInstance-${id}"/>
@@ -108,6 +96,31 @@
 							<f:entry title="Stream" field="stream">
 								<f:select onchange="loadDefectFilters(${id})"/>
 							</f:entry>
+							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"
+											 checked="${instance.invocationAssistanceOverride != null}" name="invocationAssistanceOverride">
+								<j:set var="instance" value="${instance.invocationAssistanceOverride}"/>
+								<!--f:entry title="Additional cov-build arguments:" field="buildArguments">
+									<f:textbox/>
+								</f:entry-->
+								<f:entry title="Additional cov-analyze[-java] arguments:" field="analyzeArguments">
+									<f:textbox/>
+								</f:entry>
+								<f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
+									<f:textbox/>
+								</f:entry>
+								<!--f:entry title="Intermediate directory:" field="intermediateDir">
+									<f:textbox/>
+								</f:entry-->
+								<f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
+									<f:textbox/>
+								</f:entry>
+								<!--f:entry title="Static analysis location override:" field="saOverride">
+									<f:textbox/>
+								</f:entry-->
+								<!--f:entry title="cov-build blacklist:" field="covBuildBlacklist">
+									<f:textbox/>
+								</f:entry-->
+							</f:optionalBlock>
 							<f:entry title="" field="defectFilters">
 								<tr>
 									<td class="setting-leftspace">
