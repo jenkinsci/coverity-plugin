@@ -133,46 +133,28 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			return launcher;
 		}
 
-		try {
-			String covBuild = "cov-build";
-			TaskListener listener = launcher.getListener();
-			String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
-			if(ii.getSaOverride() != null) {
-				home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+		List<String> args = new ArrayList<String>();
+		args.add("cov-build-placeholder");
+		args.add("--dir");
+		args.add(temp.getRemote());
+		if(ii.getBuildArguments() != null) {
+			for(String arg : Util.tokenize(ii.getBuildArguments())) {
+				args.add(arg);
 			}
-			if(home != null) {
-				covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
-			}
-
-			List<String> args = new ArrayList<String>();
-			args.add(covBuild);
-			args.add("--dir");
-			args.add(temp.getRemote());
-			if(ii.getBuildArguments() != null) {
-				for(String arg : Util.tokenize(ii.getBuildArguments())) {
-					args.add(arg);
-				}
-			}
-
-			String blacklistTemp = ii.getCovBuildBlacklist();
-			String[] blacklist;
-			if(blacklistTemp != null) {
-				blacklist = blacklistTemp.split(",");
-				for(int i = 0; i < blacklist.length; i++) {
-					blacklist[i] = blacklist[i].trim();
-				}
-			} else {
-				blacklist = new String[0];
-			}
-
-			return new DecoratedLauncher(launcher, blacklist, args.toArray(new String[args.size()]));
-		} catch(InterruptedException e) {
-			throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
-		} catch(IOException e) {
-			throw new RuntimeException("Error while creating temporary directory for Coverity", e);
 		}
 
+		String blacklistTemp = ii.getCovBuildBlacklist();
+		String[] blacklist;
+		if(blacklistTemp != null) {
+			blacklist = blacklistTemp.split(",");
+			for(int i = 0; i < blacklist.length; i++) {
+				blacklist[i] = blacklist[i].trim();
+			}
+		} else {
+			blacklist = new String[0];
+		}
 
+		return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
 	}
 
 	/**
@@ -182,12 +164,22 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 		private final Launcher decorated;
 		private final String[] prefix;
 		private final String[] blacklist;
+		private final String toolsDir;
+		private final Node node;
 
-		public DecoratedLauncher(Launcher decorated, String[] blacklist, String... prefix) {
+		public DecoratedLauncher(Launcher decorated, String[] blacklist, Node node, String... prefix) {
 			super(decorated);
 			this.decorated = decorated;
 			this.prefix = prefix;
 			this.blacklist = blacklist;
+			this.node = node;
+			this.toolsDir = node.getRootPath().child("tools").getRemote();
+		}
+
+		private String[] getPrefix() {
+			String[] tp = prefix.clone();
+			tp[0] = getCovBuild();
+			return tp;
 		}
 
 		@Override
@@ -199,7 +191,15 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 				}
 
 				List<String> cmds = starter.cmds();
-				cmds.addAll(0, Arrays.asList(prefix));
+
+				//skip jdk installations
+				String lastArg = cmds.get(cmds.size() - 1);
+				if(lastArg.startsWith(toolsDir) && lastArg.endsWith(".sh")) {
+					logger.info(lastArg + " is a tools script, skipping cov-build");
+					return decorated.launch(starter);
+				}
+
+				cmds.addAll(0, Arrays.asList(getPrefix()));
 				starter.cmds(cmds);
 				boolean[] masks = starter.masks();
 				if(masks == null) {
@@ -214,6 +214,11 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
 		@Override
 		public Channel launchChannel(String[] cmd, OutputStream out, FilePath workDir, Map<String, String> envVars) throws IOException, InterruptedException {
+			String lastArg = cmd[cmd.length - 1];
+			if(lastArg.startsWith(toolsDir) && lastArg.endsWith(".sh")) {
+				logger.info(lastArg + " is a tools script, skipping cov-build");
+				decorated.launchChannel(cmd, out, workDir, envVars);
+			}
 			return decorated.launchChannel(prefix(cmd), out, workDir, envVars);
 		}
 
@@ -227,7 +232,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 				return args;
 			}
 			String[] newArgs = new String[args.length + prefix.length];
-			System.arraycopy(prefix, 0, newArgs, 0, prefix.length);
+			System.arraycopy(getPrefix(), 0, newArgs, 0, prefix.length);
 			System.arraycopy(args, 0, newArgs, prefix.length, args.length);
 			return newArgs;
 		}
@@ -245,6 +250,40 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 				}
 			}
 			return false;
+		}
+
+		private String getCovBuild() {
+			Executor executor = Executor.currentExecutor();
+			Queue.Executable exec = executor.getCurrentExecutable();
+			AbstractBuild build = (AbstractBuild) exec;
+			AbstractProject project = build.getProject();
+			CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
+			InvocationAssistance ii = publisher.getInvocationAssistance();
+
+			String covBuild = "cov-build";
+			TaskListener listener = decorated.getListener();
+			String home = null;
+			try {
+				home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
+			} catch(IOException e) {
+				e.printStackTrace();
+			} catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+			if(ii.getSaOverride() != null) {
+				try {
+					home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+				} catch(IOException e) {
+					e.printStackTrace();
+				} catch(InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			if(home != null) {
+				covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
+			}
+
+			return covBuild;
 		}
 	}
 }
