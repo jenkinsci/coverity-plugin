@@ -20,6 +20,9 @@ public class InvocationAssistance {
 	private final String commitArguments;
 	private final String csharpAssemblies;
 	private final String javaWarFile;
+	private final String csharpMsvscaOutputFiles;
+	private final boolean csharpAutomaticAssemblies;
+	private final boolean csharpMsvsca;
 	private final String saOverride;
 
 	/**
@@ -33,13 +36,16 @@ public class InvocationAssistance {
 	private final String intermediateDir;
 
 	@DataBoundConstructor
-	public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies, String javaWarFile, String saOverride, String covBuildBlacklist) {
+	public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies, String javaWarFile, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist) {
 		this.intermediateDir = Util.fixEmpty(intermediateDir);
 		this.buildArguments = Util.fixEmpty(buildArguments);
 		this.analyzeArguments = Util.fixEmpty(analyzeArguments);
 		this.commitArguments = Util.fixEmpty(commitArguments);
 		this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
 		this.javaWarFile = Util.fixEmpty(javaWarFile);
+		this.csharpMsvscaOutputFiles = Util.fixEmpty(csharpMsvscaOutputFiles);
+		this.csharpMsvsca = csharpMsvsca;
+		this.csharpAutomaticAssemblies = csharpAutomaticAssemblies;
 		this.saOverride = Util.fixEmpty(saOverride);
 		this.covBuildBlacklist = Util.fixEmpty(covBuildBlacklist);
 	}
@@ -68,6 +74,18 @@ public class InvocationAssistance {
 		return javaWarFile;
 	}
 
+	public String getCsharpMsvscaOutputFiles() {
+		return csharpMsvscaOutputFiles;
+	}
+
+	public boolean getCsharpMsvsca() {
+		return csharpMsvsca;
+	}
+
+	public boolean getCsharpAutomaticAssemblies() {
+		return csharpAutomaticAssemblies;
+	}
+
 	public String getSaOverride() {
 		return saOverride;
 	}
@@ -83,18 +101,24 @@ public class InvocationAssistance {
 
 		InvocationAssistance that = (InvocationAssistance) o;
 
+		if(csharpAutomaticAssemblies != that.csharpAutomaticAssemblies) return false;
+		if(csharpMsvsca != that.csharpMsvsca) return false;
 		if(analyzeArguments != null ? !analyzeArguments.equals(that.analyzeArguments) : that.analyzeArguments != null)
 			return false;
 		if(buildArguments != null ? !buildArguments.equals(that.buildArguments) : that.buildArguments != null)
 			return false;
 		if(commitArguments != null ? !commitArguments.equals(that.commitArguments) : that.commitArguments != null)
 			return false;
+		if(covBuildBlacklist != null ? !covBuildBlacklist.equals(that.covBuildBlacklist) : that.covBuildBlacklist != null)
+			return false;
 		if(csharpAssemblies != null ? !csharpAssemblies.equals(that.csharpAssemblies) : that.csharpAssemblies != null)
 			return false;
-		if(javaWarFile != null ? !javaWarFile.equals(that.javaWarFile) : that.javaWarFile != null)
+		if(csharpMsvscaOutputFiles != null ? !csharpMsvscaOutputFiles.equals(that.csharpMsvscaOutputFiles) : that.csharpMsvscaOutputFiles != null)
 			return false;
-		if(saOverride != null ? !saOverride.equals(that.saOverride) : that.saOverride != null)
+		if(intermediateDir != null ? !intermediateDir.equals(that.intermediateDir) : that.intermediateDir != null)
 			return false;
+		if(javaWarFile != null ? !javaWarFile.equals(that.javaWarFile) : that.javaWarFile != null) return false;
+		if(saOverride != null ? !saOverride.equals(that.saOverride) : that.saOverride != null) return false;
 
 		return true;
 	}
@@ -106,13 +130,18 @@ public class InvocationAssistance {
 		result = 31 * result + (commitArguments != null ? commitArguments.hashCode() : 0);
 		result = 31 * result + (csharpAssemblies != null ? csharpAssemblies.hashCode() : 0);
 		result = 31 * result + (javaWarFile != null ? javaWarFile.hashCode() : 0);
+		result = 31 * result + (csharpMsvscaOutputFiles != null ? csharpMsvscaOutputFiles.hashCode() : 0);
+		result = 31 * result + (csharpAutomaticAssemblies ? 1 : 0);
+		result = 31 * result + (csharpMsvsca ? 1 : 0);
 		result = 31 * result + (saOverride != null ? saOverride.hashCode() : 0);
-
+		result = 31 * result + (covBuildBlacklist != null ? covBuildBlacklist.hashCode() : 0);
+		result = 31 * result + (intermediateDir != null ? intermediateDir.hashCode() : 0);
 		return result;
 	}
 
 	/**
 	 * For each variable in override, use that value, otherwise, use the value in this object.
+	 *
 	 * @param override source
 	 * @return a new, merged InvocationAssistance
 	 */
@@ -124,7 +153,10 @@ public class InvocationAssistance {
 		String csharpAssemblies = override.getCsharpAssemblies() != null ? override.getCsharpAssemblies() : getCsharpAssemblies();
 		String intermediateDir = override.getIntermediateDir() != null ? override.getIntermediateDir() : getIntermediateDir();
 		String javaWarFile = override.getJavaWarFile() != null ? override.getJavaWarFile() : getJavaWarFile();
+		String csharpMsvscaOutputFiles = override.getCsharpMsvscaOutputFiles() != null ? override.getCsharpMsvscaOutputFiles() : getCsharpMsvscaOutputFiles();
+		boolean csharpAutomaticAssemblies = override.getCsharpAutomaticAssemblies();
+		boolean csharpMsvsca = override.getCsharpMsvsca();
 		String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
-		return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, csharpAssemblies, javaWarFile, saOverride, covBuildBlacklist);
+		return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, csharpAssemblies, javaWarFile, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist);
 	}
 }

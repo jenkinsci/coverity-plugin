@@ -52,6 +52,8 @@ import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,6 +67,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Vector;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -235,6 +238,71 @@ public class CoverityPublisher extends Recorder {
 		return hideChart ? super.getProjectAction(project) : new CoverityProjectAction(project);
 	}
 
+	public static File[] listFilesAsArray(
+			File directory,
+			FilenameFilter filter,
+			boolean recurse) {
+		Collection<File> files = listFiles(directory, filter, recurse);
+
+		File[] arr = new File[files.size()];
+		return files.toArray(arr);
+	}
+
+	public static Collection<File> listFiles(
+			File directory,
+			FilenameFilter filter,
+			boolean recurse) {
+		Vector<File> files = new Vector<File>();
+		File[] entries = directory.listFiles();
+
+		for(File entry : entries) {
+			if(filter == null || filter.accept(directory, entry.getName())) {
+				files.add(entry);
+			}
+
+			if(recurse && entry.isDirectory()) {
+				files.addAll(listFiles(entry, filter, recurse));
+			}
+		}
+
+		return files;
+	}
+
+	public File[] findAssemblies(String dirName) {
+		File dir = new File(dirName);
+
+		return listFilesAsArray(dir, new FilenameFilter() {
+			public boolean accept(File dir, String filename) {
+				if(filename.endsWith(".exe") || filename.endsWith(".dll")) {
+					String pathname = dir.getAbsolutePath();
+					pathname = pathname + File.separator + filename;
+					;
+					String pdbFilename = pathname.replaceAll(".exe$", ".pdb");
+					pdbFilename = pdbFilename.replaceAll(".dll$", ".pdb");
+
+					File pdbFile = new File(pdbFilename);
+
+					return pdbFile.exists();
+				}
+
+				return false;
+			}
+
+		}, true);
+
+	}
+
+	public File[] findMsvscaOutputFiles(String dirName) {
+		File dir = new File(dirName);
+
+		return listFilesAsArray(dir, new FilenameFilter() {
+			public boolean accept(File dir, String filename) {
+				return filename.endsWith("CodeAnalysisLog.xml");
+			}
+		}, true);
+
+	}
+
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		if(isOldDataPresent()) {
@@ -344,6 +412,17 @@ public class CoverityPublisher extends Recorder {
 							}
 						}
 
+						boolean csharpAutomaticAssemblies = invocationAssistance.getCsharpAutomaticAssemblies();
+						if(csharpAutomaticAssemblies) {
+							listener.getLogger().println("[Coverity] Searching for C# assemblies...");
+							File[] automaticAssemblies = findAssemblies(build.getWorkspace().getRemote());
+
+							for(File assembly : automaticAssemblies) {
+								cmd.add(assembly.getAbsolutePath());
+							}
+						}
+
+
 						listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 						if(effectiveIA.getAnalyzeArguments() != null) {
 							for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
@@ -370,6 +449,55 @@ public class CoverityPublisher extends Recorder {
 					}
 
 					boolean useDataPort = cim.getDataPort() != 0;
+
+					//TODO: this could happen multiple times if there are multiple C# streams. is that ok?
+					// Import Microsoft Visual Studio Code Anaysis results
+					boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
+					String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
+					if("CSHARP".equals(language) && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
+						String covImportMsvsca = "cov-import-msvsca";
+						covImportMsvsca = new FilePath(launcher.getChannel(), home).child("bin").child(covImportMsvsca).getRemote();
+
+						List<String> importCmd = new ArrayList<String>();
+						importCmd.add(covImportMsvsca);
+						importCmd.add("--dir");
+						importCmd.add(temp.tempDir.getRemote());
+						importCmd.add("--append");
+
+						listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
+						File[] msvscaOutputFiles = {};
+
+						if(csharpMsvsca) {
+							msvscaOutputFiles = findMsvscaOutputFiles(build.getWorkspace().getRemote());
+						}
+
+						for(File outputFile : msvscaOutputFiles) {
+							//importCmd.add(outputFile.getName());
+							importCmd.add(outputFile.getAbsolutePath());
+						}
+
+						if(csharpMsvscaOutputFiles != null && csharpMsvscaOutputFiles.length() > 0) {
+							importCmd.add(csharpMsvscaOutputFiles);
+						}
+
+						if(msvscaOutputFiles.length == 0 && (csharpMsvscaOutputFiles == null || csharpMsvscaOutputFiles.length() == 0)) {
+							listener.getLogger().println("[MSVSCA] MSVSCA No results found, skipping");
+						} else {
+							listener.getLogger().println("[MSVSCA] MSVSCA Import cmd so far is: " + importCmd.toString());
+
+							int importResult = launcher.
+									launch().
+									cmds(new ArgumentListBuilder(importCmd.toArray(new String[importCmd.size()]))).
+									pwd(build.getWorkspace()).
+									stdout(listener).
+									join();
+							if(importResult != 0) {
+								listener.getLogger().println("[Coverity] " + covImportMsvsca + " returned " + importResult + ", aborting...");
+								build.setResult(Result.FAILURE);
+								return false;
+							}
+						}
+					}
 
 					List<String> cmd = new ArrayList<String>();
 					cmd.add(covCommitDefects);
