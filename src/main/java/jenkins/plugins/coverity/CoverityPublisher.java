@@ -51,7 +51,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
-import java.io.File;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.ParseException;
@@ -245,7 +244,7 @@ public class CoverityPublisher extends Recorder {
 
 		if(build.getResult().isWorseOrEqualTo(Result.FAILURE)) return true;
 
-		CoverityTempDir temp = null;
+		CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
 		Node node = Executor.currentExecutor().getOwner().getNode();
 		String home = getDescriptor().getHome(node, build.getEnvironment(listener));
@@ -253,45 +252,36 @@ public class CoverityPublisher extends Recorder {
 			home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
 		}
 
-    // If WAR files specified, emit them prior to running analysis
-    // Do not check for presence of Java streams or Java in build
-    String javaWarFile = invocationAssistance.getJavaWarFile();
-    listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
-    if (javaWarFile != null) {
-      /*
-      File javaWarFileFile = new File(javaWarFile);
-      if (!javaWarFileFile.exists()) {
-        listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' does not exist, skipping. Web application security analysis may be incomplete.");
-      } else {
-      */
-      if (true) {
-        String covEmitJava = "cov-emit-java";
-        covEmitJava = new FilePath(launcher.getChannel(), home).child("bin").child(covEmitJava).getRemote();
-        List<String> cmd = new ArrayList<String>();
-        cmd.add(covEmitJava);
-        cmd.add("--dir");
-		    temp = build.getAction(CoverityTempDir.class);
-        cmd.add(temp.tempDir.getRemote());
+		// If WAR files specified, emit them prior to running analysis
+		// Do not check for presence of Java streams or Java in build
+		String javaWarFile = invocationAssistance.getJavaWarFile();
+		listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
+		if(javaWarFile != null) {
+			String covEmitJava = "cov-emit-java";
+			covEmitJava = new FilePath(launcher.getChannel(), home).child("bin").child(covEmitJava).getRemote();
 
-        cmd.add("--webapp-archive");
-        cmd.add(javaWarFile);
+			List<String> cmd = new ArrayList<String>();
+			cmd.add(covEmitJava);
+			cmd.add("--dir");
+			cmd.add(temp.tempDir.getRemote());
+			cmd.add("--webapp-archive");
+			cmd.add(javaWarFile);
 
-        listener.getLogger().println("[Coverity] cov-emit-java cmd: " + cmd.toString());
+			listener.getLogger().println("[Coverity] cov-emit-java cmd: " + cmd.toString());
 
-        int result = launcher.
-            launch().
-            cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-            pwd(build.getWorkspace()).
-            stdout(listener).
-            join();
+			int result = launcher.
+					launch().
+					cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+					pwd(build.getWorkspace()).
+					stdout(listener).
+					join();
 
-        if(result != 0) {
-          listener.getLogger().println("[Coverity] " + covEmitJava + " returned " + result + ", aborting...");
-          build.setResult(Result.FAILURE);
-          return false;
-        }
-      }
-    }
+			if(result != 0) {
+				listener.getLogger().println("[Coverity] " + covEmitJava + " returned " + result + ", aborting...");
+				build.setResult(Result.FAILURE);
+				return false;
+			}
+		}
 
 		Set<String> analyzedLanguages = new HashSet<String>();
 
@@ -335,7 +325,6 @@ public class CoverityPublisher extends Recorder {
 					}
 
 					CoverityLauncherDecorator.SKIP.set(true);
-					temp = build.getAction(CoverityTempDir.class);
 
 					if(!analyzedLanguages.contains(language)) {
 						List<String> cmd = new ArrayList<String>();
