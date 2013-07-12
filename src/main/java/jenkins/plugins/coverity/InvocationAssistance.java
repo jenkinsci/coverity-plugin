@@ -19,6 +19,7 @@ public class InvocationAssistance {
 	private final String analyzeArguments;
 	private final String commitArguments;
 	private final String csharpAssemblies;
+	private final String javaWarFile;
 	private final String saOverride;
 
 	/**
@@ -32,12 +33,13 @@ public class InvocationAssistance {
 	private final String intermediateDir;
 
 	@DataBoundConstructor
-	public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies, String saOverride, String covBuildBlacklist) {
+	public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, String csharpAssemblies, String javaWarFile, String saOverride, String covBuildBlacklist) {
 		this.intermediateDir = Util.fixEmpty(intermediateDir);
 		this.buildArguments = Util.fixEmpty(buildArguments);
 		this.analyzeArguments = Util.fixEmpty(analyzeArguments);
 		this.commitArguments = Util.fixEmpty(commitArguments);
 		this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
+		this.javaWarFile = Util.fixEmpty(javaWarFile);
 		this.saOverride = Util.fixEmpty(saOverride);
 		this.covBuildBlacklist = Util.fixEmpty(covBuildBlacklist);
 	}
@@ -60,6 +62,10 @@ public class InvocationAssistance {
 
 	public String getCsharpAssemblies() {
 		return csharpAssemblies;
+	}
+
+	public String getJavaWarFile() {
+		return javaWarFile;
 	}
 
 	public String getSaOverride() {
@@ -85,6 +91,8 @@ public class InvocationAssistance {
 			return false;
 		if(csharpAssemblies != null ? !csharpAssemblies.equals(that.csharpAssemblies) : that.csharpAssemblies != null)
 			return false;
+		if(javaWarFile != null ? !javaWarFile.equals(that.javaWarFile) : that.javaWarFile != null)
+			return false;
 		if(saOverride != null ? !saOverride.equals(that.saOverride) : that.saOverride != null)
 			return false;
 
@@ -97,6 +105,7 @@ public class InvocationAssistance {
 		result = 31 * result + (analyzeArguments != null ? analyzeArguments.hashCode() : 0);
 		result = 31 * result + (commitArguments != null ? commitArguments.hashCode() : 0);
 		result = 31 * result + (csharpAssemblies != null ? csharpAssemblies.hashCode() : 0);
+		result = 31 * result + (javaWarFile != null ? javaWarFile.hashCode() : 0);
 		result = 31 * result + (saOverride != null ? saOverride.hashCode() : 0);
 
 		return result;
@@ -114,7 +123,8 @@ public class InvocationAssistance {
 		String covBuildBlacklist = override.getCovBuildBlacklist() != null ? override.getCovBuildBlacklist() : getCovBuildBlacklist();
 		String csharpAssemblies = override.getCsharpAssemblies() != null ? override.getCsharpAssemblies() : getCsharpAssemblies();
 		String intermediateDir = override.getIntermediateDir() != null ? override.getIntermediateDir() : getIntermediateDir();
+		String javaWarFile = override.getJavaWarFile() != null ? override.getJavaWarFile() : getJavaWarFile();
 		String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
-		return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, csharpAssemblies, saOverride, covBuildBlacklist);
+		return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, csharpAssemblies, javaWarFile, saOverride, covBuildBlacklist);
 	}
 }
