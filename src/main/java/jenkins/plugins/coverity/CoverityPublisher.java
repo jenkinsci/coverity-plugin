@@ -267,19 +267,23 @@ public class CoverityPublisher extends Recorder {
 			cmd.add("--webapp-archive");
 			cmd.add(javaWarFile);
 
-			listener.getLogger().println("[Coverity] cov-emit-java cmd: " + cmd.toString());
+			try {
+				CoverityLauncherDecorator.SKIP.set(true);
 
-			int result = launcher.
-					launch().
-					cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-					pwd(build.getWorkspace()).
-					stdout(listener).
-					join();
+				int result = launcher.
+						launch().
+						cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+						pwd(build.getWorkspace()).
+						stdout(listener).
+						join();
 
-			if(result != 0) {
-				listener.getLogger().println("[Coverity] " + covEmitJava + " returned " + result + ", aborting...");
-				build.setResult(Result.FAILURE);
-				return false;
+				if(result != 0) {
+					listener.getLogger().println("[Coverity] " + covEmitJava + " returned " + result + ", aborting...");
+					build.setResult(Result.FAILURE);
+					return false;
+				}
+			} finally {
+				CoverityLauncherDecorator.SKIP.set(false);
 			}
 		}
 
