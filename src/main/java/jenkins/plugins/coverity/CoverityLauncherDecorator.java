@@ -12,6 +12,7 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v5.CovRemoteServiceException_Exception;
+import com.coverity.ws.v5.StreamDataObj;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -101,7 +102,11 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			CIMInstance cim = publisher.getDescriptor().getInstance(cs.getInstance());
 			String id = cs.getInstance() + "/" + cs.getStream();
 			try {
-				String language = cim.getStream(cs.getStream()).getLanguage();
+				StreamDataObj stream = cim.getStream(cs.getStream());
+				if(stream == null) {
+					throw new RuntimeException("Could not find stream: " + id);
+				}
+				String language = stream.getLanguage();
 				if(!"CSHARP".equals(language)) {
 					onlyCS = false;
 					break;
@@ -117,7 +122,11 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			CIMInstance cim = publisher.getDescriptor().getInstance(publisher.getCimInstance());
 			String id = publisher.getCimInstance() + "/" + publisher.getStream();
 			try {
-				String language = cim.getStream(publisher.getStream()).getLanguage();
+				StreamDataObj stream = cim.getStream(publisher.getStream());
+				if(stream == null) {
+					throw new RuntimeException("Could not find stream: " + id);
+				}
+				String language = stream.getLanguage();
 				if(!"CSHARP".equals(language)) {
 					onlyCS = false;
 				}
