@@ -357,6 +357,7 @@ public class CoverityPublisher extends Recorder {
 
 		Set<String> analyzedLanguages = new HashSet<String>();
 
+		//run cov-analyze
 		for(CIMStream cimStream : getCimStreams()) {
 			CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
 
@@ -389,11 +390,8 @@ public class CoverityPublisher extends Recorder {
 						covAnalyze = "cov-analyze";
 					}
 
-					String covCommitDefects = "cov-commit-defects";
-
 					if(home != null) {
 						covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
-						covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
 					}
 
 					CoverityLauncherDecorator.SKIP.set(true);
@@ -447,57 +445,93 @@ public class CoverityPublisher extends Recorder {
 					} else {
 						listener.getLogger().println("Skipping analysis, because language " + language + " has already been analyzed");
 					}
+				} finally {
+					CoverityLauncherDecorator.SKIP.set(false);
+				}
+			}
+		}
+
+		// Import Microsoft Visual Studio Code Anaysis results
+		boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
+		String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
+		if(analyzedLanguages.contains("CSHARP") && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
+			String covImportMsvsca = "cov-import-msvsca";
+			covImportMsvsca = new FilePath(launcher.getChannel(), home).child("bin").child(covImportMsvsca).getRemote();
+
+			List<String> importCmd = new ArrayList<String>();
+			importCmd.add(covImportMsvsca);
+			importCmd.add("--dir");
+			importCmd.add(temp.tempDir.getRemote());
+			importCmd.add("--append");
+
+			listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
+			File[] msvscaOutputFiles = {};
+
+			if(csharpMsvsca) {
+				msvscaOutputFiles = findMsvscaOutputFiles(build.getWorkspace().getRemote());
+			}
+
+			for(File outputFile : msvscaOutputFiles) {
+				//importCmd.add(outputFile.getName());
+				importCmd.add(outputFile.getAbsolutePath());
+			}
+
+			if(csharpMsvscaOutputFiles != null && csharpMsvscaOutputFiles.length() > 0) {
+				importCmd.add(csharpMsvscaOutputFiles);
+			}
+
+			if(msvscaOutputFiles.length == 0 && (csharpMsvscaOutputFiles == null || csharpMsvscaOutputFiles.length() == 0)) {
+				listener.getLogger().println("[MSVSCA] MSVSCA No results found, skipping");
+			} else {
+				listener.getLogger().println("[MSVSCA] MSVSCA Import cmd so far is: " + importCmd.toString());
+
+				int importResult = launcher.
+						launch().
+						cmds(new ArgumentListBuilder(importCmd.toArray(new String[importCmd.size()]))).
+						pwd(build.getWorkspace()).
+						stdout(listener).
+						join();
+				if(importResult != 0) {
+					listener.getLogger().println("[Coverity] " + covImportMsvsca + " returned " + importResult + ", aborting...");
+					build.setResult(Result.FAILURE);
+					return false;
+				}
+			}
+		}
+
+		//run cov-commit-defects
+		for(CIMStream cimStream : getCimStreams()) {
+			CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
+
+			String language = null;
+			try {
+				language = getLanguage(cimStream);
+			} catch(CovRemoteServiceException_Exception e) {
+				e.printStackTrace(listener.error("Error while retrieving stream information for " + cimStream.getStream()));
+				return false;
+			}
+
+			if(invocationAssistance != null) {
+				InvocationAssistance effectiveIA = invocationAssistance;
+				if(cimStream.getInvocationAssistanceOverride() != null) {
+					effectiveIA = invocationAssistance.merge(cimStream.getInvocationAssistanceOverride());
+				}
+
+				try {
+					if("CSHARP".equals(language) && effectiveIA.getCsharpAssemblies() != null) {
+						String csharpAssembliesStr = effectiveIA.getCsharpAssemblies();
+						listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
+					}
+
+					String covCommitDefects = "cov-commit-defects";
+
+					if(home != null) {
+						covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
+					}
+
+					CoverityLauncherDecorator.SKIP.set(true);
 
 					boolean useDataPort = cim.getDataPort() != 0;
-
-					//TODO: this could happen multiple times if there are multiple C# streams. is that ok?
-					// Import Microsoft Visual Studio Code Anaysis results
-					boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-					String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
-					if("CSHARP".equals(language) && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
-						String covImportMsvsca = "cov-import-msvsca";
-						covImportMsvsca = new FilePath(launcher.getChannel(), home).child("bin").child(covImportMsvsca).getRemote();
-
-						List<String> importCmd = new ArrayList<String>();
-						importCmd.add(covImportMsvsca);
-						importCmd.add("--dir");
-						importCmd.add(temp.tempDir.getRemote());
-						importCmd.add("--append");
-
-						listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
-						File[] msvscaOutputFiles = {};
-
-						if(csharpMsvsca) {
-							msvscaOutputFiles = findMsvscaOutputFiles(build.getWorkspace().getRemote());
-						}
-
-						for(File outputFile : msvscaOutputFiles) {
-							//importCmd.add(outputFile.getName());
-							importCmd.add(outputFile.getAbsolutePath());
-						}
-
-						if(csharpMsvscaOutputFiles != null && csharpMsvscaOutputFiles.length() > 0) {
-							importCmd.add(csharpMsvscaOutputFiles);
-						}
-
-						if(msvscaOutputFiles.length == 0 && (csharpMsvscaOutputFiles == null || csharpMsvscaOutputFiles.length() == 0)) {
-							listener.getLogger().println("[MSVSCA] MSVSCA No results found, skipping");
-						} else {
-							listener.getLogger().println("[MSVSCA] MSVSCA Import cmd so far is: " + importCmd.toString());
-
-							int importResult = launcher.
-									launch().
-									cmds(new ArgumentListBuilder(importCmd.toArray(new String[importCmd.size()]))).
-									pwd(build.getWorkspace()).
-									stdout(listener).
-									join();
-							if(importResult != 0) {
-								listener.getLogger().println("[Coverity] " + covImportMsvsca + " returned " + importResult + ", aborting...");
-								build.setResult(Result.FAILURE);
-								return false;
-							}
-						}
-					}
 
 					List<String> cmd = new ArrayList<String>();
 					cmd.add(covCommitDefects);
