@@ -131,7 +131,7 @@
 
 
     <properties>
-        <jenkins.version>1.509.2</jenkins.version>
+        <jenkins.version>1.424.6</jenkins.version>
     </properties>
 
     <pluginRepositories>
