@@ -146,25 +146,15 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			return launcher;
 		}
 
+        EnvVars env = build.getEnvironment(listener);
 		List<String> args = new ArrayList<String>();
 		args.add("cov-build-placeholder");
 		args.add("--dir");
 		args.add(temp.getRemote());
 		if(ii.getBuildArguments() != null) {
-			for(String arg : Util.tokenize(ii.getBuildArguments())) {
+			for(String arg : Util.tokenize(env.expand(ii.getBuildArguments())) {
 				args.add(arg);
 			}
-		}
-
-            EnvVars env = build.getEnvironment(listener);
-			List<String> args = new ArrayList<String>();
-			args.add(covBuild);
-			args.add("--dir");
-			args.add(temp.getRemote());
-			if(ii.getBuildArguments() != null) {
-				for(String arg : Util.tokenize(env.expand(ii.getBuildArguments()))) {
-					args.add(arg);
-				}
 		}
 
 		String blacklistTemp = ii.getCovBuildBlacklist();
@@ -173,7 +163,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			blacklist = blacklistTemp.split(",");
 			for(int i = 0; i < blacklist.length; i++) {
 				blacklist[i] = blacklist[i].trim();
-		}
+		    }
 		} else {
 			blacklist = new String[0];
 		}
