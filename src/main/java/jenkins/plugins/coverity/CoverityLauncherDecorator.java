@@ -152,7 +152,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 		args.add("--dir");
 		args.add(temp.getRemote());
 		if(ii.getBuildArguments() != null) {
-			for(String arg : Util.tokenize(env.expand(ii.getBuildArguments())) {
+			for(String arg : Util.tokenize(env.expand(ii.getBuildArguments()))) {
 				args.add(arg);
 			}
 		}
