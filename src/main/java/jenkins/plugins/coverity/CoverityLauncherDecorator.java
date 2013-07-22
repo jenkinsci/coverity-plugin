@@ -13,6 +13,7 @@ package jenkins.plugins.coverity;
 
 import com.coverity.ws.v5.CovRemoteServiceException_Exception;
 import com.coverity.ws.v5.StreamDataObj;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -78,14 +79,18 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 		}
 
 		FilePath temp;
+        TaskListener listener = launcher.getListener();
+        EnvVars env;
 
 		try {
+            env = build.getEnvironment(listener);
 			if(ii.getIntermediateDir() == null) {
 				FilePath coverityDir = node.getRootPath().child("coverity");
 				coverityDir.mkdirs();
 				temp = coverityDir.createTempDir("temp-", null);
 			} else {
-				temp = new FilePath(node.getChannel(), ii.getIntermediateDir());
+
+				temp = new FilePath(node.getChannel(), env.expand(ii.getIntermediateDir()));
 				temp.mkdirs();
 			}
 
@@ -147,7 +152,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 		args.add("--dir");
 		args.add(temp.getRemote());
 		if(ii.getBuildArguments() != null) {
-			for(String arg : Util.tokenize(ii.getBuildArguments())) {
+			for(String arg : Util.tokenize(env.expand(ii.getBuildArguments()))) {
 				args.add(arg);
 			}
 		}
@@ -158,7 +163,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			blacklist = blacklistTemp.split(",");
 			for(int i = 0; i < blacklist.length; i++) {
 				blacklist[i] = blacklist[i].trim();
-			}
+		    }
 		} else {
 			blacklist = new String[0];
 		}
