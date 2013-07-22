@@ -245,6 +245,7 @@ public class CoverityPublisher extends Recorder {
 		if(build.getResult().isWorseOrEqualTo(Result.FAILURE)) return true;
 
 		CoverityTempDir temp = build.getAction(CoverityTempDir.class);
+        EnvVars env = build.getEnvironment(listener);
 
 		Node node = Executor.currentExecutor().getOwner().getNode();
 		String home = getDescriptor().getHome(node, build.getEnvironment(listener));
@@ -254,7 +255,7 @@ public class CoverityPublisher extends Recorder {
 
 		// If WAR files specified, emit them prior to running analysis
 		// Do not check for presence of Java streams or Java in build
-		String javaWarFile = invocationAssistance.getJavaWarFile();
+		String javaWarFile = env.expand(invocationAssistance.getJavaWarFile());
 		listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
 		if(javaWarFile != null) {
 			String covEmitJava = "cov-emit-java";
@@ -287,7 +288,6 @@ public class CoverityPublisher extends Recorder {
 			}
 		}
 
-        EnvVars env = build.getEnvironment(listener);
 		Set<String> analyzedLanguages = new HashSet<String>();
 
 		for(CIMStream cimStream : getCimStreams()) {
@@ -309,7 +309,7 @@ public class CoverityPublisher extends Recorder {
 
 				try {
 					if("CSHARP".equals(language) && effectiveIA.getCsharpAssemblies() != null) {
-						String csharpAssembliesStr = effectiveIA.getCsharpAssemblies();
+						String csharpAssembliesStr = env.expand(effectiveIA.getCsharpAssemblies());
 						listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
 					}
 
@@ -339,7 +339,7 @@ public class CoverityPublisher extends Recorder {
 
 						// For C# add the list of assemblies
 						if("CSHARP".equals(language)) {
-							String csharpAssemblies = effectiveIA.getCsharpAssemblies();
+							String csharpAssemblies = env.expand(effectiveIA.getCsharpAssemblies());
 							if(csharpAssemblies != null) {
 								cmd.add(csharpAssemblies);
 							}
@@ -386,7 +386,7 @@ public class CoverityPublisher extends Recorder {
 					cmd.add(cim.getUser());
 
 					if(effectiveIA.getCommitArguments() != null) {
-						for(String arg : Util.tokenize(effectiveIA.getCommitArguments())) {
+						for(String arg : Util.tokenize(env.expand(effectiveIA.getCommitArguments()))) {
 							cmd.add(arg);
 						}
 					}

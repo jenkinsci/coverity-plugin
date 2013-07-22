@@ -79,15 +79,16 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 		}
 
 		FilePath temp;
+        TaskListener listener = launcher.getListener();
+        EnvVars env;
 
 		try {
+            env = build.getEnvironment(listener);
 			if(ii.getIntermediateDir() == null) {
 				FilePath coverityDir = node.getRootPath().child("coverity");
 				coverityDir.mkdirs();
 				temp = coverityDir.createTempDir("temp-", null);
 			} else {
-                TaskListener listener = launcher.getListener();
-                EnvVars env = build.getEnvironment(listener);
 
 				temp = new FilePath(node.getChannel(), env.expand(ii.getIntermediateDir()));
 				temp.mkdirs();
@@ -146,7 +147,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			return launcher;
 		}
 
-        EnvVars env = build.getEnvironment(listener);
 		List<String> args = new ArrayList<String>();
 		args.add("cov-build-placeholder");
 		args.add("--dir");
