@@ -323,8 +323,9 @@ public class CoverityPublisher extends Recorder {
 		// If WAR files specified, emit them prior to running analysis
 		// Do not check for presence of Java streams or Java in build
 		String javaWarFile = invocationAssistance != null ? invocationAssistance.getJavaWarFile() : null;
-		listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
 		if(javaWarFile != null) {
+			listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
+
 			String covEmitJava = "cov-emit-java";
 			covEmitJava = new FilePath(launcher.getChannel(), home).child("bin").child(covEmitJava).getRemote();
 
@@ -452,49 +453,51 @@ public class CoverityPublisher extends Recorder {
 		}
 
 		// Import Microsoft Visual Studio Code Anaysis results
-		boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-		String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
-		if(analyzedLanguages.contains("CSHARP") && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
-			String covImportMsvsca = "cov-import-msvsca";
-			covImportMsvsca = new FilePath(launcher.getChannel(), home).child("bin").child(covImportMsvsca).getRemote();
+		if(invocationAssistance != null) {
+			boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
+			String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
+			if(analyzedLanguages.contains("CSHARP") && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
+				String covImportMsvsca = "cov-import-msvsca";
+				covImportMsvsca = new FilePath(launcher.getChannel(), home).child("bin").child(covImportMsvsca).getRemote();
 
-			List<String> importCmd = new ArrayList<String>();
-			importCmd.add(covImportMsvsca);
-			importCmd.add("--dir");
-			importCmd.add(temp.tempDir.getRemote());
-			importCmd.add("--append");
+				List<String> importCmd = new ArrayList<String>();
+				importCmd.add(covImportMsvsca);
+				importCmd.add("--dir");
+				importCmd.add(temp.tempDir.getRemote());
+				importCmd.add("--append");
 
-			listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
-			File[] msvscaOutputFiles = {};
+				listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
+				File[] msvscaOutputFiles = {};
 
-			if(csharpMsvsca) {
-				msvscaOutputFiles = findMsvscaOutputFiles(build.getWorkspace().getRemote());
-			}
+				if(csharpMsvsca) {
+					msvscaOutputFiles = findMsvscaOutputFiles(build.getWorkspace().getRemote());
+				}
 
-			for(File outputFile : msvscaOutputFiles) {
-				//importCmd.add(outputFile.getName());
-				importCmd.add(outputFile.getAbsolutePath());
-			}
+				for(File outputFile : msvscaOutputFiles) {
+					//importCmd.add(outputFile.getName());
+					importCmd.add(outputFile.getAbsolutePath());
+				}
 
-			if(csharpMsvscaOutputFiles != null && csharpMsvscaOutputFiles.length() > 0) {
-				importCmd.add(csharpMsvscaOutputFiles);
-			}
+				if(csharpMsvscaOutputFiles != null && csharpMsvscaOutputFiles.length() > 0) {
+					importCmd.add(csharpMsvscaOutputFiles);
+				}
 
-			if(msvscaOutputFiles.length == 0 && (csharpMsvscaOutputFiles == null || csharpMsvscaOutputFiles.length() == 0)) {
-				listener.getLogger().println("[MSVSCA] MSVSCA No results found, skipping");
-			} else {
-				listener.getLogger().println("[MSVSCA] MSVSCA Import cmd so far is: " + importCmd.toString());
+				if(msvscaOutputFiles.length == 0 && (csharpMsvscaOutputFiles == null || csharpMsvscaOutputFiles.length() == 0)) {
+					listener.getLogger().println("[MSVSCA] MSVSCA No results found, skipping");
+				} else {
+					listener.getLogger().println("[MSVSCA] MSVSCA Import cmd so far is: " + importCmd.toString());
 
-				int importResult = launcher.
-						launch().
-						cmds(new ArgumentListBuilder(importCmd.toArray(new String[importCmd.size()]))).
-						pwd(build.getWorkspace()).
-						stdout(listener).
-						join();
-				if(importResult != 0) {
-					listener.getLogger().println("[Coverity] " + covImportMsvsca + " returned " + importResult + ", aborting...");
-					build.setResult(Result.FAILURE);
-					return false;
+					int importResult = launcher.
+							launch().
+							cmds(new ArgumentListBuilder(importCmd.toArray(new String[importCmd.size()]))).
+							pwd(build.getWorkspace()).
+							stdout(listener).
+							join();
+					if(importResult != 0) {
+						listener.getLogger().println("[Coverity] " + covImportMsvsca + " returned " + importResult + ", aborting...");
+						build.setResult(Result.FAILURE);
+						return false;
+					}
 				}
 			}
 		}
