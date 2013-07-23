@@ -322,7 +322,7 @@ public class CoverityPublisher extends Recorder {
 
 		// If WAR files specified, emit them prior to running analysis
 		// Do not check for presence of Java streams or Java in build
-		String javaWarFile = invocationAssistance.getJavaWarFile();
+		String javaWarFile = invocationAssistance != null ? invocationAssistance.getJavaWarFile() : null;
 		listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
 		if(javaWarFile != null) {
 			String covEmitJava = "cov-emit-java";
