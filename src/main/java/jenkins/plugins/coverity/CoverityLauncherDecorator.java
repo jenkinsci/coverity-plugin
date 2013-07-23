@@ -231,6 +231,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 			return decorated.launchChannel(prefix(cmd), out, workDir, envVars);
 		}
 
+		/*
+		 * When running remotely, overriding this method makes sure that the platform is detected correctly.
+		 */
+		@Override
+		public boolean isUnix() {
+			return decorated.isUnix();
+		}
+
 		@Override
 		public void kill(Map<String, String> modelEnvVars) throws IOException, InterruptedException {
 			decorated.kill(modelEnvVars);
