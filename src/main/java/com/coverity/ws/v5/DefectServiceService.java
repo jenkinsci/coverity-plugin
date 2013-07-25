@@ -17,7 +17,7 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.1
  * 
  */
-@WebServiceClient(name = "DefectServiceService", targetNamespace = "http://ws.coverity.com/v5", wsdlLocation = "http://jvinson-x201.sf.coverity.com:18080/ws/v5/defectservice?wsdl")
+@WebServiceClient(name = "DefectServiceService", targetNamespace = "http://ws.coverity.com/v5", wsdlLocation = "http://localhost:14800/ws/v5/defectservice?wsdl")
 public class DefectServiceService
     extends Service
 {
@@ -30,9 +30,9 @@ public class DefectServiceService
         try {
             URL baseUrl;
             baseUrl = com.coverity.ws.v5.DefectServiceService.class.getResource(".");
-            url = new URL(baseUrl, "http://jvinson-x201.sf.coverity.com:18080/ws/v5/defectservice?wsdl");
+            url = new URL(baseUrl, "http://localhost:14800/ws/v5/defectservice?wsdl");
         } catch (MalformedURLException e) {
-            logger.warning("Failed to create URL for the wsdl Location: 'http://jvinson-x201.sf.coverity.com:18080/ws/v5/defectservice?wsdl', retrying as a local file");
+            logger.warning("Failed to create URL for the wsdl Location: 'http://localhost:14800/ws/v5/defectservice?wsdl', retrying as a local file");
             logger.warning(e.getMessage());
         }
         DEFECTSERVICESERVICE_WSDL_LOCATION = url;

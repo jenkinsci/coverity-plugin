@@ -123,26 +123,6 @@ public interface DefectService {
 
     /**
      * 
-     * @param filterSpec
-     * @param projectId
-     * @return
-     *     returns java.util.List<java.lang.Long>
-     * @throws CovRemoteServiceException_Exception
-     */
-    @WebMethod
-    @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getCIDsForProject", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCIDsForProject")
-    @ResponseWrapper(localName = "getCIDsForProjectResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCIDsForProjectResponse")
-    public List<Long> getCIDsForProject(
-        @WebParam(name = "projectId", targetNamespace = "")
-        ProjectIdDataObj projectId,
-        @WebParam(name = "filterSpec", targetNamespace = "")
-        MergedDefectFilterSpecDataObj filterSpec)
-        throws CovRemoteServiceException_Exception
-    ;
-
-    /**
-     * 
      * @param streamIds
      * @param filterSpec
      * @param pageSpec
@@ -161,26 +141,6 @@ public interface DefectService {
         MergedDefectFilterSpecDataObj filterSpec,
         @WebParam(name = "pageSpec", targetNamespace = "")
         PageSpecDataObj pageSpec)
-        throws CovRemoteServiceException_Exception
-    ;
-
-    /**
-     * 
-     * @param streamIds
-     * @param filterSpec
-     * @return
-     *     returns java.util.List<java.lang.Long>
-     * @throws CovRemoteServiceException_Exception
-     */
-    @WebMethod
-    @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getCIDsForStreams", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCIDsForStreams")
-    @ResponseWrapper(localName = "getCIDsForStreamsResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCIDsForStreamsResponse")
-    public List<Long> getCIDsForStreams(
-        @WebParam(name = "streamIds", targetNamespace = "")
-        List<StreamIdDataObj> streamIds,
-        @WebParam(name = "filterSpec", targetNamespace = "")
-        MergedDefectFilterSpecDataObj filterSpec)
         throws CovRemoteServiceException_Exception
     ;
 
@@ -241,6 +201,46 @@ public interface DefectService {
         ProjectIdDataObj projectId,
         @WebParam(name = "componentIds", targetNamespace = "")
         List<ComponentIdDataObj> componentIds)
+        throws CovRemoteServiceException_Exception
+    ;
+
+    /**
+     * 
+     * @param filterSpec
+     * @param projectId
+     * @return
+     *     returns java.util.List<java.lang.Long>
+     * @throws CovRemoteServiceException_Exception
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "getCIDsForProject", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCIDsForProject")
+    @ResponseWrapper(localName = "getCIDsForProjectResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCIDsForProjectResponse")
+    public List<Long> getCIDsForProject(
+        @WebParam(name = "projectId", targetNamespace = "")
+        ProjectIdDataObj projectId,
+        @WebParam(name = "filterSpec", targetNamespace = "")
+        MergedDefectFilterSpecDataObj filterSpec)
+        throws CovRemoteServiceException_Exception
+    ;
+
+    /**
+     * 
+     * @param streamIds
+     * @param filterSpec
+     * @return
+     *     returns java.util.List<java.lang.Long>
+     * @throws CovRemoteServiceException_Exception
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "getCIDsForStreams", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCIDsForStreams")
+    @ResponseWrapper(localName = "getCIDsForStreamsResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCIDsForStreamsResponse")
+    public List<Long> getCIDsForStreams(
+        @WebParam(name = "streamIds", targetNamespace = "")
+        List<StreamIdDataObj> streamIds,
+        @WebParam(name = "filterSpec", targetNamespace = "")
+        MergedDefectFilterSpecDataObj filterSpec)
         throws CovRemoteServiceException_Exception
     ;
 

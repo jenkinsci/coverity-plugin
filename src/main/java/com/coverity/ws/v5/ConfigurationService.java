@@ -574,17 +574,6 @@ public interface ConfigurationService {
 
     /**
      * 
-     * @return
-     *     returns java.util.List<com.coverity.ws.v5.PermissionDataObj>
-     */
-    @WebMethod
-    @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getAllPermissions", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetAllPermissions")
-    @ResponseWrapper(localName = "getAllPermissionsResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetAllPermissionsResponse")
-    public List<PermissionDataObj> getAllPermissions();
-
-    /**
-     * 
      * @param streamId
      * @param filterSpec
      * @return
@@ -605,45 +594,25 @@ public interface ConfigurationService {
 
     /**
      * 
-     * @param snapshotId
-     * @throws CovRemoteServiceException_Exception
-     */
-    @WebMethod
-    @RequestWrapper(localName = "deleteSnapshot", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.DeleteSnapshot")
-    @ResponseWrapper(localName = "deleteSnapshotResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.DeleteSnapshotResponse")
-    public void deleteSnapshot(
-        @WebParam(name = "snapshotId", targetNamespace = "")
-        SnapshotIdDataObj snapshotId)
-        throws CovRemoteServiceException_Exception
-    ;
-
-    /**
-     * 
-     * @param filterSpec
      * @return
-     *     returns java.util.List<com.coverity.ws.v5.CheckerPropertyDataObj>
-     * @throws CovRemoteServiceException_Exception
+     *     returns java.lang.String
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getCheckerProperties", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCheckerProperties")
-    @ResponseWrapper(localName = "getCheckerPropertiesResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCheckerPropertiesResponse")
-    public List<CheckerPropertyDataObj> getCheckerProperties(
-        @WebParam(name = "filterSpec", targetNamespace = "")
-        CheckerPropertyFilterSpecDataObj filterSpec)
-        throws CovRemoteServiceException_Exception
-    ;
+    @RequestWrapper(localName = "getMessageOfTheDay", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetMessageOfTheDay")
+    @ResponseWrapper(localName = "getMessageOfTheDayResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetMessageOfTheDayResponse")
+    public String getMessageOfTheDay();
 
     /**
      * 
      * @param arg0
      */
     @WebMethod
-    @RequestWrapper(localName = "setAcceptingNewCommits", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.SetAcceptingNewCommits")
-    @ResponseWrapper(localName = "setAcceptingNewCommitsResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.SetAcceptingNewCommitsResponse")
-    public void setAcceptingNewCommits(
+    @RequestWrapper(localName = "setMessageOfTheDay", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.SetMessageOfTheDay")
+    @ResponseWrapper(localName = "setMessageOfTheDayResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.SetMessageOfTheDayResponse")
+    public void setMessageOfTheDay(
         @WebParam(name = "arg0", targetNamespace = "")
-        boolean arg0);
+        String arg0);
 
     /**
      * 
@@ -685,24 +654,55 @@ public interface ConfigurationService {
     /**
      * 
      * @return
-     *     returns java.lang.String
+     *     returns java.util.List<com.coverity.ws.v5.PermissionDataObj>
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getMessageOfTheDay", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetMessageOfTheDay")
-    @ResponseWrapper(localName = "getMessageOfTheDayResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetMessageOfTheDayResponse")
-    public String getMessageOfTheDay();
+    @RequestWrapper(localName = "getAllPermissions", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetAllPermissions")
+    @ResponseWrapper(localName = "getAllPermissionsResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetAllPermissionsResponse")
+    public List<PermissionDataObj> getAllPermissions();
 
     /**
      * 
      * @param arg0
      */
     @WebMethod
-    @RequestWrapper(localName = "setMessageOfTheDay", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.SetMessageOfTheDay")
-    @ResponseWrapper(localName = "setMessageOfTheDayResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.SetMessageOfTheDayResponse")
-    public void setMessageOfTheDay(
+    @RequestWrapper(localName = "setAcceptingNewCommits", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.SetAcceptingNewCommits")
+    @ResponseWrapper(localName = "setAcceptingNewCommitsResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.SetAcceptingNewCommitsResponse")
+    public void setAcceptingNewCommits(
         @WebParam(name = "arg0", targetNamespace = "")
-        String arg0);
+        boolean arg0);
+
+    /**
+     * 
+     * @param snapshotId
+     * @throws CovRemoteServiceException_Exception
+     */
+    @WebMethod
+    @RequestWrapper(localName = "deleteSnapshot", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.DeleteSnapshot")
+    @ResponseWrapper(localName = "deleteSnapshotResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.DeleteSnapshotResponse")
+    public void deleteSnapshot(
+        @WebParam(name = "snapshotId", targetNamespace = "")
+        SnapshotIdDataObj snapshotId)
+        throws CovRemoteServiceException_Exception
+    ;
+
+    /**
+     * 
+     * @param filterSpec
+     * @return
+     *     returns java.util.List<com.coverity.ws.v5.CheckerPropertyDataObj>
+     * @throws CovRemoteServiceException_Exception
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "getCheckerProperties", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCheckerProperties")
+    @ResponseWrapper(localName = "getCheckerPropertiesResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetCheckerPropertiesResponse")
+    public List<CheckerPropertyDataObj> getCheckerProperties(
+        @WebParam(name = "filterSpec", targetNamespace = "")
+        CheckerPropertyFilterSpecDataObj filterSpec)
+        throws CovRemoteServiceException_Exception
+    ;
 
     /**
      * 
@@ -723,6 +723,20 @@ public interface ConfigurationService {
 
     /**
      * 
+     * @return
+     *     returns java.util.List<java.lang.String>
+     * @throws CovRemoteServiceException_Exception
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "getDefectStatuses", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetDefectStatuses")
+    @ResponseWrapper(localName = "getDefectStatusesResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetDefectStatusesResponse")
+    public List<String> getDefectStatuses()
+        throws CovRemoteServiceException_Exception
+    ;
+
+    /**
+     * 
      * @param filterSpec
      * @return
      *     returns java.util.List<com.coverity.ws.v5.ComponentMapDataObj>
@@ -735,20 +749,6 @@ public interface ConfigurationService {
     public List<ComponentMapDataObj> getComponentMaps(
         @WebParam(name = "filterSpec", targetNamespace = "")
         ComponentMapFilterSpecDataObj filterSpec)
-        throws CovRemoteServiceException_Exception
-    ;
-
-    /**
-     * 
-     * @return
-     *     returns java.util.List<java.lang.String>
-     * @throws CovRemoteServiceException_Exception
-     */
-    @WebMethod
-    @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getDefectStatuses", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetDefectStatuses")
-    @ResponseWrapper(localName = "getDefectStatusesResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetDefectStatusesResponse")
-    public List<String> getDefectStatuses()
         throws CovRemoteServiceException_Exception
     ;
 
@@ -843,22 +843,5 @@ public interface ConfigurationService {
     @RequestWrapper(localName = "getLicenseState", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetLicenseState")
     @ResponseWrapper(localName = "getLicenseStateResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetLicenseStateResponse")
     public LicenseStateDataObj getLicenseState();
-
-    /**
-     * 
-     * @param arg0
-     * @return
-     *     returns java.util.List<com.coverity.ws.v5.PermissionDataObj>
-     * @throws CovRemoteServiceException_Exception
-     */
-    @WebMethod
-    @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getAllIntegrityControlPermissions", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetAllIntegrityControlPermissions")
-    @ResponseWrapper(localName = "getAllIntegrityControlPermissionsResponse", targetNamespace = "http://ws.coverity.com/v5", className = "com.coverity.ws.v5.GetAllIntegrityControlPermissionsResponse")
-    public List<PermissionDataObj> getAllIntegrityControlPermissions(
-        @WebParam(name = "arg0", targetNamespace = "")
-        String arg0)
-        throws CovRemoteServiceException_Exception
-    ;
 
 }
