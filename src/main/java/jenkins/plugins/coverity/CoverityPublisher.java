@@ -683,7 +683,7 @@ public class CoverityPublisher extends Recorder {
 		DefectService ds = cim.getDefectService();
 
 		PageSpecDataObj pageSpec = new PageSpecDataObj();
-		pageSpec.setPageSize(100);
+		pageSpec.setPageSize(1000);
 		pageSpec.setSortAscending(true);
 
 		StreamIdDataObj streamId = new StreamIdDataObj();
