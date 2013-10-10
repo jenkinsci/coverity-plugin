@@ -665,7 +665,7 @@ public class CoverityPublisher extends Recorder {
 
 					String rootUrl = Hudson.getInstance().getRootUrl();
 					if(rootUrl != null) {
-						listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
+						listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + Util.rawEncode(action.getUrlName()));
 					}
 
 				} catch(CovRemoteServiceException_Exception e) {

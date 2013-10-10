@@ -16,6 +16,7 @@ import com.coverity.ws.v5.MergedDefectDataObj;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.Hudson;
+import hudson.Util;
 
 import java.io.IOException;
 import java.util.List;
@@ -78,7 +79,7 @@ public class CoverityBuildAction implements Action {
 	}
 
 	public String getDisplayName() {
-		return "Coverity Defects (" + getId() + ")";
+		return "Coverity Defects";
 	}
 
 	public String getUrlName() {
@@ -86,7 +87,7 @@ public class CoverityBuildAction implements Action {
 	}
 
 	/**
-	 * ID of the CIM project used for ths build
+	 * ID of the CIM project used for this build
 	 *
 	 * @return
 	 */
@@ -95,7 +96,7 @@ public class CoverityBuildAction implements Action {
 	}
 
 	public String getUrl() {
-		return build.getUrl() + getUrlName();
+		return build.getUrl() + Util.rawEncode(getUrlName());
 	}
 
 	public String getId() {
