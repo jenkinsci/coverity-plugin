@@ -94,6 +94,9 @@
 								<f:select/>
 							</f:entry>
 							<f:entry title="Stream" field="stream">
+								<f:select/>
+							</f:entry>
+							<f:entry title="Language" field="language">
 								<f:select onchange="loadDefectFilters(${id})"/>
 							</f:entry>
 							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"

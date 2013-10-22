@@ -143,7 +143,7 @@ public class CoverityPublisher extends Recorder {
 	}
 
 	private void convertOldData() {
-		CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null, null);
+		CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null, null, null);
 
 		cimInstance = null;
 		project = null;
@@ -686,8 +686,12 @@ public class CoverityPublisher extends Recorder {
 		pageSpec.setPageSize(1000);
 		pageSpec.setSortAscending(true);
 
+        logger.info("pageSpec:" + pageSpec);
+
 		StreamIdDataObj streamId = new StreamIdDataObj();
 		streamId.setName(cimStream.getStream());
+
+        logger.info("streamId:" + streamId);
 
 		MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
 		StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
@@ -703,7 +707,8 @@ public class CoverityPublisher extends Recorder {
 	}
 
 	public String getLanguage(CIMStream cimStream) throws IOException, CovRemoteServiceException_Exception {
-		return getDescriptor().getInstance(cimStream.getInstance()).getStream(cimStream.getStream()).getLanguage();
+        String domain = getDescriptor().getInstance(cimStream.getInstance()).getStream(cimStream.getStream()).getLanguage();
+		return "MIXED".equals(domain) ? cimStream.getLanguage() : domain;
 	}
 
 	public DescriptorImpl getDescriptor() {
@@ -880,6 +885,7 @@ public class CoverityPublisher extends Recorder {
 			if("CXX".equals(language)) return cxxCheckers;
 			if("JAVA".equals(language)) return javaCheckers;
 			if("CSHARP".equals(language)) return csharpCheckers;
+            if("ANY".equals(language)) return cxxCheckers+javaCheckers+csharpCheckers;
 			throw new IllegalArgumentException("Unknown language: " + language);
 		}
 
@@ -1003,6 +1009,7 @@ public class CoverityPublisher extends Recorder {
 				} else {
 					try {
 						String language = publisher.getLanguage(current);
+
 						Set<String> allCheckers = split2(getCheckers(language));
 						DefectFilters defectFilters = current.getDefectFilters();
 						if(defectFilters != null) {

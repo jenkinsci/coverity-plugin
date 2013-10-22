@@ -30,6 +30,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 	private final String project;
 	private final String stream;
 	private final String id;
+    private final String language;
 
 	/**
 	 * Defines how to filter discovered defects. Null for no filtering.
@@ -39,11 +40,12 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 	private final InvocationAssistance invocationAssistanceOverride;
 
 	@DataBoundConstructor
-	public CIMStream(String instance, String project, String stream, DefectFilters defectFilters, String id, InvocationAssistance invocationAssistanceOverride) {
+	public CIMStream(String instance, String project, String stream, DefectFilters defectFilters, String id, String language, InvocationAssistance invocationAssistanceOverride) {
 		this.instance = Util.fixEmpty(instance);
 		this.project = Util.fixEmpty(project);
 		this.stream = Util.fixEmpty(stream);
 		this.id = Util.fixEmpty(id);
+        this.language = Util.fixEmpty(language);
 		this.defectFilters = defectFilters;
 		this.invocationAssistanceOverride = invocationAssistanceOverride;
 	}
@@ -60,7 +62,11 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 		return stream;
 	}
 
-	public String getId() {
+    public String getLanguage() {
+        return language;
+    }
+
+    public String getId() {
 		return id;
 	}
 
@@ -79,6 +85,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 				", project='" + project + '\'' +
 				", stream='" + stream + '\'' +
 				", id='" + id + '\'' +
+                ", language='" + language + '\'' +
 				", defectFilters=" + defectFilters +
 				", invocationAssistanceOverride=" + invocationAssistanceOverride +
 				'}';
@@ -158,13 +165,37 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 			CIMInstance cimInstance = getInstance(instance);
 			if(cimInstance != null) {
 				for(StreamDataObj stream : cimInstance.getStaticStreams(project)) {
-					if("JAVA".equals(stream.getLanguage()) || "CXX".equals(stream.getLanguage()) || "CSHARP".equals(stream.getLanguage())) {
+                    //TODO:handle mixed streams
+                    System.out.println(stream.getId().getName() + " : " + stream.getLanguage());
+                    /* output:
+                    rxr : JAVA
+                    rxr-mixed : MIXED
+                     */
+					if("MIXED".equals(stream.getLanguage()) || "JAVA".equals(stream.getLanguage()) || "CXX".equals(stream.getLanguage()) || "CSHARP".equals(stream.getLanguage())) {
 						result.add(stream.getId().getName());
 					}
 				}
 			}
 			return result;
 		}
+
+        public ListBoxModel doFillLanguageItems(@QueryParameter String instance, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
+            ListBoxModel result = new ListBoxModel();
+            if(StringUtils.isEmpty(stream)) return result;
+            CIMInstance cimInstance = getInstance(instance);
+            if(cimInstance != null) {
+                StreamDataObj str = cimInstance.getStream(stream);
+                if("MIXED".equals(str.getLanguage())) {
+                    result.add("ANY");
+                    result.add("JAVA");
+                    result.add("CXX");
+                    result.add("CSHARP");
+                } else {
+                    result.add(str.getLanguage());
+                }
+            }
+            return result;
+        }
 
 		public ListBoxModel doFillClassificationDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
 			ListBoxModel result = new ListBoxModel();
@@ -226,22 +257,31 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 			return result;
 		}
 
-		public ListBoxModel doFillCheckerDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance, @QueryParameter(value = "../stream") String streamId) throws IOException, CovRemoteServiceException_Exception {
-			if(StringUtils.isEmpty(streamId)) return new ListBoxModel();
+		public ListBoxModel doFillCheckerDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance, @QueryParameter(value = "../stream") String streamId, @QueryParameter(value = "../language") String language) throws IOException, CovRemoteServiceException_Exception {
+			logger.info("streamId : " + streamId);
+            logger.info("cimInstance : " + cimInstance);
+            logger.info("language : " + language);
+
+            if(StringUtils.isEmpty(streamId)) return new ListBoxModel();
 			CIMInstance instance = getInstance(cimInstance);
+            logger.info("instance : " + instance);
 			if(instance == null) return new ListBoxModel();
 
 			StreamDataObj stream = instance.getStream(streamId);
+            logger.info("stream : " + stream);
 			String type = stream.getLanguage();
-			if("CXX".equals(type)) {
-				return getPublisherDescriptor().split(getPublisherDescriptor().getCxxCheckers());
-			} else if("JAVA".equals(type)) {
-				return getPublisherDescriptor().split(getPublisherDescriptor().getJavaCheckers());
-			} else if("CSHARP".equals(type)) {
-				return getPublisherDescriptor().split(getPublisherDescriptor().getCsharpCheckers());
-			} else {
-				return new ListBoxModel();
-			}
+            logger.info("type : " + type);
+
+            if("MIXED".equals(type)) {
+                type = language;
+            }
+
+            try {
+                String cs = getPublisherDescriptor().getCheckers(type);
+                return getPublisherDescriptor().split(cs);
+            } catch (Exception e) {
+                return new ListBoxModel();
+            }
 		}
 	}
 }

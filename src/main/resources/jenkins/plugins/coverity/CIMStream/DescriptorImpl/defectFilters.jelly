@@ -14,6 +14,7 @@
     <j:set var="defectFilters" value="${instance.defectFilters}"/>
     <j:set var="cimInstance" value="${instance.instance}"/>
     <j:set var="stream" value="${instance.stream}"/>
+    <j:set var="language" value="${instance.language}"/>
 
     <tr>
         <td colspan="3">
@@ -63,7 +64,7 @@
                     </j:forEach>
                 </f:entry>
                 <f:entry title="Checker is among:">
-                    <j:set var="checkers" value="${descriptor.doFillCheckerDefectFilterItems(cimInstance,stream)}"/>
+                    <j:set var="checkers" value="${descriptor.doFillCheckerDefectFilterItems(cimInstance,stream,language)}"/>
                     <a name="#checkers-${id}"/>
                     <a href="#checkers-${id}" id="showCheckers-${id}"
                        onclick="document.getElementById('checkers-${id}').style.display='block';document.getElementById('hideCheckers-${id}').style.display='block';this.style.display='none';">
