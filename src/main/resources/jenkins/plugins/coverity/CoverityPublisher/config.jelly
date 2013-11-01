@@ -64,7 +64,32 @@
 			);
 		}
 	</script>
+	<script type="text/javascript">
+		function checkCoverityConfig() {
+			var form = document.getElementById('checkConfigHidden').form;
+			buildFormTree(form);
 
+			var json = form.elements["json"].value;
+			var target = document.getElementById("checkConfigOutput");
+
+			target.innerHTML = 'Validating configuration...';
+
+			new Ajax.Request("${app.rootUrl}descriptor/jenkins.plugins.coverity.CoverityPublisher/checkConfig", {
+				parameters: { json: json },
+				onComplete: function (rsp) {
+					target.innerHTML = rsp.status == 200 ? rsp.responseText
+							: '&lt;a href="" onclick="document.getElementById(\'valerr' +
+							(i = iota++) +
+							'\').style.display=\'block\';return false"&gt;ERROR' +
+							'&lt;/a&gt;' +
+							'&lt;div id="valerr' + i + '" style="display:none"&gt;' +
+							rsp.responseText +
+							'&lt;/div&gt;';
+					Behaviour.applySubtree(target);
+				}
+			});
+		}
+	</script>
 	<tr>
 		<td width="5%"/>
 		<td colspan="3">
@@ -77,6 +102,12 @@
 						</span>
 					</f:entry>
 				</j:if>
+				<f:entry>
+				    <div>
+					    <input type="button" id="checkConfigHidden" onClick="checkCoverityConfig()" value="Check configuration" />
+					    <div id="checkConfigOutput" />
+					</div>
+				</f:entry>
 				<f:entry field="cimStreams"
 						 title="Streams"
 						 description="Streams to perform analysis for and commit to">

@@ -686,12 +686,8 @@ public class CoverityPublisher extends Recorder {
 		pageSpec.setPageSize(1000);
 		pageSpec.setSortAscending(true);
 
-        logger.info("pageSpec:" + pageSpec);
-
 		StreamIdDataObj streamId = new StreamIdDataObj();
 		streamId.setName(cimStream.getStream());
-
-        logger.info("streamId:" + streamId);
 
 		MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
 		StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
@@ -965,31 +961,52 @@ public class CoverityPublisher extends Recorder {
 			return publisher;
 		}
 
+        private JSONObject getJSONClassObject(JSONObject o, String targetClass) {
+            //try old-style json format
+            JSONObject jsonA = o.getJSONObject(getJsonSafeClassName());
+            if(jsonA == null || jsonA.toString().equals("null")) {
+                //new style json format
+                JSON jsonB = (JSON) o.get("publisher");
+                if(jsonB.isArray()) {
+                    JSONArray arr = (JSONArray) jsonB;
+                    for(Object i : arr) {
+                        JSONObject ji = (JSONObject) i;
+                        if(targetClass.equals(ji.get("stapler-class"))) {
+                            return ji;
+                        }
+                    }
+                } else {
+                    return (JSONObject) jsonB;
+                }
+            } else {
+                return jsonA;
+            }
+
+            return null;
+        }
+
+        public void doCheckConfig(StaplerRequest req, StaplerResponse rsp) throws ServletException, IOException {
+            //logger.info(req.getSubmittedForm().toString());
+
+            JSONObject json = getJSONClassObject(req.getSubmittedForm(), getId());
+
+            if(json != null && !json.isNullObject()) {
+                CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
+
+                CheckConfig ccs = new CheckConfig(publisher);
+                ccs.check();
+
+                req.setAttribute("descriptor", ccs.getDescriptor());
+                req.setAttribute("instance", ccs);
+
+                rsp.forward(ccs.getDescriptor(), "checkConfig", req);
+            }
+        }
+
 		public void doDefectFiltersConfig(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
 			logger.info(req.getSubmittedForm().toString());
 
-			JSONObject json = null;
-			//try old-style json format
-			JSONObject jsonA = req.getSubmittedForm().getJSONObject(getJsonSafeClassName());
-			if(jsonA == null || jsonA.toString().equals("null")) {
-				//new style json format
-				JSON jsonB = (JSON) req.getSubmittedForm().get("publisher");
-				String targetClass = getId();
-				if(jsonB.isArray()) {
-					JSONArray arr = (JSONArray) jsonB;
-					for(Object i : arr) {
-						JSONObject ji = (JSONObject) i;
-						if(targetClass.equals(ji.get("stapler-class"))) {
-							json = ji;
-							break;
-						}
-					}
-				} else {
-					json = (JSONObject) jsonB;
-				}
-			} else {
-				json = jsonA;
-			}
+            JSONObject json = getJSONClassObject(req.getSubmittedForm(), getId());
 
 			CIMStream current = null;
 			CIMStream.DescriptorImpl currentDescriptor = null;

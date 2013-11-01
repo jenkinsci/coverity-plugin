@@ -165,12 +165,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 			CIMInstance cimInstance = getInstance(instance);
 			if(cimInstance != null) {
 				for(StreamDataObj stream : cimInstance.getStaticStreams(project)) {
-                    //TODO:handle mixed streams
-                    System.out.println(stream.getId().getName() + " : " + stream.getLanguage());
-                    /* output:
-                    rxr : JAVA
-                    rxr-mixed : MIXED
-                     */
 					if("MIXED".equals(stream.getLanguage()) || "JAVA".equals(stream.getLanguage()) || "CXX".equals(stream.getLanguage()) || "CSHARP".equals(stream.getLanguage())) {
 						result.add(stream.getId().getName());
 					}
@@ -258,19 +252,12 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 		}
 
 		public ListBoxModel doFillCheckerDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance, @QueryParameter(value = "../stream") String streamId, @QueryParameter(value = "../language") String language) throws IOException, CovRemoteServiceException_Exception {
-			logger.info("streamId : " + streamId);
-            logger.info("cimInstance : " + cimInstance);
-            logger.info("language : " + language);
-
             if(StringUtils.isEmpty(streamId)) return new ListBoxModel();
 			CIMInstance instance = getInstance(cimInstance);
-            logger.info("instance : " + instance);
 			if(instance == null) return new ListBoxModel();
 
 			StreamDataObj stream = instance.getStream(streamId);
-            logger.info("stream : " + stream);
 			String type = stream.getLanguage();
-            logger.info("type : " + type);
 
             if("MIXED".equals(type)) {
                 type = language;
