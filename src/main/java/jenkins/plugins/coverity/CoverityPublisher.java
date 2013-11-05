@@ -678,7 +678,7 @@ public class CoverityPublisher extends Recorder {
 		return true;
 	}
 
-	public List<MergedDefectDataObj> getDefectsForSnapshot(CIMStream cimStream, long snapshotId) throws IOException, CovRemoteServiceException_Exception {
+    public List<MergedDefectDataObj> getDefectsForSnapshot(CIMStream cimStream, long snapshotId) throws IOException, CovRemoteServiceException_Exception {
 		CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
 		DefectService ds = cim.getDefectService();
 
@@ -986,14 +986,12 @@ public class CoverityPublisher extends Recorder {
         }
 
         public void doCheckConfig(StaplerRequest req, StaplerResponse rsp) throws ServletException, IOException {
-            //logger.info(req.getSubmittedForm().toString());
-
             JSONObject json = getJSONClassObject(req.getSubmittedForm(), getId());
 
             if(json != null && !json.isNullObject()) {
                 CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
 
-                CheckConfig ccs = new CheckConfig(publisher);
+                CheckConfig ccs = new CheckConfig(publisher, null, null, null);
                 ccs.check();
 
                 req.setAttribute("descriptor", ccs.getDescriptor());

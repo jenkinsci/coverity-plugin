@@ -78,6 +78,24 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 		return invocationAssistanceOverride;
 	}
 
+    public String toPrettyString() {
+        return instance + "/" + project + "/" + stream;
+    }
+
+    public String getDomain() {
+        CIMInstance ci = ((DescriptorImpl)getDescriptor()).getInstance(instance);
+        try {
+            StreamDataObj str = ci.getStream(stream);
+            return str.getLanguage();
+        } catch(IOException e) {
+            e.printStackTrace();
+            return null;
+        } catch(CovRemoteServiceException_Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 	@Override
 	public String toString() {
 		return "CIMStream{" +
