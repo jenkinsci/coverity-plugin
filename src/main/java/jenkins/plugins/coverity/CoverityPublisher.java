@@ -881,7 +881,7 @@ public class CoverityPublisher extends Recorder {
 			if("CXX".equals(language)) return cxxCheckers;
 			if("JAVA".equals(language)) return javaCheckers;
 			if("CSHARP".equals(language)) return csharpCheckers;
-            if("ANY".equals(language)) return cxxCheckers+javaCheckers+csharpCheckers;
+            if("ALL".equals(language)) return cxxCheckers+javaCheckers+csharpCheckers;
 			throw new IllegalArgumentException("Unknown language: " + language);
 		}
 

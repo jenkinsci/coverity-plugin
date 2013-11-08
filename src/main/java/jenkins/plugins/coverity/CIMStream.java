@@ -180,7 +180,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             if(cimInstance != null) {
                 StreamDataObj str = cimInstance.getStream(stream);
                 if("MIXED".equals(str.getLanguage())) {
-                    result.add("ANY");
+                    result.add("ALL");
                     result.add("JAVA");
                     result.add("CXX");
                     result.add("CSHARP");
