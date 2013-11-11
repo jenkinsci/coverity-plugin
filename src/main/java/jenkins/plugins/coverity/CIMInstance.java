@@ -11,20 +11,20 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v5.ConfigurationService;
-import com.coverity.ws.v5.ConfigurationServiceService;
-import com.coverity.ws.v5.CovRemoteServiceException_Exception;
-import com.coverity.ws.v5.DefectService;
-import com.coverity.ws.v5.DefectServiceService;
-import com.coverity.ws.v5.MergedDefectDataObj;
-import com.coverity.ws.v5.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v5.MergedDefectsPageDataObj;
-import com.coverity.ws.v5.PageSpecDataObj;
-import com.coverity.ws.v5.ProjectDataObj;
-import com.coverity.ws.v5.ProjectFilterSpecDataObj;
-import com.coverity.ws.v5.StreamDataObj;
-import com.coverity.ws.v5.StreamFilterSpecDataObj;
-import com.coverity.ws.v5.StreamIdDataObj;
+import com.coverity.ws.v6.ConfigurationService;
+import com.coverity.ws.v6.ConfigurationServiceService;
+import com.coverity.ws.v6.CovRemoteServiceException_Exception;
+import com.coverity.ws.v6.DefectService;
+import com.coverity.ws.v6.DefectServiceService;
+import com.coverity.ws.v6.MergedDefectDataObj;
+import com.coverity.ws.v6.MergedDefectFilterSpecDataObj;
+import com.coverity.ws.v6.MergedDefectsPageDataObj;
+import com.coverity.ws.v6.PageSpecDataObj;
+import com.coverity.ws.v6.ProjectDataObj;
+import com.coverity.ws.v6.ProjectFilterSpecDataObj;
+import com.coverity.ws.v6.StreamDataObj;
+import com.coverity.ws.v6.StreamFilterSpecDataObj;
+import com.coverity.ws.v6.StreamIdDataObj;
 import hudson.model.Hudson;
 import hudson.util.FormValidation;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -51,10 +51,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CIMInstance {
 
-	public static final String COVERITY_V5_NAMESPACE = "http://ws.coverity.com/v5";
+	public static final String COVERITY_V5_NAMESPACE = "http://ws.coverity.com/v6";
 
-	public static final String CONFIGURATION_SERVICE_V5_WSDL = "/ws/v5/configurationservice?wsdl";
-	public static final String DEFECT_SERVICE_V5_WSDL = "/ws/v5/defectservice?wsdl";
+	public static final String CONFIGURATION_SERVICE_V5_WSDL = "/ws/v6/configurationservice?wsdl";
+	public static final String DEFECT_SERVICE_V5_WSDL = "/ws/v6/defectservice?wsdl";
 
 	/**
 	 * Pattern to ignore streams - this is used to filter out internal DA streams, which are irrelevant to this plugin

@@ -1,8 +1,8 @@
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v5.CovRemoteServiceException_Exception;
-import com.coverity.ws.v5.StreamDataObj;
-import com.coverity.ws.v5.StreamFilterSpecDataObj;
+import com.coverity.ws.v6.CovRemoteServiceException_Exception;
+import com.coverity.ws.v6.StreamDataObj;
+import com.coverity.ws.v6.StreamFilterSpecDataObj;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;

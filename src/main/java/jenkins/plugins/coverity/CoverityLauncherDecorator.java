@@ -11,8 +11,8 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v5.CovRemoteServiceException_Exception;
-import com.coverity.ws.v5.StreamDataObj;
+import com.coverity.ws.v6.CovRemoteServiceException_Exception;
+import com.coverity.ws.v6.StreamDataObj;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;

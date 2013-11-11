@@ -11,8 +11,8 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v5.CovRemoteServiceException_Exception;
-import com.coverity.ws.v5.MergedDefectDataObj;
+import com.coverity.ws.v6.CovRemoteServiceException_Exception;
+import com.coverity.ws.v6.MergedDefectDataObj;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.Hudson;

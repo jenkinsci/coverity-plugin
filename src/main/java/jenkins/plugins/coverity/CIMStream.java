@@ -1,14 +1,14 @@
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v5.AttributeDefinitionDataObj;
-import com.coverity.ws.v5.AttributeDefinitionIdDataObj;
-import com.coverity.ws.v5.AttributeValueDataObj;
-import com.coverity.ws.v5.ComponentDataObj;
-import com.coverity.ws.v5.ComponentMapDataObj;
-import com.coverity.ws.v5.ComponentMapFilterSpecDataObj;
-import com.coverity.ws.v5.CovRemoteServiceException_Exception;
-import com.coverity.ws.v5.ProjectDataObj;
-import com.coverity.ws.v5.StreamDataObj;
+import com.coverity.ws.v6.AttributeDefinitionDataObj;
+import com.coverity.ws.v6.AttributeDefinitionIdDataObj;
+import com.coverity.ws.v6.AttributeValueDataObj;
+import com.coverity.ws.v6.ComponentDataObj;
+import com.coverity.ws.v6.ComponentMapDataObj;
+import com.coverity.ws.v6.ComponentMapFilterSpecDataObj;
+import com.coverity.ws.v6.CovRemoteServiceException_Exception;
+import com.coverity.ws.v6.ProjectDataObj;
+import com.coverity.ws.v6.StreamDataObj;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;

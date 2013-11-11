@@ -11,14 +11,14 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v5.CovRemoteServiceException_Exception;
-import com.coverity.ws.v5.DefectService;
-import com.coverity.ws.v5.MergedDefectDataObj;
-import com.coverity.ws.v5.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v5.PageSpecDataObj;
-import com.coverity.ws.v5.SnapshotIdDataObj;
-import com.coverity.ws.v5.StreamIdDataObj;
-import com.coverity.ws.v5.StreamSnapshotFilterSpecDataObj;
+import com.coverity.ws.v6.CovRemoteServiceException_Exception;
+import com.coverity.ws.v6.DefectService;
+import com.coverity.ws.v6.MergedDefectDataObj;
+import com.coverity.ws.v6.MergedDefectFilterSpecDataObj;
+import com.coverity.ws.v6.PageSpecDataObj;
+import com.coverity.ws.v6.SnapshotIdDataObj;
+import com.coverity.ws.v6.StreamIdDataObj;
+import com.coverity.ws.v6.StreamSnapshotFilterSpecDataObj;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;

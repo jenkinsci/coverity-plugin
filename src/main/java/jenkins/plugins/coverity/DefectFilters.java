@@ -11,7 +11,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v5.MergedDefectDataObj;
+import com.coverity.ws.v6.MergedDefectDataObj;
 import hudson.Util;
 import hudson.model.Descriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
