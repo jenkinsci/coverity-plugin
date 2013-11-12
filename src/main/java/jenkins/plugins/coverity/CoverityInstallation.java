@@ -26,43 +26,42 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 public class CoverityInstallation extends NodeProperty<Node> implements EnvironmentSpecific<CoverityInstallation> {
 
-	private final String home;
+    private final String home;
 
-	@DataBoundConstructor
-	public CoverityInstallation(String home) {
-		this.home = Util.fixEmpty(home);
-	}
+    @DataBoundConstructor
+    public CoverityInstallation(String home) {
+        this.home = Util.fixEmpty(home);
+    }
 
-	/**
-	 * The location of the static analysis tools on this node.
-	 * e.g. "C:\Program Files\Coverity\Coverity Static Analysis"
-	 * Not including the bin folder.
-	 * <p/>
-	 * If null, it is expected that the tools are found on the PATH.
-	 */
-	public String getHome() {
-		return home;
-	}
+    /**
+     * The location of the static analysis tools on this node. e.g. "C:\Program Files\Coverity\Coverity Static Analysis"
+     * Not including the bin folder.
+     * <p/>
+     * If null, it is expected that the tools are found on the PATH.
+     */
+    public String getHome() {
+        return home;
+    }
 
-	public CoverityInstallation forEnvironment(EnvVars environment) {
-		if(home == null) return this;
-		return new CoverityInstallation(environment.expand(getHome()));
-	}
+    public CoverityInstallation forEnvironment(EnvVars environment) {
+        if(home == null) return this;
+        return new CoverityInstallation(environment.expand(getHome()));
+    }
 
-	@Extension
-	public static class DescriptorImpl extends NodePropertyDescriptor {
+    @Extension
+    public static class DescriptorImpl extends NodePropertyDescriptor {
 
-		public DescriptorImpl() {
-		}
+        public DescriptorImpl() {
+        }
 
-		@Override
-		public String getDisplayName() {
-			return "Coverity Static Analysis";
-		}
+        @Override
+        public String getDisplayName() {
+            return "Coverity Static Analysis";
+        }
 
-		@Override
-		public boolean isApplicable(Class<? extends Node> targetType) {
-			return targetType != Hudson.class;
-		}
-	}
+        @Override
+        public boolean isApplicable(Class<? extends Node> targetType) {
+            return targetType != Hudson.class;
+        }
+    }
 }

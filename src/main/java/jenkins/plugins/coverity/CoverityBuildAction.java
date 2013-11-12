@@ -26,79 +26,79 @@ import java.util.List;
  * that build.
  */
 public class CoverityBuildAction implements Action {
-	private final AbstractBuild build;
-	private final List<Long> defectIds;
-	private final String projectId;
-	private final String streamId;
-	private final String cimInstance;
-	private String url;
+    private final AbstractBuild build;
+    private final List<Long> defectIds;
+    private final String projectId;
+    private final String streamId;
+    private final String cimInstance;
+    private String url;
 
 
-	public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<Long> matchingDefects) {
-		this.build = build;
-		this.projectId = projectId;
-		this.streamId = streamId;
-		this.cimInstance = cimInstance;
-		this.defectIds = matchingDefects;
-	}
+    public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<Long> matchingDefects) {
+        this.build = build;
+        this.projectId = projectId;
+        this.streamId = streamId;
+        this.cimInstance = cimInstance;
+        this.defectIds = matchingDefects;
+    }
 
-	/**
-	 * The owning build
-	 */
-	public AbstractBuild getBuild() {
-		return build;
-	}
+    /**
+     * The owning build
+     */
+    public AbstractBuild getBuild() {
+        return build;
+    }
 
-	/**
-	 * The IDs defects that were captured for this build
-	 */
-	public List<Long> getDefectIds() {
-		return defectIds;
-	}
+    /**
+     * The IDs defects that were captured for this build
+     */
+    public List<Long> getDefectIds() {
+        return defectIds;
+    }
 
-	/**
-	 * The data for the defects that were captured for this build. This will perform a call to the web service.
-	 */
-	public List<MergedDefectDataObj> getDefects() throws IOException, CovRemoteServiceException_Exception {
-		CIMInstance cim = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
-		return cim.getDefects(streamId, defectIds);
-	}
+    /**
+     * The data for the defects that were captured for this build. This will perform a call to the web service.
+     */
+    public List<MergedDefectDataObj> getDefects() throws IOException, CovRemoteServiceException_Exception {
+        CIMInstance cim = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
+        return cim.getDefects(streamId, defectIds);
+    }
 
-	/**
-	 * Returns the URL to the page for this defect in the CIM instance.
-	 */
-	public String getURL(MergedDefectDataObj defect) throws IOException, CovRemoteServiceException_Exception {
-		CIMInstance instance = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
-		return String.format("http://%s:%d/sourcebrowser.htm?projectId=%s#mergedDefectId=%d",
-				instance.getHost(), instance.getPort(), instance.getProjectKey(projectId), defect.getCid());
-	}
+    /**
+     * Returns the URL to the page for this defect in the CIM instance.
+     */
+    public String getURL(MergedDefectDataObj defect) throws IOException, CovRemoteServiceException_Exception {
+        CIMInstance instance = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
+        return String.format("http://%s:%d/sourcebrowser.htm?projectId=%s#mergedDefectId=%d",
+                instance.getHost(), instance.getPort(), instance.getProjectKey(projectId), defect.getCid());
+    }
 
-	public String getIconFileName() {
-		return "/plugin/coverity/icons/coverity-logo-400px.png";
-	}
+    public String getIconFileName() {
+        return "/plugin/coverity/icons/coverity-logo-400px.png";
+    }
 
-	public String getDisplayName() {
-		return "Coverity Defects (" + getId() + ")";
-	}
+    public String getDisplayName() {
+        return "Coverity Defects (" + getId() + ")";
+    }
 
-	public String getUrlName() {
-		return "coverity_" + getId();
-	}
+    public String getUrlName() {
+        return "coverity_" + getId();
+    }
 
-	/**
-	 * ID of the CIM project used for ths build
-	 *
-	 * @return
-	 */
-	public String getProjectId() {
-		return projectId;
-	}
+    /**
+     * ID of the CIM project used for ths build
+     *
+     * @return
+     */
+    public String getProjectId() {
+        return projectId;
+    }
 
-	public String getUrl() {
-		return build.getUrl() + getUrlName();
-	}
+    public String getUrl() {
+        return build.getUrl() + getUrlName();
+    }
 
-	public String getId() {
-		return cimInstance + "_" + projectId + "_" + streamId;
-	}
+    public String getId() {
+        return cimInstance + "_" + projectId + "_" + streamId;
+    }
 }

@@ -2,10 +2,12 @@ package jenkins.plugins.coverity;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.MarkupText;
-import hudson.console.ConsoleAnnotator;
-import hudson.console.ConsoleNote;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Environment;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 
 import javax.annotation.Nonnull;
@@ -48,7 +50,7 @@ public class CoverityRunListener extends RunListener<Run> {
         for(CheckConfig.Status s : cc.getStatus()) {
             if(s instanceof CheckConfig.StreamStatus) {
                 listener.getLogger().print("[Stream] " + ((CheckConfig.StreamStatus) s).getStream().toPrettyString() + " : ");
-            } else if (s instanceof CheckConfig.NodeStatus) {
+            } else if(s instanceof CheckConfig.NodeStatus) {
                 listener.getLogger().print("[Node] " + ((CheckConfig.NodeStatus) s).getNode().getDisplayName() + " : ");
             }
             listener.getLogger().println(s.getStatus());
