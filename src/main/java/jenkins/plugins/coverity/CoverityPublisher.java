@@ -21,7 +21,6 @@ import com.coverity.ws.v6.StreamIdDataObj;
 import com.coverity.ws.v6.StreamSnapshotFilterSpecDataObj;
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractBuild;
@@ -30,17 +29,17 @@ import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Executor;
-import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.util.ArgumentListBuilder;
 import hudson.util.FormValidation;
 import hudson.util.IOUtils;
 import hudson.util.ListBoxModel;
+import jenkins.plugins.coverity.analysis.CoverityToolHandler;
+import jenkins.plugins.coverity.analysis.PreFresnoToolHandler;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -51,7 +50,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -60,8 +58,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -69,8 +65,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This publisher optionally invokes cov-analyze/cov-analyze-java and cov-commit-defects. Afterwards the latest list of
@@ -238,71 +232,6 @@ public class CoverityPublisher extends Recorder {
         return hideChart ? super.getProjectAction(project) : new CoverityProjectAction(project);
     }
 
-    public static File[] listFilesAsArray(
-            File directory,
-            FilenameFilter filter,
-            boolean recurse) {
-        Collection<File> files = listFiles(directory, filter, recurse);
-
-        File[] arr = new File[files.size()];
-        return files.toArray(arr);
-    }
-
-    public static Collection<File> listFiles(
-            File directory,
-            FilenameFilter filter,
-            boolean recurse) {
-        Vector<File> files = new Vector<File>();
-        File[] entries = directory.listFiles();
-
-        for(File entry : entries) {
-            if(filter == null || filter.accept(directory, entry.getName())) {
-                files.add(entry);
-            }
-
-            if(recurse && entry.isDirectory()) {
-                files.addAll(listFiles(entry, filter, recurse));
-            }
-        }
-
-        return files;
-    }
-
-    public File[] findAssemblies(String dirName) {
-        File dir = new File(dirName);
-
-        return listFilesAsArray(dir, new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                if(filename.endsWith(".exe") || filename.endsWith(".dll")) {
-                    String pathname = dir.getAbsolutePath();
-                    pathname = pathname + File.separator + filename;
-                    ;
-                    String pdbFilename = pathname.replaceAll(".exe$", ".pdb");
-                    pdbFilename = pdbFilename.replaceAll(".dll$", ".pdb");
-
-                    File pdbFile = new File(pdbFilename);
-
-                    return pdbFile.exists();
-                }
-
-                return false;
-            }
-
-        }, true);
-
-    }
-
-    public File[] findMsvscaOutputFiles(String dirName) {
-        File dir = new File(dirName);
-
-        return listFilesAsArray(dir, new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith("CodeAnalysisLog.xml");
-            }
-        }, true);
-
-    }
-
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         if(isOldDataPresent()) {
@@ -312,394 +241,11 @@ public class CoverityPublisher extends Recorder {
 
         if(build.getResult().isWorseOrEqualTo(Result.FAILURE)) return true;
 
-        CoverityTempDir temp = build.getAction(CoverityTempDir.class);
+        CoverityVersion version = CheckConfig.checkNode(this, build, launcher, listener).getVersion();
 
-        Node node = Executor.currentExecutor().getOwner().getNode();
-        String home = getDescriptor().getHome(node, build.getEnvironment(listener));
-        if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
-        }
+        CoverityToolHandler cth = CoverityToolHandler.getHandler(version);
 
-        // If WAR files specified, emit them prior to running analysis
-        // Do not check for presence of Java streams or Java in build
-        String javaWarFile = invocationAssistance != null ? invocationAssistance.getJavaWarFile() : null;
-        if(javaWarFile != null) {
-            listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
-
-            String covEmitJava = "cov-emit-java";
-            covEmitJava = new FilePath(launcher.getChannel(), home).child("bin").child(covEmitJava).getRemote();
-
-            List<String> cmd = new ArrayList<String>();
-            cmd.add(covEmitJava);
-            cmd.add("--dir");
-            cmd.add(temp.tempDir.getRemote());
-            cmd.add("--webapp-archive");
-            cmd.add(javaWarFile);
-
-            try {
-                CoverityLauncherDecorator.SKIP.set(true);
-
-                int result = launcher.
-                        launch().
-                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                        pwd(build.getWorkspace()).
-                        stdout(listener).
-                        join();
-
-                if(result != 0) {
-                    listener.getLogger().println("[Coverity] " + covEmitJava + " returned " + result + ", aborting...");
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-            } finally {
-                CoverityLauncherDecorator.SKIP.set(false);
-            }
-        }
-
-        Set<String> analyzedLanguages = new HashSet<String>();
-
-        //run cov-analyze
-        for(CIMStream cimStream : getCimStreams()) {
-            CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
-
-            String language = null;
-            try {
-                language = getLanguage(cimStream);
-            } catch(CovRemoteServiceException_Exception e) {
-                e.printStackTrace(listener.error("Error while retrieving stream information for " + cimStream.getStream()));
-                return false;
-            }
-
-            if(invocationAssistance != null) {
-                InvocationAssistance effectiveIA = invocationAssistance;
-                if(cimStream.getInvocationAssistanceOverride() != null) {
-                    effectiveIA = invocationAssistance.merge(cimStream.getInvocationAssistanceOverride());
-                }
-
-                try {
-                    if("CSHARP".equals(language) && effectiveIA.getCsharpAssemblies() != null) {
-                        String csharpAssembliesStr = effectiveIA.getCsharpAssemblies();
-                        listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
-                    }
-
-                    String covAnalyze = null;
-                    if("JAVA".equals(language)) {
-                        covAnalyze = "cov-analyze-java";
-                    } else if("CSHARP".equals(language)) {
-                        covAnalyze = "cov-analyze-cs";
-                    } else {
-                        covAnalyze = "cov-analyze";
-                    }
-
-                    if(home != null) {
-                        covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
-                    }
-
-                    CoverityLauncherDecorator.SKIP.set(true);
-
-                    if(!analyzedLanguages.contains(language)) {
-                        List<String> cmd = new ArrayList<String>();
-                        cmd.add(covAnalyze);
-                        cmd.add("--dir");
-                        cmd.add(temp.tempDir.getRemote());
-
-                        // For C# add the list of assemblies
-                        if("CSHARP".equals(language)) {
-                            String csharpAssemblies = effectiveIA.getCsharpAssemblies();
-                            if(csharpAssemblies != null) {
-                                cmd.add(csharpAssemblies);
-                            }
-                        }
-
-                        boolean csharpAutomaticAssemblies = invocationAssistance.getCsharpAutomaticAssemblies();
-                        if(csharpAutomaticAssemblies) {
-                            listener.getLogger().println("[Coverity] Searching for C# assemblies...");
-                            File[] automaticAssemblies = findAssemblies(build.getWorkspace().getRemote());
-
-                            for(File assembly : automaticAssemblies) {
-                                cmd.add(assembly.getAbsolutePath());
-                            }
-                        }
-
-
-                        listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-                        if(effectiveIA.getAnalyzeArguments() != null) {
-                            for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
-                                cmd.add(arg);
-                            }
-                        }
-
-                        int result = launcher.
-                                launch().
-                                cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                                pwd(build.getWorkspace()).
-                                stdout(listener).
-                                join();
-
-                        analyzedLanguages.add(language);
-
-                        if(result != 0) {
-                            listener.getLogger().println("[Coverity] " + covAnalyze + " returned " + result + ", aborting...");
-                            build.setResult(Result.FAILURE);
-                            return false;
-                        }
-                    } else {
-                        listener.getLogger().println("Skipping analysis, because language " + language + " has already been analyzed");
-                    }
-                } finally {
-                    CoverityLauncherDecorator.SKIP.set(false);
-                }
-            }
-        }
-
-        // Import Microsoft Visual Studio Code Anaysis results
-        if(invocationAssistance != null) {
-            boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
-            if(analyzedLanguages.contains("CSHARP") && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
-                String covImportMsvsca = "cov-import-msvsca";
-                covImportMsvsca = new FilePath(launcher.getChannel(), home).child("bin").child(covImportMsvsca).getRemote();
-
-                List<String> importCmd = new ArrayList<String>();
-                importCmd.add(covImportMsvsca);
-                importCmd.add("--dir");
-                importCmd.add(temp.tempDir.getRemote());
-                importCmd.add("--append");
-
-                listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
-                File[] msvscaOutputFiles = {};
-
-                if(csharpMsvsca) {
-                    msvscaOutputFiles = findMsvscaOutputFiles(build.getWorkspace().getRemote());
-                }
-
-                for(File outputFile : msvscaOutputFiles) {
-                    //importCmd.add(outputFile.getName());
-                    importCmd.add(outputFile.getAbsolutePath());
-                }
-
-                if(csharpMsvscaOutputFiles != null && csharpMsvscaOutputFiles.length() > 0) {
-                    importCmd.add(csharpMsvscaOutputFiles);
-                }
-
-                if(msvscaOutputFiles.length == 0 && (csharpMsvscaOutputFiles == null || csharpMsvscaOutputFiles.length() == 0)) {
-                    listener.getLogger().println("[MSVSCA] MSVSCA No results found, skipping");
-                } else {
-                    listener.getLogger().println("[MSVSCA] MSVSCA Import cmd so far is: " + importCmd.toString());
-
-                    int importResult = launcher.
-                            launch().
-                            cmds(new ArgumentListBuilder(importCmd.toArray(new String[importCmd.size()]))).
-                            pwd(build.getWorkspace()).
-                            stdout(listener).
-                            join();
-                    if(importResult != 0) {
-                        listener.getLogger().println("[Coverity] " + covImportMsvsca + " returned " + importResult + ", aborting...");
-                        build.setResult(Result.FAILURE);
-                        return false;
-                    }
-                }
-            }
-        }
-
-        //run cov-commit-defects
-        for(CIMStream cimStream : getCimStreams()) {
-            CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
-
-            String language = null;
-            try {
-                language = getLanguage(cimStream);
-            } catch(CovRemoteServiceException_Exception e) {
-                e.printStackTrace(listener.error("Error while retrieving stream information for " + cimStream.getStream()));
-                return false;
-            }
-
-            if(invocationAssistance != null) {
-                InvocationAssistance effectiveIA = invocationAssistance;
-                if(cimStream.getInvocationAssistanceOverride() != null) {
-                    effectiveIA = invocationAssistance.merge(cimStream.getInvocationAssistanceOverride());
-                }
-
-                try {
-                    if("CSHARP".equals(language) && effectiveIA.getCsharpAssemblies() != null) {
-                        String csharpAssembliesStr = effectiveIA.getCsharpAssemblies();
-                        listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
-                    }
-
-                    String covCommitDefects = "cov-commit-defects";
-
-                    if(home != null) {
-                        covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
-                    }
-
-                    CoverityLauncherDecorator.SKIP.set(true);
-
-                    boolean useDataPort = cim.getDataPort() != 0;
-
-                    List<String> cmd = new ArrayList<String>();
-                    cmd.add(covCommitDefects);
-                    cmd.add("--dir");
-                    cmd.add(temp.tempDir.getRemote());
-                    cmd.add("--host");
-                    cmd.add(cim.getHost());
-                    cmd.add(useDataPort ? "--dataport" : "--port");
-                    cmd.add(useDataPort ? Integer.toString(cim.getDataPort()) : Integer.toString(cim.getPort()));
-                    cmd.add("--stream");
-                    cmd.add(cimStream.getStream());
-                    cmd.add("--user");
-                    cmd.add(cim.getUser());
-
-                    if(effectiveIA.getCommitArguments() != null) {
-                        for(String arg : Util.tokenize(effectiveIA.getCommitArguments())) {
-                            cmd.add(arg);
-                        }
-                    }
-
-                    ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
-                    int result = launcher.
-                            launch().
-                            cmds(args).
-                            envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
-                            stdout(listener).
-                            stderr(listener.getLogger()).
-                            join();
-
-                    if(result != 0) {
-                        listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
-
-                        build.setResult(Result.FAILURE);
-                        return false;
-                    }
-                } finally {
-                    CoverityLauncherDecorator.SKIP.set(false);
-                }
-            }
-        }
-
-        //keep if keepIntDir is set, or if the int dir is the default (keepIntDir is only useful if a custom int
-        //dir is set)
-        if(temp != null) {
-            //same as !(keepIntDir && !temp.def)
-            if(!keepIntDir || temp.def) {
-                listener.getLogger().println("[Coverity] deleting intermediate directory");
-                temp.tempDir.deleteRecursive();
-            } else {
-                listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.tempDir);
-            }
-        }
-
-        //TODO: handle multiple snapshots
-        Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
-        BufferedReader reader = new BufferedReader(build.getLogReader());
-        String line = null;
-        List<Long> snapshotIds = new ArrayList<Long>();
-        try {
-            while((line = reader.readLine()) != null) {
-                Matcher m = snapshotPattern.matcher(line);
-                if(m.matches()) {
-                    snapshotIds.add(Long.parseLong(m.group(1)));
-                }
-            }
-        } finally {
-            reader.close();
-        }
-
-        if(snapshotIds.size() != getCimStreams().size()) {
-            listener.getLogger().println("[Coverity] Wrong number of snapshot IDs found in build log");
-            build.setResult(Result.FAILURE);
-            return false;
-        }
-
-        listener.getLogger().println("[Coverity] Found snapshot IDs " + snapshotIds);
-
-        if(!skipFetchingDefects) {
-            for(int i = 0; i < cimStreams.size(); i++) {
-                CIMStream cimStream = cimStreams.get(i);
-                long snapshotId = snapshotIds.get(i);
-                try {
-                    CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
-
-                    listener.getLogger().println("[Coverity] Fetching defects for stream " + cimStream.getStream());
-
-                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cimStream, snapshotId);
-
-                    listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
-
-                    Set<String> checkers = new HashSet<String>();
-                    for(MergedDefectDataObj defect : defects) {
-                        checkers.add(defect.getCheckerName());
-                    }
-                    getDescriptor().updateCheckers(getLanguage(cimStream), checkers);
-
-                    List<Long> matchingDefects = new ArrayList<Long>();
-
-                    for(MergedDefectDataObj defect : defects) {
-                        if(cimStream.getDefectFilters() == null) {
-                            matchingDefects.add(defect.getCid());
-                        } else {
-                            boolean match = cimStream.getDefectFilters().matches(defect);
-                            if(match) {
-                                matchingDefects.add(defect.getCid());
-                            }
-                        }
-                    }
-
-                    if(!matchingDefects.isEmpty()) {
-                        listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
-                        if(failBuild) {
-                            if(build.getResult().isBetterThan(Result.FAILURE)) {
-                                build.setResult(Result.FAILURE);
-                            }
-                        }
-                    } else {
-                        listener.getLogger().println("[Coverity] No defects matched all filters.");
-                    }
-
-                    CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
-                    build.addAction(action);
-
-                    if(!matchingDefects.isEmpty() && mailSender != null) {
-                        mailSender.execute(action, listener);
-                    }
-
-                    String rootUrl = Hudson.getInstance().getRootUrl();
-                    if(rootUrl != null) {
-                        listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
-                    }
-
-                } catch(CovRemoteServiceException_Exception e) {
-                    e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    public List<MergedDefectDataObj> getDefectsForSnapshot(CIMStream cimStream, long snapshotId) throws IOException, CovRemoteServiceException_Exception {
-        CIMInstance cim = getDescriptor().getInstance(cimStream.getInstance());
-        DefectService ds = cim.getDefectService();
-
-        PageSpecDataObj pageSpec = new PageSpecDataObj();
-        pageSpec.setPageSize(1000);
-        pageSpec.setSortAscending(true);
-
-        StreamIdDataObj streamId = new StreamIdDataObj();
-        streamId.setName(cimStream.getStream());
-
-        MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
-        StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
-        SnapshotIdDataObj snapid = new SnapshotIdDataObj();
-        snapid.setId(snapshotId);
-
-        sfilter.setStreamId(streamId);
-
-        sfilter.getSnapshotIdIncludeList().add(snapid);
-        filter.getStreamSnapshotFilterSpecIncludeList().add(sfilter);
-
-        return ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec).getMergedDefects();
+        return cth.perform(build, launcher, listener, this);
     }
 
     public String getLanguage(CIMStream cimStream) throws IOException, CovRemoteServiceException_Exception {

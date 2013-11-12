@@ -66,11 +66,11 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         status.clear();
 
         for(CIMStream cs : publisher.getCimStreams()) {
-            status.add(checkStream(cs));
+            status.add(checkStream(publisher, cs));
         }
 
         if(launcher != null) {
-            NodeStatus ns = checkNode(build, launcher, listener);
+            NodeStatus ns = checkNode(publisher, build, launcher, listener);
             status.add(ns);
 
             //don't bother continuing unless we're all valid so far
@@ -125,7 +125,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                     for(Status s : status) {
                         if(s instanceof StreamStatus) {
                             StreamStatus ss = (StreamStatus) s;
-                            if(!ss.getStream().getDomain().equals("MIXED")) {
+                            if(!ss.getStream().getLanguage().equals("ALL")) {
                                 singleDomainStreamExists = true;
                                 languagesToAnalyze.add(ss.getStream().getLanguage());
                             } else {
@@ -137,6 +137,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                     }
 
                     if(singleDomainStreamExists && languagesToAnalyze.size() > 1) {
+                        System.out.println(languagesToAnalyze);
                         newStatus.add(new Status(false, "There is a single-domain stream, but there are multiple languages to be committed."));
                     }
 
@@ -160,7 +161,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         }
     }
 
-    private StreamStatus checkStream(CIMStream cs) {
+    public static StreamStatus checkStream(CoverityPublisher publisher, CIMStream cs) {
         CIMInstance ci = publisher.getDescriptor().getInstance(cs.getInstance());
 
         //check if instance is valid
@@ -211,7 +212,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         return new StreamStatus(true, "OK (version: " + version + ")", cs, version);
     }
 
-    private NodeStatus checkNode(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+    public static NodeStatus checkNode(CoverityPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         Node node = Executor.currentExecutor().getOwner().getNode();
         try {
             String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
@@ -244,7 +245,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         }
     }
 
-    public CoverityVersion getCoverityVersion(String versionFileContents) throws IOException {
+    public static CoverityVersion getCoverityVersion(String versionFileContents) throws IOException {
         String[] lines = versionFileContents.split("\n");
 
         for(String line : lines) {

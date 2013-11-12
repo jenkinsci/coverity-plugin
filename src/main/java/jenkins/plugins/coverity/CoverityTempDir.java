@@ -18,12 +18,20 @@ import hudson.model.InvisibleAction;
  * Created by CoverityLauncherDecorator to store the location of the temporary directory for Coverity for a certain
  * build
  */
-class CoverityTempDir extends InvisibleAction {
+public class CoverityTempDir extends InvisibleAction {
     transient final FilePath tempDir;
     transient final boolean def;
 
-    CoverityTempDir(FilePath tempDir, boolean def) {
+    public CoverityTempDir(FilePath tempDir, boolean def) {
         this.tempDir = tempDir;
         this.def = def;
+    }
+
+    public FilePath getTempDir() {
+        return tempDir;
+    }
+
+    public boolean isDef() {
+        return def;
     }
 }

@@ -265,7 +265,7 @@ public class CIMInstance {
 
     public List<StreamDataObj> getStaticStreams(String projectId) throws IOException, CovRemoteServiceException_Exception {
         /*
-			to get a list of all static streams for one project,
+            to get a list of all static streams for one project,
             - get a list of streams for the project
             - get a list of all static streams
             - compute the intersection
