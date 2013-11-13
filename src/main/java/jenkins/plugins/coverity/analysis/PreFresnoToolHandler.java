@@ -1,13 +1,7 @@
 package jenkins.plugins.coverity.analysis;
 
 import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.DefectService;
 import com.coverity.ws.v6.MergedDefectDataObj;
-import com.coverity.ws.v6.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v6.PageSpecDataObj;
-import com.coverity.ws.v6.SnapshotIdDataObj;
-import com.coverity.ws.v6.StreamIdDataObj;
-import com.coverity.ws.v6.StreamSnapshotFilterSpecDataObj;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
@@ -29,16 +23,12 @@ import jenkins.plugins.coverity.InvocationAssistance;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

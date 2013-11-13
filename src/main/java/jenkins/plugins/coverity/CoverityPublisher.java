@@ -12,13 +12,6 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.DefectService;
-import com.coverity.ws.v6.MergedDefectDataObj;
-import com.coverity.ws.v6.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v6.PageSpecDataObj;
-import com.coverity.ws.v6.SnapshotIdDataObj;
-import com.coverity.ws.v6.StreamIdDataObj;
-import com.coverity.ws.v6.StreamSnapshotFilterSpecDataObj;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -28,7 +21,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
-import hudson.model.Executor;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
@@ -39,7 +31,6 @@ import hudson.util.FormValidation;
 import hudson.util.IOUtils;
 import hudson.util.ListBoxModel;
 import jenkins.plugins.coverity.analysis.CoverityToolHandler;
-import jenkins.plugins.coverity.analysis.PreFresnoToolHandler;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -50,20 +41,16 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Vector;
 import java.util.logging.Logger;
 
 /**

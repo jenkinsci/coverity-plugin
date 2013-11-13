@@ -1,18 +1,33 @@
 package jenkins.plugins.coverity.analysis;
 
-import com.coverity.ws.v6.*;
+import com.coverity.ws.v6.CovRemoteServiceException_Exception;
+import com.coverity.ws.v6.DefectService;
+import com.coverity.ws.v6.MergedDefectDataObj;
+import com.coverity.ws.v6.MergedDefectFilterSpecDataObj;
+import com.coverity.ws.v6.PageSpecDataObj;
+import com.coverity.ws.v6.SnapshotIdDataObj;
+import com.coverity.ws.v6.StreamIdDataObj;
+import com.coverity.ws.v6.StreamSnapshotFilterSpecDataObj;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import hudson.model.Result;
 import hudson.util.ArgumentListBuilder;
-import jenkins.plugins.coverity.*;
+import jenkins.plugins.coverity.CIMInstance;
+import jenkins.plugins.coverity.CIMStream;
+import jenkins.plugins.coverity.CoverityLauncherDecorator;
+import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.CoverityTempDir;
+import jenkins.plugins.coverity.CoverityVersion;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Vector;
 
 public abstract class CoverityToolHandler {
     private static final CoverityVersion VERSION_FRESNO = new CoverityVersion("fresno");
