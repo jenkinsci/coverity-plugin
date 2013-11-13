@@ -32,6 +32,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * FresnoToolHandler calls cov-analyze and cov-commit-defects in a way consistent with Fresno (and presumably some later
+ * versions) of Coverity analysis.
+ * <p/>
+ * Most of the code is currently the same as {@link PreFresnoToolHandler}.
+ */
 public class FresnoToolHandler extends CoverityToolHandler {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException {

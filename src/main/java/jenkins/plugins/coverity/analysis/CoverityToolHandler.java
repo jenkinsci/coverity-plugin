@@ -29,9 +29,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
+/**
+ * CoverityToolHandler handles the actual executing of Coverity executables. This class provides common functionality,
+ * and {@link #getHandler(CoverityVersion)} to choose an appropriate subclass.}
+ */
 public abstract class CoverityToolHandler {
     private static final CoverityVersion VERSION_FRESNO = new CoverityVersion("fresno");
 
+    /**
+     * Find a suitable {@link CoverityToolHandler} to run analysis.
+     * @param version the version of Coverity analysis present on the {@link hudson.model.Node} where the analysis will
+     *                run.
+     * @return A {@link CoverityToolHandler} that can run the given version of analysis.
+     */
     public static CoverityToolHandler getHandler(CoverityVersion version) {
         if(version.compareTo(VERSION_FRESNO) < 0) {
             return new PreFresnoToolHandler();

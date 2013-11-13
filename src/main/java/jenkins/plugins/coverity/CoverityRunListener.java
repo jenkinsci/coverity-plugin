@@ -13,6 +13,10 @@ import hudson.model.listeners.RunListener;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
+/**
+ * CoverityRunListener injects the Coverity pre-build check into all builds where Coverity build/analysis/commit is
+ * enabled. The check runs before code is checked out.
+ */
 @Extension
 public class CoverityRunListener extends RunListener<Run> {
     @Override

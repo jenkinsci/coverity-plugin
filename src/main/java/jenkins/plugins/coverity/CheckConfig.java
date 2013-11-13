@@ -24,6 +24,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A configuration checker, and the results of such a check.
+ */
 public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
     private CoverityPublisher publisher;
     private final List<Status> status;
@@ -31,6 +34,14 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
     private AbstractBuild<?, ?> build;
     private BuildListener listener;
 
+    /**
+     * Create a new check.
+     *
+     * @param publisher required
+     * @param build     optional (without this, node checking will be skipped)
+     * @param launcher  optional (without this, node checking will be skipped)
+     * @param listener  optional (without this, node checking will be skipped)
+     */
     public CheckConfig(CoverityPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         this.publisher = publisher;
         this.launcher = launcher;
@@ -39,6 +50,10 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         this.status = new ArrayList<Status>();
     }
 
+    /**
+     * Returns true if all checked aspects of the configuration are valid. If this is true, then it's almost certain
+     * that the corresponding build will succeed.
+     */
     public boolean isValid() {
         for(Status s : status) {
             if(!s.isValid()) {
@@ -257,6 +272,10 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         return null;
     }
 
+    /**
+     * The result of a single check. Non-subclasses are general configuration statuses, not associated with a Node or
+     * Stream, for example.
+     */
     public static class Status {
         boolean valid;
         String status;

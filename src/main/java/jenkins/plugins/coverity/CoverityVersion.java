@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * An abstract representation of a Coverity version number. Conventional version numbers, as well as current and past
+ * codenames are all valid and comparable.
+ */
 public class CoverityVersion implements Comparable<CoverityVersion> {
     static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\w+)");
 
@@ -63,17 +67,23 @@ public class CoverityVersion implements Comparable<CoverityVersion> {
             return new CoverityVersion(m.group(5));
         } else {
             //number
-            return new CoverityVersion(i(m, 1), i(m, 2), i(m, 3), i(m, 4));
+            return new CoverityVersion(gi(m, 1), gi(m, 2), gi(m, 3), gi(m, 4));
         }
     }
 
-    private static int i(Matcher m, int group) {
+    /**
+     * Shorthand method. Return an integer from the given group of the given {@link Matcher}
+     */
+    private static int gi(Matcher m, int group) {
         if(m.group(group) == null) {
             return 0;
         }
         return Integer.parseInt(m.group(group));
     }
 
+    /**
+     * Converts from a codename version to an equivalent numbered version if necessary.
+     */
     public CoverityVersion getEffectiveVersion() {
         if(isCodeName) {
             if(codeNameEquivalents.containsKey(codeName)) {
