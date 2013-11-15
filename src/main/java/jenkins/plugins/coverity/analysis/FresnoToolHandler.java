@@ -284,7 +284,10 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     for(MergedDefectDataObj defect : defects) {
                         checkers.add(defect.getCheckerName());
                     }
-                    publisher.getDescriptor().updateCheckers(publisher.getLanguage(cimStream), checkers);
+                    if(!"ALL".equals(cimStream.getLanguage())) {
+                        //we can only update checkers if we analyzed exactly one language
+                        publisher.getDescriptor().updateCheckers(publisher.getLanguage(cimStream), checkers);
+                    }
 
                     List<Long> matchingDefects = new ArrayList<Long>();
 
