@@ -16,7 +16,7 @@
 
 			var json = form.elements["json"].value;
 
-			new Ajax.Request("${app.rootURL}descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
+			new Ajax.Request("../..descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
 				parameters: { json: json, id: id },
 				onComplete: function (rsp) {
 					var target = document.getElementById("defectFilters-" + id);
@@ -74,7 +74,7 @@
 
 			target.innerHTML = 'Validating configuration...';
 
-			new Ajax.Request("${app.rootURL}descriptor/jenkins.plugins.coverity.CoverityPublisher/checkConfig", {
+			new Ajax.Request("../../descriptor/jenkins.plugins.coverity.CoverityPublisher/checkConfig", {
 				parameters: { json: json },
 				onComplete: function (rsp) {
 					target.innerHTML = rsp.status == 200 ? rsp.responseText
