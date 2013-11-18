@@ -243,31 +243,30 @@ public class FresnoToolHandler extends CoverityToolHandler {
             }
         }
 
-        //TODO: handle multiple snapshots
-        Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
-        BufferedReader reader = new BufferedReader(build.getLogReader());
-        String line = null;
-        List<Long> snapshotIds = new ArrayList<Long>();
-        try {
-            while((line = reader.readLine()) != null) {
-                Matcher m = snapshotPattern.matcher(line);
-                if(m.matches()) {
-                    snapshotIds.add(Long.parseLong(m.group(1)));
-                }
-            }
-        } finally {
-            reader.close();
-        }
-
-        if(snapshotIds.size() != publisher.getCimStreams().size()) {
-            listener.getLogger().println("[Coverity] Wrong number of snapshot IDs found in build log");
-            build.setResult(Result.FAILURE);
-            return false;
-        }
-
-        listener.getLogger().println("[Coverity] Found snapshot IDs " + snapshotIds);
-
         if(!publisher.isSkipFetchingDefects()) {
+            Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
+            BufferedReader reader = new BufferedReader(build.getLogReader());
+            String line = null;
+            List<Long> snapshotIds = new ArrayList<Long>();
+            try {
+                while((line = reader.readLine()) != null) {
+                    Matcher m = snapshotPattern.matcher(line);
+                    if(m.matches()) {
+                        snapshotIds.add(Long.parseLong(m.group(1)));
+                    }
+                }
+            } finally {
+                reader.close();
+            }
+
+            if(snapshotIds.size() != publisher.getCimStreams().size()) {
+                listener.getLogger().println("[Coverity] Wrong number of snapshot IDs found in build log");
+                build.setResult(Result.FAILURE);
+                return false;
+            }
+
+            listener.getLogger().println("[Coverity] Found snapshot IDs " + snapshotIds);
+
             for(int i = 0; i < publisher.getCimStreams().size(); i++) {
                 CIMStream cimStream = publisher.getCimStreams().get(i);
                 long snapshotId = snapshotIds.get(i);
