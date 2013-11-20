@@ -79,13 +79,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
             InvocationAssistance effectiveIA = invocationAssistance;
 
             try {
-                if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && effectiveIA.getCsharpAssemblies() != null) {
-                    String csharpAssembliesStr = effectiveIA.getCsharpAssemblies();
-                    listener.getLogger().println("[Coverity] C# Project detected, assemblies to analyze are: " + csharpAssembliesStr);
-                }
-
                 String covAnalyze = "cov-analyze";
-
 
                 if(home != null) {
                     covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
@@ -111,25 +105,6 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     //wat?
                     throw new RuntimeException("Couldn't find a language to analyze.");
                 }
-
-                // For C# add the list of assemblies
-                if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze))) {
-                    String csharpAssemblies = effectiveIA.getCsharpAssemblies();
-                    if(csharpAssemblies != null) {
-                        cmd.add(csharpAssemblies);
-                    }
-                }
-
-                boolean csharpAutomaticAssemblies = invocationAssistance.getCsharpAutomaticAssemblies();
-                if(csharpAutomaticAssemblies) {
-                    listener.getLogger().println("[Coverity] Searching for C# assemblies...");
-                    File[] automaticAssemblies = findAssemblies(build.getWorkspace().getRemote());
-
-                    for(File assembly : automaticAssemblies) {
-                        cmd.add(assembly.getAbsolutePath());
-                    }
-                }
-
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                 if(effectiveIA.getAnalyzeArguments() != null) {
