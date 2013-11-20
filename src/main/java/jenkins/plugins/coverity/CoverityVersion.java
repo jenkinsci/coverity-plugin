@@ -1,5 +1,6 @@
 package jenkins.plugins.coverity;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,7 +9,9 @@ import java.util.regex.Pattern;
  * An abstract representation of a Coverity version number. Conventional version numbers, as well as current and past
  * codenames are all valid and comparable.
  */
-public class CoverityVersion implements Comparable<CoverityVersion> {
+public class CoverityVersion implements Comparable<CoverityVersion>, Serializable {
+    public static final CoverityVersion VERSION_FRESNO = new CoverityVersion("fresno");
+
     static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\w+)");
 
     final int major;

@@ -34,8 +34,6 @@ import java.util.Vector;
  * and {@link #getHandler(CoverityVersion)} to choose an appropriate subclass.}
  */
 public abstract class CoverityToolHandler {
-    private static final CoverityVersion VERSION_FRESNO = new CoverityVersion("fresno");
-
     /**
      * Find a suitable {@link CoverityToolHandler} to run analysis.
      * @param version the version of Coverity analysis present on the {@link hudson.model.Node} where the analysis will
@@ -43,7 +41,7 @@ public abstract class CoverityToolHandler {
      * @return A {@link CoverityToolHandler} that can run the given version of analysis.
      */
     public static CoverityToolHandler getHandler(CoverityVersion version) {
-        if(version.compareTo(VERSION_FRESNO) < 0) {
+        if(version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
             return new PreFresnoToolHandler();
         } else {
             return new FresnoToolHandler();

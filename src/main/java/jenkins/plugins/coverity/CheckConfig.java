@@ -12,6 +12,7 @@ import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Executor;
 import hudson.model.Node;
+import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.util.FormValidation;
 import org.apache.commons.io.IOUtils;
@@ -227,7 +228,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         return new StreamStatus(true, "OK (version: " + version + ")", cs, version);
     }
 
-    public static NodeStatus checkNode(CoverityPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+    public static NodeStatus checkNode(CoverityPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener) {
         Node node = Executor.currentExecutor().getOwner().getNode();
         try {
             String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));

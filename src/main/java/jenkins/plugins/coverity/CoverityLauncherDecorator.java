@@ -136,7 +136,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
             }
         }
-        if(onlyCS) {
+
+        CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
+
+        if(onlyCS && version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
             logger.info("Only streams of type CSHARP were found, skipping cov-build");
 
             return launcher;
