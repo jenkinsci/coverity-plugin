@@ -1,0 +1,55 @@
+<!--
+
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Coverity, Inc - initial implementation and documentation
+-->
+<div>
+    <span style="font-weight: bold; font-size: 1.5em">How to configure the Coverity Jenkins plugin</span>
+
+    <p>
+        The Coverity Jenkins plugin is designed to efficiently handle several different use cases. Some cases, however,
+        are restricted by the environment. This help section details how to properly configure the Coverity Jenkins
+        plugin for your environment. You can use the "Check Configuration" button to check for errors in your stream
+        configuration. In addition, another check will run before each build. This second check will also verify that
+        the analysis environment is compatible with your configuration.
+    </p>
+
+    <span style="font-weight: bold; font-size: 1.2em">Environments</span>
+    <ul>
+        <li><span style="font-weight: bold; font-size: 1.0em">Coverity Analysis 7.0 or later</span>
+
+            <p>
+                This environment allows you to specify one or all languages for each stream. Since analysis results are
+                combined in version 7.0, each stream must be able to receive results for each analyzed language.
+            </p>
+            <ul>
+                <li>
+                    To analyze all languages, make sure your streams are set to the 'Any' language type in Coverity
+                    Connect. Then select the 'All' language setting in the Coverity Jenkins plugin in every stream you
+                    would like to commit results to.
+                </li>
+                <li>
+                    To analyze a single language, make sure all streams are configured to receive that defects from the
+                    language in Coverity Connect. Then select only that language, in the Coverity Jenkins plugin, for
+                    each stream to commit defects to.
+                </li>
+            </ul>
+        </li>
+        <br/>
+        <li><span style="font-weight: bold; font-size: 1.0em">Coverity Analysis before 7.0</span>
+
+            <p>
+                This environment allows you to specify one language for each stream. For each language, the appropriate
+                analysis will be run. Then, for each stream, the corresponding language analysis results will be
+                committed.
+                Any combination of languages can be used, but each must be a single-language stream as configured in
+                Coverity Connect.
+            </p>
+        </li>
+    </ul>
+</div>
