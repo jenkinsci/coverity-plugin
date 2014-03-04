@@ -128,6 +128,14 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
         }
     }
 
+    public boolean compareMajMin(CoverityVersion version){
+        if(isCodeName || version.isCodeName){
+            return getEffectiveVersion().compareMajMin(version.getEffectiveVersion());
+        }else{
+            return (major == version.major && patch == version.patch);
+        }
+    }
+
     private int cmp(int a, int b) {
         return (a < b ? -1 : (a == b ? 0 : 1));
     }
