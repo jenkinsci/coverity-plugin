@@ -19,11 +19,23 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
 /**
  * A configuration checker, and the results of such a check.
@@ -98,7 +110,6 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             CoverityVersion analysisVersion = ns.getVersion();
 
             //lots of checks can only happen if we know the analysis version
-
             //is any target CIM version < analysis version?
             {
                 List<Status> newStatus = new ArrayList<Status>();
@@ -241,15 +252,23 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             }
 
             FilePath homePath = new FilePath(launcher.getChannel(), home);
-            CoverityVersion version = homePath.child("VERSION").act(new FilePath.FileCallable<CoverityVersion>() {
+
+            final TaskListener listen = listener; // Final copy of listner to help print debugging messages
+
+            // Function to go into Analysis directory and find the VERSION.xml file, then pull the version number.
+            CoverityVersion version = homePath.child("VERSION.xml").act(new FilePath.FileCallable<CoverityVersion>() {
                 public CoverityVersion invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                    FileInputStream fis = new FileInputStream(f);
-                    CoverityVersion cv = getCoverityVersion(IOUtils.toString(fis));
+                    InputStream fis = new FileInputStream(f);
+
+                    // Setting up reader into UTF-8 format since xml document is that format
+                    Reader reader = new InputStreamReader(fis,"UTF-8");
+                    InputSource is = new InputSource(reader);
+                    is.setEncoding("UTF-8");
+                    CoverityVersion cv = parseVersionXML(is,listen);
                     fis.close();
                     return cv;
                 }
             });
-
             return new NodeStatus(true, "version " + version, node, version);
 
         } catch(IOException e) {
@@ -261,16 +280,108 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         }
     }
 
-    public static CoverityVersion getCoverityVersion(String versionFileContents) throws IOException {
-        String[] lines = versionFileContents.split("\n");
+    /**
+     * Parse Version XML File
+     * We use SAX Parser to go thought the VERSION.xml file, and extract the Major, Minor, Revision, and Beta elements.
+     * These parts make up the version of Analysis, and is later used to compare with the cim version
+     * @param path
+     * @param listener
+     * @return {@link CoverityVersion}
+     */
+    private static CoverityVersion parseVersionXML(InputSource path, TaskListener listener){
+        try{
 
-        for(String line : lines) {
-            if(line.startsWith("externalVersion=")) {
-                return CoverityVersion.parse(line.split("=")[1]);
+            // Setting up SAX Parser
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setValidating(false);
+            SAXParser xmlParser = factory.newSAXParser();
+            XMLReader xmlReader = xmlParser.getXMLReader();
+            ConnectorParser connectorParser = new ConnectorParser();
+
+            // Setting up XML Reader so that it ignores the <!DOCTYPE
+            xmlReader.setContentHandler(connectorParser);
+            xmlReader.setFeature("http://xml.org/sax/features/validation", false);
+            xmlReader.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+            xmlReader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd",false);
+
+            // Parse the xml
+            xmlReader.parse(path);
+
+            // Checks to see if beta was set or not, since its not required on releases.
+            if(connectorParser.beta != null){
+                return new CoverityVersion(Integer.parseInt(connectorParser.major),
+                                           Integer.parseInt(connectorParser.minor),
+                                           Integer.parseInt(connectorParser.revision),
+                                           Integer.parseInt(connectorParser.beta));
+            }else{
+                return new CoverityVersion(Integer.parseInt(connectorParser.major),
+                                           Integer.parseInt(connectorParser.minor),
+                                           Integer.parseInt(connectorParser.revision));
+            }
+
+        }catch(ParserConfigurationException x){
+            listener.fatalError("Unable to configure XML parser: " + x.getMessage());
+        }catch(SAXException x){
+            listener.fatalError("Unable to parse VERSION.xml: " + x.getMessage());
+        }catch(FileNotFoundException x){
+            listener.fatalError("Could not find VERSION.xml file at: " + path.toString());
+        }catch(IOException x){
+            listener.fatalError("IOException reading VERSION.xml: " + x.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     *  Custom Handler that is ran when the XML is parse and find when major, minor, revision, and beta occurs
+     *  within the xml, and then store its number
+     */
+    private static class ConnectorParser extends DefaultHandler{
+        public String version = null;
+        public String major = null;
+        public String minor = null;
+        public String revision = null;
+        public String beta = null;
+        public boolean bmajor =false;
+        public boolean bminor =false;
+        public boolean brevision =false;
+        public boolean bbeta =false;
+
+        // Checks the start of each element it sees, then flags that specific keywords are found
+        public void startElement(String uri, String localName, String qName,
+                                 Attributes attributes) throws SAXException{
+            if(qName.equalsIgnoreCase("major")){
+                bmajor = true;
+            }
+            if(qName.equalsIgnoreCase("minor")){
+                bminor = true;
+            }
+            if(qName.equalsIgnoreCase("revision")){
+                brevision = true;
+            }
+            if(qName.equalsIgnoreCase("beta")){
+                bbeta = true;
             }
         }
 
-        return null;
+        // At each entry, it will check if specific flags are set and then store the values of the set flags
+        public void characters(char ch[],int start, int length){
+            if(this.bmajor){
+                major = new String(ch,start,length);
+                bmajor = false;
+            }
+            if(this.bminor){
+                minor = new String(ch,start,length);
+                bminor = false;
+            }
+            if(this.brevision){
+                revision = new String(ch,start,length);
+                brevision = false;
+            }
+            if(this.bbeta){
+                beta = new String(ch,start,length);
+                bbeta = false;
+            }
+        }
     }
 
     /**
