@@ -114,11 +114,13 @@ public abstract class CoverityToolHandler {
     }
 
     public List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, long snapshotId) throws IOException, CovRemoteServiceException_Exception {
+        int defectSize = 3000; // Maximum amount of defect to pull
+        int pageSize = 1000; // Size of page to be pulled
+        List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
+
         DefectService ds = cim.getDefectService();
 
         PageSpecDataObj pageSpec = new PageSpecDataObj();
-        pageSpec.setPageSize(1000);
-        pageSpec.setSortAscending(true);
 
         StreamIdDataObj streamId = new StreamIdDataObj();
         streamId.setName(cimStream.getStream());
@@ -132,8 +134,15 @@ public abstract class CoverityToolHandler {
 
         sfilter.getSnapshotIdIncludeList().add(snapid);
         filter.getStreamSnapshotFilterSpecIncludeList().add(sfilter);
+        // The loop will pull up to the maximum amount of defect, doing per page size
+        for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
+            pageSpec.setPageSize(pageSize);
+            pageSpec.setStartIndex(pageStart);
+            pageSpec.setSortAscending(true);
+            mergeList.addAll(ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec).getMergedDefects());
 
-        return ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec).getMergedDefects();
+        }
+        return mergeList;
     }
 
     public boolean covEmitWar(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home, CoverityTempDir temp, String javaWarFile) throws IOException, InterruptedException {
