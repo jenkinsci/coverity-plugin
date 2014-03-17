@@ -24,6 +24,7 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
     static final HashMap<String, CoverityVersion> codeNameEquivalents = new HashMap<String, CoverityVersion>();
 
     static {
+        codeNameEquivalents.put("gilroy", new CoverityVersion(8, 0, 0));
         codeNameEquivalents.put("fresno", new CoverityVersion(7, 0, 0));
         codeNameEquivalents.put("eureka", new CoverityVersion(6, 6, 0));
         codeNameEquivalents.put("davis", new CoverityVersion(6, 5, 1));
@@ -132,7 +133,7 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
         if(isCodeName || version.isCodeName){
             return getEffectiveVersion().compareMajMin(version.getEffectiveVersion());
         }else{
-            return (major == version.major && patch == version.patch);
+            return (major == version.major && minor == version.minor);
         }
     }
 

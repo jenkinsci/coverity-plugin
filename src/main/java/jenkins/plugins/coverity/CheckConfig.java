@@ -116,7 +116,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 for(Status s : status) {
                     if(s instanceof StreamStatus) {
                         StreamStatus ss = (StreamStatus) s;
-                        if(ss.getVersion().compareMajMin(analysisVersion)) {
+                        if(!ss.getVersion().compareMajMin(analysisVersion)) {
                             newStatus.add(new Status(false, "Connect instance " + ss.getStream().toPrettyString() + " (version " +
                                     ss.getVersion() + "|" + ss.getVersion().getEffectiveVersion() +
                                     ") is incompatible with analysis version " + analysisVersion));
@@ -308,17 +308,20 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             xmlReader.parse(path);
 
             // Checks to see if beta was set or not, since its not required on releases.
-            if(connectorParser.beta != null){
-                return new CoverityVersion(Integer.parseInt(connectorParser.major),
-                                           Integer.parseInt(connectorParser.minor),
-                                           Integer.parseInt(connectorParser.revision),
-                                           Integer.parseInt(connectorParser.beta));
-            }else{
-                return new CoverityVersion(Integer.parseInt(connectorParser.major),
-                                           Integer.parseInt(connectorParser.minor),
-                                           Integer.parseInt(connectorParser.revision));
+            try{
+                if(connectorParser.beta != null){
+                    return new CoverityVersion(Integer.parseInt(connectorParser.major),
+                                               Integer.parseInt(connectorParser.minor),
+                                               Integer.parseInt(connectorParser.revision),
+                                               Integer.parseInt(connectorParser.beta));
+                }else{
+                    return new CoverityVersion(Integer.parseInt(connectorParser.major),
+                                               Integer.parseInt(connectorParser.minor),
+                                               Integer.parseInt(connectorParser.revision));
+                }
+            }catch(NumberFormatException e){
+                    return new CoverityVersion(connectorParser.major);
             }
-
         }catch(ParserConfigurationException x){
             listener.fatalError("Unable to configure XML parser: " + x.getMessage());
         }catch(SAXException x){
