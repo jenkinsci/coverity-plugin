@@ -129,15 +129,28 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
         }
     }
 
-    public boolean compareMajMin(CoverityVersion version){
+    /**
+     * The way that Compare Major Minor works is that the argument passed in is the analysis version.
+     * @param version
+     * @return
+     */
+    public boolean compareToAnalys(CoverityVersion version){
         if(isCodeName || version.isCodeName){
-            return getEffectiveVersion().compareMajMin(version.getEffectiveVersion());
+            return getEffectiveVersion().compareToAnalys(version.getEffectiveVersion());
         }else{
-            return (major == version.major && minor == version.minor);
+            if(major == version.major){
+                return minor >= version.minor;
+            }else{
+                return major > version.major;
+            }
         }
     }
 
     private int cmp(int a, int b) {
         return (a < b ? -1 : (a == b ? 0 : 1));
+    }
+
+    public int compareMajor(int major){
+        return cmp(this.major,major);
     }
 }
