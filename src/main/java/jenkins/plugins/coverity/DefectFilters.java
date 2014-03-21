@@ -85,12 +85,7 @@ public class DefectFilters {
     }
 
     public boolean isComponentSelected(String component) {
-        for(String s : components){
-            if(s.equals(component)){
-                return true;
-            }
-        }
-        return false;
+        return components.contains(component);
     }
 
     public boolean isCheckerSelected(String checker) {
