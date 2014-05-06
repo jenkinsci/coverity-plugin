@@ -73,6 +73,15 @@ public class CoverityBuildAction implements Action {
                 instance.getHost(), instance.getPort(), instance.getProjectKey(projectId), defect.getCid());
     }
 
+    /**
+     * Returns the URL to the page for this defect in the CIM instance.
+     */
+    public String getURL(Long defect) throws IOException, CovRemoteServiceException_Exception {
+        CIMInstance instance = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
+        return String.format("http://%s:%d/sourcebrowser.htm?projectId=%s&mergedDefectId=%d",
+			     instance.getHost(), instance.getPort(), instance.getProjectKey(projectId), defect.longValue ());
+    }
+
     public String getIconFileName() {
         return "/plugin/coverity/icons/coverity-logo-400px.png";
     }
