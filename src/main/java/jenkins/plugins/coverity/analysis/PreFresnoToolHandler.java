@@ -20,6 +20,7 @@ import jenkins.plugins.coverity.CoverityLauncherDecorator;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityTempDir;
 import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.BuildThreshold;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -307,6 +308,13 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                         }
                     }
 
+		    CoverityData bdata = build.getAction (CoverityData.class);
+		    if (bdata == null) {
+			bdata = new CoverityData ();
+		    }
+		    bdata.setBuildDefects (matchingDefects);
+		    build.addAction(bdata);
+
                     if(!matchingDefects.isEmpty()) {
                         listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
                         if(publisher.isFailBuild()) {
@@ -314,6 +322,13 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                                 build.setResult(Result.FAILURE);
                             }
                         }
+			if (publisher.getThresholdHookActive ()) {
+			    BuildThreshold bs = publisher.getBuildThreshold ();
+			    listener.getLogger().println("[Coverity] Threshold hook active value: " + bs.getThresholdValue ());
+			    if (matchingDefects.size() > bs.getThresholdValue ()) {
+				build.setResult (bs.getType ());
+			    }
+			}
                     } else {
                         listener.getLogger().println("[Coverity] No defects matched all filters.");
                     }

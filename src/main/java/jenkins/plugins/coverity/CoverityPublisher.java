@@ -92,6 +92,11 @@ public class CoverityPublisher extends Recorder {
      */
     private final boolean hideChart;
     private final CoverityMailSender mailSender;
+    /**
+     * Threshold build hooks on defect numbers
+     */
+    private final BuildThreshold threshold;
+    private final boolean thresholdHookActive;
 
     @DataBoundConstructor
     public CoverityPublisher(List<CIMStream> cimStreams,
@@ -104,7 +109,8 @@ public class CoverityPublisher extends Recorder {
                              String cimInstance,
                              String project,
                              String stream,
-                             DefectFilters defectFilters) {
+                             DefectFilters defectFilters,
+			     BuildThreshold thresholdHook) {
         this.cimStreams = cimStreams;
         this.invocationAssistance = invocationAssistance;
         this.failBuild = failBuild;
@@ -116,6 +122,8 @@ public class CoverityPublisher extends Recorder {
         this.project = project;
         this.stream = stream;
         this.defectFilters = defectFilters;
+	this.threshold = thresholdHook;
+	this.thresholdHookActive = thresholdHook == null ? false : true;
 
         if(isOldDataPresent()) {
             logger.info("Old data format detected. Converting to new format.");
@@ -214,6 +222,14 @@ public class CoverityPublisher extends Recorder {
         return cimStreams;
     }
 
+    public boolean getThresholdHookActive () {
+	return this.thresholdHookActive;
+    }
+
+    public BuildThreshold getBuildThreshold () {
+	return this.threshold;
+    }
+ 
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
         return hideChart ? super.getProjectAction(project) : new CoverityProjectAction(project);
