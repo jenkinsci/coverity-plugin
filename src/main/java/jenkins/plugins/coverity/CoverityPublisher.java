@@ -93,6 +93,8 @@ public class CoverityPublisher extends Recorder {
     private final boolean hideChart;
     private final CoverityMailSender mailSender;
 
+    private final TaOptionBlock taOptionBlock;
+
     @DataBoundConstructor
     public CoverityPublisher(List<CIMStream> cimStreams,
                              InvocationAssistance invocationAssistance,
@@ -104,7 +106,8 @@ public class CoverityPublisher extends Recorder {
                              String cimInstance,
                              String project,
                              String stream,
-                             DefectFilters defectFilters) {
+                             DefectFilters defectFilters,
+                             TaOptionBlock taOptionBlock) {
         this.cimStreams = cimStreams;
         this.invocationAssistance = invocationAssistance;
         this.failBuild = failBuild;
@@ -116,6 +119,7 @@ public class CoverityPublisher extends Recorder {
         this.project = project;
         this.stream = stream;
         this.defectFilters = defectFilters;
+        this.taOptionBlock = taOptionBlock;
 
         if(isOldDataPresent()) {
             logger.info("Old data format detected. Converting to new format.");
@@ -206,6 +210,8 @@ public class CoverityPublisher extends Recorder {
     public CoverityMailSender getMailSender() {
         return mailSender;
     }
+
+    public TaOptionBlock getTaOptionBlock(){return taOptionBlock;}
 
     public List<CIMStream> getCimStreams() {
         if(cimStreams == null) {

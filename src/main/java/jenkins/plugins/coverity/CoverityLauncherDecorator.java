@@ -71,16 +71,23 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         if(publisher == null) {
             return launcher;
         }
-
+        TaOptionBlock ta = publisher.getTaOptionBlock();
         InvocationAssistance ii = publisher.getInvocationAssistance();
-        if(ii == null) {
+        /**if(ii == null) {
             return launcher;
-        }
+        }   **/
 
         FilePath temp;
-
+        String taCheck = ta.checkTaConfig();
+        if(!taCheck.equals("Pass")){
+            throw new RuntimeException(taCheck);
+        }
         try {
-            if(ii.getIntermediateDir() == null) {
+            if(ii == null){
+                FilePath coverityDir = node.getRootPath().child("coverity");
+                coverityDir.mkdirs();
+                temp = coverityDir.createTempDir("temp-", null);
+            }else if(ii.getIntermediateDir() == null) {
                 FilePath coverityDir = node.getRootPath().child("coverity");
                 coverityDir.mkdirs();
                 temp = coverityDir.createTempDir("temp-", null);
@@ -89,7 +96,11 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 temp.mkdirs();
             }
 
-            build.addAction(new CoverityTempDir(temp, ii.getIntermediateDir() == null));
+            if(ii != null){
+                build.addAction(new CoverityTempDir(temp, ii.getIntermediateDir() == null));
+            } else{
+                build.addAction(new CoverityTempDir(temp, true));
+            }
         } catch(IOException e) {
             throw new RuntimeException("Error while creating temporary directory for Coverity", e);
         } catch(InterruptedException e) {
@@ -144,25 +155,43 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
             return launcher;
         }
-
+        /**
+         * Putting together the arguments for cov-build. The placeholder is there so that we can later determine the
+         * exact location of cov-build runable.
+         */
         List<String> args = new ArrayList<String>();
         args.add("cov-build-placeholder");
+        // Adding the intermediate directory
         args.add("--dir");
+        // Adding the build command for the code
         args.add(temp.getRemote());
-        if(ii.getBuildArguments() != null) {
-            for(String arg : Util.tokenize(ii.getBuildArguments())) {
-                args.add(arg);
+
+        // Adding in Test Analysis arguments into the code when no other test command is needed to run.
+        if(ta != null){
+            if(ta.getCustomTestCommand() == null){
+                args.addAll(ta.getTaCommandArgs());
             }
         }
 
-        String blacklistTemp = ii.getCovBuildBlacklist();
         String[] blacklist;
-        if(blacklistTemp != null) {
-            blacklist = blacklistTemp.split(",");
-            for(int i = 0; i < blacklist.length; i++) {
-                blacklist[i] = blacklist[i].trim();
+        if(ii != null){
+            if(ii.getBuildArguments() != null) {
+                for(String arg : Util.tokenize(ii.getBuildArguments())) {
+                    args.add(arg);
+                }
             }
-        } else {
+
+            String blacklistTemp = ii.getCovBuildBlacklist();
+
+            if(blacklistTemp != null) {
+                blacklist = blacklistTemp.split(",");
+                for(int i = 0; i < blacklist.length; i++) {
+                    blacklist[i] = blacklist[i].trim();
+                }
+            } else {
+                blacklist = new String[0];
+            }
+        } else{
             blacklist = new String[0];
         }
 
@@ -272,6 +301,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             return false;
         }
 
+        /**
+         * getCovBuild
+         *
+         * Retrieves the location of cov-build executable/sh from the system and returns the string of the
+         * path
+         * @return  string of cov-build's path
+         */
+
         private String getCovBuild() {
             Executor executor = Executor.currentExecutor();
             Queue.Executable exec = executor.getCurrentExecutable();
@@ -290,13 +327,15 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             } catch(InterruptedException e) {
                 e.printStackTrace();
             }
-            if(ii.getSaOverride() != null) {
-                try {
-                    home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
-                } catch(IOException e) {
-                    e.printStackTrace();
-                } catch(InterruptedException e) {
-                    e.printStackTrace();
+            if(ii != null){
+                if(ii.getSaOverride() != null) {
+                    try {
+                        home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+                    } catch(IOException e) {
+                        e.printStackTrace();
+                    } catch(InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             if(home != null) {
