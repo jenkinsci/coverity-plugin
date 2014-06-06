@@ -78,10 +78,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }   **/
 
         FilePath temp;
-        String taCheck = ta.checkTaConfig();
-        if(!taCheck.equals("Pass")){
-            throw new RuntimeException(taCheck);
+        if(ta != null){
+            String taCheck = ta.checkTaConfig();
+            if(!taCheck.equals("Pass")){
+                throw new RuntimeException(taCheck);
+            }
         }
+        
         try {
             if(ii == null){
                 FilePath coverityDir = node.getRootPath().child("coverity");
