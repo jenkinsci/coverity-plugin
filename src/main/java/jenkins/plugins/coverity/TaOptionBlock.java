@@ -39,6 +39,7 @@ public class TaOptionBlock {
     private final String accRevRepo;
     private final String bullsEyeDir;
     private final String customWorkDir;
+    private final boolean covHistoryCheckbox;
 
 
     private final boolean javaOptionBlock;
@@ -68,7 +69,8 @@ public class TaOptionBlock {
                          String p4Port,
                          String accRevRepo,
                          String bullsEyeDir,
-                         String customWorkDir) {
+                         String customWorkDir,
+                         boolean covHistoryCheckbox) {
         this.customTestCommand = Util.fixEmpty(customTestCommand);
         this.cOptionBlock = cOptionBlock;
         this.csOptionBlock = csOptionBlock;
@@ -91,6 +93,7 @@ public class TaOptionBlock {
         this.accRevRepo = Util.fixEmpty(accRevRepo);   // Required if accurev is selected
         this.bullsEyeDir = Util.fixEmpty(bullsEyeDir); // Required if bulls eye is selected
         this.customWorkDir = Util.fixEmpty(customWorkDir); // Required if a custom command is issued
+        this.covHistoryCheckbox = covHistoryCheckbox;
     }
     /*
     Required functions needed for jenkins to access all of the Test Advisor Data.
@@ -139,6 +142,8 @@ public class TaOptionBlock {
 
     public String getCustomWorkDir(){return customWorkDir;}
 
+    public boolean getCovHistoryCheckbox(){return covHistoryCheckbox;}
+
 
 
     /*
@@ -155,6 +160,11 @@ public class TaOptionBlock {
             // Checking to make sure there is a coverage tool, and add that to the arguments
             if(!this.cxxCoverageTool.equals("none")){
                 args.add(this.cxxCoverageTool);
+                // Bullseye requires the directory of where bullseye is installed.
+                if(this.cxxCoverageTool.equals("bullseye")){
+                    args.add("--bullseye-dir");
+                    args.add(this.bullsEyeDir);
+                }
             }
 
         }
@@ -165,12 +175,6 @@ public class TaOptionBlock {
             // Adding C# coverage switch
             if(!this.csCoverageTool.equals("none")){
                 args.add(this.csCoverageTool);
-                // Bullseye requires the directory of where bullseye is installed.
-                if(this.csCoverageTool.equals("bullseye")){
-                    args.add("--bullseye-dir");
-                    args.add(this.bullsEyeDir);
-                }
-
             }
 
             // checking to see if C# framework is selected and add it to arguments

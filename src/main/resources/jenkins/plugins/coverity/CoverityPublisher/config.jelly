@@ -269,6 +269,9 @@
                                     <st:nbsp />
                                     <f:textbox/>
                                 </f:entry>
+                                <f:entry title="Enable Cov-Manage-History" field="covHistoryCheckbox">
+                                                <f:checkbox/>
+                                </f:entry>
                                 <tr>
                                     <f:block>
                                         <table>

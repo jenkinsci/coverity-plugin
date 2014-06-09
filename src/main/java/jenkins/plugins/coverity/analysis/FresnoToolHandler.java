@@ -112,55 +112,57 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
         // Run Cov Manage History
         if(testAnalysis != null){
-            for(CIMStream cimStream : publisher.getCimStreams()) {
-                CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
-                try {
-                    String covManageHistory = "cov-manage-history";
+            if(testAnalysis.getCovHistoryCheckbox()){
+                for(CIMStream cimStream : publisher.getCimStreams()) {
+                    CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
+                    try {
+                        String covManageHistory = "cov-manage-history";
 
-                    if(home != null) {
-                        covManageHistory = new FilePath(launcher.getChannel(), home).child("bin").child(covManageHistory).getRemote();
+                        if(home != null) {
+                            covManageHistory = new FilePath(launcher.getChannel(), home).child("bin").child(covManageHistory).getRemote();
+                        }
+
+                        CoverityLauncherDecorator.SKIP.set(true);
+
+                        boolean useDataPort = cim.getDataPort() != 0;
+
+                        List<String> cmd = new ArrayList<String>();
+                        cmd.add(covManageHistory);
+                        cmd.add("--dir");
+                        cmd.add(temp.getTempDir().getRemote());
+                        cmd.add("download");
+                        cmd.add("--host");
+                        cmd.add(cim.getHost());
+                        cmd.add("--port");
+                        cmd.add(Integer.toString(cim.getPort()));
+                        cmd.add("--stream");
+                        cmd.add(cimStream.getStream());
+                        cmd.add("--user");
+                        cmd.add(cim.getUser());
+                        cmd.add("--merge");
+
+
+                        ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
+
+                        listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+
+                        int result = launcher.
+                                launch().
+                                cmds(args).
+                                envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
+                                stdout(listener).
+                                stderr(listener.getLogger()).
+                                join();
+
+                        if(result != 0) {
+                            listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
+
+                            build.setResult(Result.FAILURE);
+                            return false;
+                        }
+                    } finally {
+                        CoverityLauncherDecorator.SKIP.set(false);
                     }
-
-                    CoverityLauncherDecorator.SKIP.set(true);
-
-                    boolean useDataPort = cim.getDataPort() != 0;
-
-                    List<String> cmd = new ArrayList<String>();
-                    cmd.add(covManageHistory);
-                    cmd.add("--dir");
-                    cmd.add(temp.getTempDir().getRemote());
-                    cmd.add("download");
-                    cmd.add("--host");
-                    cmd.add(cim.getHost());
-                    cmd.add("--port");
-                    cmd.add(Integer.toString(cim.getPort()));
-                    cmd.add("--stream");
-                    cmd.add(cimStream.getStream());
-                    cmd.add("--user");
-                    cmd.add(cim.getUser());
-                    cmd.add("--merge");
-
-
-                    ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
-                    listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                    int result = launcher.
-                            launch().
-                            cmds(args).
-                            envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
-                            stdout(listener).
-                            stderr(listener.getLogger()).
-                            join();
-
-                    if(result != 0) {
-                        listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
-
-                        build.setResult(Result.FAILURE);
-                        return false;
-                    }
-                } finally {
-                    CoverityLauncherDecorator.SKIP.set(false);
                 }
             }
         }
