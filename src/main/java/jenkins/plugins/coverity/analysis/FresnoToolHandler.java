@@ -132,8 +132,8 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add("download");
                     cmd.add("--host");
                     cmd.add(cim.getHost());
-                    cmd.add(useDataPort ? "--dataport" : "--port");
-                    cmd.add(useDataPort ? Integer.toString(cim.getDataPort()) : Integer.toString(cim.getPort()));
+                    cmd.add("--port");
+                    cmd.add(Integer.toString(cim.getPort()));
                     cmd.add("--stream");
                     cmd.add(cimStream.getStream());
                     cmd.add("--user");
@@ -461,21 +461,25 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
 
                     Set<String> checkers = new HashSet<String>();
+                    // Adding the checkers that the defects were found in
                     for(MergedDefectDataObj defect : defects) {
                         checkers.add(defect.getCheckerName());
                     }
+                    // This could be an issue! 
                     if(!"ALL".equals(cimStream.getLanguage())) {
                         //we can only update checkers if we analyzed exactly one language
                         publisher.getDescriptor().updateCheckers(publisher.getLanguage(cimStream), checkers);
                     }
 
                     List<Long> matchingDefects = new ArrayList<Long>();
-
+                    // Loop through all defects
                     for(MergedDefectDataObj defect : defects) {
+                        //When there is no defect filter, we just add it to the matching defects
                         if(cimStream.getDefectFilters() == null) {
                             matchingDefects.add(defect.getCid());
                         } else {
-                            boolean match = cimStream.getDefectFilters().matches(defect);
+                            // Check to see if defectFilter matches the defect
+                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
                             if(match) {
                                 matchingDefects.add(defect.getCid());
                             }
