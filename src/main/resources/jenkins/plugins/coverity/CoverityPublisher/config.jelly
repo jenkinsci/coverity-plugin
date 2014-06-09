@@ -249,31 +249,31 @@
 				</f:optionalBlock>
 
 
-                <f:optionalBlock title="Perform Coverity Test Analysis" field="taOptionBlock"
+                <f:optionalBlock title="Perform Coverity Test Advisor and Commit" field="taOptionBlock"
                         checked="${instance.taOptionBlock != null}" name="taOptionBlock">
                     <j:set var="instance" value="${instance.taOptionBlock}"/>
                     <f:block>
                         <table style="padding-left:1%; width:100%;">
-                            <f:section title="Test Analysis Configuration">
+                            <f:section title="Test Advisor Configuration">
                                 <f:entry title="Custom command to run tests " field="customTestCommand">
                                     <f:textbox/>
                                 </f:entry>
                                 <f:entry title="Custom command working directory" field="customWorkDir">
                                     <f:textbox />
                                 </f:entry>
-                                <f:entry title="TA Policy File:" field="policyFile">
+                                <f:entry title="TA Policy File (Required):" field="policyFile">
                                     <st:nbsp />
                                     <f:textbox/>
                                 </f:entry>
-                                <f:entry title="Strip Path:" field="taStripPath">
+                                <f:entry title="Strip Path (Required):" field="taStripPath">
                                     <st:nbsp />
                                     <f:textbox/>
                                 </f:entry>
                                 <tr>
                                     <f:block>
                                         <table>
-                                            <f:section title="C Coverage Configuration"/>
-                                            <f:entry title="C Coverage" field="cOptionBlock">
+                                            <f:section title="C/C++ Coverage Configuration"/>
+                                            <f:entry title="C/C++ Coverage" field="cOptionBlock">
                                                 <f:checkbox/>
                                             </f:entry>
 

@@ -300,7 +300,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                         if(cimStream.getDefectFilters() == null) {
                             matchingDefects.add(defect.getCid());
                         } else {
-                            boolean match = cimStream.getDefectFilters().matches(defect);
+                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
                             if(match) {
                                 matchingDefects.add(defect.getCid());
                             }

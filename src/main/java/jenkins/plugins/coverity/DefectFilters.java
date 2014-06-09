@@ -15,6 +15,7 @@ import com.coverity.ws.v6.MergedDefectDataObj;
 import hudson.Util;
 import hudson.model.Descriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
+import hudson.model.BuildListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -100,14 +101,57 @@ public class DefectFilters {
         return new SimpleDateFormat("yyyy-MM-dd").format(cutOffDate);
     }
 
-    public boolean matches(MergedDefectDataObj defect) {
-        return isActionSelected(defect.getAction()) &&
+    public boolean matches(MergedDefectDataObj defect, BuildListener listener) {
+        boolean result = true;
+        if(!isActionSelected(defect.getAction())){
+            result = false;
+            listener.getLogger().println(String.format("Failed to match defect action %s with actions selected: %s",defect.getAction(),defect.getAction()));
+        }
+
+        if(!isClassificationSelected(defect.getClassification())){
+            result = false;
+            listener.getLogger().println(String.format("Failed to match defect classifications %s with classifications selected: %s",
+                defect.getClassification(),defect.getClassification()));
+        }
+
+        if(!isSeveritySelected(defect.getSeverity())){
+            result = false;
+            listener.getLogger().println(String.format("Failed to match defect serverity %s with severity selected: %s",
+                defect.getSeverity(),defect.getSeverity()));
+        }
+
+        if(!isComponentSelected(defect.getComponentName())){
+            result = false;
+            listener.getLogger().println(String.format("Failed to match defect components %s with components selected: %s",
+                defect.getComponentName(),defect.getComponentName()));
+        }
+
+        if(!isCheckerSelected(defect.getCheckerName())){
+            result = false;
+            listener.getLogger().println(String.format("Failed to match defect checkers %s with checkers selected: %s",
+                defect.getCheckerName(),defect.getCheckerName()));
+        }
+
+        if(!Arrays.asList("New", "Triaged", "Various").contains(defect.getStatus())){
+            result = false;
+            listener.getLogger().println(String.format("Failed to match defects with 'New' 'Triaged' or 'Various' status.: %s",
+                defect.getStatus()));
+        }
+
+        if(!(cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate))){
+            result = false;
+            listener.getLogger().println(String.format("Failed at matching cutOffDate: %s",
+                defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate)));
+        }
+
+        return result;
+        /**return isActionSelected(defect.getAction()) &&
                 isClassificationSelected(defect.getClassification()) &&
                 isSeveritySelected(defect.getSeverity()) &&
                 isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getCheckerName()) &&
                 Arrays.asList("New", "Triaged", "Various").contains(defect.getStatus()) &&
-                (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
+                (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));**/
     }
 
     @Override
