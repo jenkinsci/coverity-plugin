@@ -265,7 +265,7 @@
                                     <st:nbsp />
                                     <f:textbox/>
                                 </f:entry>
-                                <f:entry title="Strip Path (Required):" field="taStripPath">
+                                <f:entry title="Strip Path:" field="taStripPath">
                                     <st:nbsp />
                                     <f:textbox/>
                                 </f:entry>

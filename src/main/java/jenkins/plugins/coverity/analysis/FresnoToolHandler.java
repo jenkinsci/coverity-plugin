@@ -295,8 +295,11 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add(testAnalysis.getPolicyFile());
                     // Adding in strip paths
                     cmd.add("--strip-path");
-                    listener.getLogger().println("Using user input!");
-                    cmd.add(testAnalysis.getTaStripPath());
+                    if(testAnalysis.getTaStripPath() == null){
+                        cmd.add(build.getWorkspace().getRemote());
+                    }else{
+                        cmd.add(testAnalysis.getTaStripPath());
+                    }
 
                     if(effectiveIA == null){
                         cmd.add("--disable-default");

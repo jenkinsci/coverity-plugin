@@ -42,7 +42,10 @@ public class TaOptionBlock {
 
 
     private final boolean javaOptionBlock;
-
+    /*
+        Generic Contructor that will hold all the elements we need for Test Advisor. All of these variables 
+        are fields within the Test Advisor Option Block
+     */
     @DataBoundConstructor
     public TaOptionBlock(String customTestCommand,
                          boolean cOptionBlock,
@@ -89,7 +92,9 @@ public class TaOptionBlock {
         this.bullsEyeDir = Util.fixEmpty(bullsEyeDir); // Required if bulls eye is selected
         this.customWorkDir = Util.fixEmpty(customWorkDir); // Required if a custom command is issued
     }
-
+    /*
+    Required functions needed for jenkins to access all of the Test Advisor Data.
+     */
     public String getCustomTestCommand(){return customTestCommand;}
 
     public boolean getCOptionBlock(){return cOptionBlock;}
@@ -136,7 +141,10 @@ public class TaOptionBlock {
 
 
 
-
+    /*
+    Get Test Advisor Command Arguments
+        - Builds the command line arguments for Test Advisor's cov-build and cov-capture command. 
+     */
     public List<String> getTaCommandArgs(){
 
         List<String> args = new ArrayList<String>();
@@ -194,7 +202,12 @@ public class TaOptionBlock {
         return args;
     }
 
-
+    /*
+    Check Test Advisor Config
+        - Ran before the build, to check that all of the fields are filled out correctly. 
+        - There are some special cases that are also checked and also making sure that all required fields 
+        are filled out. 
+     */
     public String checkTaConfig(){
         boolean delim = true;
         String errorText = "Errors with your Test Analysis configuration. Please look into the specified issues: \n";
@@ -203,11 +216,11 @@ public class TaOptionBlock {
             errorText += "[Error] No Coverage language was chosen, please pick at least one \n";
             delim = false;
         }
-        // Strip paths are reqired for TA
+        /*Strip paths are reqired for TA
         if(this.taStripPath == null){
             errorText += "[Error] No Strip Path was specified. \n";
             delim = false;
-        }
+        }*/
 
         // Making sure that a policy file exist and is specified
         if(this.policyFile == null){
