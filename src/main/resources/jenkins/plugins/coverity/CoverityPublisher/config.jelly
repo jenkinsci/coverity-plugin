@@ -191,6 +191,7 @@
 											<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
 										</a>
 									</td>
+									<f:helpArea/>
 								</tr>
 							</f:entry>
 						</table>
