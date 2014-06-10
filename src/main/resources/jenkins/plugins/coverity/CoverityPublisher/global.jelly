@@ -51,13 +51,13 @@
 		</f:entry>
 		<f:advanced>
 			<f:entry title="Known Java Checkers" field="javaCheckers">
-				<f:textarea/>
+				<f:textarea readonly= "true"/>
 			</f:entry>
 			<f:entry title="Known C/C++ Checkers" field="cxxCheckers">
-				<f:textarea/>
+				<f:textarea readonly= "true"/>
 			</f:entry>
 			<f:entry title="Known C# Checkers" field="csharpCheckers">
-				<f:textarea/>
+				<f:textarea readonly= "true"/>
 			</f:entry>
 		</f:advanced>
 	</f:section>
