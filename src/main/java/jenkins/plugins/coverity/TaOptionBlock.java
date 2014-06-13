@@ -178,9 +178,9 @@ public class TaOptionBlock {
             }
 
             // checking to see if C# framework is selected and add it to arguments
-            if(!this.csCoverageTool.equals("none")){
+            if(!this.csFramework.equals("none")){
                 args.add("--cs-test");
-                args.add(this.csCoverageTool);
+                args.add(this.csFramework);
             }
         }
 
