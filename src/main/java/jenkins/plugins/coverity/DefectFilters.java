@@ -102,6 +102,7 @@ public class DefectFilters {
     }
 
     public boolean matches(MergedDefectDataObj defect, BuildListener listener) {
+        /*
         boolean result = true;
         if(!isActionSelected(defect.getAction())){
             result = false;
@@ -144,14 +145,14 @@ public class DefectFilters {
                 defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate)));
         }
 
-        return result;
-        /**return isActionSelected(defect.getAction()) &&
+        return result;*/
+        return isActionSelected(defect.getAction()) &&
                 isClassificationSelected(defect.getClassification()) &&
                 isSeveritySelected(defect.getSeverity()) &&
                 isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getCheckerName()) &&
                 Arrays.asList("New", "Triaged", "Various").contains(defect.getStatus()) &&
-                (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));**/
+                (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
     }
 
     @Override
