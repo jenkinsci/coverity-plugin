@@ -20,6 +20,7 @@ import jenkins.plugins.coverity.CoverityLauncherDecorator;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityTempDir;
 import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.BuildThreshold;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -165,7 +166,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     boolean useDataPort = cim.getDataPort() != 0;
 
-                    List<String> cmd = new ArrayList<String>();
+		    List<String> cmd = new ArrayList<String>();
                     cmd.add(covCommitDefects);
                     cmd.add("--dir");
                     cmd.add(temp.getTempDir().getRemote());
@@ -283,12 +284,26 @@ public class FresnoToolHandler extends CoverityToolHandler {
                                 build.setResult(Result.FAILURE);
                             }
                         }
+			if (publisher.getThresholdHookActive ()) {
+			    BuildThreshold bs = publisher.getBuildThreshold ();
+			    listener.getLogger().println("[Coverity] Threshold hook active value: " + bs.getThresholdValue ());
+			    if (matchingDefects.size() > bs.getThresholdValue ()) {
+				build.setResult (bs.getType ());
+			    }
+			}
                     } else {
                         listener.getLogger().println("[Coverity] No defects matched all filters.");
                     }
 
+		    List<Long> previous = publisher.getPreviousCids ();
+		    if (previous == null)
+			previous = new ArrayList<Long> ();
+		    publisher.setPreviousCids (matchingDefects);
+
                     CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
-                    build.addAction(action);
+		    CoverityData bdata = new CoverityData (previous, matchingDefects);
+		    build.addAction (bdata);
+                    build.addAction (action);
 
                     if(!matchingDefects.isEmpty() && publisher.getMailSender() != null) {
                         publisher.getMailSender().execute(action, listener);
