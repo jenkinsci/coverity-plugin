@@ -11,7 +11,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
+import com.coverity.ws.v6.*;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -298,43 +298,92 @@ public class CoverityPublisher extends Recorder {
             this.home = home;
         }
 
-        public String getJavaCheckers() {
-            return javaCheckers;
+        public String getJavaCheckers(){return javaCheckers;}
+
+        public List<String> getCimJavaCheckers() {
+            List<String> checkers = new ArrayList<String>();
+            try {
+                for(CIMInstance instance :instances){
+                    ConfigurationService configurationService = instance.getConfigurationService();
+                    CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
+                    checkerPropFilter.getDomainList().add("STATIC_JAVA");
+                    List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkerPropFilter);
+                    for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
+                        CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
+                        if(!checkers.contains(checkerSub.getCheckerName())){
+                            checkers.add(checkerSub.getCheckerName());
+                        }
+                    }
+                }
+            } catch(Exception e) {
+            }
+            return checkers;
         }
 
         public void setJavaCheckers(String javaCheckers) {
             this.javaCheckers = Util.fixEmpty(javaCheckers);
-            try {
-                //if(this.javaCheckers == null)
-                this.javaCheckers = IOUtils.toString(getClass().getResourceAsStream("java-checkers.txt"));
-            } catch(IOException e) {
-            }
+            this.javaCheckers = StringUtils.join(getCimJavaCheckers(),'\n');
         }
 
         public String getCxxCheckers() {
             return cxxCheckers;
         }
 
+        public List<String> getCimCxxCheckers() {
+            List<String> checkers = new ArrayList<String>();
+            try {
+                for(CIMInstance instance :instances){
+                    ConfigurationService configurationService = instance.getConfigurationService();
+                    CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
+                    checkerPropFilter.getDomainList().add("STATIC_C");
+                    List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkerPropFilter);
+                    for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
+                        CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
+                        if(!checkers.contains(checkerSub.getCheckerName())){
+                            checkers.add(checkerSub.getCheckerName());
+                        }
+                    }
+                }
+            } catch(Exception e) {
+            }
+            return checkers;
+        }
+
         public void setCxxCheckers(String cxxCheckers) {
             this.cxxCheckers = Util.fixEmpty(cxxCheckers);
-            try {
-                //if(this.cxxCheckers == null)
-                this.cxxCheckers = IOUtils.toString(getClass().getResourceAsStream("cxx-checkers.txt"));
-            } catch(IOException e) {
-            }
+            this.cxxCheckers = StringUtils.join(getCimCxxCheckers(),'\n');
+
         }
 
         public String getCsharpCheckers() {
             return csharpCheckers;
         }
 
+        public List<String> getCimCsharpCheckers() {
+            List<String> checkers = new ArrayList<String>();
+            try {
+                for(CIMInstance instance :instances){
+                    ConfigurationService configurationService = instance.getConfigurationService();
+                    CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
+                    checkerPropFilter.getDomainList().add("STATIC_CS");
+                    List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkerPropFilter);
+                    for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
+                        CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
+                        if(!checkers.contains(checkerSub.getCheckerName())){
+                            checkers.add(checkerSub.getCheckerName());
+                        }
+                    }
+                }
+            } catch(Exception e) {
+            }
+            return checkers;
+        }
+
         public void setCsharpCheckers(String csharpCheckers) {
             this.csharpCheckers = Util.fixEmpty(csharpCheckers);
-            try {
-                //if(this.csharpCheckers == null)
-                this.csharpCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
-            } catch(IOException e) {
-            }
+
+            this.csharpCheckers = StringUtils.join(getCimCsharpCheckers(),'\n');
+
         }
 
         public String getHome(Node node, EnvVars environment) {

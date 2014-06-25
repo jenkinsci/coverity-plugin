@@ -1,24 +1,12 @@
 package jenkins.plugins.coverity.analysis;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.DefectService;
-import com.coverity.ws.v6.MergedDefectDataObj;
-import com.coverity.ws.v6.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v6.PageSpecDataObj;
-import com.coverity.ws.v6.SnapshotIdDataObj;
-import com.coverity.ws.v6.StreamIdDataObj;
-import com.coverity.ws.v6.StreamSnapshotFilterSpecDataObj;
+import com.coverity.ws.v6.*;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.util.ArgumentListBuilder;
-import jenkins.plugins.coverity.CIMInstance;
-import jenkins.plugins.coverity.CIMStream;
-import jenkins.plugins.coverity.CoverityLauncherDecorator;
-import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.CoverityTempDir;
-import jenkins.plugins.coverity.CoverityVersion;
+import jenkins.plugins.coverity.*;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -113,10 +101,11 @@ public abstract class CoverityToolHandler {
         }, true);
     }
 
-    public List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, long snapshotId) throws IOException, CovRemoteServiceException_Exception {
+    public List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener) throws IOException, CovRemoteServiceException_Exception {
         int defectSize = 3000; // Maximum amount of defect to pull
         int pageSize = 1000; // Size of page to be pulled
         List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
+        DefectFilters defectFilter = cimStream.getDefectFilters();
 
         DefectService ds = cim.getDefectService();
 
@@ -126,6 +115,19 @@ public abstract class CoverityToolHandler {
         streamId.setName(cimStream.getStream());
 
         MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
+        // Add all the classifications
+        filter.getClassificationNameList().addAll(defectFilter.getClassifications());
+        filter.getActionNameList().addAll(defectFilter.getActions());
+        filter.getSeverityNameList().addAll(defectFilter.getSeverities());
+        filter.getComponentIdList().addAll(defectFilter.getComponents());
+        filter.getCheckerSubcategoryFilterSpecList().addAll(defectFilter.getCheckers(listener));
+        filter.setFirstDetectedStartDate(defectFilter.getXMLCutOffDate());
+
+        ConfigurationService configurationService = cim.getConfigurationService();
+        CheckerPropertyFilterSpecDataObj checkPropFilter= new CheckerPropertyFilterSpecDataObj();
+
+        List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkPropFilter);
+
         StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
         SnapshotIdDataObj snapid = new SnapshotIdDataObj();
         snapid.setId(snapshotId);
