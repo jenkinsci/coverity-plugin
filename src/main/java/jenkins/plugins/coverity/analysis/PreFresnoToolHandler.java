@@ -284,9 +284,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
                     listener.getLogger().println("[Coverity] Fetching defects for stream " + cimStream.getStream());
 
-                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId);
-
-                    listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
+                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId,listener);
 
                     Set<String> checkers = new HashSet<String>();
                     for(MergedDefectDataObj defect : defects) {
@@ -297,18 +295,11 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     List<Long> matchingDefects = new ArrayList<Long>();
 
                     for(MergedDefectDataObj defect : defects) {
-                        if(cimStream.getDefectFilters() == null) {
-                            matchingDefects.add(defect.getCid());
-                        } else {
-                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
-                            if(match) {
-                                matchingDefects.add(defect.getCid());
-                            }
-                        }
+                        matchingDefects.add(defect.getCid());
                     }
 
                     if(!matchingDefects.isEmpty()) {
-                        listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
+                        listener.getLogger().println("[Coverity] Found " + defects.size() + " defects matching all filters: " + matchingDefects);
                         if(publisher.isFailBuild()) {
                             if(build.getResult().isBetterThan(Result.FAILURE)) {
                                 build.setResult(Result.FAILURE);

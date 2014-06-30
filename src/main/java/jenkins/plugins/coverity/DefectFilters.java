@@ -11,19 +11,17 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.MergedDefectDataObj;
+import com.coverity.ws.v6.*;
 import hudson.Util;
 import hudson.model.Descriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import hudson.model.BuildListener;
 
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Responsible for filtering the full list of defects to determine if a build should fail or not. Filters are inclusive:
@@ -69,7 +67,6 @@ public class DefectFilters {
         } else {
             ignoredCheckers = new ArrayList<String>(allCheckers);
             ignoredCheckers.removeAll(checkers);
-            checkers = null;
         }
     }
 
@@ -99,6 +96,47 @@ public class DefectFilters {
     public String getCutOffDate() {
         if(cutOffDate == null) return null;
         return new SimpleDateFormat("yyyy-MM-dd").format(cutOffDate);
+    }
+
+    public List<String> getClassifications(){return classifications;}
+
+    public List<String> getActions(){return actions;}
+
+    public List<String> getSeverities(){return severities;}
+
+    public List<ComponentIdDataObj> getComponents(){
+        List<ComponentIdDataObj> componentIdDataList = new ArrayList<ComponentIdDataObj>();
+        for(String comp : components){
+            ComponentIdDataObj cIdDataObj = new ComponentIdDataObj();
+            cIdDataObj.setName(comp);
+            componentIdDataList.add(cIdDataObj);
+        }
+        return componentIdDataList;
+    }
+
+    public List<CheckerSubcategoryFilterSpecDataObj> getCheckers(BuildListener listener){
+        List<CheckerSubcategoryFilterSpecDataObj> checkerSubFilterSpecDataObjList = new ArrayList<CheckerSubcategoryFilterSpecDataObj>();
+        for(String check : checkers){
+            if(check != null){
+                CheckerSubcategoryFilterSpecDataObj checkerSubFilterSpecDataObj = new CheckerSubcategoryFilterSpecDataObj();
+                checkerSubFilterSpecDataObj.setCheckerName(check);
+                checkerSubFilterSpecDataObjList.add(checkerSubFilterSpecDataObj);
+            }
+        }
+        return checkerSubFilterSpecDataObjList;
+    }
+
+    public List<String> getIgnoredChecker(){return ignoredCheckers;}
+
+    public XMLGregorianCalendar getXMLCutOffDate(){
+        GregorianCalendar calender = new GregorianCalendar();
+        calender.setTime(cutOffDate);
+        try{
+            return DatatypeFactory.newInstance().newXMLGregorianCalendar(calender);
+        }catch(Exception e){
+
+        }
+        return null;
     }
 
     public boolean matches(MergedDefectDataObj defect, BuildListener listener) {

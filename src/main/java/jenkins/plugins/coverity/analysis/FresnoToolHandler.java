@@ -461,9 +461,9 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     listener.getLogger().println("[Coverity] Fetching defects for stream " + cimStream.getStream());
 
-                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId);
+                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId,listener);
 
-                    listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
+                    //listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
 
                     Set<String> checkers = new HashSet<String>();
                     // Adding the checkers that the defects were found in
@@ -479,20 +479,11 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     List<Long> matchingDefects = new ArrayList<Long>();
                     // Loop through all defects
                     for(MergedDefectDataObj defect : defects) {
-                        //When there is no defect filter, we just add it to the matching defects
-                        if(cimStream.getDefectFilters() == null) {
-                            matchingDefects.add(defect.getCid());
-                        } else {
-                            // Check to see if defectFilter matches the defect
-                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
-                            if(match) {
-                                matchingDefects.add(defect.getCid());
-                            }
-                        }
+                        matchingDefects.add(defect.getCid());
                     }
 
                     if(!matchingDefects.isEmpty()) {
-                        listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
+                        listener.getLogger().println("[Coverity] Found " + defects.size() + " defects matching all filters: " + matchingDefects);
                         if(publisher.isFailBuild()) {
                             if(build.getResult().isBetterThan(Result.FAILURE)) {
                                 build.setResult(Result.FAILURE);
