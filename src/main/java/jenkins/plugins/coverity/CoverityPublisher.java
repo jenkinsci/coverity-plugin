@@ -44,13 +44,7 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -243,8 +237,11 @@ public class CoverityPublisher extends Recorder {
         CoverityVersion version = CheckConfig.checkNode(this, build, launcher, listener).getVersion();
 
         CoverityToolHandler cth = CoverityToolHandler.getHandler(version);
-
-        return cth.perform(build, launcher, listener, this);
+        try{
+            return cth.perform(build, launcher, listener, this);
+        } catch(CovRemoteServiceException_Exception e){
+            throw new InterruptedException("Cov Remote Service Error " + e.getMessage());
+        }
     }
 
     public String getLanguage(CIMStream cimStream) throws IOException, CovRemoteServiceException_Exception {
@@ -451,6 +448,17 @@ public class CoverityPublisher extends Recorder {
 
         public Set<String> split2(String string) {
             Set<String> result = new TreeSet<String>();
+            for(String s : string.split("[\r\n]")) {
+                s = Util.fixEmptyAndTrim(s);
+                if(s != null) {
+                    result.add(s);
+                }
+            }
+            return result;
+        }
+        // Spliting checker strings into a usable list
+        public List<String> split2List(String string) {
+            List<String> result = new LinkedList<String>();
             for(String s : string.split("[\r\n]")) {
                 s = Util.fixEmptyAndTrim(s);
                 if(s != null) {

@@ -14,11 +14,14 @@ package jenkins.plugins.coverity;
 import com.coverity.ws.v6.*;
 import hudson.Util;
 import hudson.model.Descriptor;
+import hudson.model.Hudson;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import hudson.model.BuildListener;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -72,6 +75,10 @@ public class DefectFilters {
 
     public boolean isClassificationSelected(String action) {
         return classifications.contains(action);
+    }
+
+    public List<String> getCheckersList(){
+        return checkers;
     }
 
     public boolean isActionSelected(String action) {
@@ -140,50 +147,6 @@ public class DefectFilters {
     }
 
     public boolean matches(MergedDefectDataObj defect, BuildListener listener) {
-        /*
-        boolean result = true;
-        if(!isActionSelected(defect.getAction())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect action %s with actions selected: %s",defect.getAction(),defect.getAction()));
-        }
-
-        if(!isClassificationSelected(defect.getClassification())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect classifications %s with classifications selected: %s",
-                defect.getClassification(),defect.getClassification()));
-        }
-
-        if(!isSeveritySelected(defect.getSeverity())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect serverity %s with severity selected: %s",
-                defect.getSeverity(),defect.getSeverity()));
-        }
-
-        if(!isComponentSelected(defect.getComponentName())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect components %s with components selected: %s",
-                defect.getComponentName(),defect.getComponentName()));
-        }
-
-        if(!isCheckerSelected(defect.getCheckerName())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect checkers %s with checkers selected: %s",
-                defect.getCheckerName(),defect.getCheckerName()));
-        }
-
-        if(!Arrays.asList("New", "Triaged", "Various").contains(defect.getStatus())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defects with 'New' 'Triaged' or 'Various' status.: %s",
-                defect.getStatus()));
-        }
-
-        if(!(cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate))){
-            result = false;
-            listener.getLogger().println(String.format("Failed at matching cutOffDate: %s",
-                defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate)));
-        }
-
-        return result;*/
         return isActionSelected(defect.getAction()) &&
                 isClassificationSelected(defect.getClassification()) &&
                 isSeveritySelected(defect.getSeverity()) &&
@@ -220,5 +183,25 @@ public class DefectFilters {
         result = 31 * result + (checkers != null ? checkers.hashCode() : 0);
         result = 31 * result + (cutOffDate != null ? cutOffDate.hashCode() : 0);
         return result;
+    }
+
+    public CoverityPublisher.DescriptorImpl getPublisherDescriptor() {
+        return Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
+    }
+
+    public void setCheckers(CIMInstance cimInstance,long streamId) throws IOException,CovRemoteServiceException_Exception{
+        StreamDataObj stream = cimInstance.getStream(String.valueOf(streamId));
+        String type = stream.getLanguage();
+
+        if("MIXED".equals(type)) {
+            type = "ALL";
+        }
+
+        try {
+            String cs = getPublisherDescriptor().getCheckers(type);
+            checkers = getPublisherDescriptor().split2List(cs);
+        } catch(Exception e) {
+            checkers = new LinkedList<String>();
+        }
     }
 }

@@ -66,7 +66,7 @@ public abstract class CoverityToolHandler {
         return files.toArray(arr);
     }
 
-    public abstract boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException;
+    public abstract boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException, CovRemoteServiceException_Exception;
 
     public File[] findMsvscaOutputFiles(String dirName) {
         File dir = new File(dirName);
@@ -101,7 +101,7 @@ public abstract class CoverityToolHandler {
         }, true);
     }
 
-    public List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener) throws IOException, CovRemoteServiceException_Exception {
+    public List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener) throws IOException, CovRemoteServiceException_Exception  {
         int defectSize = 3000; // Maximum amount of defect to pull
         int pageSize = 1000; // Size of page to be pulled
         List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
@@ -120,6 +120,9 @@ public abstract class CoverityToolHandler {
         filter.getActionNameList().addAll(defectFilter.getActions());
         filter.getSeverityNameList().addAll(defectFilter.getSeverities());
         filter.getComponentIdList().addAll(defectFilter.getComponents());
+        if(defectFilter.getCheckersList() == null){
+            defectFilter.setCheckers(cim,snapshotId);
+        }
         filter.getCheckerSubcategoryFilterSpecList().addAll(defectFilter.getCheckers(listener));
         filter.setFirstDetectedStartDate(defectFilter.getXMLCutOffDate());
 
