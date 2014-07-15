@@ -29,6 +29,12 @@ public abstract class CoverityToolHandler {
      * @return A {@link CoverityToolHandler} that can run the given version of analysis.
      */
     public static CoverityToolHandler getHandler(CoverityVersion version) {
+        // A fail safe for testing so that when we have new versions of analysis and platform, the build steps will
+        // Automatically go to fresnotoolhandler
+        if (version.isCodeName() && !version.containsCodeName()){
+            return new FresnoToolHandler();
+        }
+
         if(version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
             return new PreFresnoToolHandler();
         } else {
@@ -120,6 +126,8 @@ public abstract class CoverityToolHandler {
         filter.getActionNameList().addAll(defectFilter.getActions());
         filter.getSeverityNameList().addAll(defectFilter.getSeverities());
         filter.getComponentIdList().addAll(defectFilter.getComponents());
+        // Check to see if checker list is empty because of pre-existing settings
+        // We reset the checker list to have all checkers.
         if(defectFilter.getCheckersList() == null){
             defectFilter.setCheckers(cim,snapshotId);
         }
