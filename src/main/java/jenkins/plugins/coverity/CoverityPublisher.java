@@ -95,6 +95,8 @@ public class CoverityPublisher extends Recorder {
 
     private final TaOptionBlock taOptionBlock;
 
+    private final ScmOptionBlock scmOptionBlock;
+
     @DataBoundConstructor
     public CoverityPublisher(List<CIMStream> cimStreams,
                              InvocationAssistance invocationAssistance,
@@ -107,7 +109,8 @@ public class CoverityPublisher extends Recorder {
                              String project,
                              String stream,
                              DefectFilters defectFilters,
-                             TaOptionBlock taOptionBlock) {
+                             TaOptionBlock taOptionBlock,
+                             ScmOptionBlock scmOptionBlock) {
         this.cimStreams = cimStreams;
         this.invocationAssistance = invocationAssistance;
         this.failBuild = failBuild;
@@ -120,6 +123,7 @@ public class CoverityPublisher extends Recorder {
         this.stream = stream;
         this.defectFilters = defectFilters;
         this.taOptionBlock = taOptionBlock;
+        this.scmOptionBlock = scmOptionBlock;
 
         if(isOldDataPresent()) {
             logger.info("Old data format detected. Converting to new format.");
@@ -212,6 +216,8 @@ public class CoverityPublisher extends Recorder {
     }
 
     public TaOptionBlock getTaOptionBlock(){return taOptionBlock;}
+
+    public ScmOptionBlock getScmOptionBlock(){return scmOptionBlock;}
 
     public List<CIMStream> getCimStreams() {
         if(cimStreams == null) {

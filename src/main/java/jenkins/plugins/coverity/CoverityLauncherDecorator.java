@@ -72,6 +72,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             return launcher;
         }
         TaOptionBlock ta = publisher.getTaOptionBlock();
+        ScmOptionBlock scm = publisher.getScmOptionBlock();
         InvocationAssistance ii = publisher.getInvocationAssistance();
         /**if(ii == null) {
             return launcher;
@@ -85,6 +86,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             }
         }
         
+        if(scm != null){
+            String scmCheck = scm.checkScmConfig();
+        }
+
         try {
             if(ii == null){
                 FilePath coverityDir = node.getRootPath().child("coverity");
