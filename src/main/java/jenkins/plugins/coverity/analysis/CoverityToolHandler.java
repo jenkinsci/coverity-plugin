@@ -132,7 +132,10 @@ public abstract class CoverityToolHandler {
             defectFilter.setCheckers(cim,snapshotId);
         }
         filter.getCheckerSubcategoryFilterSpecList().addAll(defectFilter.getCheckers(listener));
-        filter.setFirstDetectedStartDate(defectFilter.getXMLCutOffDate());
+        // Getting the cutoff date to add into filter. But only should be done if the cut off date is specified.
+        if(defectFilter.getCutOffDate() != null){
+            filter.setFirstDetectedStartDate(defectFilter.getXMLCutOffDate());
+        }
 
         ConfigurationService configurationService = cim.getConfigurationService();
         CheckerPropertyFilterSpecDataObj checkPropFilter= new CheckerPropertyFilterSpecDataObj();
