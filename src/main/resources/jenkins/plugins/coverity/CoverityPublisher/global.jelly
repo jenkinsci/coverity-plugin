@@ -30,9 +30,6 @@
 					<f:entry title="Data Port (Optional)" field="dataPort">
 						<f:textbox/>
 					</f:entry>
-					<f:entry title="Commit Port (Optional)" field="dataPort">
-						<f:textbox/>
-					</f:entry>
 					<f:entry title="Use SSL" field="useSSL">
 						<f:checkbox/>
 					</f:entry>
