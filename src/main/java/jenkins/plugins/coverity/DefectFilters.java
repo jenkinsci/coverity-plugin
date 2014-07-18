@@ -73,6 +73,20 @@ public class DefectFilters {
         }
     }
 
+    /**
+     * We want to do a check on the defect configuration so that no null values are going into the build.
+     * There has been issues on upgrade where configurations are changed, and not updates thus causing builds to
+     * fail because some configuaritons are null.
+     * @return true if defect configurations are not null
+     */
+    public boolean checkConfig(){
+        if(this.getCheckersList() == null || this.getClassifications() == null ||
+                this.getActions() == null || this.getSeverities() == null || this.getComponents() == null){
+            return false;
+        }
+        return true;
+    }
+
     public boolean isClassificationSelected(String action) {
         return classifications.contains(action);
     }
@@ -189,6 +203,14 @@ public class DefectFilters {
         return Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
     }
 
+    /**
+     * Set checkers is used when specific jenkins instances are set up with pre-exisiting configurations and we need to
+     * reset the checkers. (Mainly because of STS)
+     * @param cimInstance
+     * @param streamId
+     * @throws IOException
+     * @throws CovRemoteServiceException_Exception
+     */
     public void setCheckers(CIMInstance cimInstance,long streamId) throws IOException,CovRemoteServiceException_Exception{
         StreamDataObj stream = cimInstance.getStream(String.valueOf(streamId));
         String type = stream.getLanguage();

@@ -118,6 +118,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         // Do not run cov-build if language is "CSHARP"
         boolean onlyCS = true;
         for(CIMStream cs : publisher.getCimStreams()) {
+            if(!cs.getDefectFilters().checkConfig()){
+                throw new RuntimeException("Defect Filters Configured incorrectly. Possibly new configuration have been " +
+                        "added and needs configurations. \n Please check your build configuration before running another build.");
+            }
             CIMInstance cim = publisher.getDescriptor().getInstance(cs.getInstance());
             String id = cs.getInstance() + "/" + cs.getStream();
             try {
