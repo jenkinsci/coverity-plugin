@@ -127,8 +127,6 @@ public abstract class CoverityToolHandler {
         SnapshotIdDataObj snapid = new SnapshotIdDataObj();
         snapid.setId(snapshotId);
 
-        TestingErrorOnBuild
-
         sfilter.setStreamId(streamId);
 
         sfilter.getSnapshotIdIncludeList().add(snapid);
