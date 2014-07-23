@@ -462,7 +462,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId,listener);
 
-                    //listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
+                    listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
 
                     Set<String> checkers = new HashSet<String>();
                     // Adding the checkers that the defects were found in
@@ -478,7 +478,17 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     List<Long> matchingDefects = new ArrayList<Long>();
                     // Loop through all defects
                     for(MergedDefectDataObj defect : defects) {
-                        matchingDefects.add(defect.getCid());
+                        //matchingDefects.add(defect.getCid()); All the code needed when trying to get cim checkers
+                        //When there is no defect filter, we just add it to the matching defects
+                        if(cimStream.getDefectFilters() == null) {
+                            matchingDefects.add(defect.getCid());
+                        } else {
+                            // Check to see if defectFilter matches the defect
+                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
+                            if(match) {
+                                matchingDefects.add(defect.getCid());
+                            }
+                        }
                     }
 
                     if(!matchingDefects.isEmpty()) {

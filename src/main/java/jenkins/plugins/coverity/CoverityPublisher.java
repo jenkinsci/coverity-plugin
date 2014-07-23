@@ -325,6 +325,15 @@ public class CoverityPublisher extends Recorder {
 
         public void setJavaCheckers(String javaCheckers) {
             this.javaCheckers = Util.fixEmpty(javaCheckers);
+            try{
+                this.javaCheckers = IOUtils.toString(getClass().getResourceAsStream("java-checkers.txt"));
+            }catch(IOException e){
+                logger.info("Failed loading Java Checkers text file.");
+            }
+        }
+
+        public void setCimJavaCheckers(String javaCheckers) {
+            this.javaCheckers = Util.fixEmpty(javaCheckers);
             this.javaCheckers = StringUtils.join(getCimJavaCheckers(),'\n');
         }
 
@@ -353,6 +362,16 @@ public class CoverityPublisher extends Recorder {
         }
 
         public void setCxxCheckers(String cxxCheckers) {
+            this.cxxCheckers = Util.fixEmpty(cxxCheckers);
+            try{
+                this.cxxCheckers = IOUtils.toString(getClass().getResourceAsStream("cxx-checkers.txt"));
+            }catch(IOException e){
+                logger.info("Failed to load Cxx Checkers text file");
+            }
+
+        }
+
+        public void setCIMCxxCheckers(String cxxCheckers) {
             this.cxxCheckers = Util.fixEmpty(cxxCheckers);
             this.cxxCheckers = StringUtils.join(getCimCxxCheckers(),'\n');
 
@@ -383,6 +402,16 @@ public class CoverityPublisher extends Recorder {
         }
 
         public void setCsharpCheckers(String csharpCheckers) {
+            this.csharpCheckers = Util.fixEmpty(csharpCheckers);
+
+            try{
+                this.cxxCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
+            }catch(IOException e){
+                logger.info("Failed to load C sharp Checkers text file");
+            }
+        }
+
+        public void setCimCsharpCheckers(String csharpCheckers) {
             this.csharpCheckers = Util.fixEmpty(csharpCheckers);
 
             this.csharpCheckers = StringUtils.join(getCimCsharpCheckers(),'\n');

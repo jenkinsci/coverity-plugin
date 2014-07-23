@@ -121,26 +121,7 @@ public abstract class CoverityToolHandler {
         streamId.setName(cimStream.getStream());
 
         MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
-        // Add all the classifications
-        filter.getClassificationNameList().addAll(defectFilter.getClassifications());
-        filter.getActionNameList().addAll(defectFilter.getActions());
-        filter.getSeverityNameList().addAll(defectFilter.getSeverities());
-        filter.getComponentIdList().addAll(defectFilter.getComponents());
-        // Check to see if checker list is empty because of pre-existing settings
-        // We reset the checker list to have all checkers.
-        if(defectFilter.getCheckersList() == null){
-            defectFilter.setCheckers(cim,snapshotId);
-        }
-        filter.getCheckerSubcategoryFilterSpecList().addAll(defectFilter.getCheckers(listener));
-        // Getting the cutoff date to add into filter. But only should be done if the cut off date is specified.
-        if(defectFilter.getCutOffDate() != null){
-            filter.setFirstDetectedStartDate(defectFilter.getXMLCutOffDate());
-        }
 
-        ConfigurationService configurationService = cim.getConfigurationService();
-        CheckerPropertyFilterSpecDataObj checkPropFilter= new CheckerPropertyFilterSpecDataObj();
-
-        List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkPropFilter);
 
         StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
         SnapshotIdDataObj snapid = new SnapshotIdDataObj();
@@ -159,6 +140,29 @@ public abstract class CoverityToolHandler {
 
         }
         return mergeList;
+    }
+
+    public MergedDefectFilterSpecDataObj addFilters(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener)throws IOException,CovRemoteServiceException_Exception{
+        MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
+        DefectFilters defectFilter = cimStream.getDefectFilters();
+
+        // Add all the classifications
+        filter.getClassificationNameList().addAll(defectFilter.getClassifications());
+        filter.getActionNameList().addAll(defectFilter.getActions());
+        filter.getSeverityNameList().addAll(defectFilter.getSeverities());
+        filter.getComponentIdList().addAll(defectFilter.getComponents());
+        // Check to see if checker list is empty because of pre-existing settings
+        // We reset the checker list to have all checkers.
+        if(defectFilter.getCheckersList() == null){
+            defectFilter.setCheckers(cim,snapshotId);
+        }
+        filter.getCheckerSubcategoryFilterSpecList().addAll(defectFilter.getCheckers(listener));
+        // Getting the cutoff date to add into filter. But only should be done if the cut off date is specified.
+        if(defectFilter.getCutOffDate() != null){
+            filter.setFirstDetectedStartDate(defectFilter.getXMLCutOffDate());
+        }
+
+        return filter;
     }
 
     public boolean covEmitWar(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home, CoverityTempDir temp, String javaWarFile) throws IOException, InterruptedException {
