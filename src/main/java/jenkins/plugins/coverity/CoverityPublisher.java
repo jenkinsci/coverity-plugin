@@ -405,7 +405,7 @@ public class CoverityPublisher extends Recorder {
             this.csharpCheckers = Util.fixEmpty(csharpCheckers);
 
             try{
-                this.cxxCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
+                this.csharpCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
             }catch(IOException e){
                 logger.info("Failed to load C sharp Checkers text file");
             }
