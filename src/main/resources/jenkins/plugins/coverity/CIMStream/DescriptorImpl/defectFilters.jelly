@@ -88,7 +88,7 @@
                 </f:entry>
                 <f:entry title="Date first detected is on or after">
                     <f:textbox name="cutOffDate" value="${defectFilters.cutOffDate}"
-                               checkUrl="'${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/checkCutOffDate' + qs(this).addThis().toString()"/>
+                               checkUrl="'/descriptor/jenkins.plugins.coverity.CoverityPublisher/checkCutOffDate' + qs(this).addThis().toString()"/>
                 </f:entry>
             </table>
         </td>
