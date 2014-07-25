@@ -27,8 +27,8 @@ public class ObjectFactory {
     private final static QName _GetCheckerSubcategoriesForProjectResponse_QNAME = new QName("http://ws.coverity.com/v6", "getCheckerSubcategoriesForProjectResponse");
     private final static QName _UpdateTriageForCIDsInTriageStore_QNAME = new QName("http://ws.coverity.com/v6", "updateTriageForCIDsInTriageStore");
     private final static QName _GetFileContents_QNAME = new QName("http://ws.coverity.com/v6", "getFileContents");
-    private final static QName _GetComponentMetricsForProject_QNAME = new QName("http://ws.coverity.com/v6", "getComponentMetricsForProject");
     private final static QName _GetCheckerSubcategoriesForStreamsResponse_QNAME = new QName("http://ws.coverity.com/v6", "getCheckerSubcategoriesForStreamsResponse");
+    private final static QName _GetComponentMetricsForProject_QNAME = new QName("http://ws.coverity.com/v6", "getComponentMetricsForProject");
     private final static QName _GetMergedDefectsForStreamsResponse_QNAME = new QName("http://ws.coverity.com/v6", "getMergedDefectsForStreamsResponse");
     private final static QName _UpdateDefectInstanceProperties_QNAME = new QName("http://ws.coverity.com/v6", "updateDefectInstanceProperties");
     private final static QName _UpdateDefectInstancePropertiesResponse_QNAME = new QName("http://ws.coverity.com/v6", "updateDefectInstancePropertiesResponse");
@@ -70,59 +70,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link GetStreamFunctionsInternalResponse }
+     * Create an instance of {@link GetMergedDefectsForProjectResponse }
      * 
      */
-    public GetStreamFunctionsInternalResponse createGetStreamFunctionsInternalResponse() {
-        return new GetStreamFunctionsInternalResponse();
-    }
-
-    /**
-     * Create an instance of {@link GetCIDsForProjectResponse }
-     * 
-     */
-    public GetCIDsForProjectResponse createGetCIDsForProjectResponse() {
-        return new GetCIDsForProjectResponse();
-    }
-
-    /**
-     * Create an instance of {@link GetMergedDefectHistory }
-     * 
-     */
-    public GetMergedDefectHistory createGetMergedDefectHistory() {
-        return new GetMergedDefectHistory();
-    }
-
-    /**
-     * Create an instance of {@link GetCheckerSubcategoriesForStreams }
-     * 
-     */
-    public GetCheckerSubcategoriesForStreams createGetCheckerSubcategoriesForStreams() {
-        return new GetCheckerSubcategoriesForStreams();
-    }
-
-    /**
-     * Create an instance of {@link GetCIDForMergeKeyResponse }
-     * 
-     */
-    public GetCIDForMergeKeyResponse createGetCIDForMergeKeyResponse() {
-        return new GetCIDForMergeKeyResponse();
-    }
-
-    /**
-     * Create an instance of {@link GetMergedDefectsForStreams }
-     * 
-     */
-    public GetMergedDefectsForStreams createGetMergedDefectsForStreams() {
-        return new GetMergedDefectsForStreams();
-    }
-
-    /**
-     * Create an instance of {@link GetCIDForDMCID }
-     * 
-     */
-    public GetCIDForDMCID createGetCIDForDMCID() {
-        return new GetCIDForDMCID();
+    public GetMergedDefectsForProjectResponse createGetMergedDefectsForProjectResponse() {
+        return new GetMergedDefectsForProjectResponse();
     }
 
     /**
@@ -134,38 +86,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link GetStreamFunctionsInternal }
-     * 
-     */
-    public GetStreamFunctionsInternal createGetStreamFunctionsInternal() {
-        return new GetStreamFunctionsInternal();
-    }
-
-    /**
-     * Create an instance of {@link GetMergedDefectsForProjectResponse }
-     * 
-     */
-    public GetMergedDefectsForProjectResponse createGetMergedDefectsForProjectResponse() {
-        return new GetMergedDefectsForProjectResponse();
-    }
-
-    /**
-     * Create an instance of {@link GetCIDForDMCIDResponse }
-     * 
-     */
-    public GetCIDForDMCIDResponse createGetCIDForDMCIDResponse() {
-        return new GetCIDForDMCIDResponse();
-    }
-
-    /**
-     * Create an instance of {@link GetFileContentsResponse }
-     * 
-     */
-    public GetFileContentsResponse createGetFileContentsResponse() {
-        return new GetFileContentsResponse();
-    }
-
-    /**
      * Create an instance of {@link GetTrendRecordsForProject }
      * 
      */
@@ -174,83 +94,59 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link GetCIDsForStreamsResponse }
+     * Create an instance of {@link GetTrendRecordsForProjectResponse }
      * 
      */
-    public GetCIDsForStreamsResponse createGetCIDsForStreamsResponse() {
-        return new GetCIDsForStreamsResponse();
+    public GetTrendRecordsForProjectResponse createGetTrendRecordsForProjectResponse() {
+        return new GetTrendRecordsForProjectResponse();
     }
 
     /**
-     * Create an instance of {@link UpdateStreamDefectsResponse }
+     * Create an instance of {@link FunctionInfoDataObj }
      * 
      */
-    public UpdateStreamDefectsResponse createUpdateStreamDefectsResponse() {
-        return new UpdateStreamDefectsResponse();
+    public FunctionInfoDataObj createFunctionInfoDataObj() {
+        return new FunctionInfoDataObj();
     }
 
     /**
-     * Create an instance of {@link GetCIDsForProject }
+     * Create an instance of {@link UpdateDefectInstanceProperties }
      * 
      */
-    public GetCIDsForProject createGetCIDsForProject() {
-        return new GetCIDsForProject();
+    public UpdateDefectInstanceProperties createUpdateDefectInstanceProperties() {
+        return new UpdateDefectInstanceProperties();
     }
 
     /**
-     * Create an instance of {@link GetStreamDefectsResponse }
+     * Create an instance of {@link ComponentMetricsDataObj }
      * 
      */
-    public GetStreamDefectsResponse createGetStreamDefectsResponse() {
-        return new GetStreamDefectsResponse();
+    public ComponentMetricsDataObj createComponentMetricsDataObj() {
+        return new ComponentMetricsDataObj();
     }
 
     /**
-     * Create an instance of {@link GetStreamDefects }
+     * Create an instance of {@link StreamFunctionDataObj }
      * 
      */
-    public GetStreamDefects createGetStreamDefects() {
-        return new GetStreamDefects();
+    public StreamFunctionDataObj createStreamFunctionDataObj() {
+        return new StreamFunctionDataObj();
     }
 
     /**
-     * Create an instance of {@link GetMergedDefectsForProject }
+     * Create an instance of {@link FileContentsDataObj }
      * 
      */
-    public GetMergedDefectsForProject createGetMergedDefectsForProject() {
-        return new GetMergedDefectsForProject();
+    public FileContentsDataObj createFileContentsDataObj() {
+        return new FileContentsDataObj();
     }
 
     /**
-     * Create an instance of {@link UpdateTriageForCIDsInTriageStoreResponse }
+     * Create an instance of {@link StreamDefectFilterSpecDataObj }
      * 
      */
-    public UpdateTriageForCIDsInTriageStoreResponse createUpdateTriageForCIDsInTriageStoreResponse() {
-        return new UpdateTriageForCIDsInTriageStoreResponse();
-    }
-
-    /**
-     * Create an instance of {@link GetCIDsForStreams }
-     * 
-     */
-    public GetCIDsForStreams createGetCIDsForStreams() {
-        return new GetCIDsForStreams();
-    }
-
-    /**
-     * Create an instance of {@link UpdateTriageForCIDsInTriageStore }
-     * 
-     */
-    public UpdateTriageForCIDsInTriageStore createUpdateTriageForCIDsInTriageStore() {
-        return new UpdateTriageForCIDsInTriageStore();
-    }
-
-    /**
-     * Create an instance of {@link GetFileContents }
-     * 
-     */
-    public GetFileContents createGetFileContents() {
-        return new GetFileContents();
+    public StreamDefectFilterSpecDataObj createStreamDefectFilterSpecDataObj() {
+        return new StreamDefectFilterSpecDataObj();
     }
 
     /**
@@ -262,27 +158,179 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link GetComponentMetricsForProject }
+     * Create an instance of {@link GetCheckerSubcategoriesForStreams }
      * 
      */
-    public GetComponentMetricsForProject createGetComponentMetricsForProject() {
-        return new GetComponentMetricsForProject();
+    public GetCheckerSubcategoriesForStreams createGetCheckerSubcategoriesForStreams() {
+        return new GetCheckerSubcategoriesForStreams();
     }
 
     /**
-     * Create an instance of {@link UpdateDefectInstancePropertiesResponse }
+     * Create an instance of {@link GetMergedDefectHistoryResponse }
      * 
      */
-    public UpdateDefectInstancePropertiesResponse createUpdateDefectInstancePropertiesResponse() {
-        return new UpdateDefectInstancePropertiesResponse();
+    public GetMergedDefectHistoryResponse createGetMergedDefectHistoryResponse() {
+        return new GetMergedDefectHistoryResponse();
     }
 
     /**
-     * Create an instance of {@link UpdateDefectInstanceProperties }
+     * Create an instance of {@link CreateMergedDefectResponse }
      * 
      */
-    public UpdateDefectInstanceProperties createUpdateDefectInstanceProperties() {
-        return new UpdateDefectInstanceProperties();
+    public CreateMergedDefectResponse createCreateMergedDefectResponse() {
+        return new CreateMergedDefectResponse();
+    }
+
+    /**
+     * Create an instance of {@link GetFileContents }
+     * 
+     */
+    public GetFileContents createGetFileContents() {
+        return new GetFileContents();
+    }
+
+    /**
+     * Create an instance of {@link UpdateTriageForCIDsInTriageStoreResponse }
+     * 
+     */
+    public UpdateTriageForCIDsInTriageStoreResponse createUpdateTriageForCIDsInTriageStoreResponse() {
+        return new UpdateTriageForCIDsInTriageStoreResponse();
+    }
+
+    /**
+     * Create an instance of {@link GetMergedDefectsForProject }
+     * 
+     */
+    public GetMergedDefectsForProject createGetMergedDefectsForProject() {
+        return new GetMergedDefectsForProject();
+    }
+
+    /**
+     * Create an instance of {@link StreamSnapshotFilterSpecDataObj }
+     * 
+     */
+    public StreamSnapshotFilterSpecDataObj createStreamSnapshotFilterSpecDataObj() {
+        return new StreamSnapshotFilterSpecDataObj();
+    }
+
+    /**
+     * Create an instance of {@link DefectInstanceIdDataObj }
+     * 
+     */
+    public DefectInstanceIdDataObj createDefectInstanceIdDataObj() {
+        return new DefectInstanceIdDataObj();
+    }
+
+    /**
+     * Create an instance of {@link PageSpecDataObj }
+     * 
+     */
+    public PageSpecDataObj createPageSpecDataObj() {
+        return new PageSpecDataObj();
+    }
+
+    /**
+     * Create an instance of {@link ComponentIdDataObj }
+     * 
+     */
+    public ComponentIdDataObj createComponentIdDataObj() {
+        return new ComponentIdDataObj();
+    }
+
+    /**
+     * Create an instance of {@link GetCIDForDMCID }
+     * 
+     */
+    public GetCIDForDMCID createGetCIDForDMCID() {
+        return new GetCIDForDMCID();
+    }
+
+    /**
+     * Create an instance of {@link StreamFunctionPageDataObj }
+     * 
+     */
+    public StreamFunctionPageDataObj createStreamFunctionPageDataObj() {
+        return new StreamFunctionPageDataObj();
+    }
+
+    /**
+     * Create an instance of {@link AttributeDefinitionValueFilterMapDataObj }
+     * 
+     */
+    public AttributeDefinitionValueFilterMapDataObj createAttributeDefinitionValueFilterMapDataObj() {
+        return new AttributeDefinitionValueFilterMapDataObj();
+    }
+
+    /**
+     * Create an instance of {@link GetCIDsForStreamsResponse }
+     * 
+     */
+    public GetCIDsForStreamsResponse createGetCIDsForStreamsResponse() {
+        return new GetCIDsForStreamsResponse();
+    }
+
+    /**
+     * Create an instance of {@link CheckerSubcategoryFilterSpecDataObj }
+     * 
+     */
+    public CheckerSubcategoryFilterSpecDataObj createCheckerSubcategoryFilterSpecDataObj() {
+        return new CheckerSubcategoryFilterSpecDataObj();
+    }
+
+    /**
+     * Create an instance of {@link GetStreamFunctionsInternal }
+     * 
+     */
+    public GetStreamFunctionsInternal createGetStreamFunctionsInternal() {
+        return new GetStreamFunctionsInternal();
+    }
+
+    /**
+     * Create an instance of {@link DefectStateDataObj }
+     * 
+     */
+    public DefectStateDataObj createDefectStateDataObj() {
+        return new DefectStateDataObj();
+    }
+
+    /**
+     * Create an instance of {@link FileIdDataObj }
+     * 
+     */
+    public FileIdDataObj createFileIdDataObj() {
+        return new FileIdDataObj();
+    }
+
+    /**
+     * Create an instance of {@link GetCIDForDMCIDResponse }
+     * 
+     */
+    public GetCIDForDMCIDResponse createGetCIDForDMCIDResponse() {
+        return new GetCIDForDMCIDResponse();
+    }
+
+    /**
+     * Create an instance of {@link FieldChangeDataObj }
+     * 
+     */
+    public FieldChangeDataObj createFieldChangeDataObj() {
+        return new FieldChangeDataObj();
+    }
+
+    /**
+     * Create an instance of {@link DefectInstanceDataObj }
+     * 
+     */
+    public DefectInstanceDataObj createDefectInstanceDataObj() {
+        return new DefectInstanceDataObj();
+    }
+
+    /**
+     * Create an instance of {@link GetCIDForMergeKey }
+     * 
+     */
+    public GetCIDForMergeKey createGetCIDForMergeKey() {
+        return new GetCIDForMergeKey();
     }
 
     /**
@@ -302,115 +350,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link GetTrendRecordsForProjectResponse }
+     * Create an instance of {@link UpdateStreamDefectsResponse }
      * 
      */
-    public GetTrendRecordsForProjectResponse createGetTrendRecordsForProjectResponse() {
-        return new GetTrendRecordsForProjectResponse();
+    public UpdateStreamDefectsResponse createUpdateStreamDefectsResponse() {
+        return new UpdateStreamDefectsResponse();
     }
 
     /**
-     * Create an instance of {@link GetComponentMetricsForProjectResponse }
+     * Create an instance of {@link PropertyDataObj }
      * 
      */
-    public GetComponentMetricsForProjectResponse createGetComponentMetricsForProjectResponse() {
-        return new GetComponentMetricsForProjectResponse();
-    }
-
-    /**
-     * Create an instance of {@link GetCIDForMergeKey }
-     * 
-     */
-    public GetCIDForMergeKey createGetCIDForMergeKey() {
-        return new GetCIDForMergeKey();
-    }
-
-    /**
-     * Create an instance of {@link UpdateStreamDefects }
-     * 
-     */
-    public UpdateStreamDefects createUpdateStreamDefects() {
-        return new UpdateStreamDefects();
-    }
-
-    /**
-     * Create an instance of {@link GetMergedDefectHistoryResponse }
-     * 
-     */
-    public GetMergedDefectHistoryResponse createGetMergedDefectHistoryResponse() {
-        return new GetMergedDefectHistoryResponse();
-    }
-
-    /**
-     * Create an instance of {@link GetCheckerSubcategoriesForProject }
-     * 
-     */
-    public GetCheckerSubcategoriesForProject createGetCheckerSubcategoriesForProject() {
-        return new GetCheckerSubcategoriesForProject();
-    }
-
-    /**
-     * Create an instance of {@link CreateMergedDefectResponse }
-     * 
-     */
-    public CreateMergedDefectResponse createCreateMergedDefectResponse() {
-        return new CreateMergedDefectResponse();
-    }
-
-    /**
-     * Create an instance of {@link CovRemoteServiceException }
-     * 
-     */
-    public CovRemoteServiceException createCovRemoteServiceException() {
-        return new CovRemoteServiceException();
-    }
-
-    /**
-     * Create an instance of {@link AttributeValueIdDataObj }
-     * 
-     */
-    public AttributeValueIdDataObj createAttributeValueIdDataObj() {
-        return new AttributeValueIdDataObj();
-    }
-
-    /**
-     * Create an instance of {@link StreamDefectDataObj }
-     * 
-     */
-    public StreamDefectDataObj createStreamDefectDataObj() {
-        return new StreamDefectDataObj();
-    }
-
-    /**
-     * Create an instance of {@link StreamSnapshotFilterSpecDataObj }
-     * 
-     */
-    public StreamSnapshotFilterSpecDataObj createStreamSnapshotFilterSpecDataObj() {
-        return new StreamSnapshotFilterSpecDataObj();
-    }
-
-    /**
-     * Create an instance of {@link FieldChangeDataObj }
-     * 
-     */
-    public FieldChangeDataObj createFieldChangeDataObj() {
-        return new FieldChangeDataObj();
-    }
-
-    /**
-     * Create an instance of {@link ProjectTrendRecordFilterSpecDataObj }
-     * 
-     */
-    public ProjectTrendRecordFilterSpecDataObj createProjectTrendRecordFilterSpecDataObj() {
-        return new ProjectTrendRecordFilterSpecDataObj();
-    }
-
-    /**
-     * Create an instance of {@link MergedDefectFilterSpecDataObj }
-     * 
-     */
-    public MergedDefectFilterSpecDataObj createMergedDefectFilterSpecDataObj() {
-        return new MergedDefectFilterSpecDataObj();
+    public PropertyDataObj createPropertyDataObj() {
+        return new PropertyDataObj();
     }
 
     /**
@@ -422,27 +374,51 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link MergedDefectDataObj }
+     * Create an instance of {@link UpdateTriageForCIDsInTriageStore }
      * 
      */
-    public MergedDefectDataObj createMergedDefectDataObj() {
-        return new MergedDefectDataObj();
+    public UpdateTriageForCIDsInTriageStore createUpdateTriageForCIDsInTriageStore() {
+        return new UpdateTriageForCIDsInTriageStore();
     }
 
     /**
-     * Create an instance of {@link ProjectIdDataObj }
+     * Create an instance of {@link GetCIDsForProjectResponse }
      * 
      */
-    public ProjectIdDataObj createProjectIdDataObj() {
-        return new ProjectIdDataObj();
+    public GetCIDsForProjectResponse createGetCIDsForProjectResponse() {
+        return new GetCIDsForProjectResponse();
     }
 
     /**
-     * Create an instance of {@link CheckerSubcategoryIdDataObj }
+     * Create an instance of {@link MergedDefectsPageDataObj }
      * 
      */
-    public CheckerSubcategoryIdDataObj createCheckerSubcategoryIdDataObj() {
-        return new CheckerSubcategoryIdDataObj();
+    public MergedDefectsPageDataObj createMergedDefectsPageDataObj() {
+        return new MergedDefectsPageDataObj();
+    }
+
+    /**
+     * Create an instance of {@link GetComponentMetricsForProjectResponse }
+     * 
+     */
+    public GetComponentMetricsForProjectResponse createGetComponentMetricsForProjectResponse() {
+        return new GetComponentMetricsForProjectResponse();
+    }
+
+    /**
+     * Create an instance of {@link GetStreamDefects }
+     * 
+     */
+    public GetStreamDefects createGetStreamDefects() {
+        return new GetStreamDefects();
+    }
+
+    /**
+     * Create an instance of {@link SnapshotIdDataObj }
+     * 
+     */
+    public SnapshotIdDataObj createSnapshotIdDataObj() {
+        return new SnapshotIdDataObj();
     }
 
     /**
@@ -462,11 +438,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link StreamDefectFilterSpecDataObj }
+     * Create an instance of {@link GetCIDsForStreams }
      * 
      */
-    public StreamDefectFilterSpecDataObj createStreamDefectFilterSpecDataObj() {
-        return new StreamDefectFilterSpecDataObj();
+    public GetCIDsForStreams createGetCIDsForStreams() {
+        return new GetCIDsForStreams();
+    }
+
+    /**
+     * Create an instance of {@link GetCIDsForProject }
+     * 
+     */
+    public GetCIDsForProject createGetCIDsForProject() {
+        return new GetCIDsForProject();
     }
 
     /**
@@ -478,123 +462,75 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link StreamFunctionPageDataObj }
+     * Create an instance of {@link GetMergedDefectHistory }
      * 
      */
-    public StreamFunctionPageDataObj createStreamFunctionPageDataObj() {
-        return new StreamFunctionPageDataObj();
+    public GetMergedDefectHistory createGetMergedDefectHistory() {
+        return new GetMergedDefectHistory();
     }
 
     /**
-     * Create an instance of {@link MergedDefectsPageDataObj }
+     * Create an instance of {@link GetMergedDefectsForStreams }
      * 
      */
-    public MergedDefectsPageDataObj createMergedDefectsPageDataObj() {
-        return new MergedDefectsPageDataObj();
+    public GetMergedDefectsForStreams createGetMergedDefectsForStreams() {
+        return new GetMergedDefectsForStreams();
     }
 
     /**
-     * Create an instance of {@link FileContentsDataObj }
+     * Create an instance of {@link GetCIDForMergeKeyResponse }
      * 
      */
-    public FileContentsDataObj createFileContentsDataObj() {
-        return new FileContentsDataObj();
+    public GetCIDForMergeKeyResponse createGetCIDForMergeKeyResponse() {
+        return new GetCIDForMergeKeyResponse();
     }
 
     /**
-     * Create an instance of {@link ComponentMetricsDataObj }
+     * Create an instance of {@link GetStreamDefectsResponse }
      * 
      */
-    public ComponentMetricsDataObj createComponentMetricsDataObj() {
-        return new ComponentMetricsDataObj();
+    public GetStreamDefectsResponse createGetStreamDefectsResponse() {
+        return new GetStreamDefectsResponse();
     }
 
     /**
-     * Create an instance of {@link DefectChangeDataObj }
+     * Create an instance of {@link GetCheckerSubcategoriesForProject }
      * 
      */
-    public DefectChangeDataObj createDefectChangeDataObj() {
-        return new DefectChangeDataObj();
+    public GetCheckerSubcategoriesForProject createGetCheckerSubcategoriesForProject() {
+        return new GetCheckerSubcategoriesForProject();
     }
 
     /**
-     * Create an instance of {@link AttributeDefinitionIdDataObj }
+     * Create an instance of {@link MergedDefectDataObj }
      * 
      */
-    public AttributeDefinitionIdDataObj createAttributeDefinitionIdDataObj() {
-        return new AttributeDefinitionIdDataObj();
+    public MergedDefectDataObj createMergedDefectDataObj() {
+        return new MergedDefectDataObj();
     }
 
     /**
-     * Create an instance of {@link TriageStoreIdDataObj }
+     * Create an instance of {@link UpdateStreamDefects }
      * 
      */
-    public TriageStoreIdDataObj createTriageStoreIdDataObj() {
-        return new TriageStoreIdDataObj();
+    public UpdateStreamDefects createUpdateStreamDefects() {
+        return new UpdateStreamDefects();
     }
 
     /**
-     * Create an instance of {@link FileIdDataObj }
+     * Create an instance of {@link GetComponentMetricsForProject }
      * 
      */
-    public FileIdDataObj createFileIdDataObj() {
-        return new FileIdDataObj();
+    public GetComponentMetricsForProject createGetComponentMetricsForProject() {
+        return new GetComponentMetricsForProject();
     }
 
     /**
-     * Create an instance of {@link DefectStateDataObj }
+     * Create an instance of {@link GetStreamFunctionsInternalResponse }
      * 
      */
-    public DefectStateDataObj createDefectStateDataObj() {
-        return new DefectStateDataObj();
-    }
-
-    /**
-     * Create an instance of {@link AttributeDefinitionValueFilterMapDataObj }
-     * 
-     */
-    public AttributeDefinitionValueFilterMapDataObj createAttributeDefinitionValueFilterMapDataObj() {
-        return new AttributeDefinitionValueFilterMapDataObj();
-    }
-
-    /**
-     * Create an instance of {@link DefectInstanceIdDataObj }
-     * 
-     */
-    public DefectInstanceIdDataObj createDefectInstanceIdDataObj() {
-        return new DefectInstanceIdDataObj();
-    }
-
-    /**
-     * Create an instance of {@link ProjectMetricsDataObj }
-     * 
-     */
-    public ProjectMetricsDataObj createProjectMetricsDataObj() {
-        return new ProjectMetricsDataObj();
-    }
-
-    /**
-     * Create an instance of {@link PageSpecDataObj }
-     * 
-     */
-    public PageSpecDataObj createPageSpecDataObj() {
-        return new PageSpecDataObj();
-    }
-
-    /**
-     * Create an instance of {@link SnapshotIdDataObj }
-     * 
-     */
-    public SnapshotIdDataObj createSnapshotIdDataObj() {
-        return new SnapshotIdDataObj();
-    }
-
-    /**
-     * Create an instance of {@link DefectInstanceDataObj }
-     * 
-     */
-    public DefectInstanceDataObj createDefectInstanceDataObj() {
-        return new DefectInstanceDataObj();
+    public GetStreamFunctionsInternalResponse createGetStreamFunctionsInternalResponse() {
+        return new GetStreamFunctionsInternalResponse();
     }
 
     /**
@@ -606,35 +542,67 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link StreamFunctionDataObj }
+     * Create an instance of {@link DefectChangeDataObj }
      * 
      */
-    public StreamFunctionDataObj createStreamFunctionDataObj() {
-        return new StreamFunctionDataObj();
+    public DefectChangeDataObj createDefectChangeDataObj() {
+        return new DefectChangeDataObj();
     }
 
     /**
-     * Create an instance of {@link FunctionInfoDataObj }
+     * Create an instance of {@link GetFileContentsResponse }
      * 
      */
-    public FunctionInfoDataObj createFunctionInfoDataObj() {
-        return new FunctionInfoDataObj();
+    public GetFileContentsResponse createGetFileContentsResponse() {
+        return new GetFileContentsResponse();
     }
 
     /**
-     * Create an instance of {@link CheckerSubcategoryFilterSpecDataObj }
+     * Create an instance of {@link ProjectTrendRecordFilterSpecDataObj }
      * 
      */
-    public CheckerSubcategoryFilterSpecDataObj createCheckerSubcategoryFilterSpecDataObj() {
-        return new CheckerSubcategoryFilterSpecDataObj();
+    public ProjectTrendRecordFilterSpecDataObj createProjectTrendRecordFilterSpecDataObj() {
+        return new ProjectTrendRecordFilterSpecDataObj();
     }
 
     /**
-     * Create an instance of {@link ComponentIdDataObj }
+     * Create an instance of {@link CheckerSubcategoryIdDataObj }
      * 
      */
-    public ComponentIdDataObj createComponentIdDataObj() {
-        return new ComponentIdDataObj();
+    public CheckerSubcategoryIdDataObj createCheckerSubcategoryIdDataObj() {
+        return new CheckerSubcategoryIdDataObj();
+    }
+
+    /**
+     * Create an instance of {@link StreamDefectDataObj }
+     * 
+     */
+    public StreamDefectDataObj createStreamDefectDataObj() {
+        return new StreamDefectDataObj();
+    }
+
+    /**
+     * Create an instance of {@link ProjectIdDataObj }
+     * 
+     */
+    public ProjectIdDataObj createProjectIdDataObj() {
+        return new ProjectIdDataObj();
+    }
+
+    /**
+     * Create an instance of {@link AttributeValueIdDataObj }
+     * 
+     */
+    public AttributeValueIdDataObj createAttributeValueIdDataObj() {
+        return new AttributeValueIdDataObj();
+    }
+
+    /**
+     * Create an instance of {@link MergedDefectFilterSpecDataObj }
+     * 
+     */
+    public MergedDefectFilterSpecDataObj createMergedDefectFilterSpecDataObj() {
+        return new MergedDefectFilterSpecDataObj();
     }
 
     /**
@@ -646,11 +614,43 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link PropertyDataObj }
+     * Create an instance of {@link ProjectMetricsDataObj }
      * 
      */
-    public PropertyDataObj createPropertyDataObj() {
-        return new PropertyDataObj();
+    public ProjectMetricsDataObj createProjectMetricsDataObj() {
+        return new ProjectMetricsDataObj();
+    }
+
+    /**
+     * Create an instance of {@link CovRemoteServiceException }
+     * 
+     */
+    public CovRemoteServiceException createCovRemoteServiceException() {
+        return new CovRemoteServiceException();
+    }
+
+    /**
+     * Create an instance of {@link TriageStoreIdDataObj }
+     * 
+     */
+    public TriageStoreIdDataObj createTriageStoreIdDataObj() {
+        return new TriageStoreIdDataObj();
+    }
+
+    /**
+     * Create an instance of {@link AttributeDefinitionIdDataObj }
+     * 
+     */
+    public AttributeDefinitionIdDataObj createAttributeDefinitionIdDataObj() {
+        return new AttributeDefinitionIdDataObj();
+    }
+
+    /**
+     * Create an instance of {@link UpdateDefectInstancePropertiesResponse }
+     * 
+     */
+    public UpdateDefectInstancePropertiesResponse createUpdateDefectInstancePropertiesResponse() {
+        return new UpdateDefectInstancePropertiesResponse();
     }
 
     /**
@@ -681,21 +681,21 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link GetComponentMetricsForProject }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://ws.coverity.com/v6", name = "getComponentMetricsForProject")
-    public JAXBElement<GetComponentMetricsForProject> createGetComponentMetricsForProject(GetComponentMetricsForProject value) {
-        return new JAXBElement<GetComponentMetricsForProject>(_GetComponentMetricsForProject_QNAME, GetComponentMetricsForProject.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetCheckerSubcategoriesForStreamsResponse }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://ws.coverity.com/v6", name = "getCheckerSubcategoriesForStreamsResponse")
     public JAXBElement<GetCheckerSubcategoriesForStreamsResponse> createGetCheckerSubcategoriesForStreamsResponse(GetCheckerSubcategoriesForStreamsResponse value) {
         return new JAXBElement<GetCheckerSubcategoriesForStreamsResponse>(_GetCheckerSubcategoriesForStreamsResponse_QNAME, GetCheckerSubcategoriesForStreamsResponse.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link GetComponentMetricsForProject }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://ws.coverity.com/v6", name = "getComponentMetricsForProject")
+    public JAXBElement<GetComponentMetricsForProject> createGetComponentMetricsForProject(GetComponentMetricsForProject value) {
+        return new JAXBElement<GetComponentMetricsForProject>(_GetComponentMetricsForProject_QNAME, GetComponentMetricsForProject.class, null, value);
     }
 
     /**
