@@ -55,7 +55,7 @@ public class FileContentsDataObj {
      *     byte[]
      */
     public void setContents(byte[] value) {
-        this.contents = ((byte[]) value);
+        this.contents = value;
     }
 
     /**
