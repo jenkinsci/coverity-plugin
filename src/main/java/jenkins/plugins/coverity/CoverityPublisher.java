@@ -11,7 +11,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
+import com.coverity.ws.v6.*;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -44,13 +44,7 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -95,6 +89,8 @@ public class CoverityPublisher extends Recorder {
 
     private final TaOptionBlock taOptionBlock;
 
+    private final ScmOptionBlock scmOptionBlock;
+
     @DataBoundConstructor
     public CoverityPublisher(List<CIMStream> cimStreams,
                              InvocationAssistance invocationAssistance,
@@ -107,7 +103,8 @@ public class CoverityPublisher extends Recorder {
                              String project,
                              String stream,
                              DefectFilters defectFilters,
-                             TaOptionBlock taOptionBlock) {
+                             TaOptionBlock taOptionBlock,
+                             ScmOptionBlock scmOptionBlock) {
         this.cimStreams = cimStreams;
         this.invocationAssistance = invocationAssistance;
         this.failBuild = failBuild;
@@ -120,6 +117,7 @@ public class CoverityPublisher extends Recorder {
         this.stream = stream;
         this.defectFilters = defectFilters;
         this.taOptionBlock = taOptionBlock;
+        this.scmOptionBlock = scmOptionBlock;
 
         if(isOldDataPresent()) {
             logger.info("Old data format detected. Converting to new format.");
@@ -213,6 +211,8 @@ public class CoverityPublisher extends Recorder {
 
     public TaOptionBlock getTaOptionBlock(){return taOptionBlock;}
 
+    public ScmOptionBlock getScmOptionBlock(){return scmOptionBlock;}
+
     public List<CIMStream> getCimStreams() {
         if(cimStreams == null) {
             return new ArrayList<CIMStream>();
@@ -237,8 +237,11 @@ public class CoverityPublisher extends Recorder {
         CoverityVersion version = CheckConfig.checkNode(this, build, launcher, listener).getVersion();
 
         CoverityToolHandler cth = CoverityToolHandler.getHandler(version);
-
-        return cth.perform(build, launcher, listener, this);
+        try{
+            return cth.perform(build, launcher, listener, this);
+        } catch(CovRemoteServiceException_Exception e){
+            throw new InterruptedException("Cov Remote Service Error " + e.getMessage());
+        }
     }
 
     public String getLanguage(CIMStream cimStream) throws IOException, CovRemoteServiceException_Exception {
@@ -298,43 +301,121 @@ public class CoverityPublisher extends Recorder {
             this.home = home;
         }
 
-        public String getJavaCheckers() {
-            return javaCheckers;
+        public String getJavaCheckers(){return javaCheckers;}
+
+        public List<String> getCimJavaCheckers() {
+            List<String> checkers = new ArrayList<String>();
+            try {
+                for(CIMInstance instance :instances){
+                    ConfigurationService configurationService = instance.getConfigurationService();
+                    CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
+                    checkerPropFilter.getDomainList().add("STATIC_JAVA");
+                    List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkerPropFilter);
+                    for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
+                        CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
+                        if(!checkers.contains(checkerSub.getCheckerName())){
+                            checkers.add(checkerSub.getCheckerName());
+                        }
+                    }
+                }
+            } catch(Exception e) {
+            }
+            return checkers;
         }
 
         public void setJavaCheckers(String javaCheckers) {
             this.javaCheckers = Util.fixEmpty(javaCheckers);
-            try {
-                //if(this.javaCheckers == null)
+            try{
                 this.javaCheckers = IOUtils.toString(getClass().getResourceAsStream("java-checkers.txt"));
-            } catch(IOException e) {
+            }catch(IOException e){
+                logger.info("Failed loading Java Checkers text file.");
             }
+        }
+
+        public void setCimJavaCheckers(String javaCheckers) {
+            this.javaCheckers = Util.fixEmpty(javaCheckers);
+            this.javaCheckers = StringUtils.join(getCimJavaCheckers(),'\n');
         }
 
         public String getCxxCheckers() {
             return cxxCheckers;
         }
 
+        public List<String> getCimCxxCheckers() {
+            List<String> checkers = new ArrayList<String>();
+            try {
+                for(CIMInstance instance :instances){
+                    ConfigurationService configurationService = instance.getConfigurationService();
+                    CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
+                    checkerPropFilter.getDomainList().add("STATIC_C");
+                    List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkerPropFilter);
+                    for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
+                        CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
+                        if(!checkers.contains(checkerSub.getCheckerName())){
+                            checkers.add(checkerSub.getCheckerName());
+                        }
+                    }
+                }
+            } catch(Exception e) {
+            }
+            return checkers;
+        }
+
         public void setCxxCheckers(String cxxCheckers) {
             this.cxxCheckers = Util.fixEmpty(cxxCheckers);
-            try {
-                //if(this.cxxCheckers == null)
+            try{
                 this.cxxCheckers = IOUtils.toString(getClass().getResourceAsStream("cxx-checkers.txt"));
-            } catch(IOException e) {
+            }catch(IOException e){
+                logger.info("Failed to load Cxx Checkers text file");
             }
+
+        }
+
+        public void setCIMCxxCheckers(String cxxCheckers) {
+            this.cxxCheckers = Util.fixEmpty(cxxCheckers);
+            this.cxxCheckers = StringUtils.join(getCimCxxCheckers(),'\n');
+
         }
 
         public String getCsharpCheckers() {
             return csharpCheckers;
         }
 
+        public List<String> getCimCsharpCheckers() {
+            List<String> checkers = new ArrayList<String>();
+            try {
+                for(CIMInstance instance :instances){
+                    ConfigurationService configurationService = instance.getConfigurationService();
+                    CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
+                    checkerPropFilter.getDomainList().add("STATIC_CS");
+                    List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkerPropFilter);
+                    for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
+                        CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
+                        if(!checkers.contains(checkerSub.getCheckerName())){
+                            checkers.add(checkerSub.getCheckerName());
+                        }
+                    }
+                }
+            } catch(Exception e) {
+            }
+            return checkers;
+        }
+
         public void setCsharpCheckers(String csharpCheckers) {
             this.csharpCheckers = Util.fixEmpty(csharpCheckers);
-            try {
-                //if(this.csharpCheckers == null)
+
+            try{
                 this.csharpCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
-            } catch(IOException e) {
+            }catch(IOException e){
+                logger.info("Failed to load C sharp Checkers text file");
             }
+        }
+
+        public void setCimCsharpCheckers(String csharpCheckers) {
+            this.csharpCheckers = Util.fixEmpty(csharpCheckers);
+
+            this.csharpCheckers = StringUtils.join(getCimCsharpCheckers(),'\n');
+
         }
 
         public String getHome(Node node, EnvVars environment) {
@@ -396,6 +477,17 @@ public class CoverityPublisher extends Recorder {
 
         public Set<String> split2(String string) {
             Set<String> result = new TreeSet<String>();
+            for(String s : string.split("[\r\n]")) {
+                s = Util.fixEmptyAndTrim(s);
+                if(s != null) {
+                    result.add(s);
+                }
+            }
+            return result;
+        }
+        // Spliting checker strings into a usable list
+        public List<String> split2List(String string) {
+            List<String> result = new LinkedList<String>();
             for(String s : string.split("[\r\n]")) {
                 s = Util.fixEmptyAndTrim(s);
                 if(s != null) {

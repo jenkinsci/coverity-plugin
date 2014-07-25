@@ -36,7 +36,7 @@ import java.util.HashMap;
  */
 public class FresnoToolHandler extends CoverityToolHandler {
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException , CovRemoteServiceException_Exception{
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
@@ -44,6 +44,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
+        ScmOptionBlock scm = publisher.getScmOptionBlock();
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
             home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
@@ -168,79 +169,77 @@ public class FresnoToolHandler extends CoverityToolHandler {
         }
 
         // Run Cov Import Scm
-        if(testAnalysis != null){
-            if(testAnalysis.getScmOptionBlock() && !testAnalysis.getScmSystem().equals("none")){
-                try {
-                    String covImportScm = "cov-import-scm";
+        if(scm != null && !scm.getScmSystem().equals("none")){
 
-                    if(home != null) {
-                        covImportScm = new FilePath(launcher.getChannel(), home).child("bin").child(covImportScm).getRemote();
-                    }
+            try {
+                String covImportScm = "cov-import-scm";
 
-                    CoverityLauncherDecorator.SKIP.set(true);
-
-
-
-                    List<String> cmd = new ArrayList<String>();
-                    cmd.add(covImportScm);
-                    cmd.add("--dir");
-                    cmd.add(temp.getTempDir().getRemote());
-                    cmd.add("--scm");
-                    cmd.add(testAnalysis.getScmSystem());
-                    if(testAnalysis.getCustomTestTool() != null){
-                        cmd.add("--tool");
-                        cmd.add(testAnalysis.getCustomTestTool());
-                    }
-
-                    if(testAnalysis.getScmToolArguments() != null){
-                        cmd.add("--tool-arg");
-                        cmd.add(testAnalysis.getScmToolArguments());
-                    }
-
-                    if(testAnalysis.getScmCommandArgs() != null){
-                        cmd.add("--command-arg");
-                        cmd.add(testAnalysis.getScmCommandArgs());
-                    }
-
-                    if(testAnalysis.getLogFileLoc() != null){
-                        cmd.add("--log");
-                        cmd.add(testAnalysis.getLogFileLoc());
-                    }
-                    // Adding accurev's root repo, which is optional
-                    if(testAnalysis.getScmSystem().equals("accurev") && testAnalysis.getAccRevRepo() != null){
-                        cmd.add("--project-root");
-                        cmd.add(testAnalysis.getAccRevRepo());
-                    }
-
-                    // Perforce requires p4port to be set when running scm
-                    Map<String,String> env = new HashMap<String,String>();;
-                    if(testAnalysis.getScmSystem().equals("perforce")){
-                        env.put("P4PORT",testAnalysis.getP4Port());
-                    }
-
-
-                    ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
-                    listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                    int result = launcher.
-                            launch().
-                            cmds(args).
-                            stdout(listener).
-                            envs(env).
-                            stderr(listener.getLogger()).
-                            join();
-
-                    if(result != 0) {
-                        listener.getLogger().println("[Coverity] cov-import-scm returned " + result + ", aborting...");
-
-                        build.setResult(Result.FAILURE);
-                        return false;
-                    }
-                } finally {
-                    CoverityLauncherDecorator.SKIP.set(false);
+                if(home != null) {
+                    covImportScm = new FilePath(launcher.getChannel(), home).child("bin").child(covImportScm).getRemote();
                 }
 
+                CoverityLauncherDecorator.SKIP.set(true);
+
+
+
+                List<String> cmd = new ArrayList<String>();
+                cmd.add(covImportScm);
+                cmd.add("--dir");
+                cmd.add(temp.getTempDir().getRemote());
+                cmd.add("--scm");
+                cmd.add(scm.getScmSystem());
+                if(scm.getCustomTestTool() != null){
+                    cmd.add("--tool");
+                    cmd.add(scm.getCustomTestTool());
+                }
+
+                if(scm.getScmToolArguments() != null){
+                    cmd.add("--tool-arg");
+                    cmd.add(scm.getScmToolArguments());
+                }
+
+                if(scm.getScmCommandArgs() != null){
+                    cmd.add("--command-arg");
+                    cmd.add(scm.getScmCommandArgs());
+                }
+
+                if(scm.getLogFileLoc() != null){
+                    cmd.add("--log");
+                    cmd.add(scm.getLogFileLoc());
+                }
+                // Adding accurev's root repo, which is optional
+                if(scm.getScmSystem().equals("accurev") && scm.getAccRevRepo() != null){
+                    cmd.add("--project-root");
+                    cmd.add(scm.getAccRevRepo());
+                }
+
+                // Perforce requires p4port to be set when running scm
+                Map<String,String> env = new HashMap<String,String>();;
+                if(scm.getScmSystem().equals("perforce")){
+                    env.put("P4PORT",scm.getP4Port());
+                }
+
+
+                ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
+
+                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+
+                int result = launcher.
+                        launch().
+                        cmds(args).
+                        stdout(listener).
+                        envs(env).
+                        stderr(listener.getLogger()).
+                        join();
+
+                if(result != 0) {
+                    listener.getLogger().println("[Coverity] cov-import-scm returned " + result + ", aborting...");
+
+                    build.setResult(Result.FAILURE);
+                    return false;
+                }
+            } finally {
+                CoverityLauncherDecorator.SKIP.set(false);
             }
         }
 
@@ -461,7 +460,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     listener.getLogger().println("[Coverity] Fetching defects for stream " + cimStream.getStream());
 
-                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId);
+                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId,listener);
 
                     listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
 
@@ -479,6 +478,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     List<Long> matchingDefects = new ArrayList<Long>();
                     // Loop through all defects
                     for(MergedDefectDataObj defect : defects) {
+                        //matchingDefects.add(defect.getCid()); All the code needed when trying to get cim checkers
                         //When there is no defect filter, we just add it to the matching defects
                         if(cimStream.getDefectFilters() == null) {
                             matchingDefects.add(defect.getCid());
@@ -492,7 +492,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     }
 
                     if(!matchingDefects.isEmpty()) {
-                        listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
+                        listener.getLogger().println("[Coverity] Found " + defects.size() + " defects matching all filters: " + matchingDefects);
                         if(publisher.isFailBuild()) {
                             if(build.getResult().isBetterThan(Result.FAILURE)) {
                                 build.setResult(Result.FAILURE);

@@ -78,7 +78,7 @@ public class CoverityProjectAction implements Action {
                 final List<CoverityBuildAction> actions = build.getActions(CoverityBuildAction.class);
 
                 for(CoverityBuildAction action : actions) {
-                    if(action != null) {
+                    if(action != null && action.getDefectIds() != null && action.getId() != null) {
                         data.add(action.getDefectIds().size(), action.getId(), new ChartLabel(build));
                     }
                 }

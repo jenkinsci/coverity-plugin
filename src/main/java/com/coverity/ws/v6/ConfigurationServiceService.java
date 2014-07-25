@@ -17,7 +17,7 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.1
  * 
  */
-@WebServiceClient(name = "ConfigurationServiceService", targetNamespace = "http://ws.coverity.com/v6", wsdlLocation = "http://localhost:14800/ws/v6/configurationservice?wsdl")
+@WebServiceClient(name = "ConfigurationServiceService", targetNamespace = "http://ws.coverity.com/v6", wsdlLocation = "http://kdang-wrkst:11121/ws/v6/configurationservice?wsdl")
 public class ConfigurationServiceService
     extends Service
 {
@@ -30,9 +30,9 @@ public class ConfigurationServiceService
         try {
             URL baseUrl;
             baseUrl = com.coverity.ws.v6.ConfigurationServiceService.class.getResource(".");
-            url = new URL(baseUrl, "http://localhost:14800/ws/v6/configurationservice?wsdl");
+            url = new URL(baseUrl, "http://kdang-wrkst:11121/ws/v6/configurationservice?wsdl");
         } catch (MalformedURLException e) {
-            logger.warning("Failed to create URL for the wsdl Location: 'http://localhost:14800/ws/v6/configurationservice?wsdl', retrying as a local file");
+            logger.warning("Failed to create URL for the wsdl Location: 'http://kdang-wrkst:11121/ws/v6/configurationservice?wsdl', retrying as a local file");
             logger.warning(e.getMessage());
         }
         CONFIGURATIONSERVICESERVICE_WSDL_LOCATION = url;

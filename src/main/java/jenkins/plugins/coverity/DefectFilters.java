@@ -11,19 +11,20 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.MergedDefectDataObj;
+import com.coverity.ws.v6.*;
 import hudson.Util;
 import hudson.model.Descriptor;
+import hudson.model.Hudson;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import hudson.model.BuildListener;
 
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Responsible for filtering the full list of defects to determine if a build should fail or not. Filters are inclusive:
@@ -69,12 +70,29 @@ public class DefectFilters {
         } else {
             ignoredCheckers = new ArrayList<String>(allCheckers);
             ignoredCheckers.removeAll(checkers);
-            checkers = null;
         }
+    }
+
+    /**
+     * We want to do a check on the defect configuration so that no null values are going into the build.
+     * There has been issues on upgrade where configurations are changed, and not updates thus causing builds to
+     * fail because some configuaritons are null.
+     * @return true if defect configurations are not null
+     */
+    public boolean checkConfig(){
+        if(this.getCheckersList() == null || this.getClassifications() == null ||
+                this.getActions() == null || this.getSeverities() == null || this.getComponents() == null){
+            return false;
+        }
+        return true;
     }
 
     public boolean isClassificationSelected(String action) {
         return classifications.contains(action);
+    }
+
+    public List<String> getCheckersList(){
+        return checkers;
     }
 
     public boolean isActionSelected(String action) {
@@ -101,51 +119,48 @@ public class DefectFilters {
         return new SimpleDateFormat("yyyy-MM-dd").format(cutOffDate);
     }
 
+    public List<String> getClassifications(){return classifications;}
+
+    public List<String> getActions(){return actions;}
+
+    public List<String> getSeverities(){return severities;}
+
+    public List<ComponentIdDataObj> getComponents(){
+        List<ComponentIdDataObj> componentIdDataList = new ArrayList<ComponentIdDataObj>();
+        for(String comp : components){
+            ComponentIdDataObj cIdDataObj = new ComponentIdDataObj();
+            cIdDataObj.setName(comp);
+            componentIdDataList.add(cIdDataObj);
+        }
+        return componentIdDataList;
+    }
+
+    public List<CheckerSubcategoryFilterSpecDataObj> getCheckers(BuildListener listener){
+        List<CheckerSubcategoryFilterSpecDataObj> checkerSubFilterSpecDataObjList = new ArrayList<CheckerSubcategoryFilterSpecDataObj>();
+        for(String check : checkers){
+            if(check != null){
+                CheckerSubcategoryFilterSpecDataObj checkerSubFilterSpecDataObj = new CheckerSubcategoryFilterSpecDataObj();
+                checkerSubFilterSpecDataObj.setCheckerName(check);
+                checkerSubFilterSpecDataObjList.add(checkerSubFilterSpecDataObj);
+            }
+        }
+        return checkerSubFilterSpecDataObjList;
+    }
+
+    public List<String> getIgnoredChecker(){return ignoredCheckers;}
+
+    public XMLGregorianCalendar getXMLCutOffDate(){
+        GregorianCalendar calender = new GregorianCalendar();
+        calender.setTime(cutOffDate);
+        try{
+            return DatatypeFactory.newInstance().newXMLGregorianCalendar(calender);
+        }catch(Exception e){
+
+        }
+        return null;
+    }
+
     public boolean matches(MergedDefectDataObj defect, BuildListener listener) {
-        /*
-        boolean result = true;
-        if(!isActionSelected(defect.getAction())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect action %s with actions selected: %s",defect.getAction(),defect.getAction()));
-        }
-
-        if(!isClassificationSelected(defect.getClassification())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect classifications %s with classifications selected: %s",
-                defect.getClassification(),defect.getClassification()));
-        }
-
-        if(!isSeveritySelected(defect.getSeverity())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect serverity %s with severity selected: %s",
-                defect.getSeverity(),defect.getSeverity()));
-        }
-
-        if(!isComponentSelected(defect.getComponentName())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect components %s with components selected: %s",
-                defect.getComponentName(),defect.getComponentName()));
-        }
-
-        if(!isCheckerSelected(defect.getCheckerName())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defect checkers %s with checkers selected: %s",
-                defect.getCheckerName(),defect.getCheckerName()));
-        }
-
-        if(!Arrays.asList("New", "Triaged", "Various").contains(defect.getStatus())){
-            result = false;
-            listener.getLogger().println(String.format("Failed to match defects with 'New' 'Triaged' or 'Various' status.: %s",
-                defect.getStatus()));
-        }
-
-        if(!(cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate))){
-            result = false;
-            listener.getLogger().println(String.format("Failed at matching cutOffDate: %s",
-                defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate)));
-        }
-
-        return result;*/
         return isActionSelected(defect.getAction()) &&
                 isClassificationSelected(defect.getClassification()) &&
                 isSeveritySelected(defect.getSeverity()) &&
@@ -182,5 +197,33 @@ public class DefectFilters {
         result = 31 * result + (checkers != null ? checkers.hashCode() : 0);
         result = 31 * result + (cutOffDate != null ? cutOffDate.hashCode() : 0);
         return result;
+    }
+
+    public CoverityPublisher.DescriptorImpl getPublisherDescriptor() {
+        return Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
+    }
+
+    /**
+     * Set checkers is used when specific jenkins instances are set up with pre-exisiting configurations and we need to
+     * reset the checkers. (Mainly because of STS)
+     * @param cimInstance
+     * @param streamId
+     * @throws IOException
+     * @throws CovRemoteServiceException_Exception
+     */
+    public void setCheckers(CIMInstance cimInstance,long streamId) throws IOException,CovRemoteServiceException_Exception{
+        StreamDataObj stream = cimInstance.getStream(String.valueOf(streamId));
+        String type = stream.getLanguage();
+
+        if("MIXED".equals(type)) {
+            type = "ALL";
+        }
+
+        try {
+            String cs = getPublisherDescriptor().getCheckers(type);
+            checkers = getPublisherDescriptor().split2List(cs);
+        } catch(Exception e) {
+            checkers = new LinkedList<String>();
+        }
     }
 }

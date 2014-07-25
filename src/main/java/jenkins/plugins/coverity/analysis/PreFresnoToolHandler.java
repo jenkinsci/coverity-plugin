@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  */
 public class PreFresnoToolHandler extends CoverityToolHandler {
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException, CovRemoteServiceException_Exception {
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
@@ -284,9 +284,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
                     listener.getLogger().println("[Coverity] Fetching defects for stream " + cimStream.getStream());
 
-                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId);
-
-                    listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
+                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId,listener);
 
                     Set<String> checkers = new HashSet<String>();
                     for(MergedDefectDataObj defect : defects) {
@@ -297,6 +295,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     List<Long> matchingDefects = new ArrayList<Long>();
 
                     for(MergedDefectDataObj defect : defects) {
+                        //matchingDefects.add(defect.getCid());
                         if(cimStream.getDefectFilters() == null) {
                             matchingDefects.add(defect.getCid());
                         } else {
@@ -308,7 +307,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     }
 
                     if(!matchingDefects.isEmpty()) {
-                        listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
+                        listener.getLogger().println("[Coverity] Found " + defects.size() + " defects matching all filters: " + matchingDefects);
                         if(publisher.isFailBuild()) {
                             if(build.getResult().isBetterThan(Result.FAILURE)) {
                                 build.setResult(Result.FAILURE);

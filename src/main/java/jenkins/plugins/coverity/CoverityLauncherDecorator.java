@@ -72,6 +72,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             return launcher;
         }
         TaOptionBlock ta = publisher.getTaOptionBlock();
+        ScmOptionBlock scm = publisher.getScmOptionBlock();
         InvocationAssistance ii = publisher.getInvocationAssistance();
         /**if(ii == null) {
             return launcher;
@@ -85,6 +86,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             }
         }
         
+        if(scm != null){
+            String scmCheck = scm.checkScmConfig();
+        }
+
         try {
             if(ii == null){
                 FilePath coverityDir = node.getRootPath().child("coverity");
@@ -113,6 +118,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         // Do not run cov-build if language is "CSHARP"
         boolean onlyCS = true;
         for(CIMStream cs : publisher.getCimStreams()) {
+            if(!cs.getDefectFilters().checkConfig()){
+                throw new RuntimeException("Defect Filters Configured incorrectly. Possibly new configuration have been " +
+                        "added and needs configurations. \n Please check your build configuration before running another build.");
+            }
             CIMInstance cim = publisher.getDescriptor().getInstance(cs.getInstance());
             String id = cs.getInstance() + "/" + cs.getStream();
             try {
