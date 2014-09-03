@@ -68,15 +68,15 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         AbstractProject project = build.getProject();
 
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
+
+        CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
+
         if(publisher == null) {
             return launcher;
         }
         TaOptionBlock ta = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
         InvocationAssistance ii = publisher.getInvocationAssistance();
-        /**if(ii == null) {
-            return launcher;
-        }   **/
 
         FilePath temp;
         if(ta != null){
@@ -87,7 +87,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
         
         if(scm != null){
-            String scmCheck = scm.checkScmConfig();
+            String scmCheck = scm.checkScmConfig(version);
+            if(!scmCheck.equals("Pass")){
+                throw new RuntimeException(scmCheck);
+            }
         }
 
         try {
@@ -159,8 +162,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
             }
         }
-
-        CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
 
         if(onlyCS && version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
             logger.info("Only streams of type CSHARP were found, skipping cov-build");

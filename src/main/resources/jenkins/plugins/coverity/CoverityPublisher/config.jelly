@@ -419,11 +419,13 @@
 
                 <f:optionalBlock title="Source Control Configuration 'SCM' (Optional)" field="scmOptionBlock"
                                  checked="${instance.scmOptionBlock != null}" name="scmOptionBlock">
-                    <f:block>
-                        <f:entry title="Source Control Systems:">
+                        <j:set var="instance" value="${instance.scmOptionBlock}"/>
+                        <f:block>
+
+                        <f:entry name="scmSystem" title="Source Control Systems:" field="scmSystem">
                             <select name="scmSystem">
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'none' || !instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'none'}">
                                         <option value="none" selected="selected">none</option>
                                     </j:when>
                                     <j:otherwise>
@@ -431,7 +433,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'accurev' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'accurev'}">
                                         <option value="accurev" selected="selected">AccuRev</option>
                                     </j:when>
                                     <j:otherwise>
@@ -439,7 +441,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'clearcase' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'clearcase'}">
                                         <option value="clearcase" selected="selected">ClearCase</option>
                                     </j:when>
                                     <j:otherwise>
@@ -447,7 +449,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'cvs' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'cvs' }">
                                         <option value="cvs" selected="selected">Concurrent Version System</option>
                                     </j:when>
                                     <j:otherwise>
@@ -455,7 +457,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'git' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'git' }">
                                         <option value="git" selected="selected">Git</option>
                                     </j:when>
                                     <j:otherwise>
@@ -463,7 +465,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'hg' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'hg' }">
                                         <option value="hg" selected="selected">Mercuial</option>
                                     </j:when>
                                     <j:otherwise>
@@ -471,7 +473,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'tfs2008' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'tfs2008' }">
                                         <option value="tfs2008" selected="selected">Team Foundation Server 2008</option>
                                     </j:when>
                                     <j:otherwise>
@@ -479,7 +481,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'tfs2010' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'tfs2010' }">
                                         <option value="tfs2010" selected="selected">Team Foundation Server 2010</option>
                                     </j:when>
                                     <j:otherwise>
@@ -487,7 +489,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'tfs2012' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'tfs2012' }">
                                         <option value="tfs2012" selected="selected">Team Foundation Server 2012</option>
                                     </j:when>
                                     <j:otherwise>
@@ -495,7 +497,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'tfs2013' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'tfs2013' }">
                                         <option value="tfs2013" selected="selected">Team Foundation Server 2013</option>
                                     </j:when>
                                     <j:otherwise>
@@ -503,7 +505,7 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'perforce' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'perforce' }">
                                         <option value="perforce" selected="selected">Perforce</option>
                                     </j:when>
                                     <j:otherwise>
@@ -511,7 +513,15 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'svn' &amp;&amp; instance.scmOptionBlock}">
+                                    <j:when test="${instance.scmSystem eq 'perforce2009' }">
+                                        <option value="perforce2009" selected="selected">Perforce 2009</option>
+                                    </j:when>
+                                    <j:otherwise>
+                                        <option value="perforce2009">Perforce 2009</option>
+                                    </j:otherwise>
+                                </j:choose>
+                                <j:choose>
+                                    <j:when test="${instance.scmSystem eq 'svn' }">
                                         <option value="svn" selected="selected">Subversion</option>
                                     </j:when>
                                     <j:otherwise>
