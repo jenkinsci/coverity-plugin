@@ -285,8 +285,6 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add("--cpp");
                 } else if("CSHARP".equals(languageToAnalyze)) {
                     cmd.add("--cs");
-                    cmd.add("-j");
-                    cmd.add("auto");
                 } else {
                     //wat?
                     throw new RuntimeException("Couldn't find a language to analyze.");
