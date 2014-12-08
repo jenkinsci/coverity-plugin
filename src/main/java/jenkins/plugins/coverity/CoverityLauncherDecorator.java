@@ -69,11 +69,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
 
-        CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
+       
 
         if(publisher == null) {
             return launcher;
         }
+
+        CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
+
         TaOptionBlock ta = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
         InvocationAssistance ii = publisher.getInvocationAssistance();
@@ -173,11 +176,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
          * exact location of cov-build runable.
          */
         List<String> args = new ArrayList<String>();
-        args.add("cov-build-placeholder");
-        // Adding the intermediate directory
-        args.add("--dir");
-        // Adding the build command for the code
-        args.add(temp.getRemote());
+        if(ii != null){
+            args.add("cov-build-placeholder");
+            // Adding the intermediate directory
+            args.add("--dir");
+            // Adding the build command for the code
+            args.add(temp.getRemote());
+        }
 
         // Adding in Test Analysis arguments into the code when no other test command is needed to run.
         if(ta != null){
@@ -208,6 +213,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             blacklist = new String[0];
         }
 
+        String concat = ""; 
+
+        for(String x : args){
+            concat += args + " "; 
+        }
+
+        //throw new RuntimeException("args list is: " + concat);
+        //logger.info("args is: " + Arrays.toString(args));
         return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
     }
 
@@ -232,7 +245,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         private String[] getPrefix() {
             String[] tp = prefix.clone();
-            tp[0] = getCovBuild();
+            if(tp.length > 0){    
+                tp[0] = getCovBuild();
+            }
             return tp;
         }
 
