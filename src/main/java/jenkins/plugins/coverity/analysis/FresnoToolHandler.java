@@ -35,6 +35,13 @@ import java.util.HashMap;
  * Most of the code is currently the same as {@link PreFresnoToolHandler}.
  */
 public class FresnoToolHandler extends CoverityToolHandler {
+
+    CoverityVersion version;
+
+    public FresnoToolHandler(CoverityVersion version){
+        this.version = version;
+    }
+
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException , CovRemoteServiceException_Exception{
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
@@ -378,7 +385,11 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add(temp.getTempDir().getRemote());
                     cmd.add("--host");
                     cmd.add(cim.getHost());
-                    cmd.add(useDataPort ? "--dataport" : "--port");
+                    if(version.compareToAnalysis(new CoverityVersion("gilroy"))){
+                        cmd.add(cim.isUseSSL() ? "--http-port" : "--port");
+                    }else{
+                        cmd.add(useDataPort ? "--dataport" : "--port");
+                    }
                     cmd.add(useDataPort ? Integer.toString(cim.getDataPort()) : Integer.toString(cim.getPort()));
                     cmd.add("--stream");
                     cmd.add(cimStream.getStream());

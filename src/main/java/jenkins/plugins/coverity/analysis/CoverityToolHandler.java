@@ -32,13 +32,13 @@ public abstract class CoverityToolHandler {
         // A fail safe for testing so that when we have new versions of analysis and platform, the build steps will
         // Automatically go to fresnotoolhandler
         if (version.isCodeName() && !version.containsCodeName()){
-            return new FresnoToolHandler();
+            return new FresnoToolHandler(version);
         }
 
         if(version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
             return new PreFresnoToolHandler();
         } else {
-            return new FresnoToolHandler();
+            return new FresnoToolHandler(version);
         }
     }
 
