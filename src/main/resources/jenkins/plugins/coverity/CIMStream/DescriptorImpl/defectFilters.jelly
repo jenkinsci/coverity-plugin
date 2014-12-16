@@ -53,6 +53,14 @@
                         <st:nbsp/>
                     </j:forEach>
                 </f:entry>
+                <f:entry title="Impact is among:">
+                    <j:forEach var="e" items="${descriptor.doFillImpactDefectFilterItems(cimInstance)}">
+                        <f:checkbox name="impacts" json="${e.value}"
+                                    checked="${defectFilters == null ? true : defectFilters.isImpactsSelected(e.value)}"/>
+                        <label class="attach-previous">${e.name}</label>
+                        <st:nbsp/>
+                    </j:forEach>
+                </f:entry>
                 <f:entry title="Component is among:">
                     <input type="button" class="yui-button" value="Select All" onclick="checkFiltersComponents(true, ${id});"/>
                     <input type="button" class="yui-button" value="Select None" onclick="checkFiltersComponents(false, ${id});"/>

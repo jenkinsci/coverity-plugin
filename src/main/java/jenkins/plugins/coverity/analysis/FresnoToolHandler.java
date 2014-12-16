@@ -475,6 +475,8 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         publisher.getDescriptor().updateCheckers(publisher.getLanguage(cimStream), checkers);
                     }
 
+                    cimStream.getDefectFilters().createImpactMap(cim);
+
                     List<Long> matchingDefects = new ArrayList<Long>();
                     // Loop through all defects
                     for(MergedDefectDataObj defect : defects) {
@@ -483,6 +485,9 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         if(cimStream.getDefectFilters() == null) {
                             matchingDefects.add(defect.getCid());
                         } else {
+
+
+
                             // Check to see if defectFilter matches the defect
                             boolean match = cimStream.getDefectFilters().matches(defect,listener);
                             if(match) {

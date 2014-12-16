@@ -294,6 +294,9 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
                     List<Long> matchingDefects = new ArrayList<Long>();
 
+                    cimStream.getDefectFilters().createImpactMap(cim);
+
+
                     for(MergedDefectDataObj defect : defects) {
                         //matchingDefects.add(defect.getCid());
                         if(cimStream.getDefectFilters() == null) {
