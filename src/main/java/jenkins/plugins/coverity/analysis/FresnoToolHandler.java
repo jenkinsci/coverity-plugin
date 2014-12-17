@@ -56,6 +56,8 @@ public class FresnoToolHandler extends CoverityToolHandler {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
+        scm.setEnvVars(envVars);
+
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
             home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
@@ -389,12 +391,21 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add(temp.getTempDir().getRemote());
                     cmd.add("--host");
                     cmd.add(cim.getHost());
-                    if(version.compareToAnalysis(new CoverityVersion("gilroy"))){
-                        cmd.add(cim.isUseSSL() ? "--http-port" : "--port");
+
+                    // For versions greater than gilroy (7.5.0), we want to use the --https-port for https connetions
+                    // since it was added for gilroy and beyond
+                    if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
+                        cmd.add("--http-port");
+                        cim.add(Integer.toString(cim.getPort()));
                     }else{
-                        cmd.add(useDataPort ? "--dataport" : "--port");
+                        cmd.add("--port");
+                        cim.add(Integer.toString(cim.getPort()));
                     }
-                    cmd.add(useDataPort ? Integer.toString(cim.getDataPort()) : Integer.toString(cim.getPort()));
+
+                    if(useDataPort){
+                        cim.add("--dataport");
+                        cim.add(Integer.toString(cim.getDataPort()));
+                    }
                     cmd.add("--stream");
                     cmd.add(cimStream.getStream());
                     cmd.add("--user");

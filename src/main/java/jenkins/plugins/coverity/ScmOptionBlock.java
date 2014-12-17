@@ -1,10 +1,13 @@
 package jenkins.plugins.coverity;
 
 import hudson.Util;
+import hudson.EnvVars;
+import hudson.model.BuildListener;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.util.*;
+
 
 
 public class ScmOptionBlock {
@@ -16,6 +19,8 @@ public class ScmOptionBlock {
     private final String logFileLoc;
     private final String p4Port;
     private final String accRevRepo;
+    private EnvVars envVars;
+
 
     @DataBoundConstructor
     public ScmOptionBlock(
@@ -38,17 +43,19 @@ public class ScmOptionBlock {
 
     public String getScmSystem(){return scmSystem;}
 
-    public String getCustomTestTool(){return customTestTool;}
+    public String getCustomTestTool(){return envVars.expand(customTestTool);}
 
-    public String getScmToolArguments(){return scmToolArguments;}
+    public String getScmToolArguments(){return envVars.expand(scmToolArguments);}
 
-    public String getScmCommandArgs(){return scmCommandArgs;}
+    public String getScmCommandArgs(){return envVars.expand(scmCommandArgs);}
 
-    public String getLogFileLoc(){return logFileLoc;}
+    public String getLogFileLoc(){return envVars.expand(logFileLoc);}
 
-    public String getP4Port(){return p4Port;}
+    public String getP4Port(){return envVars.expand(p4Port);}
 
-    public String getAccRevRepo(){return accRevRepo;}
+    public String getAccRevRepo(){return envVars.expand(accRevRepo);}
+
+    public void setEnvVars(EnvVars env){ this.envVars = env;}
 
     public String checkScmConfig(CoverityVersion version){
         // Checking the required fields for specific SCM systems
