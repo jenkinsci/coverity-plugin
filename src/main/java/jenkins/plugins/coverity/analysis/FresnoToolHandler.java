@@ -12,6 +12,7 @@ import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.util.ArgumentListBuilder;
+import hudson.EnvVars;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
@@ -44,6 +45,9 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException , CovRemoteServiceException_Exception{
+        
+        EnvVars envVars = build.getEnvironment(listener);
+
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
@@ -90,7 +94,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add(temp.getTempDir().getRemote());
                     cmd.addAll(testAnalysis.getTaCommandArgs());
 
-                    for(String arg : Util.tokenize(testAnalysis.getCustomTestCommand())) {
+                    for(String arg : Util.tokenize(envVars.expand(testAnalysis.getCustomTestCommand()))) {
                         cmd.add(arg);
                     }
 
@@ -319,7 +323,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                 if(effectiveIA != null){
                     if(effectiveIA.getAnalyzeArguments() != null) {
-                        for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
+                        for(String arg : Util.tokenize(envVars.expand(effectiveIA.getAnalyzeArguments()))) {
                             cmd.add(arg);
                         }
                     }
@@ -398,7 +402,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     if(invocationAssistance != null){
                         if(effectiveIA.getCommitArguments() != null) {
-                            for(String arg : Util.tokenize(effectiveIA.getCommitArguments())) {
+                            for(String arg : Util.tokenize(envVars.expand(effectiveIA.getCommitArguments()))) {
                                 cmd.add(arg);
                             }
                         }

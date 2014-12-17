@@ -26,6 +26,7 @@ import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.remoting.Channel;
+import hudson.EnvVars;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -171,10 +172,20 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
             return launcher;
         }
+
+        //Setting up code to allow environment variables in text fields
+        EnvVars env;
+        try{
+            env = build.getEnvironment(launcher.getListener());
+        }catch(Exception e){
+            throw new RuntimeException("Error getting build environment variables", e);
+        }
+
         /**
          * Putting together the arguments for cov-build. The placeholder is there so that we can later determine the
          * exact location of cov-build runable.
          */
+       
         List<String> args = new ArrayList<String>();
         if(ii != null){
             args.add("cov-build-placeholder");
@@ -194,7 +205,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         String[] blacklist;
         if(ii != null){
             if(ii.getBuildArguments() != null) {
-                for(String arg : Util.tokenize(ii.getBuildArguments())) {
+                for(String arg : Util.tokenize(env.expand(ii.getBuildArguments()))) {
                     args.add(arg);
                 }
             }

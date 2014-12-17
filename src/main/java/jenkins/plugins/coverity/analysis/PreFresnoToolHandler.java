@@ -11,6 +11,7 @@ import hudson.model.Executor;
 import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
+import hudson.EnvVars;
 import hudson.util.ArgumentListBuilder;
 import jenkins.plugins.coverity.CIMInstance;
 import jenkins.plugins.coverity.CIMStream;
@@ -20,6 +21,7 @@ import jenkins.plugins.coverity.CoverityLauncherDecorator;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityTempDir;
 import jenkins.plugins.coverity.InvocationAssistance;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,6 +41,10 @@ import java.util.regex.Pattern;
 public class PreFresnoToolHandler extends CoverityToolHandler {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException, CovRemoteServiceException_Exception {
+
+        EnvVars envVars = build.getEnvironment(listener);
+
+
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
@@ -129,7 +135,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
                         listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                         if(effectiveIA.getAnalyzeArguments() != null) {
-                            for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
+                            for(String arg : Util.tokenize(envVars.expand(teffectiveIA.getAnalyzeArguments()))) {
                                 cmd.add(arg);
                             }
                         }
@@ -213,7 +219,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     cmd.add(cim.getUser());
 
                     if(effectiveIA.getCommitArguments() != null) {
-                        for(String arg : Util.tokenize(effectiveIA.getCommitArguments())) {
+                        for(String arg : Util.tokenize(envVars.expand(teffectiveIA.getCommitArguments()))) {
                             cmd.add(arg);
                         }
                     }
