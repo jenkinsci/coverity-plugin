@@ -56,7 +56,9 @@ public class FresnoToolHandler extends CoverityToolHandler {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
-        scm.setEnvVars(envVars);
+        if(scm != null){
+            scm.setEnvVars(envVars);
+        }
 
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
