@@ -200,7 +200,6 @@ public class DefectFilters {
         }catch(Exception e){
             // We dont to do anything if this fails since it happens so late within the build.
         }
-
     }
 
     /*
@@ -212,10 +211,12 @@ public class DefectFilters {
         // Creating the key with  a specific format. CheckerName:Domain:CheckerSubcategory
         String key = String.format("%s:%s:%s", defect.getCheckerName(), defect.getDomain(), defect.getCheckerSubcategory());
 
-        // Go through the impacts map that will have the key associated with an impact. 
-        for(String selectedImpact : this.impacts){
-            if(this.impactMap.get(key).equals(selectedImpact)){
-                return true;
+        if(this.impacts != null){
+            // Go through the impacts map that will have the key associated with an impact. 
+            for(String selectedImpact : this.impacts){
+                if(this.impactMap.get(key).equals(selectedImpact)){
+                    return true;
+                }
             }
         }
 
