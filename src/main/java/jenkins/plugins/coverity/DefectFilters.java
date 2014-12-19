@@ -46,6 +46,11 @@ public class DefectFilters {
     public DefectFilters(List<String> actions, List<String> impacts, List<String> classifications, List<String> severities, List<String> components, List<String> checkers, String cutOffDate) throws Descriptor.FormException {
         this.classifications = Util.fixNull(classifications);
         this.actions = Util.fixNull(actions);
+        if(impacts == null){
+            impacts.add("High");
+            impacts.add("Medium");
+            impacts.add("Low");
+        }
         this.impacts = Util.fixNull(impacts);
         this.severities = Util.fixNull(severities);
         this.components = Util.fixNull(components);
