@@ -56,6 +56,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
+        
         if(scm != null){
             scm.setEnvVars(envVars);
         }
@@ -396,7 +397,10 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     // For versions greater than gilroy (7.5.0), we want to use the --https-port for https connetions
                     // since it was added for gilroy and beyond
-                    if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
+                    if(useDataPort && System.getProperty("os.name").contains("Linux")){
+                        cmd.add("--dataport");
+                        cmd.add(Integer.toString(cim.getDataPort()));
+                    }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
                         cmd.add("--http-port");
                         cmd.add(Integer.toString(cim.getPort()));
                     }else{
@@ -404,10 +408,6 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         cmd.add(Integer.toString(cim.getPort()));
                     }
 
-                    if(useDataPort){
-                        cmd.add("--dataport");
-                        cmd.add(Integer.toString(cim.getDataPort()));
-                    }
                     cmd.add("--stream");
                     cmd.add(cimStream.getStream());
                     cmd.add("--user");
