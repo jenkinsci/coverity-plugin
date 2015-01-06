@@ -91,6 +91,16 @@ public class CoverityProjectAction implements Action {
         protected JFreeChart createGraph() {
             final CategoryDataset dataset = createDataSet().build();
 
+            DataSetBuilder test = createDataSet();
+            List rows = dataset.getColumnKeys();
+            for(int i = 0; i < rows.size(); i ++){
+                Object row = rows.get(i);
+                if(row == null){
+                    throw new NullPointerException();
+                }
+            }
+
+
             final JFreeChart chart = ChartFactory.createStackedAreaChart(null, // chart
                     // title
                     null, // unused
@@ -102,18 +112,18 @@ public class CoverityProjectAction implements Action {
                     false // urls
             );
 
-            chart.setBackgroundPaint(Color.white);
+            chart.setBackgroundPaint(Color.white); // Originally white
 
             final CategoryPlot plot = chart.getCategoryPlot();
 
             // plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
-            plot.setBackgroundPaint(Color.WHITE);
+            plot.setBackgroundPaint(Color.white); // Originally white
             plot.setOutlinePaint(null);
             plot.setForegroundAlpha(0.8f);
-            // plot.setDomainGridlinesVisible(true);
-            // plot.setDomainGridlinePaint(Color.white);
+            plot.setDomainGridlinesVisible(true);
+            plot.setDomainGridlinePaint(Color.white);
             plot.setRangeGridlinesVisible(true);
-            plot.setRangeGridlinePaint(Color.black);
+            plot.setRangeGridlinePaint(Color.black); // Originally black
 
             CategoryAxis domainAxis = new ShiftedCategoryAxis(null);
             plot.setDomainAxis(domainAxis);
@@ -123,7 +133,6 @@ public class CoverityProjectAction implements Action {
             domainAxis.setCategoryMargin(0.0);
 
             final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-            ChartUtil.adjustChebyshev(dataset, rangeAxis);
             rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
             rangeAxis.setAutoRange(true);
 
@@ -199,6 +208,7 @@ public class CoverityProjectAction implements Action {
         @Override
         public String toString() {
             String l = build.getDisplayName();
+            
             String s = build.getBuiltOnStr();
             if(s != null)
                 l += ' ' + s;
