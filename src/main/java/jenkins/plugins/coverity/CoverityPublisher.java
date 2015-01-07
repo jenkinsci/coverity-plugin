@@ -73,6 +73,12 @@ public class CoverityPublisher extends Recorder {
      * Should the build be marked as failed if defects are present ?
      */
     private final boolean failBuild;
+
+    /**
+     * Should the build be marked as unstable if defects are present ?
+     */
+    private final boolean unstable;
+
     /**
      * Should the intermediate directory be preserved after each build?
      */
@@ -91,10 +97,15 @@ public class CoverityPublisher extends Recorder {
 
     private final ScmOptionBlock scmOptionBlock;
 
+    // Internal variable to notify the Publisher that the build should be marked as unstable 
+    // since we cannot set the build as unstable within the tool handler
+    private Boolean unstableBuild = false;
+
     @DataBoundConstructor
     public CoverityPublisher(List<CIMStream> cimStreams,
                              InvocationAssistance invocationAssistance,
                              boolean failBuild,
+                             boolean unstable,
                              boolean keepIntDir,
                              boolean skipFetchingDefects,
                              boolean hideChart,
@@ -108,6 +119,7 @@ public class CoverityPublisher extends Recorder {
         this.cimStreams = cimStreams;
         this.invocationAssistance = invocationAssistance;
         this.failBuild = failBuild;
+        this.unstable = unstable;
         this.mailSender = mailSender;
         this.keepIntDir = keepIntDir;
         this.skipFetchingDefects = skipFetchingDefects;
@@ -205,9 +217,22 @@ public class CoverityPublisher extends Recorder {
         return hideChart;
     }
 
+    public boolean isUnstable(){
+        return unstable;
+    }
+    
+    public boolean isUnstableBuild(){
+        return unstableBuild;
+    }
+
+    public void setUnstableBuild(boolean unstable){
+        unstableBuild = unstable;
+    }
+
     public CoverityMailSender getMailSender() {
         return mailSender;
     }
+
 
     public TaOptionBlock getTaOptionBlock(){return taOptionBlock;}
 
@@ -238,7 +263,12 @@ public class CoverityPublisher extends Recorder {
 
         CoverityToolHandler cth = CoverityToolHandler.getHandler(version);
         try{
-            return cth.perform(build, launcher, listener, this);
+            cth.perform(build, launcher, listener, this);
+            
+            if(isUnstableBuild()){
+                build.setResult(Result.UNSTABLE);
+            }
+            return true;
         } catch(CovRemoteServiceException_Exception e){
             throw new InterruptedException("Cov Remote Service Error " + e.getMessage());
         }

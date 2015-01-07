@@ -534,6 +534,14 @@ public class FresnoToolHandler extends CoverityToolHandler {
                                 build.setResult(Result.FAILURE);
                             }
                         }
+                        
+                        // if the user wants to mark the build as unstable when defects are found, then we 
+                        // notify the publisher to do so.
+                        if(publisher.isUnstable()){
+                            publisher.setUnstableBuild(true);
+
+                        }
+
                     } else {
                         listener.getLogger().println("[Coverity] No defects matched all filters.");
                     }
