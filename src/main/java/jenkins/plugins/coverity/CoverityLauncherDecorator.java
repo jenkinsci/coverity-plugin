@@ -187,7 +187,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
          */
        
         List<String> args = new ArrayList<String>();
-        if(ii != null){
+        if(ii != null || ta != null){
             args.add("cov-build-placeholder");
             // Adding the intermediate directory
             args.add("--dir");
@@ -203,7 +203,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         String[] blacklist;
-        if(ii != null){
+        if(ii != null || ta != null) {
             if(ii.getBuildArguments() != null) {
                 for(String arg : Util.tokenize(env.expand(ii.getBuildArguments()))) {
                     args.add(arg);
