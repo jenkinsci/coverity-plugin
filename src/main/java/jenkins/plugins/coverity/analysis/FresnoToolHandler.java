@@ -400,7 +400,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     // For versions greater than gilroy (7.5.0), we want to use the --https-port for https connetions
                     // since it was added for gilroy and beyond
-                    if(useDataPort && System.getProperty("os.name").contains("Linux")){
+                    if(useDataPort){
                         cmd.add("--dataport");
                         cmd.add(Integer.toString(cim.getDataPort()));
                     }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
@@ -528,7 +528,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     }
 
                     if(!matchingDefects.isEmpty()) {
-                        listener.getLogger().println("[Coverity] Found " + defects.size() + " defects matching all filters: " + matchingDefects);
+                        listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
                         if(publisher.isFailBuild()) {
                             if(build.getResult().isBetterThan(Result.FAILURE)) {
                                 build.setResult(Result.FAILURE);
