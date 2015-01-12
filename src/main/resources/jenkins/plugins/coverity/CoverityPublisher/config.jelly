@@ -574,6 +574,19 @@
 				<f:helpArea/>
 				<tr>
 					<td class="setting-name" colspan="3">
+						<f:checkbox field="unstable"/>
+						<label class="attach-previous">Mark build as unstable if matching defects are found</label>
+					</td>
+					<td class="setting-help">
+						<a href="#" class="help-button"
+						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/unstable">
+							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+						</a>
+					</td>
+				</tr>
+				<f:helpArea/>
+				<tr>
+					<td class="setting-name" colspan="3">
 						<f:checkbox field="skipFetchingDefects"/>
 						<label class="attach-previous">Do not fetch defects after the build</label>
 					</td>
