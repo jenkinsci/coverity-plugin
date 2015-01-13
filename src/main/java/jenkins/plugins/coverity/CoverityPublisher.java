@@ -99,7 +99,7 @@ public class CoverityPublisher extends Recorder {
 
     // Internal variable to notify the Publisher that the build should be marked as unstable 
     // since we cannot set the build as unstable within the tool handler
-    private Boolean unstableBuild = false;
+    private Boolean unstableBuild;
 
     @DataBoundConstructor
     public CoverityPublisher(List<CIMStream> cimStreams,
@@ -130,7 +130,7 @@ public class CoverityPublisher extends Recorder {
         this.defectFilters = defectFilters;
         this.taOptionBlock = taOptionBlock;
         this.scmOptionBlock = scmOptionBlock;
-
+        this.unstableBuild = false;
         if(isOldDataPresent()) {
             logger.info("Old data format detected. Converting to new format.");
             convertOldData();
