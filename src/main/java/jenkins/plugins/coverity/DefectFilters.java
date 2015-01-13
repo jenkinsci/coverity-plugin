@@ -33,7 +33,6 @@ import java.util.*;
 public class DefectFilters {
     private List<String> classifications;
     private List<String> actions;
-    private List<String> inpact;
     private List<String> severities;
     private List<String> components;
     private List<String> checkers;
@@ -65,7 +64,7 @@ public class DefectFilters {
     }
 
     void invertCheckers(Set<String> allCheckers, List<String> allClassifications, List<String> allActions, List<String> allSeverities, List<String> allComponents) {
-        if(classifications.isEmpty() && checkers.isEmpty() && actions.isEmpty() && components.isEmpty() && severities.isEmpty() && inpact.isEmpty()) {
+        if(classifications.isEmpty() && checkers.isEmpty() && actions.isEmpty() && components.isEmpty() && severities.isEmpty()) {
             ignoredCheckers = new ArrayList<String>();
             actions = allActions;
             severities = allSeverities;
@@ -211,11 +210,18 @@ public class DefectFilters {
         // Creating the key with  a specific format. CheckerName:Domain:CheckerSubcategory
         String key = String.format("%s:%s:%s", defect.getCheckerName(), defect.getDomain(), defect.getCheckerSubcategory());
 
-        if(this.impacts != null){
+        // if a checker does not have a impact, we let it through since the impact is undetermined. 
+        if(!this.impactMap.containsKey(key)){
+            return true;
+        }
+
+        if(this.impacts != null && this.impactMap != null){
             // Go through the impacts map that will have the key associated with an impact. 
             for(String selectedImpact : this.impacts){
-                if(this.impactMap.get(key).equals(selectedImpact)){
-                    return true;
+                if(selectedImpact != null){
+                    if(this.impactMap.get(key).equals(selectedImpact)){
+                        return true;
+                    }  
                 }
             }
         }
