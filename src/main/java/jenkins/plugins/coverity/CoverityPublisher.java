@@ -222,7 +222,13 @@ public class CoverityPublisher extends Recorder {
     }
     
     public boolean isUnstableBuild(){
-        return unstableBuild;
+        // taking care of a werid edge case where unstableBuild might be null.
+        if(unstableBuild == null){
+            return false;
+        }else{
+            return unstableBuild;
+
+        }
     }
 
     public void setUnstableBuild(boolean unstable){
