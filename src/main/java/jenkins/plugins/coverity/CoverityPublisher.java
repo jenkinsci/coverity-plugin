@@ -99,7 +99,7 @@ public class CoverityPublisher extends Recorder {
 
     // Internal variable to notify the Publisher that the build should be marked as unstable 
     // since we cannot set the build as unstable within the tool handler
-    private Boolean unstableBuild;
+    private boolean unstableBuild;
 
     @DataBoundConstructor
     public CoverityPublisher(List<CIMStream> cimStreams,

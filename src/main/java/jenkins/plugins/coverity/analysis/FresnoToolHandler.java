@@ -517,8 +517,6 @@ public class FresnoToolHandler extends CoverityToolHandler {
                             matchingDefects.add(defect.getCid());
                         } else {
 
-
-
                             // Check to see if defectFilter matches the defect
                             boolean match = cimStream.getDefectFilters().matches(defect,listener);
                             if(match) {
