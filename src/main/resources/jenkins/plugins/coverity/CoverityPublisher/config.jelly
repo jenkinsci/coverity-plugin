@@ -119,7 +119,7 @@
 							<input type="hidden" name="id" value="${id}" />
 							<br/>
 
-							<f:entry title="Integrity Manager instance" field="instance">
+							<f:entry title="Coverity Connect instance" field="instance">
 								<f:select id="cimInstance-${id}"/>
 							</f:entry>
 							<f:entry title="Project" field="project">
@@ -627,7 +627,7 @@
 				<j:if test="${instance.cimInstance != null}">
 					<f:advanced
 							title="Deprecated Fields (Save your config or run a build to upgrade your job to the current format)">
-						<f:entry title="Integrity Manager instance" field="cimInstance">
+						<f:entry title="Coverity Connect instance" field="cimInstance">
 							<f:textbox disabled="disabled"/>
 						</f:entry>
 						<f:entry title="Project" field="project">
