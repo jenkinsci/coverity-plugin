@@ -84,7 +84,7 @@ public class CoverityBuildAction implements Action {
     }
 
     public String getDisplayName() {
-        return "Coverity Defects (" + getId() + ")";
+        return "Coverity Defects ";
     }
 
     public String getUrlName() {
