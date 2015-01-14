@@ -530,6 +530,14 @@
                                 </j:choose>
                             </select>
                         </f:entry>
+                        <f:entry title="AccuRev root repository" field="accRevRepo">
+                                <st:nbsp /><st:nbsp />
+                                <f:textbox/>
+                            </f:entry>
+                            <f:entry title="Perforce P4PORT" field="p4Port">
+                                <st:nbsp /><st:nbsp />
+                                <f:textbox/>
+                        </f:entry>
                         <f:advanced>
                             <f:entry title="Custom Tool Path (optional)" field="customTestTool">
                                 <st:nbsp /><st:nbsp />
@@ -544,14 +552,6 @@
                                 <f:textbox/>
                             </f:entry>
                             <f:entry title="Log File Location (optional)" field="logFileLoc">
-                                <st:nbsp /><st:nbsp />
-                                <f:textbox/>
-                            </f:entry>
-                            <f:entry title="AccuRev root repository" field="accRevRepo">
-                                <st:nbsp /><st:nbsp />
-                                <f:textbox/>
-                            </f:entry>
-                            <f:entry title="Perforce P4PORT" field="p4Port">
                                 <st:nbsp /><st:nbsp />
                                 <f:textbox/>
                             </f:entry>
