@@ -12,6 +12,7 @@
 package jenkins.plugins.coverity;
 
 import hudson.Util;
+import hudson.EnvVars;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
@@ -40,6 +41,7 @@ public class TaOptionBlock {
     private final String bullsEyeDir;
     private final String customWorkDir;
     private final boolean covHistoryCheckbox;
+    private EnvVars envVars;
 
 
     private final boolean javaOptionBlock;
@@ -98,7 +100,7 @@ public class TaOptionBlock {
     /*
     Required functions needed for jenkins to access all of the Test Advisor Data.
      */
-    public String getCustomTestCommand(){return customTestCommand;}
+    public String getCustomTestCommand(){return envVars.expand(customTestCommand);}
 
     public boolean getCOptionBlock(){return cOptionBlock;}
 
@@ -108,13 +110,13 @@ public class TaOptionBlock {
 
     public String getScmSystem(){return scmSystem;}
 
-    public String getCustomTestTool(){return customTestTool;}
+    public String getCustomTestTool(){return envVars.expand(customTestTool);}
 
-    public String getScmToolArguments(){return scmToolArguments;}
+    public String getScmToolArguments(){return envVars.expand(scmToolArguments);}
 
-    public String getScmCommandArgs(){return scmCommandArgs;}
+    public String getScmCommandArgs(){return envVars.expand(scmCommandArgs);}
 
-    public String getLogFileLoc(){return logFileLoc;}
+    public String getLogFileLoc(){return envVars.expand(logFileLoc);}
 
     public String getCsFramework(){return csFramework;}
 
@@ -130,17 +132,17 @@ public class TaOptionBlock {
 
     public boolean getScmOptionBlock(){return scmOptionBlock;}
 
-    public String getPolicyFile(){return policyFile;}
+    public String getPolicyFile(){return envVars.expand(policyFile);}
 
-    public String getTaStripPath(){return taStripPath;}
+    public String getTaStripPath(){return envVars.expand(taStripPath);}
 
     public String getP4Port(){return p4Port;}
 
-    public String getAccRevRepo(){return accRevRepo;}
+    public String getAccRevRepo(){return envVars.expand(accRevRepo);}
 
-    public String getBullsEyeDir(){return bullsEyeDir;}
+    public String getBullsEyeDir(){return envVars.expand(bullsEyeDir);}
 
-    public String getCustomWorkDir(){return customWorkDir;}
+    public String getCustomWorkDir(){return envVars.expand(customWorkDir);}
 
     public boolean getCovHistoryCheckbox(){return covHistoryCheckbox;}
 
@@ -245,7 +247,7 @@ public class TaOptionBlock {
             }
 
             if(this.scmSystem.equals("perforce") && this.p4Port == null){
-                errorText += "[Error] Please specify Perforce's port environment variable under 'Advanced'\n ";
+                errorText += "[Error] Please specify Perforce's port environment variable\n ";
                 delim = false;
             }
         }

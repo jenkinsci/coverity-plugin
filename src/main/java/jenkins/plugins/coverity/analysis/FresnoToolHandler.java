@@ -331,7 +331,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                 if(effectiveIA != null){
                     if(effectiveIA.getAnalyzeArguments() != null) {
-                        for(String arg : Util.tokenize(envVars.expand(effectiveIA.getAnalyzeArguments()))) {
+                        for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
                             cmd.add(arg);
                         }
                     }
@@ -404,7 +404,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         cmd.add("--dataport");
                         cmd.add(Integer.toString(cim.getDataPort()));
                     }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
-                        cmd.add("--https-port");
+                        cmd.add("--http-port");
                         cmd.add(Integer.toString(cim.getPort()));
                     }else{
                         cmd.add("--port");
@@ -418,7 +418,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     if(invocationAssistance != null){
                         if(effectiveIA.getCommitArguments() != null) {
-                            for(String arg : Util.tokenize(envVars.expand(effectiveIA.getCommitArguments()))) {
+                            for(String arg : Util.tokenize(effectiveIA.getCommitArguments())) {
                                 cmd.add(arg);
                             }
                         }

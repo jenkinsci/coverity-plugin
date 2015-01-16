@@ -10,7 +10,7 @@
  *    Coverity, Inc - initial implementation and documentation
  *******************************************************************************/
 package jenkins.plugins.coverity;
-
+import hudson.EnvVars;
 import hudson.Util;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -24,6 +24,7 @@ public class InvocationAssistance {
     private final boolean csharpAutomaticAssemblies;
     private final boolean csharpMsvsca;
     private final String saOverride;
+    private EnvVars envVars;
 
     /**
      * Do not wrap any executables with these names with cov-build. Format is comma-separated list.
@@ -51,19 +52,19 @@ public class InvocationAssistance {
     }
 
     public String getBuildArguments() {
-        return buildArguments;
+        return envVars.expand(buildArguments);
     }
 
     public String getAnalyzeArguments() {
-        return analyzeArguments;
+        return envVars.expand(analyzeArguments);
     }
 
     public String getCommitArguments() {
-        return commitArguments;
+        return envVars.expand(commitArguments);
     }
 
     public String getIntermediateDir() {
-        return intermediateDir;
+        return envVars.expand(intermediateDir);
     }
 
     public String getCsharpAssemblies() {
@@ -71,11 +72,11 @@ public class InvocationAssistance {
     }
 
     public String getJavaWarFile() {
-        return javaWarFile;
+        return envVars.expand(javaWarFile);
     }
 
     public String getCsharpMsvscaOutputFiles() {
-        return csharpMsvscaOutputFiles;
+        return envVars.expand(csharpMsvscaOutputFiles);
     }
 
     public boolean getCsharpMsvsca() {
@@ -87,11 +88,11 @@ public class InvocationAssistance {
     }
 
     public String getSaOverride() {
-        return saOverride;
+        return envVars.expand(saOverride);
     }
 
     public String getCovBuildBlacklist() {
-        return covBuildBlacklist;
+        return envVars.expand(covBuildBlacklist);
     }
 
     @Override
