@@ -52,19 +52,19 @@ public class InvocationAssistance {
     }
 
     public String getBuildArguments() {
-        return envVars.expand(buildArguments);
+        return buildArguments != null ? envVars.expand(buildArguments) : buildArguments;
     }
 
     public String getAnalyzeArguments() {
-        return envVars.expand(analyzeArguments);
+        return analyzeArguments != null ? envVars.expand(analyzeArguments) : analyzeArguments;
     }
 
     public String getCommitArguments() {
-        return envVars.expand(commitArguments);
+        return commitArguments != null ? envVars.expand(commitArguments) : commitArguments;
     }
 
     public String getIntermediateDir() {
-        return envVars.expand(intermediateDir);
+        return intermediateDir != null ? envVars.expand(intermediateDir) : intermediateDir;
     }
 
     public String getCsharpAssemblies() {
@@ -72,11 +72,11 @@ public class InvocationAssistance {
     }
 
     public String getJavaWarFile() {
-        return envVars.expand(javaWarFile);
+        return javaWarFile != null ? envVars.expand(javaWarFile) : javaWarFile;
     }
 
     public String getCsharpMsvscaOutputFiles() {
-        return envVars.expand(csharpMsvscaOutputFiles);
+        return csharpMsvscaOutputFiles != null ? envVars.expand(csharpMsvscaOutputFiles) : csharpMsvscaOutputFiles;
     }
 
     public boolean getCsharpMsvsca() {
@@ -88,11 +88,11 @@ public class InvocationAssistance {
     }
 
     public String getSaOverride() {
-        return envVars.expand(saOverride);
+        return saOverride == null ? saOverride : envVars.expand(saOverride);
     }
 
     public String getCovBuildBlacklist() {
-        return envVars.expand(covBuildBlacklist);
+        return covBuildBlacklist !=null ? envVars.expand(covBuildBlacklist) : covBuildBlacklist;
     }
 
     @Override
