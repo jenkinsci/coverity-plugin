@@ -278,6 +278,11 @@ public class TaOptionBlock {
         return errorText;
     }
 
+    // Sets the environment varibles for the project so that we can replace environment varibles
+    public void setEnvVars(EnvVars environment){
+        this.envVars = environment;
+    }
+
 
 }
 

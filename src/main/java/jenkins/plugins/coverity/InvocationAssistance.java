@@ -160,4 +160,9 @@ public class InvocationAssistance {
         String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
         return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, csharpAssemblies, javaWarFile, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist);
     }
+
+    // Sets the environment varibles for the project so that we can replace environment varibles
+    public void setEnvVars(EnvVars environment){
+        this.envVars = environment;
+    }
 }

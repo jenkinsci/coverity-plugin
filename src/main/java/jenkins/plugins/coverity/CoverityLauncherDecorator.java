@@ -69,18 +69,26 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         AbstractProject project = build.getProject();
 
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-
        
 
         if(publisher == null) {
             return launcher;
         }
 
+        try{
+            publisher.setEnvVars(build.getEnvironment(launcher.getListener()));
+
+        }catch(Exception e ){
+            new RuntimeException("Error acquiring build's environment varibles " + e.getMessage() );
+        }
+        
         CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
 
         TaOptionBlock ta = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
         InvocationAssistance ii = publisher.getInvocationAssistance();
+
+
 
         FilePath temp;
         if(ta != null){

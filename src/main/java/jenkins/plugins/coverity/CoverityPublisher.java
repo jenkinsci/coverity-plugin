@@ -233,6 +233,21 @@ public class CoverityPublisher extends Recorder {
         return mailSender;
     }
 
+    // we want to make sure that all instances of ia, scm and ta have a copy of the environment variables
+    // so we pass it into each class so that it can handle environment variables within user input
+    public void setEnvVars(EnvVars vars) throws Exception{
+        if (invocationAssistance != null){
+            invocationAssistance.setEnvVars(vars);
+        }
+        if (scmOptionBlock != null){
+            scmOptionBlock.setEnvVars(vars);
+        }
+
+        if (taOptionBlock != null){
+            taOptionBlock.setEnvVars(vars);
+        }
+    }
+
 
     public TaOptionBlock getTaOptionBlock(){return taOptionBlock;}
 
