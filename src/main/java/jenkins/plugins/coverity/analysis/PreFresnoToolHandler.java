@@ -133,12 +133,13 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                         }
 
 
-                        listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                         if(effectiveIA.getAnalyzeArguments() != null) {
-                            for(String arg : Util.tokenize(envVars.expand(effectiveIA.getAnalyzeArguments()))) {
+                            for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
                                 cmd.add(arg);
                             }
                         }
+                        listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+
 
                         int result = launcher.
                                 launch().
@@ -219,7 +220,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     cmd.add(cim.getUser());
 
                     if(effectiveIA.getCommitArguments() != null) {
-                        for(String arg : Util.tokenize(envVars.expand(effectiveIA.getCommitArguments()))) {
+                        for(String arg : Util.tokenize(effectiveIA.getCommitArguments())) {
                             cmd.add(arg);
                         }
                     }

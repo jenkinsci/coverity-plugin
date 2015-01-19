@@ -328,7 +328,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
 
 
-                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+                
                 if(effectiveIA != null){
                     if(effectiveIA.getAnalyzeArguments() != null) {
                         for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
@@ -336,6 +336,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         }
                     }
                 }
+                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
                 int result = launcher.
                         launch().
