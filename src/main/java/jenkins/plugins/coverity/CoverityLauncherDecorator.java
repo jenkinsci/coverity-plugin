@@ -203,7 +203,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         String[] blacklist;
-        if(ii != null || ta != null) {
+        if(ii != null) {
             if(ii.getBuildArguments() != null) {
                 for(String arg : Util.tokenize(env.expand(ii.getBuildArguments()))) {
                     args.add(arg);
