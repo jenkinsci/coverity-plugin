@@ -75,13 +75,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             return launcher;
         }
 
-        try{
-            publisher.setEnvVars(build.getEnvironment(launcher.getListener()));
-
-        }catch(Exception e ){
-            new RuntimeException("Error acquiring build's environment varibles " + e.getMessage() );
-        }
-        
         CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
 
         TaOptionBlock ta = publisher.getTaOptionBlock();
@@ -213,7 +206,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         String[] blacklist;
         if(ii != null) {
             if(ii.getBuildArguments() != null) {
-                for(String arg : Util.tokenize(env.expand(ii.getBuildArguments()))) {
+                for(String arg : Util.tokenize(ii.getBuildArguments())) {
                     args.add(arg);
                 }
             }
@@ -240,6 +233,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         //throw new RuntimeException("args list is: " + concat);
         //logger.info("args is: " + Arrays.toString(args));
+        
+        // Evaluation the args to replace any evironment variables 
+        args = CoverityUtils.evaluateEnvVars(args, launcher.getListener());
+
         return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
     }
 

@@ -63,12 +63,13 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
-        String javaWarFile = invocationAssistance != null ? invocationAssistance.getJavaWarFile() : null;
+        String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(invocationAssistance.getJavaWarFile(), listener) : null;
+
         if(javaWarFile != null) {
             listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
 
@@ -99,9 +100,12 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add(temp.getTempDir().getRemote());
                     cmd.addAll(testAnalysis.getTaCommandArgs());
 
-                    for(String arg : Util.tokenize(envVars.expand(testAnalysis.getCustomTestCommand()))) {
+                    for(String arg : testAnalysis.getCustomTestCommand().split(" ")) {
                         cmd.add(arg);
                     }
+
+                    // Evaluation the cmd to replace any evironment variables 
+                    cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -161,6 +165,8 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         cmd.add(cim.getUser());
                         cmd.add("--merge");
 
+                        // Evaluation the cmd to replace any evironment variables 
+                        cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
 
                         ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -238,9 +244,12 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     env.put("P4PORT",scm.getP4Port());
                 }
 
+                // Evaluation the cmd to replace any evironment variables 
+                cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
 
                 ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
+                
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
                 int result = launcher.
@@ -331,11 +340,14 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 
                 if(effectiveIA != null){
                     if(effectiveIA.getAnalyzeArguments() != null) {
-                        for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
+                        for(String arg : effectiveIA.getAnalyzeArguments().split(" ")) {
                             cmd.add(arg);
                         }
                     }
                 }
+
+                cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
+
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
                 int result = launcher.
@@ -359,7 +371,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
+            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(),listener);
             if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
                 boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
                 if(!result) {
@@ -419,11 +431,14 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     if(invocationAssistance != null){
                         if(effectiveIA.getCommitArguments() != null) {
-                            for(String arg : Util.tokenize(effectiveIA.getCommitArguments())) {
+                            for(String arg : effectiveIA.getCommitArguments().split(" ")) {
                                 cmd.add(arg);
                             }
                         }
                     }
+
+                    // Evaluation the cmd to replace any evironment variables 
+                    cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
