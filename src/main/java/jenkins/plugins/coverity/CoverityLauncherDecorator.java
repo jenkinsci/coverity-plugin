@@ -108,7 +108,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 coverityDir.mkdirs();
                 temp = coverityDir.createTempDir("temp-", null);
             } else {
-                temp = new FilePath(node.getChannel(), CoverityUtil.evaluateEvnVars(ii.getIntermediateDir()));
+                temp = new FilePath(node.getChannel(), CoverityUtils.evaluateEnvVars(ii.getIntermediateDir(),launcher.getListener()));
                 temp.mkdirs();
             }
 
