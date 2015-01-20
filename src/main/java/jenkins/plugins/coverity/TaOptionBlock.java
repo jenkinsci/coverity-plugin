@@ -100,7 +100,7 @@ public class TaOptionBlock {
     /*
     Required functions needed for jenkins to access all of the Test Advisor Data.
      */
-    public String getCustomTestCommand(){return customTestCommand != null ? envVars.expand(customTestCommand) : customTestCommand;}
+    public String getCustomTestCommand(){return customTestCommand;}
 
     public boolean getCOptionBlock(){return cOptionBlock;}
 
@@ -110,13 +110,13 @@ public class TaOptionBlock {
 
     public String getScmSystem(){return scmSystem;}
 
-    public String getCustomTestTool(){return customTestTool != null ? envVars.expand(customTestTool) : customTestTool;}
+    public String getCustomTestTool(){return customTestTool;}
 
-    public String getScmToolArguments(){return scmToolArguments != null ? envVars.expand(scmToolArguments) : scmToolArguments;}
+    public String getScmToolArguments(){return scmToolArguments;}
 
-    public String getScmCommandArgs(){return scmCommandArgs != null ? envVars.expand(scmCommandArgs) : scmCommandArgs;}
+    public String getScmCommandArgs(){return scmCommandArgs;}
 
-    public String getLogFileLoc(){return logFileLoc != null ? envVars.expand(logFileLoc) : logFileLoc;}
+    public String getLogFileLoc(){return logFileLoc ;}
 
     public String getCsFramework(){return csFramework;}
 
@@ -132,17 +132,17 @@ public class TaOptionBlock {
 
     public boolean getScmOptionBlock(){return scmOptionBlock;}
 
-    public String getPolicyFile(){return policyFile != null ? envVars.expand(policyFile) : policyFile;}
+    public String getPolicyFile(){return policyFile;}
 
-    public String getTaStripPath(){return taStripPath != null ? envVars.expand(taStripPath) : taStripPath;}
+    public String getTaStripPath(){return taStripPath;}
 
     public String getP4Port(){return p4Port;}
 
-    public String getAccRevRepo(){return accRevRepo != null ? envVars.expand(accRevRepo) : accRevRepo;}
+    public String getAccRevRepo(){return accRevRepo;}
 
-    public String getBullsEyeDir(){return bullsEyeDir != null ? envVars.expand(bullsEyeDir) : bullsEyeDir;}
+    public String getBullsEyeDir(){return bullsEyeDir;}
 
-    public String getCustomWorkDir(){return customWorkDir != null ? envVars.expand(customWorkDir) : customWorkDir;}
+    public String getCustomWorkDir(){return customWorkDir;}
 
     public boolean getCovHistoryCheckbox(){return covHistoryCheckbox;}
 
@@ -276,11 +276,6 @@ public class TaOptionBlock {
         }
 
         return errorText;
-    }
-
-    // Sets the environment varibles for the project so that we can replace environment varibles
-    public void setEnvVars(EnvVars environment){
-        this.envVars = environment;
     }
 
 
