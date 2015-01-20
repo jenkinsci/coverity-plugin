@@ -235,6 +235,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         //logger.info("args is: " + Arrays.toString(args));
         
         // Evaluation the args to replace any evironment variables 
+        CoverityUtils.setEnvVars(env);
         args = CoverityUtils.evaluateEnvVars(args, launcher.getListener());
 
         return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
