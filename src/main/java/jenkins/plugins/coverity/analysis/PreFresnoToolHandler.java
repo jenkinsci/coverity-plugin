@@ -45,7 +45,9 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
         EnvVars envVars = build.getEnvironment(listener);
 
-
+        // Seting the new envVars after jenkins has modified its own
+        CoverityUtils.setEnvVars(envVars);
+        
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();

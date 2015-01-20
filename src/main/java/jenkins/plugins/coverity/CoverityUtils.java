@@ -58,4 +58,8 @@ public class CoverityUtils {
 		return output;
 
 	}
+
+	public static void setEnvVars(EnvVars environment){
+		envVars = environment;
+	}
 }

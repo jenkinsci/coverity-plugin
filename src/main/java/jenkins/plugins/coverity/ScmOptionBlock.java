@@ -43,19 +43,17 @@ public class ScmOptionBlock {
 
     public String getScmSystem(){return scmSystem;}
 
-    public String getCustomTestTool(){return envVars.expand(customTestTool);}
+    public String getCustomTestTool(){return customTestTool;}
 
-    public String getScmToolArguments(){return envVars.expand(scmToolArguments);}
+    public String getScmToolArguments(){return scmToolArguments;}
 
-    public String getScmCommandArgs(){return envVars.expand(scmCommandArgs);}
+    public String getScmCommandArgs(){return scmCommandArgs;}
 
-    public String getLogFileLoc(){return envVars.expand(logFileLoc);}
+    public String getLogFileLoc(){return logFileLoc;}
 
-    public String getP4Port(){return envVars.expand(p4Port);}
+    public String getP4Port(){return p4Port;}
 
-    public String getAccRevRepo(){return envVars.expand(accRevRepo);}
-
-    public void setEnvVars(EnvVars env){ this.envVars = env;}
+    public String getAccRevRepo(){return accRevRepo;}
 
     public String checkScmConfig(CoverityVersion version){
         // Checking the required fields for specific SCM systems

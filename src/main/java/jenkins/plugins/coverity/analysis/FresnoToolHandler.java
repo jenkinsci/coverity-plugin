@@ -57,10 +57,8 @@ public class FresnoToolHandler extends CoverityToolHandler {
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
         
-        if(scm != null){
-            scm.setEnvVars(envVars);
-        }
-
+        // Seting the new envVars after jenkins has modified its own
+        CoverityUtils.setEnvVars(envVars);
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
             home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), listener)).forEnvironment(build.getEnvironment(listener)).getHome();
@@ -270,10 +268,6 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 CoverityLauncherDecorator.SKIP.set(false);
             }
         }
-
-
-
-
 
         //what languages are we analyzing?
         String languageToAnalyze = null;
