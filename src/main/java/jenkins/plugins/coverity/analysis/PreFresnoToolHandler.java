@@ -47,19 +47,19 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
         // Seting the new envVars after jenkins has modified its own
         CoverityUtils.setEnvVars(envVars);
-        
+
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), listener)).forEnvironment(build.getEnvironment(listener)).getHome();
+            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
-        String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(invocationAssistance.getJavaWarFile(), listener) : null;
+        String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(invocationAssistance.getJavaWarFile(), build, listener) : null;
         if(javaWarFile != null) {
             listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
 
@@ -143,7 +143,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                         }
 
                          // Evaluation the cmd to replace any evironment variables 
-                        cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
+                        cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
 
                         listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
@@ -233,7 +233,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     }
 
                     // Evaluation the cmd to replace any evironment variables 
-                    cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
+                    cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 

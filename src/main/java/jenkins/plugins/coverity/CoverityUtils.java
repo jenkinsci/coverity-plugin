@@ -25,14 +25,11 @@ import java.util.List;
 
 public class CoverityUtils {
 
-	static Executor executor = Executor.currentExecutor();
-    static Queue.Executable exec = executor.getCurrentExecutable();
-    static AbstractBuild build = (AbstractBuild) exec;
 
     static EnvVars envVars;
     
 	
-	public static String evaluateEnvVars(String input,TaskListener listener)throws RuntimeException{
+	public static String evaluateEnvVars(String input, AbstractBuild build, TaskListener listener)throws RuntimeException{
 		
 		try{
 			envVars = build.getEnvironment(listener);
@@ -42,7 +39,7 @@ public class CoverityUtils {
 		}
 	}
 
-	public static List<String> evaluateEnvVars(List<String> input, TaskListener listener)throws RuntimeException{
+	public static List<String> evaluateEnvVars(List<String> input, AbstractBuild build, TaskListener listener)throws RuntimeException{
 		List<String> output = new ArrayList<String>();
 		
 		try{

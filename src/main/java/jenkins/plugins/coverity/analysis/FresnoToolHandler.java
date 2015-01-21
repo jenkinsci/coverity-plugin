@@ -61,12 +61,12 @@ public class FresnoToolHandler extends CoverityToolHandler {
         CoverityUtils.setEnvVars(envVars);
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), listener)).forEnvironment(build.getEnvironment(listener)).getHome();
+            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
-        String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(invocationAssistance.getJavaWarFile(), listener) : null;
+        String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(invocationAssistance.getJavaWarFile(), build,  listener) : null;
 
         if(javaWarFile != null) {
             listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
@@ -103,7 +103,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     }
 
                     // Evaluation the cmd to replace any evironment variables 
-                    cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
+                    cmd = CoverityUtils.evaluateEnvVars(cmd, build,listener);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -164,7 +164,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         cmd.add("--merge");
 
                         // Evaluation the cmd to replace any evironment variables 
-                        cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
+                        cmd = CoverityUtils.evaluateEnvVars(cmd, build,listener);
 
                         ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -243,7 +243,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 }
 
                 // Evaluation the cmd to replace any evironment variables 
-                cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
+                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
 
                 ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -340,7 +340,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     }
                 }
 
-                cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
+                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
@@ -365,7 +365,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(),listener);
+            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(),build, listener);
             if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
                 boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
                 if(!result) {
@@ -432,7 +432,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     }
 
                     // Evaluation the cmd to replace any evironment variables 
-                    cmd = CoverityUtils.evaluateEnvVars(cmd,listener);
+                    cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 

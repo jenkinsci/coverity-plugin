@@ -108,7 +108,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 coverityDir.mkdirs();
                 temp = coverityDir.createTempDir("temp-", null);
             } else {
-                temp = new FilePath(node.getChannel(), CoverityUtils.evaluateEnvVars(ii.getIntermediateDir(),launcher.getListener()));
+                temp = new FilePath(node.getChannel(), CoverityUtils.evaluateEnvVars(ii.getIntermediateDir(), build, launcher.getListener()));
                 temp.mkdirs();
             }
 
@@ -236,7 +236,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         
         // Evaluation the args to replace any evironment variables 
         CoverityUtils.setEnvVars(env);
-        args = CoverityUtils.evaluateEnvVars(args, launcher.getListener());
+        args = CoverityUtils.evaluateEnvVars(args, build, launcher.getListener());
 
         return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
     }
