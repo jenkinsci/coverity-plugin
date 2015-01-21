@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+
 import java.util.logging.Logger;
 
 /**
@@ -70,6 +72,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
        
+        //Setting up code to allow environment variables in text fields
+        EnvVars env;
+        try{
+            env = project.getEnvironment(node,launcher.getListener());
+        }catch(Exception e){
+            throw new RuntimeException("Error getting build environment variables", e);
+        }
+        launcher.getListener().getLogger().println(env.toString());
 
         if(publisher == null) {
             return launcher;
@@ -108,7 +118,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 coverityDir.mkdirs();
                 temp = coverityDir.createTempDir("temp-", null);
             } else {
-                temp = new FilePath(node.getChannel(), CoverityUtils.evaluateEnvVars(ii.getIntermediateDir(), build, launcher.getListener()));
+                temp = new FilePath(node.getChannel(), ii.getIntermediateDir());
                 temp.mkdirs();
             }
 
@@ -174,14 +184,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             return launcher;
         }
 
-        //Setting up code to allow environment variables in text fields
-        EnvVars env;
-        try{
-            env = build.getEnvironment(launcher.getListener());
-        }catch(Exception e){
-            throw new RuntimeException("Error getting build environment variables", e);
-        }
-
+        
         /**
          * Putting together the arguments for cov-build. The placeholder is there so that we can later determine the
          * exact location of cov-build runable.
@@ -225,18 +228,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             blacklist = new String[0];
         }
 
-        String concat = ""; 
-
-        for(String x : args){
-            concat += args + " "; 
-        }
-
-        //throw new RuntimeException("args list is: " + concat);
-        //logger.info("args is: " + Arrays.toString(args));
-        
         // Evaluation the args to replace any evironment variables 
-        CoverityUtils.setEnvVars(env);
-        args = CoverityUtils.evaluateEnvVars(args, build, launcher.getListener());
+        args = CoverityUtils.evaluateEnvVars(args, env);
+        launcher.getListener().getLogger().println(args.toString());
 
         return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
     }
@@ -276,6 +270,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     return decorated.launch(starter);
                 }
 
+                // Creating a hashmap of the environment variables so that we can evalute the cov-build command
+                Map<String,String> envMap = new HashMap<String,String>();
+
+                for(String env : starter.envs()){
+                    String[] split = env.split("=",2);
+                    envMap.put(env.split("=",2)[0],env.split("=",2)[1]);
+                }
+
                 List<String> cmds = starter.cmds();
 
                 //skip jdk installations
@@ -286,6 +288,8 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 }
 
                 cmds.addAll(0, Arrays.asList(getPrefix()));
+                // parsing the command and replacing all environment variable with their respective value
+                cmds = CoverityUtils.evaluateEnvVars(cmds,new EnvVars(envMap));
                 starter.cmds(cmds);
                 boolean[] masks = starter.masks();
                 if(masks == null) {

@@ -112,7 +112,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     int result = launcher.
                             launch().
                             cmds(args).
-                            pwd(testAnalysis.getCustomWorkDir()).
+                            pwd(CoverityUtils.evaluateEnvVars(testAnalysis.getCustomWorkDir(), build, listener)).
                             stdout(listener).
                             stderr(listener.getLogger()).
                             join();
@@ -239,7 +239,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 // Perforce requires p4port to be set when running scm
                 Map<String,String> env = new HashMap<String,String>();;
                 if(scm.getScmSystem().equals("perforce")){
-                    env.put("P4PORT",scm.getP4Port());
+                    env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), build, listener));
                 }
 
                 // Evaluation the cmd to replace any evironment variables 

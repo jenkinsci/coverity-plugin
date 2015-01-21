@@ -56,6 +56,32 @@ public class CoverityUtils {
 
 	}
 
+	public static String evaluateEnvVars(String input, EnvVars environment)throws RuntimeException{
+		
+		try{
+			return environment.expand(input);
+		}catch(Exception e){
+			throw new RuntimeException("Error trying to evaluate environment variable: " + input);
+		}
+	}
+
+	public static List<String> evaluateEnvVars(List<String> input, EnvVars environment)throws RuntimeException{
+		List<String> output = new ArrayList<String>();
+		
+		try{
+				
+			for(String cmd : input){
+				output.add(environment.expand(cmd));
+			}
+		}catch(Exception e){
+			throw new RuntimeException("Error trying to evaluate Environment variables in: " + input.toString() );
+		}
+
+		return output;
+
+	}
+
+
 	public static void setEnvVars(EnvVars environment){
 		envVars = environment;
 	}
