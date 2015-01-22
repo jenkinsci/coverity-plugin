@@ -174,7 +174,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
+            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), build, listener);
             if(analyzedLanguages.contains("CSHARP") && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
                 boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
                 if(!result) {

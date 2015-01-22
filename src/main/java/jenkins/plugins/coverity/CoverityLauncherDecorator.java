@@ -79,7 +79,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }catch(Exception e){
             throw new RuntimeException("Error getting build environment variables", e);
         }
-        launcher.getListener().getLogger().println(env.toString());
 
         if(publisher == null) {
             return launcher;
