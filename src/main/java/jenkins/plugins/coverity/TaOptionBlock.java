@@ -222,23 +222,13 @@ public class TaOptionBlock {
             errorText += "[Error] No Coverage language was chosen, please pick at least one \n";
             delim = false;
         }
-        /*Strip paths are reqired for TA
-        if(this.taStripPath == null){
-            errorText += "[Error] No Strip Path was specified. \n";
-            delim = false;
-        }*/
 
-        // Making sure that a policy file exist and is specified
+        // Making sure that a policy file is specified
         if(this.policyFile == null){
             errorText += "[Error] Policy file is not specified. \n";
             delim = false;
-        }else{
-            File policy = new File(this.policyFile);
-            if(!policy.exists()){
-                errorText += "[Error] Could not locate Policy File. \n";
-                delim = false;
-            }
         }
+
         // Checking the required fields for specific SCM systems
         if(this.scmOptionBlock){
             if(this.scmSystem.equals("accurev") && this.accRevRepo == null){
@@ -263,12 +253,6 @@ public class TaOptionBlock {
         if(this.customTestCommand != null && this.customWorkDir == null){
             errorText += "[Error] When running a custom test command, a working directory must be specified \n";
             delim = false;
-        }else if(this.customTestCommand != null && this.customWorkDir != null){
-            File workDir = new File(this.customWorkDir);
-            if(!workDir.exists()){
-                errorText += "[Error] Could not find the custom working directory. \n";
-                delim = false;
-            }
         }
 
         if(delim){
