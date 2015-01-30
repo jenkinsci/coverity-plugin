@@ -38,11 +38,14 @@ public class DefectFilters {
     private List<String> checkers;
     private List<String> ignoredCheckers;
     private Date cutOffDate;
+    private Map<String,String> impactMap;
+    private List<String> impacts;
 
     @DataBoundConstructor
-    public DefectFilters(List<String> actions, List<String> classifications, List<String> severities, List<String> components, List<String> checkers, String cutOffDate) throws Descriptor.FormException {
+    public DefectFilters(List<String> actions, List<String> impacts, List<String> classifications, List<String> severities, List<String> components, List<String> checkers, String cutOffDate) throws Descriptor.FormException {
         this.classifications = Util.fixNull(classifications);
         this.actions = Util.fixNull(actions);
+        this.impacts = Util.fixNull(impacts);
         this.severities = Util.fixNull(severities);
         this.components = Util.fixNull(components);
         this.checkers = Util.fixNull(checkers);
@@ -99,6 +102,10 @@ public class DefectFilters {
         return actions.contains(action);
     }
 
+    public boolean isImpactsSelected(String impact){
+        return impacts.contains(impact);
+    }
+
     public boolean isSeveritySelected(String severity) {
         return severities.contains(severity);
     }
@@ -114,6 +121,8 @@ public class DefectFilters {
         return !ignoredCheckers.contains(checker);
     }
 
+
+
     public String getCutOffDate() {
         if(cutOffDate == null) return null;
         return new SimpleDateFormat("yyyy-MM-dd").format(cutOffDate);
@@ -124,6 +133,8 @@ public class DefectFilters {
     public List<String> getActions(){return actions;}
 
     public List<String> getSeverities(){return severities;}
+
+    public List<String> getImpacts(){return impacts;}
 
     public List<ComponentIdDataObj> getComponents(){
         List<ComponentIdDataObj> componentIdDataList = new ArrayList<ComponentIdDataObj>();
@@ -160,12 +171,72 @@ public class DefectFilters {
         return null;
     }
 
+    /*
+    createImpactMap
+        Creates an impact map with a key that is based upon the Checkername:Domain:Subcategory. 
+            We use that as the key because it can be easily obtained from the mergedDefectDataObj 
+            and can be tied to the CheckerSubcategoryDataObj since that contains the impact. 
+
+        That map is then stored within DefectFilters which it will later use to filter defects. 
+     */
+    public void createImpactMap(CIMInstance cim){
+        this.impactMap = new HashMap<String,String>();
+
+        try{
+            // Setting up the ws call to get all CheckerSubcategory for the current project
+            ConfigurationService configurationService = cim.getConfigurationService();
+            CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
+            List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkerPropFilter);
+            // Going through each CheckerSubcategory to get the ID object, which contains the Checker name, domain and Subcategory information
+            for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
+                // Make sure we save the impact
+                String impact = checkerProp.getImpact();
+                CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
+                // Creating the key based on the format of CheckerName:Domain:Subcategory
+                String key = String.format("%s:%s:%s", checkerSub.getCheckerName(), checkerSub.getDomain(), checkerSub.getSubcategory());
+                impactMap.put(key,impact);
+            }
+        }catch(Exception e){
+            // We dont to do anything if this fails since it happens so late within the build.
+        }
+    }
+
+    /*
+    checkImpactSelected
+        The function is used to see if the mergeDefect that is passed in has a impact that matches with the impacts 
+        selected within the configuration. 
+     */
+    public boolean checkImpactSelected(MergedDefectDataObj defect){
+        // Creating the key with  a specific format. CheckerName:Domain:CheckerSubcategory
+        String key = String.format("%s:%s:%s", defect.getCheckerName(), defect.getDomain(), defect.getCheckerSubcategory());
+
+        // if a checker does not have a impact, we let it through since the impact is undetermined. 
+        if(!this.impactMap.containsKey(key)){
+            return true;
+        }
+
+        if(this.impacts != null && this.impactMap != null){
+            // Go through the impacts map that will have the key associated with an impact. 
+            for(String selectedImpact : this.impacts){
+                if(selectedImpact != null){
+                    if(this.impactMap.get(key).equals(selectedImpact)){
+                        return true;
+                    }  
+                }
+            }
+        }
+
+        return false;
+    }
+
+
     public boolean matches(MergedDefectDataObj defect, BuildListener listener) {
         return isActionSelected(defect.getAction()) &&
                 isClassificationSelected(defect.getClassification()) &&
                 isSeveritySelected(defect.getSeverity()) &&
                 isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getCheckerName()) &&
+                checkImpactSelected(defect) &&
                 Arrays.asList("New", "Triaged", "Various").contains(defect.getStatus()) &&
                 (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
     }

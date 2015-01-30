@@ -14,9 +14,9 @@
 		<f:entry title="Coverity Static Analysis location" field="home">
 			<f:textbox/>
 		</f:entry>
-		<f:entry title="Integrity Manager instances" field="instances">
+		<f:entry title="Coverity Connect instances" field="instances">
 			<f:repeatable var="instance" name="instances" items="${descriptor.instances}" add="Add"
-						  header="CIM Instance">
+						  header="Coverity Connect Instance">
 				<table width="100%">
 					<f:entry title="Name" field="name">
 						<f:textbox/>

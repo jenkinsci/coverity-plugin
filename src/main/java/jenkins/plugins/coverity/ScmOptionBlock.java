@@ -1,10 +1,13 @@
 package jenkins.plugins.coverity;
 
 import hudson.Util;
+import hudson.EnvVars;
+import hudson.model.BuildListener;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.util.*;
+
 
 
 public class ScmOptionBlock {
@@ -16,6 +19,8 @@ public class ScmOptionBlock {
     private final String logFileLoc;
     private final String p4Port;
     private final String accRevRepo;
+    private EnvVars envVars;
+
 
     @DataBoundConstructor
     public ScmOptionBlock(
@@ -50,10 +55,10 @@ public class ScmOptionBlock {
 
     public String getAccRevRepo(){return accRevRepo;}
 
-    public String checkScmConfig(){
+    public String checkScmConfig(CoverityVersion version){
         // Checking the required fields for specific SCM systems
 
-        String errorText = "Errors with your SCM configuration. Please look into the specified issues: ";
+        String errorText = "Errors with your SCM configuration. Please look into the specified issues: \n";
         Boolean delim = true;
         if(this.scmSystem.equals("accurev") && this.accRevRepo == null){
             errorText += "[Error] Please specify AccuRev's source control repository under 'Advanced' \n";
@@ -62,6 +67,11 @@ public class ScmOptionBlock {
 
         if(this.scmSystem.equals("perforce") && this.p4Port == null){
             errorText += "[Error] Please specify Perforce's port environment variable under 'Advanced'\n ";
+            delim = false;
+        }
+
+        if(!version.compareToAnalysis(new CoverityVersion(7, 5, 0)) && this.scmSystem.equals("perforce2009")){
+            errorText += "[Error] Perforce 2009 is only available with Coverity Analysis versions 7.5.0 and greater \n";
             delim = false;
         }
 

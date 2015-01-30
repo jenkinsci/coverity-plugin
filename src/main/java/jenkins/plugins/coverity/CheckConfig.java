@@ -116,7 +116,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 for(Status s : status) {
                     if(s instanceof StreamStatus) {
                         StreamStatus ss = (StreamStatus) s;
-                        if(!ss.getVersion().compareToAnalys(analysisVersion)) {
+                        if(!ss.getVersion().compareToAnalysis(analysisVersion)) {
                             newStatus.add(new Status(false, "Connect instance " + ss.getStream().toPrettyString() + " (version " +
                                     ss.getVersion() + "|" + ss.getVersion().getEffectiveVersion() +
                                     ") is incompatible with analysis version " + analysisVersion));

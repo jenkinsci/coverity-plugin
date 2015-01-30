@@ -10,7 +10,7 @@
  *    Coverity, Inc - initial implementation and documentation
  *******************************************************************************/
 package jenkins.plugins.coverity;
-
+import hudson.EnvVars;
 import hudson.Util;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -24,6 +24,7 @@ public class InvocationAssistance {
     private final boolean csharpAutomaticAssemblies;
     private final boolean csharpMsvsca;
     private final String saOverride;
+    private EnvVars envVars;
 
     /**
      * Do not wrap any executables with these names with cov-build. Format is comma-separated list.
@@ -94,6 +95,8 @@ public class InvocationAssistance {
         return covBuildBlacklist;
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
@@ -158,5 +161,10 @@ public class InvocationAssistance {
         boolean csharpMsvsca = override.getCsharpMsvsca();
         String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
         return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, csharpAssemblies, javaWarFile, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist);
+    }
+
+    // Sets the environment varibles for the project so that we can replace environment varibles
+    public void setEnvVars(EnvVars environment){
+        this.envVars = environment;
     }
 }

@@ -24,7 +24,8 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
     static final HashMap<String, CoverityVersion> codeNameEquivalents = new HashMap<String, CoverityVersion>();
 
     static {
-        codeNameEquivalents.put("harmony", new CoverityVersion(8, 0, 0));
+        codeNameEquivalents.put("indio", new CoverityVersion(8, 0, 0));
+        codeNameEquivalents.put("harmony", new CoverityVersion(7, 6, 0));
         codeNameEquivalents.put("gilroy1", new CoverityVersion(7, 5, 1));
         codeNameEquivalents.put("gilroy", new CoverityVersion(7, 5, 0));
         codeNameEquivalents.put("fresno", new CoverityVersion(7, 0, 0));
@@ -133,12 +134,14 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
 
     /**
      * The way that Compare Major Minor works is that the argument passed in is the analysis version.
+     * Compares the version's major and minor version number. Returns true if the current version is greater than
+     *  or equals to the passed in version. Else, the compare will return false.
      * @param version
      * @return
      */
-    public boolean compareToAnalys(CoverityVersion version){
+    public boolean compareToAnalysis(CoverityVersion version){
         if(isCodeName || version.isCodeName){
-            return getEffectiveVersion().compareToAnalys(version.getEffectiveVersion());
+            return getEffectiveVersion().compareToAnalysis(version.getEffectiveVersion());
         }else{
             if(major == version.major){
                 return minor >= version.minor;

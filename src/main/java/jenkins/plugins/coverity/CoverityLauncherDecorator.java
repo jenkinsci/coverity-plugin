@@ -26,6 +26,7 @@ import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.remoting.Channel;
+import hudson.EnvVars;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+
 import java.util.logging.Logger;
 
 /**
@@ -68,15 +71,26 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         AbstractProject project = build.getProject();
 
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
+       
+        //Setting up code to allow environment variables in text fields
+        EnvVars env;
+        try{
+            env = project.getEnvironment(node,launcher.getListener());
+        }catch(Exception e){
+            throw new RuntimeException("Error getting build environment variables", e);
+        }
+
         if(publisher == null) {
             return launcher;
         }
+
+        CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
+
         TaOptionBlock ta = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
         InvocationAssistance ii = publisher.getInvocationAssistance();
-        /**if(ii == null) {
-            return launcher;
-        }   **/
+
+
 
         FilePath temp;
         if(ta != null){
@@ -87,7 +101,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
         
         if(scm != null){
-            String scmCheck = scm.checkScmConfig();
+            String scmCheck = scm.checkScmConfig(version);
+            if(!scmCheck.equals("Pass")){
+                throw new RuntimeException(scmCheck);
+            }
         }
 
         try {
@@ -160,23 +177,26 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             }
         }
 
-        CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
-
         if(onlyCS && version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
             logger.info("Only streams of type CSHARP were found, skipping cov-build");
 
             return launcher;
         }
+
+        
         /**
          * Putting together the arguments for cov-build. The placeholder is there so that we can later determine the
          * exact location of cov-build runable.
          */
+       
         List<String> args = new ArrayList<String>();
-        args.add("cov-build-placeholder");
-        // Adding the intermediate directory
-        args.add("--dir");
-        // Adding the build command for the code
-        args.add(temp.getRemote());
+        if(ii != null || ta != null){
+            args.add("cov-build-placeholder");
+            // Adding the intermediate directory
+            args.add("--dir");
+            // Adding the build command for the code
+            args.add(temp.getRemote());
+        }
 
         // Adding in Test Analysis arguments into the code when no other test command is needed to run.
         if(ta != null){
@@ -186,9 +206,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         String[] blacklist;
-        if(ii != null){
+        if(ii != null) {
             if(ii.getBuildArguments() != null) {
-                for(String arg : Util.tokenize(ii.getBuildArguments())) {
+                for(String arg : ii.getBuildArguments().split(" ")) {
                     args.add(arg);
                 }
             }
@@ -206,6 +226,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         } else{
             blacklist = new String[0];
         }
+
+        // Evaluation the args to replace any evironment variables 
+        args = CoverityUtils.evaluateEnvVars(args, env);
+        launcher.getListener().getLogger().println(args.toString());
 
         return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
     }
@@ -231,7 +255,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         private String[] getPrefix() {
             String[] tp = prefix.clone();
-            tp[0] = getCovBuild();
+            if(tp.length > 0){    
+                tp[0] = getCovBuild();
+            }
             return tp;
         }
 
@@ -241,6 +267,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 if(isBlacklisted(starter.cmds().get(0))) {
                     logger.info(starter.cmds().get(0) + " is blacklisted, skipping cov-build");
                     return decorated.launch(starter);
+                }
+
+                // Creating a hashmap of the environment variables so that we can evalute the cov-build command
+                Map<String,String> envMap = new HashMap<String,String>();
+
+                for(String env : starter.envs()){
+                    String[] split = env.split("=",2);
+                    envMap.put(env.split("=",2)[0],env.split("=",2)[1]);
                 }
 
                 List<String> cmds = starter.cmds();
@@ -253,6 +287,8 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 }
 
                 cmds.addAll(0, Arrays.asList(getPrefix()));
+                // parsing the command and replacing all environment variable with their respective value
+                cmds = CoverityUtils.evaluateEnvVars(cmds,new EnvVars(envMap));
                 starter.cmds(cmds);
                 boolean[] masks = starter.masks();
                 if(masks == null) {

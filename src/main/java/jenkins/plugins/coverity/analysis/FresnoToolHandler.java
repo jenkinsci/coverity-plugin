@@ -12,6 +12,7 @@ import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.util.ArgumentListBuilder;
+import hudson.EnvVars;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
@@ -35,8 +36,18 @@ import java.util.HashMap;
  * Most of the code is currently the same as {@link PreFresnoToolHandler}.
  */
 public class FresnoToolHandler extends CoverityToolHandler {
+
+    CoverityVersion version;
+
+    public FresnoToolHandler(CoverityVersion version){
+        this.version = version;
+    }
+
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException , CovRemoteServiceException_Exception{
+        
+        EnvVars envVars = build.getEnvironment(listener);
+
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
@@ -45,14 +56,18 @@ public class FresnoToolHandler extends CoverityToolHandler {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
+        
+        // Seting the new envVars after jenkins has modified its own
+        CoverityUtils.setEnvVars(envVars);
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
-        String javaWarFile = invocationAssistance != null ? invocationAssistance.getJavaWarFile() : null;
+        String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(invocationAssistance.getJavaWarFile(), build,  listener) : null;
+
         if(javaWarFile != null) {
             listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
 
@@ -83,9 +98,12 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add(temp.getTempDir().getRemote());
                     cmd.addAll(testAnalysis.getTaCommandArgs());
 
-                    for(String arg : Util.tokenize(testAnalysis.getCustomTestCommand())) {
+                    for(String arg : testAnalysis.getCustomTestCommand().split(" ")) {
                         cmd.add(arg);
                     }
+
+                    // Evaluation the cmd to replace any evironment variables 
+                    cmd = CoverityUtils.evaluateEnvVars(cmd, build,listener);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -94,7 +112,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     int result = launcher.
                             launch().
                             cmds(args).
-                            pwd(testAnalysis.getCustomWorkDir()).
+                            pwd(CoverityUtils.evaluateEnvVars(testAnalysis.getCustomWorkDir(), build, listener)).
                             stdout(listener).
                             stderr(listener.getLogger()).
                             join();
@@ -138,10 +156,16 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         cmd.add(Integer.toString(cim.getPort()));
                         cmd.add("--stream");
                         cmd.add(cimStream.getStream());
+                        if(cim.isUseSSL()){
+                            cmd.add("--ssl");
+                        }
+                        
                         cmd.add("--user");
                         cmd.add(cim.getUser());
                         cmd.add("--merge");
 
+                        // Evaluation the cmd to replace any evironment variables 
+                        cmd = CoverityUtils.evaluateEnvVars(cmd, build,listener);
 
                         ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -216,12 +240,15 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 // Perforce requires p4port to be set when running scm
                 Map<String,String> env = new HashMap<String,String>();;
                 if(scm.getScmSystem().equals("perforce")){
-                    env.put("P4PORT",scm.getP4Port());
+                    env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), build, listener));
                 }
 
+                // Evaluation the cmd to replace any evironment variables 
+                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
 
                 ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
+                
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
                 int result = launcher.
@@ -242,10 +269,6 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 CoverityLauncherDecorator.SKIP.set(false);
             }
         }
-
-
-
-
 
         //what languages are we analyzing?
         String languageToAnalyze = null;
@@ -309,14 +332,18 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
 
 
-                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+                
                 if(effectiveIA != null){
                     if(effectiveIA.getAnalyzeArguments() != null) {
-                        for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
+                        for(String arg : effectiveIA.getAnalyzeArguments().split(" ")) {
                             cmd.add(arg);
                         }
                     }
                 }
+
+                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+
+                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
                 int result = launcher.
                         launch().
@@ -339,7 +366,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
+            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(),build, listener);
             if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
                 boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
                 if(!result) {
@@ -378,8 +405,20 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add(temp.getTempDir().getRemote());
                     cmd.add("--host");
                     cmd.add(cim.getHost());
-                    cmd.add(useDataPort ? "--dataport" : "--port");
-                    cmd.add(useDataPort ? Integer.toString(cim.getDataPort()) : Integer.toString(cim.getPort()));
+
+                    // For versions greater than gilroy (7.5.0), we want to use the --https-port for https connetions
+                    // since it was added for gilroy and beyond
+                    if(useDataPort){
+                        cmd.add("--dataport");
+                        cmd.add(Integer.toString(cim.getDataPort()));
+                    }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
+                        cmd.add("--https-port");
+                        cmd.add(Integer.toString(cim.getPort()));
+                    }else{
+                        cmd.add("--port");
+                        cmd.add(Integer.toString(cim.getPort()));
+                    }
+
                     cmd.add("--stream");
                     cmd.add(cimStream.getStream());
                     cmd.add("--user");
@@ -387,11 +426,14 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     if(invocationAssistance != null){
                         if(effectiveIA.getCommitArguments() != null) {
-                            for(String arg : Util.tokenize(effectiveIA.getCommitArguments())) {
+                            for(String arg : effectiveIA.getCommitArguments().split(" ")) {
                                 cmd.add(arg);
                             }
                         }
                     }
+
+                    // Evaluation the cmd to replace any evironment variables 
+                    cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -475,6 +517,8 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         publisher.getDescriptor().updateCheckers(publisher.getLanguage(cimStream), checkers);
                     }
 
+                    cimStream.getDefectFilters().createImpactMap(cim);
+
                     List<Long> matchingDefects = new ArrayList<Long>();
                     // Loop through all defects
                     for(MergedDefectDataObj defect : defects) {
@@ -483,6 +527,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         if(cimStream.getDefectFilters() == null) {
                             matchingDefects.add(defect.getCid());
                         } else {
+
                             // Check to see if defectFilter matches the defect
                             boolean match = cimStream.getDefectFilters().matches(defect,listener);
                             if(match) {
@@ -492,12 +537,20 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     }
 
                     if(!matchingDefects.isEmpty()) {
-                        listener.getLogger().println("[Coverity] Found " + defects.size() + " defects matching all filters: " + matchingDefects);
+                        listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
                         if(publisher.isFailBuild()) {
                             if(build.getResult().isBetterThan(Result.FAILURE)) {
                                 build.setResult(Result.FAILURE);
                             }
                         }
+                        
+                        // if the user wants to mark the build as unstable when defects are found, then we 
+                        // notify the publisher to do so.
+                        if(publisher.isUnstable()){
+                            publisher.setUnstableBuild(true);
+
+                        }
+
                     } else {
                         listener.getLogger().println("[Coverity] No defects matched all filters.");
                     }

@@ -69,7 +69,13 @@ public class CoverityBuildAction implements Action {
      */
     public String getURL(MergedDefectDataObj defect) throws IOException, CovRemoteServiceException_Exception {
         CIMInstance instance = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
-        return String.format("http://%s:%d/sourcebrowser.htm?projectId=%s&mergedDefectId=%d",
+        String header = "http";
+
+        if(instance.isUseSSL()){
+            header = "https";
+        }
+
+        return String.format(header + "://%s:%d/sourcebrowser.htm?projectId=%s&mergedDefectId=%d",
                 instance.getHost(), instance.getPort(), instance.getProjectKey(projectId), defect.getCid());
     }
 
@@ -78,7 +84,7 @@ public class CoverityBuildAction implements Action {
     }
 
     public String getDisplayName() {
-        return "Coverity Defects (" + getId() + ")";
+        return "Coverity Defects ";
     }
 
     public String getUrlName() {

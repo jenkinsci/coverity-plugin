@@ -11,6 +11,7 @@ import hudson.model.Executor;
 import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
+import hudson.EnvVars;
 import hudson.util.ArgumentListBuilder;
 import jenkins.plugins.coverity.CIMInstance;
 import jenkins.plugins.coverity.CIMStream;
@@ -20,6 +21,8 @@ import jenkins.plugins.coverity.CoverityLauncherDecorator;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityTempDir;
 import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.CoverityUtils;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,18 +42,24 @@ import java.util.regex.Pattern;
 public class PreFresnoToolHandler extends CoverityToolHandler {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException, CovRemoteServiceException_Exception {
+
+        EnvVars envVars = build.getEnvironment(listener);
+
+        // Seting the new envVars after jenkins has modified its own
+        CoverityUtils.setEnvVars(envVars);
+
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
-        String javaWarFile = invocationAssistance != null ? invocationAssistance.getJavaWarFile() : null;
+        String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(invocationAssistance.getJavaWarFile(), build, listener) : null;
         if(javaWarFile != null) {
             listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
 
@@ -127,12 +136,17 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                         }
 
 
-                        listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
                         if(effectiveIA.getAnalyzeArguments() != null) {
-                            for(String arg : Util.tokenize(effectiveIA.getAnalyzeArguments())) {
+                            for(String arg : effectiveIA.getAnalyzeArguments().split(" ")) {
                                 cmd.add(arg);
                             }
                         }
+
+                         // Evaluation the cmd to replace any evironment variables 
+                        cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+
+                        listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+
 
                         int result = launcher.
                                 launch().
@@ -160,7 +174,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = invocationAssistance.getCsharpMsvscaOutputFiles();
+            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), build, listener);
             if(analyzedLanguages.contains("CSHARP") && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
                 boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
                 if(!result) {
@@ -217,6 +231,9 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                             cmd.add(arg);
                         }
                     }
+
+                    // Evaluation the cmd to replace any evironment variables 
+                    cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -294,6 +311,9 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
                     List<Long> matchingDefects = new ArrayList<Long>();
 
+                    cimStream.getDefectFilters().createImpactMap(cim);
+
+
                     for(MergedDefectDataObj defect : defects) {
                         //matchingDefects.add(defect.getCid());
                         if(cimStream.getDefectFilters() == null) {
@@ -307,12 +327,21 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     }
 
                     if(!matchingDefects.isEmpty()) {
-                        listener.getLogger().println("[Coverity] Found " + defects.size() + " defects matching all filters: " + matchingDefects);
+                        listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
                         if(publisher.isFailBuild()) {
                             if(build.getResult().isBetterThan(Result.FAILURE)) {
                                 build.setResult(Result.FAILURE);
                             }
                         }
+
+                        // if the user wants to mark the build as unstable when defects are found, then we 
+                        // notify the publisher to do so.
+                        if(publisher.isUnstable()){
+                            publisher.setUnstableBuild(true);
+
+                        }
+
+
                     } else {
                         listener.getLogger().println("[Coverity] No defects matched all filters.");
                     }
@@ -329,6 +358,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                         listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
                     }
 
+
                 } catch(CovRemoteServiceException_Exception e) {
                     e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
                     build.setResult(Result.FAILURE);
@@ -336,6 +366,8 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                 }
             }
         }
+        
+
         return true;
     }
 }

@@ -237,6 +237,14 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
+        public ListBoxModel doFillImpactDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
+            ListBoxModel result = new ListBoxModel();
+            result.add("High");
+            result.add("Medium");
+            result.add("Low");
+            return result;
+        }
+
         public ListBoxModel doFillSeveritiesDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
             ListBoxModel result = new ListBoxModel();
             CIMInstance instance = getInstance(cimInstance);
