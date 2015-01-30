@@ -23,7 +23,7 @@
     </parent>
 
     <artifactId>coverity</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Coverity plugin</name>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin</url>
