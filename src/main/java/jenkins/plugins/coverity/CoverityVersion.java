@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
  */
 public class CoverityVersion implements Comparable<CoverityVersion>, Serializable {
     public static final CoverityVersion VERSION_FRESNO = new CoverityVersion("fresno");
+    public static final CoverityVersion VERSION_INDIO = new CoverityVersion("indio");
 
     static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\w+)");
 

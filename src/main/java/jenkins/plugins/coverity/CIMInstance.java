@@ -52,9 +52,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CIMInstance {
 
     public static final String COVERITY_V5_NAMESPACE = "http://ws.coverity.com/v6";
+    public static final String COVERITY_V9_NAMESPACE = "http://ws.coverity.com/v9";
 
     public static final String CONFIGURATION_SERVICE_V5_WSDL = "/ws/v6/configurationservice?wsdl";
     public static final String DEFECT_SERVICE_V5_WSDL = "/ws/v6/defectservice?wsdl";
+
+    public static final String CONFIGURATION_SERVICE_V9_WSDL = "/ws/v9/configurationservice?wsdl";
+    public static final String DEFECT_SERVICE_V9_WSDL = "/ws/v9/defectservice?wsdl";
 
     /**
      * Pattern to ignore streams - this is used to filter out internal DA streams, which are irrelevant to this plugin
@@ -99,12 +103,22 @@ public class CIMInstance {
     /**
      * cached webservice port for Defect service
      */
-    private transient DefectServiceService defectServiceService;
+    private transient com.coverity.ws.v6.DefectServiceService defectServiceService;
 
     /**
      * cached webservice port for Configuration service
      */
-    private transient ConfigurationServiceService configurationServiceService;
+    private transient com.coverity.ws.v6.ConfigurationServiceService configurationServiceService;
+
+    /**
+     * cached webservice port for Defect service for Indio
+     */
+    private transient com.coverity.ws.v9.DefectServiceService defectServiceServiceIndio;
+
+    /**
+     * cached webservice port for Configuration service for Indio
+     */
+    private transient com.coverity.ws.v9.ConfigurationServiceService configurationServiceServiceIndio;
 
     @DataBoundConstructor
     public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort) {
@@ -156,12 +170,12 @@ public class CIMInstance {
     }
 
     /**
-     * Returns a Defect service client
+     * Returns a Defect service client using v6 web services.
      */
-    public DefectService getDefectService() throws IOException {
+    public com.coverity.ws.v6.DefectService getDefectService() throws IOException {
         synchronized(this) {
             if(defectServiceService == null) {
-                defectServiceService = new DefectServiceService(
+                defectServiceService = new com.coverity.ws.v6.DefectServiceService(
                         new URL(getURL(), DEFECT_SERVICE_V5_WSDL),
                         new QName(COVERITY_V5_NAMESPACE, "DefectServiceService"));
             }
@@ -169,7 +183,30 @@ public class CIMInstance {
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
-            DefectService defectService = defectServiceService.getDefectServicePort();
+            com.coverity.ws.v6.DefectService defectService = defectServiceService.getDefectServicePort();
+            attachAuthenticationHandler((BindingProvider) defectService);
+
+            return defectService;
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
+        }
+    }
+
+    /**
+     * Returns a Defect service client using v9 web services.
+     */
+    public com.coverity.ws.v9.DefectService getDefectServiceIndio() throws IOException {
+        synchronized(this) {
+            if(defectServiceService == null) {
+                defectServiceService = new com.coverity.ws.v6.DefectServiceService(
+                        new URL(getURL(), DEFECT_SERVICE_V5_WSDL),
+                        new QName(COVERITY_V5_NAMESPACE, "DefectServiceService"));
+            }
+        }
+
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            com.coverity.ws.v9.DefectService defectService = defectServiceServiceIndio.getDefectServicePort();
             attachAuthenticationHandler((BindingProvider) defectService);
 
             return defectService;
@@ -186,7 +223,7 @@ public class CIMInstance {
     }
 
     /**
-     * Returns a Configuration service client
+     * Returns a Configuration service client using v6 web services.
      */
     public ConfigurationService getConfigurationService() throws IOException {
         synchronized(this) {
@@ -201,6 +238,30 @@ public class CIMInstance {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
             ConfigurationService configurationService = configurationServiceService.getConfigurationServicePort();
+            attachAuthenticationHandler((BindingProvider) configurationService);
+
+            return configurationService;
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
+        }
+    }
+
+    /**
+     * Returns a Configuration service client using v9 web services.
+     */
+    public com.coverity.ws.v9.ConfigurationService getConfigurationServiceIndio() throws IOException {
+        synchronized(this) {
+            if(configurationServiceService == null) {
+                // Create a Web Services port to the server
+                configurationServiceService = new ConfigurationServiceService(
+                        new URL(getURL(), CONFIGURATION_SERVICE_V9_WSDL),
+                        new QName(COVERITY_V9_NAMESPACE, "ConfigurationServiceService"));
+            }
+        }
+
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            com.coverity.ws.v9.ConfigurationService configurationService = configurationServiceServiceIndio.getConfigurationServicePort();
             attachAuthenticationHandler((BindingProvider) configurationService);
 
             return configurationService;

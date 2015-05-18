@@ -37,6 +37,8 @@ public abstract class CoverityToolHandler {
 
         if(version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
             return new PreFresnoToolHandler();
+        } if(version.compareTo(CoverityVersion.VERSION_INDIO) >= 0){
+            return new IndioToolHandler(version);
         } else {
             return new FresnoToolHandler(version);
         }
@@ -72,7 +74,7 @@ public abstract class CoverityToolHandler {
         return files.toArray(arr);
     }
 
-    public abstract boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException, CovRemoteServiceException_Exception;
+    public abstract boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException, CovRemoteServiceException_Exception, com.coverity.ws.v9.CovRemoteServiceException_Exception;
 
     public File[] findMsvscaOutputFiles(String dirName) {
         File dir = new File(dirName);
@@ -105,41 +107,6 @@ public abstract class CoverityToolHandler {
             }
 
         }, true);
-    }
-
-    public List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener) throws IOException, CovRemoteServiceException_Exception  {
-        int defectSize = 3000; // Maximum amount of defect to pull
-        int pageSize = 1000; // Size of page to be pulled
-        List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
-        DefectFilters defectFilter = cimStream.getDefectFilters();
-
-        DefectService ds = cim.getDefectService();
-
-        PageSpecDataObj pageSpec = new PageSpecDataObj();
-
-        StreamIdDataObj streamId = new StreamIdDataObj();
-        streamId.setName(cimStream.getStream());
-
-        MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
-
-
-        StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
-        SnapshotIdDataObj snapid = new SnapshotIdDataObj();
-        snapid.setId(snapshotId);
-
-        sfilter.setStreamId(streamId);
-
-        sfilter.getSnapshotIdIncludeList().add(snapid);
-        filter.getStreamSnapshotFilterSpecIncludeList().add(sfilter);
-        // The loop will pull up to the maximum amount of defect, doing per page size
-        for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
-            pageSpec.setPageSize(pageSize);
-            pageSpec.setStartIndex(pageStart);
-            pageSpec.setSortAscending(true);
-            mergeList.addAll(ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec).getMergedDefects());
-
-        }
-        return mergeList;
     }
 
     public MergedDefectFilterSpecDataObj addFilters(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener)throws IOException,CovRemoteServiceException_Exception{

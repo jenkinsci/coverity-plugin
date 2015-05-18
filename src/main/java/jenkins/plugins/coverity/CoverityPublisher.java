@@ -12,6 +12,7 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v6.*;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -268,13 +269,27 @@ public class CoverityPublisher extends Recorder {
                 build.setResult(Result.UNSTABLE);
             }
             return true;
-        } catch(CovRemoteServiceException_Exception e){
+        } catch(com.coverity.ws.v6.CovRemoteServiceException_Exception e){
+            throw new InterruptedException("Cov Remote Service Error " + e.getMessage());
+        } catch(com.coverity.ws.v9.CovRemoteServiceException_Exception e){
             throw new InterruptedException("Cov Remote Service Error " + e.getMessage());
         }
     }
 
-    public String getLanguage(CIMStream cimStream) throws IOException, CovRemoteServiceException_Exception {
-        String domain = getDescriptor().getInstance(cimStream.getInstance()).getStream(cimStream.getStream()).getLanguage();
+    public StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, com.coverity.ws.v6.CovRemoteServiceException_Exception {
+        StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
+        filter.setNamePattern(streamId);
+
+        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
+        if(streams.isEmpty()) {
+            return null;
+        } else {
+            return streams.get(0);
+        }
+    }
+
+    public String getLanguage(CIMStream cimStream) throws IOException, com.coverity.ws.v6.CovRemoteServiceException_Exception {
+        String domain = getStream(cimStream.getStream(), getDescriptor().getInstance(cimStream.getInstance())).getLanguage();
         return "MIXED".equals(domain) ? cimStream.getLanguage() : domain;
     }
 
@@ -661,7 +676,7 @@ public class CoverityPublisher extends Recorder {
             }
         }
 
-        public void doDefectFiltersConfig(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+        public void doDefectFiltersConfig(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException, com.coverity.ws.v6.CovRemoteServiceException_Exception {
             logger.info(req.getSubmittedForm().toString());
 
             JSONObject json = getJSONClassObject(req.getSubmittedForm(), getId());
@@ -696,7 +711,7 @@ public class CoverityPublisher extends Recorder {
                                     toStrings(currentDescriptor.doFillComponentDefectFilterItems(current.getInstance(), current.getStream()))
                             );
                         }
-                    } catch(CovRemoteServiceException_Exception e) {
+                    } catch(com.coverity.ws.v6.CovRemoteServiceException_Exception e) {
                         throw new IOException(e);
                     }
                 }

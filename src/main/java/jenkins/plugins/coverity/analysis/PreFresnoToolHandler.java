@@ -1,7 +1,6 @@
 package jenkins.plugins.coverity.analysis;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.MergedDefectDataObj;
+import com.coverity.ws.v6.*;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
@@ -13,21 +12,14 @@ import hudson.model.Node;
 import hudson.model.Result;
 import hudson.EnvVars;
 import hudson.util.ArgumentListBuilder;
-import jenkins.plugins.coverity.CIMInstance;
-import jenkins.plugins.coverity.CIMStream;
-import jenkins.plugins.coverity.CoverityBuildAction;
-import jenkins.plugins.coverity.CoverityInstallation;
-import jenkins.plugins.coverity.CoverityLauncherDecorator;
-import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.CoverityTempDir;
-import jenkins.plugins.coverity.InvocationAssistance;
-import jenkins.plugins.coverity.CoverityUtils;
+import jenkins.plugins.coverity.*;
 
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -78,7 +70,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
             String language = null;
             try {
-                language = publisher.getLanguage(cimStream);
+                language = getLanguage(cimStream, cim);
             } catch(CovRemoteServiceException_Exception e) {
                 e.printStackTrace(listener.error("Error while retrieving stream information for " + cimStream.getStream()));
                 return false;
@@ -190,7 +182,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
             String language = null;
             try {
-                language = publisher.getLanguage(cimStream);
+                language = getLanguage(cimStream, cim);
             } catch(CovRemoteServiceException_Exception e) {
                 e.printStackTrace(listener.error("Error while retrieving stream information for " + cimStream.getStream()));
                 return false;
@@ -307,7 +299,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     for(MergedDefectDataObj defect : defects) {
                         checkers.add(defect.getCheckerName());
                     }
-                    publisher.getDescriptor().updateCheckers(publisher.getLanguage(cimStream), checkers);
+                    publisher.getDescriptor().updateCheckers(getLanguage(cimStream, cim), checkers);
 
                     List<Long> matchingDefects = new ArrayList<Long>();
 
@@ -369,5 +361,57 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         
 
         return true;
+    }
+
+    public StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, CovRemoteServiceException_Exception {
+        StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
+        filter.setNamePattern(streamId);
+
+        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
+        if(streams.isEmpty()) {
+            return null;
+        } else {
+            return streams.get(0);
+        }
+    }
+
+    public String getLanguage(CIMStream cimStream, CIMInstance cimInstance) throws IOException, CovRemoteServiceException_Exception {
+        String domain = getStream(cimStream.getStream(), cimInstance).getLanguage();
+        return "MIXED".equals(domain) ? cimStream.getLanguage() : domain;
+    }
+
+    public List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener) throws IOException, CovRemoteServiceException_Exception  {
+        int defectSize = 3000; // Maximum amount of defect to pull
+        int pageSize = 1000; // Size of page to be pulled
+        List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
+        DefectFilters defectFilter = cimStream.getDefectFilters();
+
+        DefectService ds = cim.getDefectService();
+
+        PageSpecDataObj pageSpec = new PageSpecDataObj();
+
+        StreamIdDataObj streamId = new StreamIdDataObj();
+        streamId.setName(cimStream.getStream());
+
+        MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
+
+
+        StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
+        SnapshotIdDataObj snapid = new SnapshotIdDataObj();
+        snapid.setId(snapshotId);
+
+        sfilter.setStreamId(streamId);
+
+        sfilter.getSnapshotIdIncludeList().add(snapid);
+        filter.getStreamSnapshotFilterSpecIncludeList().add(sfilter);
+        // The loop will pull up to the maximum amount of defect, doing per page size
+        for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
+            pageSpec.setPageSize(pageSize);
+            pageSpec.setStartIndex(pageStart);
+            pageSpec.setSortAscending(true);
+            mergeList.addAll(ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec).getMergedDefects());
+
+        }
+        return mergeList;
     }
 }
