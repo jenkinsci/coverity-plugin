@@ -121,7 +121,7 @@ public class ComponentMetricsDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ComponentIdDataObj }
+     *     {@link ComponentIdDataObj }
      *     
      */
     public ComponentIdDataObj getComponentId() {
@@ -133,7 +133,7 @@ public class ComponentMetricsDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ComponentIdDataObj }
+     *     {@link ComponentIdDataObj }
      *     
      */
     public void setComponentId(ComponentIdDataObj value) {
@@ -177,7 +177,7 @@ public class ComponentMetricsDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getMetricsDate() {
@@ -189,7 +189,7 @@ public class ComponentMetricsDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setMetricsDate(XMLGregorianCalendar value) {

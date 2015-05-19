@@ -45,7 +45,7 @@ public class AttributeDefinitionValueFilterMapDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.AttributeDefinitionIdDataObj }
+     *     {@link AttributeDefinitionIdDataObj }
      *     
      */
     public AttributeDefinitionIdDataObj getAttributeDefinitionId() {
@@ -57,7 +57,7 @@ public class AttributeDefinitionValueFilterMapDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.AttributeDefinitionIdDataObj }
+     *     {@link AttributeDefinitionIdDataObj }
      *     
      */
     public void setAttributeDefinitionId(AttributeDefinitionIdDataObj value) {
@@ -82,7 +82,7 @@ public class AttributeDefinitionValueFilterMapDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.AttributeValueIdDataObj }
+     * {@link AttributeValueIdDataObj }
      * 
      * 
      */

@@ -40,7 +40,7 @@ public class GetRoleResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.RoleDataObj }
+     *     {@link RoleDataObj }
      *     
      */
     public RoleDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetRoleResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.RoleDataObj }
+     *     {@link RoleDataObj }
      *     
      */
     public void setReturn(RoleDataObj value) {

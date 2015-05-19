@@ -84,7 +84,7 @@ public class DefectDetectionHistoryDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getDetection() {
@@ -96,7 +96,7 @@ public class DefectDetectionHistoryDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setDetection(XMLGregorianCalendar value) {
@@ -169,7 +169,7 @@ public class DefectDetectionHistoryDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamIdDataObj }
+     * {@link StreamIdDataObj }
      * 
      * 
      */

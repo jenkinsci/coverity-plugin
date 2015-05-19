@@ -46,7 +46,7 @@ public class UpdateTriageForCIDsInTriageStore {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.TriageStoreIdDataObj }
+     *     {@link TriageStoreIdDataObj }
      *     
      */
     public TriageStoreIdDataObj getTriageStore() {
@@ -58,7 +58,7 @@ public class UpdateTriageForCIDsInTriageStore {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.TriageStoreIdDataObj }
+     *     {@link TriageStoreIdDataObj }
      *     
      */
     public void setTriageStore(TriageStoreIdDataObj value) {
@@ -83,7 +83,7 @@ public class UpdateTriageForCIDsInTriageStore {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.MergedDefectIdDataObj }
+     * {@link MergedDefectIdDataObj }
      * 
      * 
      */
@@ -99,7 +99,7 @@ public class UpdateTriageForCIDsInTriageStore {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.DefectStateSpecDataObj }
+     *     {@link DefectStateSpecDataObj }
      *     
      */
     public DefectStateSpecDataObj getDefectState() {
@@ -111,7 +111,7 @@ public class UpdateTriageForCIDsInTriageStore {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.DefectStateSpecDataObj }
+     *     {@link DefectStateSpecDataObj }
      *     
      */
     public void setDefectState(DefectStateSpecDataObj value) {

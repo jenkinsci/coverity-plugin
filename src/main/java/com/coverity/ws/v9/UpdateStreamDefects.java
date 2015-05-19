@@ -56,7 +56,7 @@ public class UpdateStreamDefects {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamDefectIdDataObj }
+     * {@link StreamDefectIdDataObj }
      * 
      * 
      */
@@ -72,7 +72,7 @@ public class UpdateStreamDefects {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.DefectStateSpecDataObj }
+     *     {@link DefectStateSpecDataObj }
      *     
      */
     public DefectStateSpecDataObj getDefectStateSpec() {
@@ -84,7 +84,7 @@ public class UpdateStreamDefects {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.DefectStateSpecDataObj }
+     *     {@link DefectStateSpecDataObj }
      *     
      */
     public void setDefectStateSpec(DefectStateSpecDataObj value) {

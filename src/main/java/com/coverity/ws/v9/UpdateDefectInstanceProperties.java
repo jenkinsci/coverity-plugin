@@ -43,7 +43,7 @@ public class UpdateDefectInstanceProperties {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.DefectInstanceIdDataObj }
+     *     {@link DefectInstanceIdDataObj }
      *     
      */
     public DefectInstanceIdDataObj getDefectInstanceId() {
@@ -55,7 +55,7 @@ public class UpdateDefectInstanceProperties {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.DefectInstanceIdDataObj }
+     *     {@link DefectInstanceIdDataObj }
      *     
      */
     public void setDefectInstanceId(DefectInstanceIdDataObj value) {
@@ -80,7 +80,7 @@ public class UpdateDefectInstanceProperties {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.PropertySpecDataObj }
+     * {@link PropertySpecDataObj }
      * 
      * 
      */

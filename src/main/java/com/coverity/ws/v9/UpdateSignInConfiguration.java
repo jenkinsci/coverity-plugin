@@ -38,7 +38,7 @@ public class UpdateSignInConfiguration {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.SignInSettingsDataObj }
+     *     {@link SignInSettingsDataObj }
      *     
      */
     public SignInSettingsDataObj getSignInSettingsDataObj() {
@@ -50,7 +50,7 @@ public class UpdateSignInConfiguration {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.SignInSettingsDataObj }
+     *     {@link SignInSettingsDataObj }
      *     
      */
     public void setSignInSettingsDataObj(SignInSettingsDataObj value) {

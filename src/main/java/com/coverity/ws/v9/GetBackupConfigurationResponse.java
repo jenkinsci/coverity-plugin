@@ -40,7 +40,7 @@ public class GetBackupConfigurationResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.BackupConfigurationDataObj }
+     *     {@link BackupConfigurationDataObj }
      *     
      */
     public BackupConfigurationDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetBackupConfigurationResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.BackupConfigurationDataObj }
+     *     {@link BackupConfigurationDataObj }
      *     
      */
     public void setReturn(BackupConfigurationDataObj value) {

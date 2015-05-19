@@ -41,7 +41,7 @@ public class CreateStreamInProject {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public ProjectIdDataObj getProjectId() {
@@ -53,7 +53,7 @@ public class CreateStreamInProject {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public void setProjectId(ProjectIdDataObj value) {
@@ -65,7 +65,7 @@ public class CreateStreamInProject {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.StreamSpecDataObj }
+     *     {@link StreamSpecDataObj }
      *     
      */
     public StreamSpecDataObj getStreamSpec() {
@@ -77,7 +77,7 @@ public class CreateStreamInProject {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.StreamSpecDataObj }
+     *     {@link StreamSpecDataObj }
      *     
      */
     public void setStreamSpec(StreamSpecDataObj value) {

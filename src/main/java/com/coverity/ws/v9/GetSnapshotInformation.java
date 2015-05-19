@@ -53,7 +53,7 @@ public class GetSnapshotInformation {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.SnapshotIdDataObj }
+     * {@link SnapshotIdDataObj }
      * 
      * 
      */

@@ -41,7 +41,7 @@ public class GetSnapshotsForStream {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.StreamIdDataObj }
+     *     {@link StreamIdDataObj }
      *     
      */
     public StreamIdDataObj getStreamId() {
@@ -53,7 +53,7 @@ public class GetSnapshotsForStream {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.StreamIdDataObj }
+     *     {@link StreamIdDataObj }
      *     
      */
     public void setStreamId(StreamIdDataObj value) {

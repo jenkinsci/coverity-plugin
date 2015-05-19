@@ -38,7 +38,7 @@ public class GetDeveloperStreamsProjects {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ProjectFilterSpecDataObj }
+     *     {@link ProjectFilterSpecDataObj }
      *     
      */
     public ProjectFilterSpecDataObj getFilterSpec() {
@@ -50,7 +50,7 @@ public class GetDeveloperStreamsProjects {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ProjectFilterSpecDataObj }
+     *     {@link ProjectFilterSpecDataObj }
      *     
      */
     public void setFilterSpec(ProjectFilterSpecDataObj value) {

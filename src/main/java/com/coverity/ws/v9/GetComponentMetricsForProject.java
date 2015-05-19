@@ -43,7 +43,7 @@ public class GetComponentMetricsForProject {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public ProjectIdDataObj getProjectId() {
@@ -55,7 +55,7 @@ public class GetComponentMetricsForProject {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public void setProjectId(ProjectIdDataObj value) {
@@ -80,7 +80,7 @@ public class GetComponentMetricsForProject {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.ComponentIdDataObj }
+     * {@link ComponentIdDataObj }
      * 
      * 
      */

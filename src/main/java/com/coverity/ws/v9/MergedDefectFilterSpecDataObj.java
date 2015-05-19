@@ -264,7 +264,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.ComponentIdDataObj }
+     * {@link ComponentIdDataObj }
      * 
      * 
      */
@@ -670,7 +670,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.AttributeDefinitionValueFilterMapDataObj }
+     * {@link AttributeDefinitionValueFilterMapDataObj }
      * 
      * 
      */
@@ -782,7 +782,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getFirstDetectedEndDate() {
@@ -794,7 +794,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setFirstDetectedEndDate(XMLGregorianCalendar value) {
@@ -806,7 +806,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getFirstDetectedStartDate() {
@@ -818,7 +818,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setFirstDetectedStartDate(XMLGregorianCalendar value) {
@@ -854,7 +854,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastDetectedEndDate() {
@@ -866,7 +866,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastDetectedEndDate(XMLGregorianCalendar value) {
@@ -878,7 +878,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastDetectedStartDate() {
@@ -890,7 +890,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastDetectedStartDate(XMLGregorianCalendar value) {
@@ -902,7 +902,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastFixedEndDate() {
@@ -914,7 +914,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastFixedEndDate(XMLGregorianCalendar value) {
@@ -926,7 +926,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastFixedStartDate() {
@@ -938,7 +938,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastFixedStartDate(XMLGregorianCalendar value) {
@@ -950,7 +950,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastTriagedEndDate() {
@@ -962,7 +962,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastTriagedEndDate(XMLGregorianCalendar value) {
@@ -974,7 +974,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastTriagedStartDate() {
@@ -986,7 +986,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastTriagedStartDate(XMLGregorianCalendar value) {
@@ -1184,7 +1184,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamIdDataObj }
+     * {@link StreamIdDataObj }
      * 
      * 
      */
@@ -1237,7 +1237,7 @@ public class MergedDefectFilterSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamIdDataObj }
+     * {@link StreamIdDataObj }
      * 
      * 
      */

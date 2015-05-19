@@ -148,7 +148,7 @@ public class DefectInstanceDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.LocalizedValueDataObj }
+     *     {@link LocalizedValueDataObj }
      *     
      */
     public LocalizedValueDataObj getCategory() {
@@ -160,7 +160,7 @@ public class DefectInstanceDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.LocalizedValueDataObj }
+     *     {@link LocalizedValueDataObj }
      *     
      */
     public void setCategory(LocalizedValueDataObj value) {
@@ -369,7 +369,7 @@ public class DefectInstanceDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.LocalizedValueDataObj }
+     *     {@link LocalizedValueDataObj }
      *     
      */
     public LocalizedValueDataObj getImpact() {
@@ -381,7 +381,7 @@ public class DefectInstanceDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.LocalizedValueDataObj }
+     *     {@link LocalizedValueDataObj }
      *     
      */
     public void setImpact(LocalizedValueDataObj value) {
@@ -406,7 +406,7 @@ public class DefectInstanceDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.LocalizedValueDataObj }
+     * {@link LocalizedValueDataObj }
      * 
      * 
      */
@@ -470,7 +470,7 @@ public class DefectInstanceDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.LocalizedValueDataObj }
+     *     {@link LocalizedValueDataObj }
      *     
      */
     public LocalizedValueDataObj getType() {
@@ -482,7 +482,7 @@ public class DefectInstanceDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.LocalizedValueDataObj }
+     *     {@link LocalizedValueDataObj }
      *     
      */
     public void setType(LocalizedValueDataObj value) {

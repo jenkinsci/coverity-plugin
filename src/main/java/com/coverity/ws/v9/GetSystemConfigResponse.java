@@ -40,7 +40,7 @@ public class GetSystemConfigResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ConfigurationDataObj }
+     *     {@link ConfigurationDataObj }
      *     
      */
     public ConfigurationDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetSystemConfigResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ConfigurationDataObj }
+     *     {@link ConfigurationDataObj }
      *     
      */
     public void setReturn(ConfigurationDataObj value) {

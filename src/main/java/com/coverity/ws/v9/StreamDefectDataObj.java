@@ -126,7 +126,7 @@ public class StreamDefectDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.DefectInstanceDataObj }
+     * {@link DefectInstanceDataObj }
      * 
      * 
      */
@@ -155,7 +155,7 @@ public class StreamDefectDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.DefectStateAttributeValueDataObj }
+     * {@link DefectStateAttributeValueDataObj }
      * 
      * 
      */
@@ -208,7 +208,7 @@ public class StreamDefectDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.DefectStateDataObj }
+     * {@link DefectStateDataObj }
      * 
      * 
      */
@@ -248,7 +248,7 @@ public class StreamDefectDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.StreamIdDataObj }
+     *     {@link StreamIdDataObj }
      *     
      */
     public StreamIdDataObj getStreamId() {
@@ -260,7 +260,7 @@ public class StreamDefectDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.StreamIdDataObj }
+     *     {@link StreamIdDataObj }
      *     
      */
     public void setStreamId(StreamIdDataObj value) {

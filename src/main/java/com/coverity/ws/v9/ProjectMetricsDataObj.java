@@ -175,7 +175,7 @@ public class ProjectMetricsDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getMetricsDate() {
@@ -187,7 +187,7 @@ public class ProjectMetricsDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setMetricsDate(XMLGregorianCalendar value) {
@@ -231,7 +231,7 @@ public class ProjectMetricsDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public ProjectIdDataObj getProjectId() {
@@ -243,7 +243,7 @@ public class ProjectMetricsDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public void setProjectId(ProjectIdDataObj value) {

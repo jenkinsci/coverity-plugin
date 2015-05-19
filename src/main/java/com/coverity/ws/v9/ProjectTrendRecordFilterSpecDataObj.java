@@ -45,7 +45,7 @@ public class ProjectTrendRecordFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getEndDate() {
@@ -57,7 +57,7 @@ public class ProjectTrendRecordFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setEndDate(XMLGregorianCalendar value) {
@@ -69,7 +69,7 @@ public class ProjectTrendRecordFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getStartDate() {
@@ -81,7 +81,7 @@ public class ProjectTrendRecordFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setStartDate(XMLGregorianCalendar value) {

@@ -40,7 +40,7 @@ public class GetCommitStateResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.CommitStateDataObj }
+     *     {@link CommitStateDataObj }
      *     
      */
     public CommitStateDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetCommitStateResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.CommitStateDataObj }
+     *     {@link CommitStateDataObj }
      *     
      */
     public void setReturn(CommitStateDataObj value) {

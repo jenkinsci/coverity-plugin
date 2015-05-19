@@ -211,7 +211,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.AttributeDefinitionValueFilterMapDataObj }
+     * {@link AttributeDefinitionValueFilterMapDataObj }
      * 
      * 
      */
@@ -409,7 +409,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.ComponentIdDataObj }
+     * {@link ComponentIdDataObj }
      * 
      * 
      */
@@ -502,7 +502,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getFirstDetectedEndDate() {
@@ -514,7 +514,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setFirstDetectedEndDate(XMLGregorianCalendar value) {
@@ -526,7 +526,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getFirstDetectedStartDate() {
@@ -538,7 +538,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setFirstDetectedStartDate(XMLGregorianCalendar value) {
@@ -709,7 +709,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastDetectedEndDate() {
@@ -721,7 +721,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastDetectedEndDate(XMLGregorianCalendar value) {
@@ -733,7 +733,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastDetectedStartDate() {
@@ -745,7 +745,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastDetectedStartDate(XMLGregorianCalendar value) {
@@ -1006,7 +1006,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamIdDataObj }
+     * {@link StreamIdDataObj }
      * 
      * 
      */
@@ -1059,7 +1059,7 @@ public class SnapshotScopeDefectFilterSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamIdDataObj }
+     * {@link StreamIdDataObj }
      * 
      * 
      */

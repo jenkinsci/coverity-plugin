@@ -41,7 +41,7 @@ public class UpdateSnapshotInfo {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.SnapshotIdDataObj }
+     *     {@link SnapshotIdDataObj }
      *     
      */
     public SnapshotIdDataObj getSnapshotId() {
@@ -53,7 +53,7 @@ public class UpdateSnapshotInfo {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.SnapshotIdDataObj }
+     *     {@link SnapshotIdDataObj }
      *     
      */
     public void setSnapshotId(SnapshotIdDataObj value) {

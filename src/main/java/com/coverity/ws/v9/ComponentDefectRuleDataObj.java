@@ -44,7 +44,7 @@ public class ComponentDefectRuleDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ComponentIdDataObj }
+     *     {@link ComponentIdDataObj }
      *     
      */
     public ComponentIdDataObj getComponentId() {
@@ -56,7 +56,7 @@ public class ComponentDefectRuleDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ComponentIdDataObj }
+     *     {@link ComponentIdDataObj }
      *     
      */
     public void setComponentId(ComponentIdDataObj value) {

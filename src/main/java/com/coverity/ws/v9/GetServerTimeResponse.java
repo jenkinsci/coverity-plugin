@@ -43,7 +43,7 @@ public class GetServerTimeResponse {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getReturn() {
@@ -55,7 +55,7 @@ public class GetServerTimeResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setReturn(XMLGregorianCalendar value) {

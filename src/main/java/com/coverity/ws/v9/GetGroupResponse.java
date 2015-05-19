@@ -40,7 +40,7 @@ public class GetGroupResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.GroupDataObj }
+     *     {@link GroupDataObj }
      *     
      */
     public GroupDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetGroupResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.GroupDataObj }
+     *     {@link GroupDataObj }
      *     
      */
     public void setReturn(GroupDataObj value) {

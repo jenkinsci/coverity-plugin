@@ -40,7 +40,7 @@ public class GetLoggingConfigurationResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.LoggingConfigurationDataObj }
+     *     {@link LoggingConfigurationDataObj }
      *     
      */
     public LoggingConfigurationDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetLoggingConfigurationResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.LoggingConfigurationDataObj }
+     *     {@link LoggingConfigurationDataObj }
      *     
      */
     public void setReturn(LoggingConfigurationDataObj value) {

@@ -40,7 +40,7 @@ public class CopyStreamResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.StreamDataObj }
+     *     {@link StreamDataObj }
      *     
      */
     public StreamDataObj getReturn() {
@@ -52,7 +52,7 @@ public class CopyStreamResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.StreamDataObj }
+     *     {@link StreamDataObj }
      *     
      */
     public void setReturn(StreamDataObj value) {

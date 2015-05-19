@@ -85,7 +85,7 @@ public class SnapshotFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getEndDate() {
@@ -97,7 +97,7 @@ public class SnapshotFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setEndDate(XMLGregorianCalendar value) {
@@ -133,7 +133,7 @@ public class SnapshotFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastBeforeCodeVersionDate() {
@@ -145,7 +145,7 @@ public class SnapshotFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastBeforeCodeVersionDate(XMLGregorianCalendar value) {
@@ -157,7 +157,7 @@ public class SnapshotFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getStartDate() {
@@ -169,7 +169,7 @@ public class SnapshotFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setStartDate(XMLGregorianCalendar value) {

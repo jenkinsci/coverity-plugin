@@ -59,7 +59,7 @@ public class AttributeValueChangeSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.AttributeValueIdDataObj }
+     * {@link AttributeValueIdDataObj }
      * 
      * 
      */
@@ -88,7 +88,7 @@ public class AttributeValueChangeSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.AttributeValueSpecDataObj }
+     * {@link AttributeValueSpecDataObj }
      * 
      * 
      */

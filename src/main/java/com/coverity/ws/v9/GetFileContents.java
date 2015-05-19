@@ -41,7 +41,7 @@ public class GetFileContents {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.StreamIdDataObj }
+     *     {@link StreamIdDataObj }
      *     
      */
     public StreamIdDataObj getStreamId() {
@@ -53,7 +53,7 @@ public class GetFileContents {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.StreamIdDataObj }
+     *     {@link StreamIdDataObj }
      *     
      */
     public void setStreamId(StreamIdDataObj value) {
@@ -65,7 +65,7 @@ public class GetFileContents {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.FileIdDataObj }
+     *     {@link FileIdDataObj }
      *     
      */
     public FileIdDataObj getFileId() {
@@ -77,7 +77,7 @@ public class GetFileContents {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.FileIdDataObj }
+     *     {@link FileIdDataObj }
      *     
      */
     public void setFileId(FileIdDataObj value) {

@@ -62,7 +62,7 @@ public class GetMergedDefectsForStreams {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamIdDataObj }
+     * {@link StreamIdDataObj }
      * 
      * 
      */
@@ -102,7 +102,7 @@ public class GetMergedDefectsForStreams {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.PageSpecDataObj }
+     *     {@link PageSpecDataObj }
      *     
      */
     public PageSpecDataObj getPageSpec() {
@@ -114,7 +114,7 @@ public class GetMergedDefectsForStreams {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.PageSpecDataObj }
+     *     {@link PageSpecDataObj }
      *     
      */
     public void setPageSpec(PageSpecDataObj value) {

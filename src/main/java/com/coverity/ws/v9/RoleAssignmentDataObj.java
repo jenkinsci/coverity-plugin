@@ -50,7 +50,7 @@ public class RoleAssignmentDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.GroupIdDataObj }
+     *     {@link GroupIdDataObj }
      *     
      */
     public GroupIdDataObj getGroupId() {
@@ -62,7 +62,7 @@ public class RoleAssignmentDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.GroupIdDataObj }
+     *     {@link GroupIdDataObj }
      *     
      */
     public void setGroupId(GroupIdDataObj value) {
@@ -98,7 +98,7 @@ public class RoleAssignmentDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.RoleIdDataObj }
+     *     {@link RoleIdDataObj }
      *     
      */
     public RoleIdDataObj getRoleId() {
@@ -110,7 +110,7 @@ public class RoleAssignmentDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.RoleIdDataObj }
+     *     {@link RoleIdDataObj }
      *     
      */
     public void setRoleId(RoleIdDataObj value) {

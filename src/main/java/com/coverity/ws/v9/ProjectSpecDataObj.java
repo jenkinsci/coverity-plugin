@@ -69,7 +69,7 @@ public class ProjectSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamIdDataObj }
+     * {@link StreamIdDataObj }
      * 
      * 
      */
@@ -98,7 +98,7 @@ public class ProjectSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamIdDataObj }
+     * {@link StreamIdDataObj }
      * 
      * 
      */

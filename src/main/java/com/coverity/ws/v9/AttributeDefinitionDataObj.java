@@ -143,7 +143,7 @@ public class AttributeDefinitionDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.AttributeValueDataObj }
+     * {@link AttributeValueDataObj }
      * 
      * 
      */

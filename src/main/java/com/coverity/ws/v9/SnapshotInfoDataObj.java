@@ -404,7 +404,7 @@ public class SnapshotInfoDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getCodeVersionDate() {
@@ -416,7 +416,7 @@ public class SnapshotInfoDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setCodeVersionDate(XMLGregorianCalendar value) {
@@ -452,7 +452,7 @@ public class SnapshotInfoDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getDateCreated() {
@@ -464,7 +464,7 @@ public class SnapshotInfoDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setDateCreated(XMLGregorianCalendar value) {
@@ -609,7 +609,7 @@ public class SnapshotInfoDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.SnapshotIdDataObj }
+     *     {@link SnapshotIdDataObj }
      *     
      */
     public SnapshotIdDataObj getSnapshotId() {
@@ -621,7 +621,7 @@ public class SnapshotInfoDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.SnapshotIdDataObj }
+     *     {@link SnapshotIdDataObj }
      *     
      */
     public void setSnapshotId(SnapshotIdDataObj value) {

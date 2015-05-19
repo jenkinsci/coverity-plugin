@@ -41,7 +41,7 @@ public class UpdateLdapConfiguration {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ServerDomainIdDataObj }
+     *     {@link ServerDomainIdDataObj }
      *     
      */
     public ServerDomainIdDataObj getServerDomainIdDataObj() {
@@ -53,7 +53,7 @@ public class UpdateLdapConfiguration {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ServerDomainIdDataObj }
+     *     {@link ServerDomainIdDataObj }
      *     
      */
     public void setServerDomainIdDataObj(ServerDomainIdDataObj value) {

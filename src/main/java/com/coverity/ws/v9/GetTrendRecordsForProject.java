@@ -41,7 +41,7 @@ public class GetTrendRecordsForProject {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public ProjectIdDataObj getProjectId() {
@@ -53,7 +53,7 @@ public class GetTrendRecordsForProject {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public void setProjectId(ProjectIdDataObj value) {

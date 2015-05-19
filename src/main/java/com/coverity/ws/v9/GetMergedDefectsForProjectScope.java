@@ -44,7 +44,7 @@ public class GetMergedDefectsForProjectScope {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public ProjectIdDataObj getProjectId() {
@@ -56,7 +56,7 @@ public class GetMergedDefectsForProjectScope {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public void setProjectId(ProjectIdDataObj value) {
@@ -92,7 +92,7 @@ public class GetMergedDefectsForProjectScope {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.PageSpecDataObj }
+     *     {@link PageSpecDataObj }
      *     
      */
     public PageSpecDataObj getPageSpec() {
@@ -104,7 +104,7 @@ public class GetMergedDefectsForProjectScope {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.PageSpecDataObj }
+     *     {@link PageSpecDataObj }
      *     
      */
     public void setPageSpec(PageSpecDataObj value) {

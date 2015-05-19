@@ -40,7 +40,7 @@ public class GetVersionResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.VersionDataObj }
+     *     {@link VersionDataObj }
      *     
      */
     public VersionDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetVersionResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.VersionDataObj }
+     *     {@link VersionDataObj }
      *     
      */
     public void setReturn(VersionDataObj value) {

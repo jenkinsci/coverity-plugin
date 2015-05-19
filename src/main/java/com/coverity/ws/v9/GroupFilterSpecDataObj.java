@@ -99,7 +99,7 @@ public class GroupFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public ProjectIdDataObj getProjectIdDataObj() {
@@ -111,7 +111,7 @@ public class GroupFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public void setProjectIdDataObj(ProjectIdDataObj value) {

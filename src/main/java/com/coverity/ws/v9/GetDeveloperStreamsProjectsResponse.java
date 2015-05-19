@@ -55,7 +55,7 @@ public class GetDeveloperStreamsProjectsResponse {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.ProjectDataObj }
+     * {@link ProjectDataObj }
      * 
      * 
      */

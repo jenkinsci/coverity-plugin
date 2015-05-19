@@ -41,7 +41,7 @@ public class DefectStateAttributeValueDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.AttributeDefinitionIdDataObj }
+     *     {@link AttributeDefinitionIdDataObj }
      *     
      */
     public AttributeDefinitionIdDataObj getAttributeDefinitionId() {
@@ -53,7 +53,7 @@ public class DefectStateAttributeValueDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.AttributeDefinitionIdDataObj }
+     *     {@link AttributeDefinitionIdDataObj }
      *     
      */
     public void setAttributeDefinitionId(AttributeDefinitionIdDataObj value) {
@@ -65,7 +65,7 @@ public class DefectStateAttributeValueDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.AttributeValueIdDataObj }
+     *     {@link AttributeValueIdDataObj }
      *     
      */
     public AttributeValueIdDataObj getAttributeValueId() {
@@ -77,7 +77,7 @@ public class DefectStateAttributeValueDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.AttributeValueIdDataObj }
+     *     {@link AttributeValueIdDataObj }
      *     
      */
     public void setAttributeValueId(AttributeValueIdDataObj value) {

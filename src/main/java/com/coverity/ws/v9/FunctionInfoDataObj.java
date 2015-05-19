@@ -47,7 +47,7 @@ public class FunctionInfoDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.FileIdDataObj }
+     *     {@link FileIdDataObj }
      *     
      */
     public FileIdDataObj getFileId() {
@@ -59,7 +59,7 @@ public class FunctionInfoDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.FileIdDataObj }
+     *     {@link FileIdDataObj }
      *     
      */
     public void setFileId(FileIdDataObj value) {

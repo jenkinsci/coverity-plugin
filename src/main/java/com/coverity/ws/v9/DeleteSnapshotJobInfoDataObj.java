@@ -57,7 +57,7 @@ public class DeleteSnapshotJobInfoDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.DeleteSnapshotJobStatus }
+     *     {@link DeleteSnapshotJobStatus }
      *     
      */
     public DeleteSnapshotJobStatus getStatus() {
@@ -69,7 +69,7 @@ public class DeleteSnapshotJobInfoDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.DeleteSnapshotJobStatus }
+     *     {@link DeleteSnapshotJobStatus }
      *     
      */
     public void setStatus(DeleteSnapshotJobStatus value) {

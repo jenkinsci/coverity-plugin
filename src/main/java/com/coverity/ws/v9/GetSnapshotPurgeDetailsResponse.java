@@ -40,7 +40,7 @@ public class GetSnapshotPurgeDetailsResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.SnapshotPurgeDetailsObj }
+     *     {@link SnapshotPurgeDetailsObj }
      *     
      */
     public SnapshotPurgeDetailsObj getReturn() {
@@ -52,7 +52,7 @@ public class GetSnapshotPurgeDetailsResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.SnapshotPurgeDetailsObj }
+     *     {@link SnapshotPurgeDetailsObj }
      *     
      */
     public void setReturn(SnapshotPurgeDetailsObj value) {

@@ -333,7 +333,7 @@ public class ProjectScopeDefectFilterSpecDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.ComponentIdDataObj }
+     * {@link ComponentIdDataObj }
      * 
      * 
      */
@@ -407,7 +407,7 @@ public class ProjectScopeDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getFirstDetectedEndDate() {
@@ -419,7 +419,7 @@ public class ProjectScopeDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setFirstDetectedEndDate(XMLGregorianCalendar value) {
@@ -431,7 +431,7 @@ public class ProjectScopeDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getFirstDetectedStartDate() {
@@ -443,7 +443,7 @@ public class ProjectScopeDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setFirstDetectedStartDate(XMLGregorianCalendar value) {
@@ -542,7 +542,7 @@ public class ProjectScopeDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastDetectedEndDate() {
@@ -554,7 +554,7 @@ public class ProjectScopeDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastDetectedEndDate(XMLGregorianCalendar value) {
@@ -566,7 +566,7 @@ public class ProjectScopeDefectFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getLastDetectedStartDate() {
@@ -578,7 +578,7 @@ public class ProjectScopeDefectFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setLastDetectedStartDate(XMLGregorianCalendar value) {

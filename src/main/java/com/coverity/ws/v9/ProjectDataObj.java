@@ -88,7 +88,7 @@ public class ProjectDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamDataObj }
+     * {@link StreamDataObj }
      * 
      * 
      */
@@ -117,7 +117,7 @@ public class ProjectDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.StreamDataObj }
+     * {@link StreamDataObj }
      * 
      * 
      */
@@ -162,7 +162,7 @@ public class ProjectDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getDateCreated() {
@@ -174,7 +174,7 @@ public class ProjectDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setDateCreated(XMLGregorianCalendar value) {
@@ -186,7 +186,7 @@ public class ProjectDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getDateModified() {
@@ -198,7 +198,7 @@ public class ProjectDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setDateModified(XMLGregorianCalendar value) {

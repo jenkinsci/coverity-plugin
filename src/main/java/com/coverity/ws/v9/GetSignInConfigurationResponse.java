@@ -40,7 +40,7 @@ public class GetSignInConfigurationResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.SignInSettingsDataObj }
+     *     {@link SignInSettingsDataObj }
      *     
      */
     public SignInSettingsDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetSignInConfigurationResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.SignInSettingsDataObj }
+     *     {@link SignInSettingsDataObj }
      *     
      */
     public void setReturn(SignInSettingsDataObj value) {

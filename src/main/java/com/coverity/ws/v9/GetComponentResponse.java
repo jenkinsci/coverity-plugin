@@ -40,7 +40,7 @@ public class GetComponentResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ComponentDataObj }
+     *     {@link ComponentDataObj }
      *     
      */
     public ComponentDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetComponentResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ComponentDataObj }
+     *     {@link ComponentDataObj }
      *     
      */
     public void setReturn(ComponentDataObj value) {

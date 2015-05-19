@@ -40,7 +40,7 @@ public class GetUserResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.UserDataObj }
+     *     {@link UserDataObj }
      *     
      */
     public UserDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetUserResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.UserDataObj }
+     *     {@link UserDataObj }
      *     
      */
     public void setReturn(UserDataObj value) {

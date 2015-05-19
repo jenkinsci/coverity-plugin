@@ -40,7 +40,7 @@ public class GetFileContentsResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.FileContentsDataObj }
+     *     {@link FileContentsDataObj }
      *     
      */
     public FileContentsDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetFileContentsResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.FileContentsDataObj }
+     *     {@link FileContentsDataObj }
      *     
      */
     public void setReturn(FileContentsDataObj value) {

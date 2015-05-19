@@ -40,7 +40,7 @@ public class GetSkeletonizationConfigurationResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.SkeletonizationConfigurationDataObj }
+     *     {@link SkeletonizationConfigurationDataObj }
      *     
      */
     public SkeletonizationConfigurationDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetSkeletonizationConfigurationResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.SkeletonizationConfigurationDataObj }
+     *     {@link SkeletonizationConfigurationDataObj }
      *     
      */
     public void setReturn(SkeletonizationConfigurationDataObj value) {

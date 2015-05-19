@@ -123,7 +123,7 @@ public class ComponentMapDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.ComponentDataObj }
+     * {@link ComponentDataObj }
      * 
      * 
      */

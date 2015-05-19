@@ -40,7 +40,7 @@ public class GetLicenseStateResponse {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.LicenseStateDataObj }
+     *     {@link LicenseStateDataObj }
      *     
      */
     public LicenseStateDataObj getReturn() {
@@ -52,7 +52,7 @@ public class GetLicenseStateResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.LicenseStateDataObj }
+     *     {@link LicenseStateDataObj }
      *     
      */
     public void setReturn(LicenseStateDataObj value) {

@@ -239,7 +239,7 @@ public class UserFilterSpecDataObj {
      * 
      * @return
      *     possible object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public ProjectIdDataObj getProjectIdDataObj() {
@@ -251,7 +251,7 @@ public class UserFilterSpecDataObj {
      * 
      * @param value
      *     allowed object is
-     *     {@link com.coverity.ws.v9.ProjectIdDataObj }
+     *     {@link ProjectIdDataObj }
      *     
      */
     public void setProjectIdDataObj(ProjectIdDataObj value) {

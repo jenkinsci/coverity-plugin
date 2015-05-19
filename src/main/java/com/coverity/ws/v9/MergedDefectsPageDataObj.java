@@ -62,7 +62,7 @@ public class MergedDefectsPageDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.MergedDefectIdDataObj }
+     * {@link MergedDefectIdDataObj }
      * 
      * 
      */
@@ -91,7 +91,7 @@ public class MergedDefectsPageDataObj {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link com.coverity.ws.v9.MergedDefectDataObj }
+     * {@link MergedDefectDataObj }
      * 
      * 
      */

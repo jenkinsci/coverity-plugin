@@ -80,7 +80,7 @@ public class CreateMergedDefect {
      * 
      * @return
      *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public XMLGregorianCalendar getDateOriginated() {
@@ -92,7 +92,7 @@ public class CreateMergedDefect {
      * 
      * @param value
      *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
+     *     {@link XMLGregorianCalendar }
      *     
      */
     public void setDateOriginated(XMLGregorianCalendar value) {
