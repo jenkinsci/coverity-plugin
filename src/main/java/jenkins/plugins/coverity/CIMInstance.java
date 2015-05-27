@@ -197,10 +197,10 @@ public class CIMInstance {
      */
     public com.coverity.ws.v9.DefectService getDefectServiceIndio() throws IOException {
         synchronized(this) {
-            if(defectServiceService == null) {
-                defectServiceService = new com.coverity.ws.v6.DefectServiceService(
-                        new URL(getURL(), DEFECT_SERVICE_V5_WSDL),
-                        new QName(COVERITY_V5_NAMESPACE, "DefectServiceService"));
+            if(defectServiceServiceIndio == null) {
+                defectServiceServiceIndio = new com.coverity.ws.v9.DefectServiceService(
+                        new URL(getURL(), DEFECT_SERVICE_V9_WSDL),
+                        new QName(COVERITY_V9_NAMESPACE, "DefectServiceService"));
             }
         }
 
@@ -251,9 +251,9 @@ public class CIMInstance {
      */
     public com.coverity.ws.v9.ConfigurationService getConfigurationServiceIndio() throws IOException {
         synchronized(this) {
-            if(configurationServiceService == null) {
+            if(configurationServiceServiceIndio == null) {
                 // Create a Web Services port to the server
-                configurationServiceService = new ConfigurationServiceService(
+                configurationServiceServiceIndio = new com.coverity.ws.v9.ConfigurationServiceService(
                         new URL(getURL(), CONFIGURATION_SERVICE_V9_WSDL),
                         new QName(COVERITY_V9_NAMESPACE, "ConfigurationServiceService"));
             }
