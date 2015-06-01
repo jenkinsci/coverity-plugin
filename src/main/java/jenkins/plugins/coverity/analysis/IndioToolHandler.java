@@ -567,11 +567,11 @@ public class IndioToolHandler extends CoverityToolHandler {
         streamIds.add(streamId);
 
         MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
-        filter.setSnapshotComparisonField(Long.toString(snapshotId));
 
         PageSpecDataObj pageSpec = new PageSpecDataObj();
 
         SnapshotScopeSpecDataObj snapshotScope = new SnapshotScopeSpecDataObj();
+        snapshotScope.setShowSelector(Long.toString(snapshotId));
 
         // The loop will pull up to the maximum amount of defect, doing per page size
         for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
