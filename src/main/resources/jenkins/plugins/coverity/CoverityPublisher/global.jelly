@@ -49,16 +49,5 @@
 				</table>
 			</f:repeatable>
 		</f:entry>
-		<f:advanced>
-			<f:entry title="Known Java Checkers" field="javaCheckers">
-				<f:textarea readonly= "true"/>
-			</f:entry>
-			<f:entry title="Known C/C++ Checkers" field="cxxCheckers">
-				<f:textarea readonly= "true"/>
-			</f:entry>
-			<f:entry title="Known C# Checkers" field="csharpCheckers">
-				<f:textarea readonly= "true"/>
-			</f:entry>
-		</f:advanced>
 	</f:section>
 </j:jelly>

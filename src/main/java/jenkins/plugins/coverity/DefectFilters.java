@@ -269,7 +269,7 @@ public class DefectFilters {
                 isSeveritySelected(severity) &&
                 isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getCheckerName()) &&
-                !defect.getDisplayImpact().isEmpty() &&
+                isImpactsSelected(defect.getDisplayImpact()) &&
                 Arrays.asList("New", "Triaged", "Various").contains(status) &&
                 (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
     }

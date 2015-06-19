@@ -14,8 +14,6 @@ package jenkins.plugins.coverity;
 import com.coverity.ws.v6.ConfigurationService;
 import com.coverity.ws.v6.ConfigurationServiceService;
 import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.DefectService;
-import com.coverity.ws.v6.DefectServiceService;
 import com.coverity.ws.v6.MergedDefectDataObj;
 import com.coverity.ws.v6.MergedDefectFilterSpecDataObj;
 import com.coverity.ws.v6.MergedDefectsPageDataObj;
@@ -25,6 +23,7 @@ import com.coverity.ws.v6.ProjectFilterSpecDataObj;
 import com.coverity.ws.v6.StreamDataObj;
 import com.coverity.ws.v6.StreamFilterSpecDataObj;
 import com.coverity.ws.v6.StreamIdDataObj;
+import com.coverity.ws.v9.SnapshotScopeSpecDataObj;
 import hudson.model.Hudson;
 import hudson.util.FormValidation;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -270,6 +269,48 @@ public class CIMInstance {
         }
     }
 
+    public String getWsVersion(){
+        com.coverity.ws.v9.ConfigurationService simpleWsCall = null;
+        // Set the default ws version value to v6.
+        String wsVersion = "v6";
+        try {
+            String testMessage = this.getConfigurationServiceIndio().getVersion().getExternalVersion();
+            if(testMessage != null){
+                wsVersion = "v9";
+            }
+        } catch (Exception e) {
+        }
+        return wsVersion;
+    }
+
+    public List<com.coverity.ws.v9.MergedDefectDataObj> getDefectsIndio(String streamId, List<Long> defectIds) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
+        com.coverity.ws.v9.MergedDefectFilterSpecDataObj filterSpec = new com.coverity.ws.v9.MergedDefectFilterSpecDataObj();
+        com.coverity.ws.v9.StreamIdDataObj stream = new com.coverity.ws.v9.StreamIdDataObj();
+        stream.setName(streamId);
+        List<com.coverity.ws.v9.StreamIdDataObj> streamList = new ArrayList<com.coverity.ws.v9.StreamIdDataObj>();
+        streamList.add(stream);
+        com.coverity.ws.v9.PageSpecDataObj pageSpec = new com.coverity.ws.v9.PageSpecDataObj();
+        pageSpec.setPageSize(2500);
+
+        SnapshotScopeSpecDataObj snapshotScopeSpecDataObj = new SnapshotScopeSpecDataObj();
+
+        List<com.coverity.ws.v9.MergedDefectDataObj> result = new ArrayList<com.coverity.ws.v9.MergedDefectDataObj>();
+        int defectCount = 0;
+        com.coverity.ws.v9.MergedDefectsPageDataObj defects = null;
+        do {
+            pageSpec.setStartIndex(defectCount);
+            defects = getDefectServiceIndio().getMergedDefectsForStreams(streamList, filterSpec, pageSpec, snapshotScopeSpecDataObj);
+            for(com.coverity.ws.v9.MergedDefectDataObj defect : defects.getMergedDefects()) {
+                if(defectIds.contains(defect.getCid())) {
+                    result.add(defect);
+                }
+            }
+            defectCount += defects.getMergedDefects().size();
+        } while(defectCount < defects.getTotalNumberOfRecords());
+
+        return result;
+    }
+
     public List<MergedDefectDataObj> getDefects(String streamId, List<Long> defectIds) throws IOException, CovRemoteServiceException_Exception {
         MergedDefectFilterSpecDataObj filterSpec1 = new MergedDefectFilterSpecDataObj();
         StreamIdDataObj stream = new StreamIdDataObj();
@@ -358,15 +399,37 @@ public class CIMInstance {
         }
     }
 
+    public com.coverity.ws.v9.StreamDataObj getStreamIndio(String streamId) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
+        com.coverity.ws.v9.StreamFilterSpecDataObj filter = new com.coverity.ws.v9.StreamFilterSpecDataObj();
+        filter.setNamePattern(streamId);
+
+        List<com.coverity.ws.v9.StreamDataObj> streams = getConfigurationServiceIndio().getStreams(filter);
+        if(streams.isEmpty()) {
+            return null;
+        } else {
+            return streams.get(0);
+        }
+    }
+
     public FormValidation doCheck() throws IOException {
         try {
             URL url = getURL();
-            int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V5_WSDL));
-            if(responseCode != 200) {
-                return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
+            // Fix:77968 by using different wsdl for v9 and v6.
+            if(this.getWsVersion().equals("v9")){
+                int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V9_WSDL));
+                if(responseCode != 200) {
+                    return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
+                }
+                getConfigurationServiceIndio().getServerTime();
+                return FormValidation.ok("Successfully connected to the instance.");
+            } else {
+                int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V5_WSDL));
+                if(responseCode != 200) {
+                    return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
+                }
+                getConfigurationService().getServerTime();
+                return FormValidation.ok("Successfully connected to the instance.");
             }
-            getConfigurationService().getServerTime();
-            return FormValidation.ok("Successfully connected to the instance.");
         } catch(UnknownHostException e) {
             return FormValidation.error("Host name unknown");
         } catch(ConnectException e) {
