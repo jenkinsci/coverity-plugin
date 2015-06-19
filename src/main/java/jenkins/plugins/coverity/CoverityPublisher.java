@@ -676,7 +676,7 @@ public class CoverityPublisher extends Recorder {
                 try {
                     if(current.isValid()) {
                         if(getInstance(cimInstance).getWsVersion().equals("v9")){
-                            Set<String> allCheckers = split2(publisher.getDescriptor().getAllCheckers());
+                            Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
                             DefectFilters defectFilters = current.getDefectFilters();
                             if(defectFilters != null) {
                                 defectFilters.invertCheckers(
@@ -772,7 +772,7 @@ public class CoverityPublisher extends Recorder {
                     //do nothing
                 } else {
                     if(getInstance(current.getInstance()).getWsVersion().equals("v9")){
-                        Set<String> allCheckers = split2(publisher.getDescriptor().getAllCheckers());
+                        Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
                         DefectFilters defectFilters = current.getDefectFilters();
                         if(defectFilters != null) {
                             try {

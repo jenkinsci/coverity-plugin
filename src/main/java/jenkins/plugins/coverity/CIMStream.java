@@ -329,7 +329,8 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             String wsversion = instance.getWsVersion();
             try {
                 if(wsversion.equals("v9")){
-                    String cs = getPublisherDescriptor().getAllCheckers();
+                    // Retrieve all defects for a specific cim instance.
+                    String cs = instance.getCimInstanceCheckers();
                     return getPublisherDescriptor().split(cs);
                 } else {
                     StreamDataObj stream = instance.getStream(streamId);

@@ -16,6 +16,7 @@ import com.coverity.ws.v9.DefectStateAttributeValueDataObj;
 import hudson.Util;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
+import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import hudson.model.BuildListener;
@@ -316,16 +317,23 @@ public class DefectFilters {
      * @throws CovRemoteServiceException_Exception
      */
     public void setCheckers(CIMInstance cimInstance,long streamId) throws IOException,CovRemoteServiceException_Exception{
-        StreamDataObj stream = getStream(String.valueOf(streamId), cimInstance);
-        String type = stream.getLanguage();
 
-        if("MIXED".equals(type)) {
-            type = "ALL";
-        }
-
+        String wsversion = cimInstance.getWsVersion();
         try {
-            String cs = getPublisherDescriptor().getCheckers(type);
-            checkers = getPublisherDescriptor().split2List(cs);
+            if(wsversion.equals("v9")){
+                // Retrieve all defects for a specific cim instance.
+                String cs = cimInstance.getCimInstanceCheckers();
+                checkers = getPublisherDescriptor().split2List(cs);
+            } else {
+                StreamDataObj stream = getStream(String.valueOf(streamId), cimInstance);
+                String type = stream.getLanguage();
+
+                if("MIXED".equals(type)) {
+                    type = "ALL";
+                }
+                String cs = getPublisherDescriptor().getCheckers(type);
+                checkers = getPublisherDescriptor().split2List(cs);
+            }
         } catch(Exception e) {
             checkers = new LinkedList<String>();
         }

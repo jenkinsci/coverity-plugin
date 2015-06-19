@@ -11,21 +11,11 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.ConfigurationService;
-import com.coverity.ws.v6.ConfigurationServiceService;
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.MergedDefectDataObj;
-import com.coverity.ws.v6.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v6.MergedDefectsPageDataObj;
-import com.coverity.ws.v6.PageSpecDataObj;
-import com.coverity.ws.v6.ProjectDataObj;
-import com.coverity.ws.v6.ProjectFilterSpecDataObj;
-import com.coverity.ws.v6.StreamDataObj;
-import com.coverity.ws.v6.StreamFilterSpecDataObj;
-import com.coverity.ws.v6.StreamIdDataObj;
+import com.coverity.ws.v6.*;
 import com.coverity.ws.v9.SnapshotScopeSpecDataObj;
 import hudson.model.Hudson;
 import hudson.util.FormValidation;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.xml.namespace.QName;
@@ -41,6 +31,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -467,6 +458,31 @@ public class CIMInstance {
             return 404;
         }
 
+    }
+
+    public String getCimInstanceCheckers() {
+        List<String> checkers = new ArrayList<String>();
+
+        if(this.getWsVersion().equals("v9")){
+            try {
+                checkers.addAll(this.getConfigurationServiceIndio().getCheckerNames());
+            } catch(Exception e) {
+            }
+        } else{
+            try {
+                CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
+                List<CheckerPropertyDataObj> checkerPropertyList = this.getConfigurationService().getCheckerProperties(checkerPropFilter);
+                for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
+                    CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
+                    if(!checkers.contains(checkerSub.getCheckerName())){
+                        checkers.add(checkerSub.getCheckerName());
+                    }
+                }
+            } catch(Exception e) {
+            }
+        }
+        Collections.sort(checkers);
+        return StringUtils.join(checkers, '\n');
     }
 
 }
