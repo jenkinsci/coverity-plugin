@@ -23,7 +23,7 @@
     </parent>
 
     <artifactId>coverity</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.5.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Coverity plugin</name>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin</url>
@@ -39,6 +39,11 @@
             <id>kdang</id>
             <name>Ken Dang</name>
             <email>kdang@coverity.com</email>
+        </developer>
+        <developer>
+            <id>frossi</id>
+            <name>Franco Rossi</name>
+            <email>frossi@coverity.com</email>
         </developer>
     </developers>
 
