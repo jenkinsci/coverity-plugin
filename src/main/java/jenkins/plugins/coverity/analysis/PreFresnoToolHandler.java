@@ -129,7 +129,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
 
                         if(effectiveIA.getAnalyzeArguments() != null) {
-                            for(String arg : effectiveIA.getAnalyzeArguments().split(" ")) {
+                            for(String arg : effectiveIA.getAnalyzeArguments().trim().replaceAll(" +", " ").split(" ")) {
                                 cmd.add(arg);
                             }
                         }
