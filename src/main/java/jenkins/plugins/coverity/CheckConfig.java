@@ -198,7 +198,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 if(fv.kind != FormValidation.Kind.OK) {
                     return new StreamStatus(false, "Could not connect to instance: " + fv, cs, null);
                 }
-            } catch(IOException e) {
+            } catch(Exception e) {
                 e.printStackTrace();
                 return new StreamStatus(false, "Could not connect to instance: " + e, cs, null);
             }
