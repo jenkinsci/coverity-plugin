@@ -289,7 +289,16 @@ public class IndioToolHandler extends CoverityToolHandler {
                 cmd.add("--dir");
                 cmd.add(temp.getTempDir().getRemote());
 
-                if("ALL".equals(languageToAnalyze)) {
+                boolean isMisraAnalysis = effectiveIA.getIsUsingMisra();
+
+                if(isMisraAnalysis) {
+                    cmd.add("--cpp");
+                    if(effectiveIA.getMisraConfigFile() != null && !effectiveIA.getMisraConfigFile().isEmpty()){
+                        cmd.add("--misra-config " + effectiveIA.getMisraConfigFile());
+                    } else {
+                        throw new RuntimeException("Couldn't find MISRA configuration file.");
+                    }
+                } else if("ALL".equals(languageToAnalyze)) {
                     cmd.add("--include-java");
                 } else if("JAVA".equals(languageToAnalyze)) {
                     cmd.add("--java");
@@ -302,7 +311,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                     throw new RuntimeException("Couldn't find a language to analyze.");
                 }
                 // Turning on test analysis and adding required policy file
-                if(testAnalysis != null){
+                if(testAnalysis != null && !isMisraAnalysis){
                     cmd.add("--test-advisor");
                     cmd.add("--test-advisor-policy");
                     cmd.add(testAnalysis.getPolicyFile());
@@ -319,14 +328,9 @@ public class IndioToolHandler extends CoverityToolHandler {
                     }
                 }
 
-
-
-
-                if(effectiveIA != null){
-                    if(effectiveIA.getAnalyzeArguments() != null) {
-                        for(String arg : effectiveIA.getAnalyzeArguments().trim().replaceAll(" +", " ").split(" ")) {
-                            cmd.add(arg);
-                        }
+                if(effectiveIA.getAnalyzeArguments() != null && !isMisraAnalysis) {
+                    for(String arg : effectiveIA.getAnalyzeArguments().trim().split(" +")) {
+                        cmd.add(arg);
                     }
                 }
 
@@ -414,7 +418,9 @@ public class IndioToolHandler extends CoverityToolHandler {
                     cmd.add(cim.getUser());
 
                     if(invocationAssistance != null){
-                        if(effectiveIA.getCommitArguments() != null) {
+                        if(effectiveIA.getIsUsingMisra()){
+                            cmd.add("--misra-only");
+                        } else if(effectiveIA.getCommitArguments() != null) {
                             for(String arg : effectiveIA.getCommitArguments().split(" ")) {
                                 cmd.add(arg);
                             }

@@ -325,10 +325,10 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
 
 
-                
+
                 if(effectiveIA != null){
                     if(effectiveIA.getAnalyzeArguments() != null) {
-                        for(String arg : effectiveIA.getAnalyzeArguments().trim().replaceAll(" +", " ").split(" ")) {
+                        for(String arg : effectiveIA.getAnalyzeArguments().trim().split(" +")) {
                             cmd.add(arg);
                         }
                     }
