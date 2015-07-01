@@ -299,7 +299,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                         throw new RuntimeException("Couldn't find MISRA configuration file.");
                     }
                 } else if("ALL".equals(languageToAnalyze)) {
-                    cmd.add("--include-java");
+                    // do nothing, all languages are added by default
                 } else if("JAVA".equals(languageToAnalyze)) {
                     cmd.add("--java");
                 } else if("CXX".equals(languageToAnalyze)) {
@@ -307,7 +307,6 @@ public class IndioToolHandler extends CoverityToolHandler {
                 } else if("CSHARP".equals(languageToAnalyze)) {
                     cmd.add("--cs");
                 } else {
-                    //wat?
                     throw new RuntimeException("Couldn't find a language to analyze.");
                 }
                 // Turning on test analysis and adding required policy file
