@@ -328,7 +328,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                 }
 
                 if(effectiveIA.getAnalyzeArguments() != null && !isMisraAnalysis) {
-                    for(String arg : effectiveIA.getAnalyzeArguments().trim().split(" +")) {
+                    for(String arg : CoverityUtils.parseWithComasAndSpaces(effectiveIA.getAnalyzeArguments())) {
                         cmd.add(arg);
                     }
                 }

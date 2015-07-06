@@ -22,6 +22,8 @@ import hudson.EnvVars;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class CoverityUtils {
@@ -40,6 +42,14 @@ public class CoverityUtils {
 		}
 	}
 
+    public static List<String> parseWithComasAndSpaces(String cmd){
+        List<String> list = new ArrayList<String>();
+        Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(cmd);
+        while (m.find())
+            list.add(m.group(1).replaceAll("\"",""));
+        return list;
+    }
+
 	public static List<String> evaluateEnvVars(List<String> input, AbstractBuild build, TaskListener listener)throws RuntimeException{
 		List<String> output = new ArrayList<String>();
 		
@@ -52,8 +62,14 @@ public class CoverityUtils {
                  * After evaluating an environment variable, we need to check if more than one options where specified
                  * on it. In order to do so, we use the command split(" ").
                  */
-                cmd = envVars.expand(cmd).trim().replaceAll(" +", " ");
-				Collections.addAll(output, cmd.split(" "));
+                if(cmd.startsWith("$") && envVars.containsKey(cmd.substring(1))){
+                    String envVarValue = envVars.expand(cmd);
+                    if(envVarValue != null){
+                        output.addAll(parseWithComasAndSpaces(envVarValue));
+                    }
+                } else {
+                    output.add(cmd);
+                }
 			}
 		}catch(Exception e){
 			throw new RuntimeException("Error trying to evaluate Environment variables in: " + input.toString() );
