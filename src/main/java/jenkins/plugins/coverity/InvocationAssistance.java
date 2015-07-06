@@ -65,7 +65,7 @@ public class InvocationAssistance {
         } else {
             this.misraConfigFile = null;
         }
-        this.isUsingMisra = this.misraConfigFile != null && !this.misraConfigFile.isEmpty();
+        this.isUsingMisra = this.misraMap != null;
         this.intermediateDir = Util.fixEmpty(intermediateDir);
         this.buildArguments = Util.fixEmpty(buildArguments);
         this.analyzeArguments = Util.fixEmpty(analyzeArguments);
@@ -207,4 +207,28 @@ public class InvocationAssistance {
     public void setEnvVars(EnvVars environment){
         this.envVars = environment;
     }
+
+    public String checkIAConfig(){
+        boolean delim = true;
+        String errorText = "Errors with your \"Perform Coverity build/analyze/commit\" options: \n";
+        // Making sure they pick a test language
+        if(isUsingMisra){
+            if(misraConfigFile == null){
+                delim = false;
+            } else if (misraConfigFile.isEmpty()){
+                delim = false;
+            } else if (misraConfigFile.trim().isEmpty()){
+                delim = false;
+            }
+        }
+
+        if(delim){
+            errorText = "Pass";
+        } else {
+            errorText += "[Error] No MISRA configuration file was specified. \n";
+        }
+
+        return errorText;
+    }
+
 }

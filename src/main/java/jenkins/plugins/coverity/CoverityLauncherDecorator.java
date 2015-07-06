@@ -99,6 +99,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 throw new RuntimeException(taCheck);
             }
         }
+
+        if(ii != null){
+            String taCheck = ii.checkIAConfig();
+            if(!taCheck.equals("Pass")){
+                throw new RuntimeException(taCheck);
+            }
+        }
         
         if(scm != null){
             String scmCheck = scm.checkScmConfig(version);
