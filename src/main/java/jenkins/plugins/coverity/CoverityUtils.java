@@ -62,7 +62,7 @@ public class CoverityUtils {
                  * After evaluating an environment variable, we need to check if more than one options where specified
                  * on it. In order to do so, we use the command split(" ").
                  */
-                if(cmd.startsWith("$") && envVars.containsKey(cmd.substring(1))){
+                if((cmd.startsWith("$") && envVars.containsKey(cmd.substring(1))) || (cmd.startsWith("\"$") && envVars.containsKey(cmd.substring(1,cmd.length())))){
                     String envVarValue = envVars.expand(cmd);
                     if(envVarValue != null){
                         output.addAll(parseWithComasAndSpaces(envVarValue));
