@@ -46,7 +46,7 @@ public class CoverityUtils {
         List<String> list = new ArrayList<String>();
         Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(cmd);
         while (m.find())
-            list.add(m.group(1).replaceAll("\"",""));
+            list.add(m.group(1));
         return list;
     }
 
