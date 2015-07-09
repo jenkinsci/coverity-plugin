@@ -56,7 +56,7 @@
 
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/coverity-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/coverity-plugin.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/coverity-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/coverity-plugin</url>
     </scm>
 
