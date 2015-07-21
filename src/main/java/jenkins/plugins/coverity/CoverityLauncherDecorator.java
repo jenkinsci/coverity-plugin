@@ -108,7 +108,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             if(!taCheck.equals("Pass")){
                 throw new RuntimeException(taCheck);
             }
-            isUsingMisra = true;
+            isUsingMisra = ii.getIsUsingMisra();
         }
 
         if(isUsingTA && isUsingMisra){
