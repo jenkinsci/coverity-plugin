@@ -105,6 +105,19 @@ public class DefectFilters {
     }
 
     public boolean isImpactsSelected(String impact){
+        Map<String, String> mapWithJapaneseTranslations;
+        mapWithJapaneseTranslations = new HashMap<String, String>();
+        mapWithJapaneseTranslations.put("High", "高");
+        mapWithJapaneseTranslations.put("Medium", "中");
+        mapWithJapaneseTranslations.put("Low", "低");
+        List<String> initialImpacts = new ArrayList<String>(this.impacts);
+        if(initialImpacts != null && !initialImpacts.isEmpty()){
+            for(String specificImpact : initialImpacts){
+                if(mapWithJapaneseTranslations.containsKey(specificImpact)){
+                    this.impacts.add(mapWithJapaneseTranslations.get(specificImpact));
+                }
+            }
+        }
         return impacts.contains(impact);
     }
 
