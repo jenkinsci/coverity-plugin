@@ -132,7 +132,7 @@ public abstract class CoverityToolHandler {
         return filter;
     }
 
-    public boolean covEmitWar(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home, CoverityTempDir temp, String javaWarFile) throws IOException, InterruptedException {
+    public boolean covEmitWar(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home, CoverityTempDir temp, List<String> javaWarFiles) throws IOException, InterruptedException {
         String covEmitJava = "cov-emit-java";
         covEmitJava = new FilePath(launcher.getChannel(), home).child("bin").child(covEmitJava).getRemote();
 
@@ -140,8 +140,12 @@ public abstract class CoverityToolHandler {
         cmd.add(covEmitJava);
         cmd.add("--dir");
         cmd.add(temp.getTempDir().getRemote());
-        cmd.add("--webapp-archive");
-        cmd.add(javaWarFile);
+        if(javaWarFiles != null && !javaWarFiles.isEmpty()){
+            for(String javaWarFile : javaWarFiles){
+                cmd.add("--webapp-archive");
+                cmd.add(javaWarFile);
+            }
+        }
 
         try {
             CoverityLauncherDecorator.SKIP.set(true);

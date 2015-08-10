@@ -59,16 +59,19 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
-        String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(invocationAssistance.getJavaWarFile(), build,  listener) : null;
-
-        if(javaWarFile != null) {
-            listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
-
-            boolean result = covEmitWar(build, launcher, listener, home, temp, javaWarFile);
-            if(!result) {
-                build.setResult(Result.FAILURE);
-                return false;
+        List<String> warFiles = null;
+        for(String givenJar : invocationAssistance.getJavaWarFiles()){
+            String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, build,  listener) : null;
+            if(javaWarFile != null) {
+                listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
+                warFiles.add(javaWarFile);
             }
+        }
+
+        boolean resultCovEmitWar = covEmitWar(build, launcher, listener, home, temp, warFiles);
+        if(!resultCovEmitWar) {
+            build.setResult(Result.FAILURE);
+            return false;
         }
 
         // Run Cov-Capture

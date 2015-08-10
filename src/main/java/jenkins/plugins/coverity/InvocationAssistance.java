@@ -12,15 +12,19 @@
 package jenkins.plugins.coverity;
 import hudson.EnvVars;
 import hudson.Util;
+import hudson.model.AbstractDescribableImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 import net.sf.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class InvocationAssistance {
     private final String buildArguments;
     private final String analyzeArguments;
     private final String commitArguments;
     private final String csharpAssemblies;
-    private final String javaWarFile;
+    private final List<String> javaWarFiles;
     private final String csharpMsvscaOutputFiles;
     private final boolean csharpAutomaticAssemblies;
     private final boolean csharpMsvsca;
@@ -41,7 +45,7 @@ public class InvocationAssistance {
      */
     private final String intermediateDir;
 
-    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, boolean isUsingMisra, String misraConfigFile, String csharpAssemblies, String javaWarFile, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist) {
+    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, boolean isUsingMisra, String misraConfigFile, String csharpAssemblies, List<String> javaWarFiles, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist) {
         this.isUsingMisra = isUsingMisra;
         this.misraConfigFile = misraConfigFile;
         this.intermediateDir = Util.fixEmpty(intermediateDir);
@@ -49,7 +53,7 @@ public class InvocationAssistance {
         this.analyzeArguments = Util.fixEmpty(analyzeArguments);
         this.commitArguments = Util.fixEmpty(commitArguments);
         this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
-        this.javaWarFile = Util.fixEmpty(javaWarFile);
+        this.javaWarFiles = javaWarFiles;
         this.csharpMsvscaOutputFiles = Util.fixEmpty(csharpMsvscaOutputFiles);
         this.csharpMsvsca = csharpMsvsca;
         this.csharpAutomaticAssemblies = csharpAutomaticAssemblies;
@@ -58,7 +62,7 @@ public class InvocationAssistance {
     }
 
     @DataBoundConstructor
-    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, JSONObject misraMap, String csharpAssemblies, String javaWarFile, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist) {
+    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, JSONObject misraMap, String csharpAssemblies, List<JavaWarFile> javaWarFiles, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist) {
         this.misraMap = misraMap;
         if(this.misraMap != null) {
             this.misraConfigFile = (String) misraMap.get("misraConfigFile");
@@ -71,7 +75,13 @@ public class InvocationAssistance {
         this.analyzeArguments = Util.fixEmpty(analyzeArguments);
         this.commitArguments = Util.fixEmpty(commitArguments);
         this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
-        this.javaWarFile = Util.fixEmpty(javaWarFile);
+        List<String> tempJavaWarFilesPaths = new ArrayList<String>();
+        if(javaWarFiles != null && !javaWarFiles.isEmpty()){
+            for(JavaWarFile javaWarFile : javaWarFiles){
+                tempJavaWarFilesPaths.add(javaWarFile.getWarFile());
+            }
+        }
+        this.javaWarFiles = tempJavaWarFilesPaths;
         this.csharpMsvscaOutputFiles = Util.fixEmpty(csharpMsvscaOutputFiles);
         this.csharpMsvsca = csharpMsvsca;
         this.csharpAutomaticAssemblies = csharpAutomaticAssemblies;
@@ -101,8 +111,8 @@ public class InvocationAssistance {
         return csharpAssemblies;
     }
 
-    public String getJavaWarFile() {
-        return javaWarFile;
+    public List<String> getJavaWarFiles() {
+        return javaWarFiles;
     }
 
     public String getCsharpMsvscaOutputFiles() {
@@ -158,7 +168,7 @@ public class InvocationAssistance {
             return false;
         if(intermediateDir != null ? !intermediateDir.equals(that.intermediateDir) : that.intermediateDir != null)
             return false;
-        if(javaWarFile != null ? !javaWarFile.equals(that.javaWarFile) : that.javaWarFile != null) return false;
+        if(javaWarFiles != null ? !javaWarFiles.equals(that.javaWarFiles) : that.javaWarFiles != null) return false;
         if(saOverride != null ? !saOverride.equals(that.saOverride) : that.saOverride != null) return false;
 
         return true;
@@ -170,7 +180,7 @@ public class InvocationAssistance {
         result = 31 * result + (analyzeArguments != null ? analyzeArguments.hashCode() : 0);
         result = 31 * result + (commitArguments != null ? commitArguments.hashCode() : 0);
         result = 31 * result + (csharpAssemblies != null ? csharpAssemblies.hashCode() : 0);
-        result = 31 * result + (javaWarFile != null ? javaWarFile.hashCode() : 0);
+        result = 31 * result + (javaWarFiles != null ? javaWarFiles.hashCode() : 0);
         result = 31 * result + (csharpMsvscaOutputFiles != null ? csharpMsvscaOutputFiles.hashCode() : 0);
         result = 31 * result + (csharpAutomaticAssemblies ? 1 : 0);
         result = 31 * result + (csharpMsvsca ? 1 : 0);
@@ -193,14 +203,14 @@ public class InvocationAssistance {
         String covBuildBlacklist = override.getCovBuildBlacklist() != null ? override.getCovBuildBlacklist() : getCovBuildBlacklist();
         String csharpAssemblies = override.getCsharpAssemblies() != null ? override.getCsharpAssemblies() : getCsharpAssemblies();
         String intermediateDir = override.getIntermediateDir() != null ? override.getIntermediateDir() : getIntermediateDir();
-        String javaWarFile = override.getJavaWarFile() != null ? override.getJavaWarFile() : getJavaWarFile();
+        List<String> javaWarFiles = override.getJavaWarFiles() != null ? override.getJavaWarFiles() : getJavaWarFiles();
         String csharpMsvscaOutputFiles = override.getCsharpMsvscaOutputFiles() != null ? override.getCsharpMsvscaOutputFiles() : getCsharpMsvscaOutputFiles();
         boolean csharpAutomaticAssemblies = override.getCsharpAutomaticAssemblies();
         boolean csharpMsvsca = override.getCsharpMsvsca();
         String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
         boolean isUsingMisra = override.getIsUsingMisra();
         String misraConfigFile = override.getMisraConfigFile() != null ? override.getMisraConfigFile() : getMisraConfigFile();
-        return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, isUsingMisra, misraConfigFile, csharpAssemblies, javaWarFile, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist);
+        return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, isUsingMisra, misraConfigFile, csharpAssemblies, javaWarFiles, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist);
     }
 
     // Sets the environment varibles for the project so that we can replace environment varibles

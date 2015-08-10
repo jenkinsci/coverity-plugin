@@ -249,9 +249,23 @@
                             <f:entry title="(Only for C#) Search for Microsoft Code Analysis results:" field="csharpMsvsca">
                                 <f:checkbox/>
                             </f:entry>
-                            <f:entry title="(Only for Java) WAR file:" field="javaWarFile">
-                                <f:textbox/>
+
+                            <f:entry title="(Only for Java) WAR files:" field="javaWarFiles">
+                                <f:repeatable field="javaWarFiles" add="Add War File" minimum="0" varStatus="loopItem" var="loopItem2">
+                                    <j:set var="id" value="${descriptor.getRandomID(instance)}" />
+                                    <table width="100%">
+                                        <input type="hidden" name="id" value="${id}" />
+                                        <br/>
+                                        <f:entry title="War File" field="warFiles">
+                                            <f:textbox/>
+                                        </f:entry>
+                                    </table>
+                                    <div align="right">
+                                        <input type="button" value="Remove War File" class="repeatable-delete" style="margin-left: 1em;"/>
+                                    </div>
+                                </f:repeatable>
                             </f:entry>
+
                             <f:entry title="Static analysis location override:" field="saOverride">
                                 <f:textbox/>
                             </f:entry>
