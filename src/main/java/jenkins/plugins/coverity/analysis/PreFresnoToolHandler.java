@@ -239,6 +239,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                             envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
                             stdout(listener).
                             stderr(listener.getLogger()).
+                            pwd(build.getWorkspace()).
                             join();
 
                     if(result != 0) {
