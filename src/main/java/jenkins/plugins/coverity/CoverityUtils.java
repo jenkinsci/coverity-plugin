@@ -19,6 +19,7 @@ import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.EnvVars;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -94,4 +95,12 @@ public class CoverityUtils {
 	public static void setEnvVars(EnvVars environment){
 		envVars = environment;
 	}
+
+    public static void checkDir(String dir) throws Exception {
+        File dirFile = new File(dir);
+        if(!dirFile.exists()){
+            throw new Exception("Directory: " + dir + " doesn't exist.");
+        }
+    }
+
 }

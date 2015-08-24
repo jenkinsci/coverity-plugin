@@ -396,9 +396,12 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 if(ii.getSaOverride() != null) {
                     try {
                         home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+                        CoverityUtils.checkDir(home);
                     } catch(IOException e) {
                         e.printStackTrace();
                     } catch(InterruptedException e) {
+                        e.printStackTrace();
+                    } catch(Exception e) {
                         e.printStackTrace();
                     }
                 }

@@ -74,7 +74,7 @@ public abstract class CoverityToolHandler {
         return files.toArray(arr);
     }
 
-    public abstract boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException, CovRemoteServiceException_Exception, com.coverity.ws.v9.CovRemoteServiceException_Exception;
+    public abstract boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws Exception;
 
     public File[] findMsvscaOutputFiles(String dirName) {
         File dir = new File(dirName);

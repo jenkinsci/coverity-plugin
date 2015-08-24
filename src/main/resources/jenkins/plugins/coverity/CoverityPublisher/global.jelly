@@ -14,6 +14,8 @@
 		<f:entry title="Coverity Static Analysis location" field="home">
 			<f:textbox/>
 		</f:entry>
+		<f:validateButton method="checkAnalysisLocation" title="Check" progress="Checking..."
+        									  with="home"/>
 		<f:entry title="Coverity Connect instances" field="instances">
 			<f:repeatable var="instance" name="instances" items="${descriptor.instances}" add="Add"
 						  header="Coverity Connect Instance">

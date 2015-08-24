@@ -251,6 +251,13 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);
             }
 
+            try {
+                CoverityUtils.checkDir(home);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);
+            }
+
             FilePath homePath = new FilePath(launcher.getChannel(), home);
 
             final TaskListener listen = listener; // Final copy of listner to help print debugging messages
