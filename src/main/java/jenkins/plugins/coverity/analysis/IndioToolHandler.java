@@ -231,6 +231,12 @@ public class IndioToolHandler extends CoverityToolHandler {
                     cmd.add("--log");
                     cmd.add(scm.getLogFileLoc());
                 }
+
+                if(scm.getFileRegex() != null){
+                    cmd.add("--filename-regex");
+                    cmd.add(scm.getFileRegex());
+                }
+
                 // Adding accurev's root repo, which is optional
                 if(scm.getScmSystem().equals("accurev") && scm.getAccRevRepo() != null){
                     cmd.add("--project-root");
@@ -241,6 +247,12 @@ public class IndioToolHandler extends CoverityToolHandler {
                 Map<String,String> env = new HashMap<String,String>();;
                 if(scm.getScmSystem().equals("perforce")){
                     env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), build, listener));
+                }
+
+                if(scm.getScmAdditionalCmd() != null) {
+                    for(String arg : scm.getScmAdditionalCmd().trim().replaceAll(" +", " ").split(" ")){
+                        cmd.add(arg);
+                    }
                 }
 
                 // Evaluation the cmd to replace any evironment variables

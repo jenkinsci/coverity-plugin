@@ -583,6 +583,14 @@
                                 <st:nbsp /><st:nbsp />
                                 <f:textbox/>
                             </f:entry>
+                            <f:entry title="File regex (optional)" field="fileRegex">
+                                <st:nbsp /><st:nbsp />
+                                <f:textbox/>
+                            </f:entry>
+                            <f:entry title="Additional scm arguments (optional)" field="scmAdditionalCmd">
+                                <st:nbsp /><st:nbsp />
+                                <f:textbox/>
+                            </f:entry>
                         </f:advanced>
                     </f:block>
                 </f:optionalBlock>
