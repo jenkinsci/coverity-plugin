@@ -21,6 +21,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jenkins.plugins.coverity.CoverityUtils.*;
+
 /**
  * Similar to other handlers, but this one uses v9 ws.
  */
@@ -33,7 +35,7 @@ public class IndioToolHandler extends CoverityToolHandler {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws InterruptedException, IOException , CovRemoteServiceException_Exception{
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws Exception {
 
         EnvVars envVars = build.getEnvironment(listener);
 
@@ -52,6 +54,8 @@ public class IndioToolHandler extends CoverityToolHandler {
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
             home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
+
+        CoverityUtils.checkDir(home);
 
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build

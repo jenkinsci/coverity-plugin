@@ -229,6 +229,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add("--log");
                     cmd.add(scm.getLogFileLoc());
                 }
+
                 // Adding accurev's root repo, which is optional
                 if(scm.getScmSystem().equals("accurev") && scm.getAccRevRepo() != null){
                     cmd.add("--project-root");

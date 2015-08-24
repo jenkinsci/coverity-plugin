@@ -565,6 +565,7 @@
                                 <st:nbsp /><st:nbsp />
                                 <f:textbox/>
                         </f:entry>
+
                         <f:advanced>
                             <f:entry title="Custom Tool Path (optional)" field="customTestTool">
                                 <st:nbsp /><st:nbsp />
@@ -650,6 +651,7 @@
 						</a>
 					</td>
 				</tr>
+
 				<f:helpArea/>
 				<j:if test="${instance.cimInstance != null}">
 					<f:advanced
