@@ -565,6 +565,7 @@
                                 <st:nbsp /><st:nbsp />
                                 <f:textbox/>
                         </f:entry>
+
                         <f:advanced>
                             <f:entry title="Custom Tool Path (optional)" field="customTestTool">
                                 <st:nbsp /><st:nbsp />
@@ -579,6 +580,14 @@
                                 <f:textbox/>
                             </f:entry>
                             <f:entry title="Log File Location (optional)" field="logFileLoc">
+                                <st:nbsp /><st:nbsp />
+                                <f:textbox/>
+                            </f:entry>
+                            <f:entry title="File regex (optional)" field="fileRegex">
+                                <st:nbsp /><st:nbsp />
+                                <f:textbox/>
+                            </f:entry>
+                            <f:entry title="Additional scm arguments (optional)" field="scmAdditionalCmd">
                                 <st:nbsp /><st:nbsp />
                                 <f:textbox/>
                             </f:entry>
@@ -650,6 +659,7 @@
 						</a>
 					</td>
 				</tr>
+
 				<f:helpArea/>
 				<j:if test="${instance.cimInstance != null}">
 					<f:advanced

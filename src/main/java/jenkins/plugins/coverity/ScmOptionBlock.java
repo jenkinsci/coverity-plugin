@@ -19,8 +19,8 @@ public class ScmOptionBlock {
     private final String logFileLoc;
     private final String p4Port;
     private final String accRevRepo;
-    private EnvVars envVars;
-
+    private final String scmAdditionalCmd;
+    private final String fileRegex;
 
     @DataBoundConstructor
     public ScmOptionBlock(
@@ -30,7 +30,9 @@ public class ScmOptionBlock {
             String scmCommandArgs,
             String logFileLoc,
             String p4Port,
-            String accRevRepo){
+            String accRevRepo,
+            String scmAdditionalCmd,
+            String fileRegex){
 
         this.scmSystem = scmSystem;
         this.customTestTool = Util.fixEmpty(customTestTool);
@@ -39,6 +41,8 @@ public class ScmOptionBlock {
         this.logFileLoc = Util.fixEmpty(logFileLoc);
         this.p4Port = Util.fixEmpty(p4Port); // Required if perforce is selected
         this.accRevRepo = Util.fixEmpty(accRevRepo);   // Required if accurev is selected
+        this.scmAdditionalCmd = Util.fixEmpty(scmAdditionalCmd);
+        this.fileRegex = Util.fixEmpty(fileRegex);
     }
 
     public String getScmSystem(){return scmSystem;}
@@ -54,6 +58,14 @@ public class ScmOptionBlock {
     public String getP4Port(){return p4Port;}
 
     public String getAccRevRepo(){return accRevRepo;}
+
+    public String getScmAdditionalCmd() {
+        return scmAdditionalCmd;
+    }
+
+    public String getFileRegex() {
+        return fileRegex;
+    }
 
     public String checkScmConfig(CoverityVersion version){
         // Checking the required fields for specific SCM systems
