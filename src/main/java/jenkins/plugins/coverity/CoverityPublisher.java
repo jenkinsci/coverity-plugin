@@ -43,6 +43,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -274,6 +275,9 @@ public class CoverityPublisher extends Recorder {
             throw new InterruptedException("Cov Remote Service Error " + e.getMessage());
         } catch(com.coverity.ws.v9.CovRemoteServiceException_Exception e){
             throw new InterruptedException("Cov Remote Service Error " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -557,6 +561,15 @@ public class CoverityPublisher extends Recorder {
 
         public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter boolean useSSL, @QueryParameter String user, @QueryParameter String password, @QueryParameter int dataPort) throws IOException {
             return new CIMInstance("", host, port, user, password, useSSL, dataPort).doCheck();
+        }
+
+        public FormValidation doCheckAnalysisLocation(@QueryParameter String home) throws IOException {
+            File analysisDir = new File(home);
+            if(analysisDir.exists()){
+                return FormValidation.ok("Analysis installation directory has been verified.");
+            } else{
+                return FormValidation.error("The specified \"Coverity Static Analysis\" directory doesn't exists.");
+            }
         }
 
         public FormValidation doCheckCutOffDate(@QueryParameter String value) throws FormException {
