@@ -56,12 +56,15 @@ public class IndioToolHandler extends CoverityToolHandler {
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
         List<String> warFiles = null;
-        if(invocationAssistance.getJavaWarFiles() != null && !invocationAssistance.getJavaWarFiles().isEmpty()){
-            for(String givenJar : invocationAssistance.getJavaWarFiles()){
-                String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, build,  listener) : null;
-                if(javaWarFile != null) {
-                    listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
-                    warFiles.add(javaWarFile);
+        List<String> givenWarFiles = invocationAssistance.getJavaWarFiles();
+        if(givenWarFiles != null && !givenWarFiles.isEmpty()){
+            if(invocationAssistance.getJavaWarFiles() != null && !invocationAssistance.getJavaWarFiles().isEmpty()){
+                for(String givenJar : invocationAssistance.getJavaWarFiles()){
+                    String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, build,  listener) : null;
+                    if(javaWarFile != null) {
+                        listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
+                        warFiles.add(javaWarFile);
+                    }
                 }
             }
         }
