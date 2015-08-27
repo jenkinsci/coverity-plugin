@@ -73,10 +73,12 @@ public class FresnoToolHandler extends CoverityToolHandler {
             }
         }
 
-        boolean resultCovEmitWar = covEmitWar(build, launcher, listener, home, temp, warFiles);
-        if(!resultCovEmitWar) {
-            build.setResult(Result.FAILURE);
-            return false;
+        if(warFiles != null && !warFiles.isEmpty()) {
+            boolean resultCovEmitWar = covEmitWar(build, launcher, listener, home, temp, warFiles);
+            if (!resultCovEmitWar) {
+                build.setResult(Result.FAILURE);
+                return false;
+            }
         }
 
         // Run Cov-Capture

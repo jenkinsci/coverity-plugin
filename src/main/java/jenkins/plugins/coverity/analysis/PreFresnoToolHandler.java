@@ -65,10 +65,13 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
             }
         }
 
-        boolean resultCovEmitWar = covEmitWar(build, launcher, listener, home, temp, warFiles);
-        if(!resultCovEmitWar) {
-            build.setResult(Result.FAILURE);
-            return false;
+
+        if(warFiles != null && !warFiles.isEmpty()) {
+            boolean resultCovEmitWar = covEmitWar(build, launcher, listener, home, temp, warFiles);
+            if (!resultCovEmitWar) {
+                build.setResult(Result.FAILURE);
+                return false;
+            }
         }
 
         Set<String> analyzedLanguages = new HashSet<String>();
