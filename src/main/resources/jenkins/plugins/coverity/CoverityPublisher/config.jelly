@@ -256,7 +256,7 @@
                                     <table width="100%">
                                         <input type="hidden" name="id" value="${id}" />
                                         <br/>
-                                        <f:entry title="War File" field="warFiles">
+                                        <f:entry title="War File" field="warFile">
                                             <f:textbox/>
                                         </f:entry>
                                     </table>

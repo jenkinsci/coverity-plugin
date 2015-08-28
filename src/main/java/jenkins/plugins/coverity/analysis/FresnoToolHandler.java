@@ -62,7 +62,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
         List<String> warFiles = null;
-        List<String> givenWarFiles = invocationAssistance.getJavaWarFiles();
+        List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
         if(givenWarFiles != null && !givenWarFiles.isEmpty()){
             for(String givenJar : givenWarFiles){
                 String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, build,  listener) : null;
