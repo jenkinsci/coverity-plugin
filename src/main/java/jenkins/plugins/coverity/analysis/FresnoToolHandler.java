@@ -474,7 +474,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
             }
         }
 
-        if(!publisher.isSkipFetchingDefects()) {
+        if(invocationAssistance != null && !publisher.isSkipFetchingDefects()) {
             Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
             BufferedReader reader = new BufferedReader(build.getLogReader());
             String line = null;
@@ -490,7 +490,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 reader.close();
             }
             listener.getLogger().println("Cim Streams: " + publisher.getCimStreams().size());
-            listener.getLogger().println("Snapsho Size: " + snapshotIds.size());
+            listener.getLogger().println("Snapshot Size: " + snapshotIds.size());
             if(snapshotIds.size() != publisher.getCimStreams().size()) {
                 listener.getLogger().println("[Coverity] Wrong number of snapshot IDs found in build log");
                 build.setResult(Result.FAILURE);
