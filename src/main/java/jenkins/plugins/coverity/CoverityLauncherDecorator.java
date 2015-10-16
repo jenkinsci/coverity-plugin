@@ -19,14 +19,10 @@ import hudson.Launcher;
 import hudson.LauncherDecorator;
 import hudson.Proc;
 import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Executor;
-import hudson.model.Node;
-import hudson.model.Queue;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.remoting.Channel;
 import hudson.EnvVars;
+import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -75,7 +71,11 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         //Setting up code to allow environment variables in text fields
         EnvVars env;
         try{
-            env = project.getEnvironment(node,launcher.getListener());
+            env = ((Job)project).getEnvironment(node, launcher.getListener());
+            JDK jdk = project.getJDK();
+            if (jdk != null) {
+                jdk.buildEnvVars(env);
+            }
         }catch(Exception e){
             throw new RuntimeException("Error getting build environment variables", e);
         }
