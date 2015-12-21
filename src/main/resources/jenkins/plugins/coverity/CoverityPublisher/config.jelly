@@ -134,7 +134,7 @@
 								<!--f:entry title="Additional cov-build arguments:" field="buildArguments">
 									<f:textbox/>
 								</f:entry-->
-								<f:entry title="Additional cov-analyze[-java] arguments:" field="analyzeArguments">
+								<f:entry title="Additional cov-analyze arguments:" field="analyzeArguments">
 									<f:textbox/>
 								</f:entry>
 								<f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
@@ -216,7 +216,7 @@
                             <f:entry title="Additional cov-build arguments:" field="buildArguments">
                                 <f:textbox/>
                             </f:entry>
-                            <f:entry title="Additional cov-analyze[-java] arguments:" field="analyzeArguments">
+                            <f:entry title="Additional cov-analyze arguments:" field="analyzeArguments">
                                 <f:textbox/>
                             </f:entry>
                             <f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
