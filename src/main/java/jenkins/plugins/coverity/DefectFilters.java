@@ -14,12 +14,10 @@ package jenkins.plugins.coverity;
 import com.coverity.ws.v6.*;
 import com.coverity.ws.v9.DefectStateAttributeValueDataObj;
 import hudson.Util;
+import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
-import hudson.util.ListBoxModel;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
-import hudson.model.BuildListener;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -252,7 +250,7 @@ public class DefectFilters {
                 isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getCheckerName()) &&
                 checkImpactSelected(defect) &&
-                Arrays.asList("New", "Triaged", "Various").contains(defect.getStatus()) &&
+                Arrays.asList("New", "Triaged", "Various", "新規", "選別済み", "混在").contains(defect.getStatus()) &&
                 (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
     }
 
@@ -284,7 +282,7 @@ public class DefectFilters {
                 isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getCheckerName()) &&
                 isImpactsSelected(defect.getDisplayImpact()) &&
-                Arrays.asList("New", "Triaged", "Various").contains(status) &&
+                Arrays.asList("New", "Triaged", "Various", "新規", "選別済み", "混在").contains(status) &&
                 (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
     }
 
