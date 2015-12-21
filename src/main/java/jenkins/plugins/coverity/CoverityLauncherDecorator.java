@@ -13,12 +13,12 @@ package jenkins.plugins.coverity;
 
 import com.coverity.ws.v6.CovRemoteServiceException_Exception;
 import com.coverity.ws.v6.StreamDataObj;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.LauncherDecorator;
 import hudson.Proc;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Executor;
@@ -26,16 +26,14 @@ import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.remoting.Channel;
-import hudson.EnvVars;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
 import java.util.logging.Logger;
 
 /**
@@ -159,18 +157,32 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             CIMInstance cim = publisher.getDescriptor().getInstance(cs.getInstance());
             String id = cs.getInstance() + "/" + cs.getStream();
             try {
-                StreamDataObj stream = cim.getStream(cs.getStream());
-                if(stream == null) {
-                    throw new RuntimeException("Could not find stream: " + id);
-                }
-                String language = stream.getLanguage();
-                if(!"CSHARP".equals(language)) {
-                    onlyCS = false;
-                    break;
+                if(cim.getWsVersion().equals("v9")){
+                    com.coverity.ws.v9.StreamDataObj stream = cim.getStreamIndio(cs.getStream());
+                    if(stream == null) {
+                        throw new RuntimeException("Could not find stream: " + id);
+                    }
+                    String language = stream.getLanguage();
+                    if(!"CSHARP".equals(language)) {
+                        onlyCS = false;
+                        break;
+                    }
+                } else {
+                    StreamDataObj stream = cim.getStream(cs.getStream());
+                    if(stream == null) {
+                        throw new RuntimeException("Could not find stream: " + id);
+                    }
+                    String language = stream.getLanguage();
+                    if(!"CSHARP".equals(language)) {
+                        onlyCS = false;
+                        break;
+                    }
                 }
             } catch(CovRemoteServiceException_Exception e) {
                 throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
             } catch(IOException e) {
+                throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
+            } catch (com.coverity.ws.v9.CovRemoteServiceException_Exception e) {
                 throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
             }
         }
