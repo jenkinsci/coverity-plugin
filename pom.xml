@@ -146,22 +146,6 @@
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
         </dependency>
-        <!-- 
-        In commit fac4e1a in the jffi repo (https://github.com/jnr/jffi), they
-        bumped the version to 1.3.0 on 2015 March 2, but then they changed their
-        minds on 2015 April 23 (see commit dbe4025 in the jffi repo) and went
-        back to 1.2.9. Since some Maven repos
-        (https://oss.sonatype.org/content/repositories/snapshots/com/github/jnr/jffi)
-        still serve jffi-1.3.0-SNAPSHOT and libs-releases-local refuses to serve
-        SNAPSHOT JARs, we need to ensure we don't request for
-        jffi-1.3.0-SNAPSHOT, especially since it's currently not a valid
-        release.
-        -->
-        <dependency>
-            <groupId>com.github.jnr</groupId>
-            <artifactId>jffi</artifactId>
-            <version>(,1.3.0-SNAPSHOT)</version>
-        </dependency>
     </dependencies>
 
 
