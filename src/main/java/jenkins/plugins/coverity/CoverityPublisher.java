@@ -261,10 +261,15 @@ public class CoverityPublisher extends Recorder {
 
         if(build.getResult().isWorseOrEqualTo(Result.FAILURE)) return true;
 
-        CoverityVersion version = CheckConfig.checkNode(this, build, launcher, listener).getVersion();
-
-        CoverityToolHandler cth = CoverityToolHandler.getHandler(version);
         try{
+            CoverityVersion version = CheckConfig.checkNode(this, build, launcher, listener).getVersion();
+
+            if(version == null){
+                throw new Exception("Coverity Version is null. Please verify the version file under your Coverity Analysis installation.");
+            }
+
+            CoverityToolHandler cth = CoverityToolHandler.getHandler(version);
+
             cth.perform(build, launcher, listener, this);
             
             if(isUnstableBuild()){
@@ -565,8 +570,13 @@ public class CoverityPublisher extends Recorder {
 
         public FormValidation doCheckAnalysisLocation(@QueryParameter String home) throws IOException {
             File analysisDir = new File(home);
+            File analysisVersionXml = new File(home, "VERSION.xml");
             if(analysisDir.exists()){
-                return FormValidation.ok("Analysis installation directory has been verified.");
+                if(analysisVersionXml.isFile()){
+                    return FormValidation.ok("Analysis installation directory has been verified.");
+                } else{
+                    return FormValidation.error("The specified \"Coverity Static Analysis\" directory doesn't contain a VERSION.xml file.");
+                }
             } else{
                 return FormValidation.error("The specified \"Coverity Static Analysis\" directory doesn't exists.");
             }
