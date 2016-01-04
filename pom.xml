@@ -155,7 +155,7 @@
 
 
     <properties>
-        <jenkins.version>1.509.4</jenkins.version>
+        <jenkins.version>1.534</jenkins.version>
     </properties>
 
     <pluginRepositories>
