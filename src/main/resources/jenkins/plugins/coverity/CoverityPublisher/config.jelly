@@ -120,7 +120,7 @@
 							<br/>
 
 							<f:entry title="Coverity Connect instance" field="instance">
-								<f:select id="cimInstance-${id}" onchange="loadDefectFilters(${id})"/>
+								<f:select id="cimInstance-${id}"/>
 							</f:entry>
 							<f:entry title="Project" field="project">
 								<f:select/>
@@ -128,6 +128,9 @@
 							<f:entry title="Stream" field="stream">
 								<f:select/>
 							</f:entry>
+							<f:entry title="Language" field="language">
+                                <f:select onchange="loadDefectFilters(${id})"/>
+                            </f:entry>
 							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"
 											 checked="${instance.invocationAssistanceOverride != null}" name="invocationAssistanceOverride">
 								<j:set var="instance" value="${instance.invocationAssistanceOverride}"/>
