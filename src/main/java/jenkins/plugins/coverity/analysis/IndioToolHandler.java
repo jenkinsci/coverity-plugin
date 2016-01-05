@@ -1,7 +1,6 @@
 package jenkins.plugins.coverity.analysis;
 
 import com.coverity.ws.v9.*;
-import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -17,11 +16,13 @@ import jenkins.plugins.coverity.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import jenkins.plugins.coverity.CoverityUtils.*;
 
 /**
  * Similar to other handlers, but this one uses v9 ws.
@@ -315,7 +316,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                 cmd.add("--dir");
                 cmd.add(temp.getTempDir().getRemote());
 
-                boolean isMisraAnalysis = effectiveIA.getIsUsingMisra();
+                boolean isMisraAnalysis = effectiveIA.getIsUsingMisra() && (this.version.compareMajor(7) == 0);
 
                 if(isMisraAnalysis) {
                     cmd.add("--cpp");
@@ -443,7 +444,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                     cmd.add(cim.getUser());
 
                     if(invocationAssistance != null){
-                        if(effectiveIA.getIsUsingMisra()){
+                        if(effectiveIA.getIsUsingMisra() && (this.version.compareMajor(7) == 0)){
                             cmd.add("--misra-only");
                         } else if(effectiveIA.getCommitArguments() != null) {
                             for(String arg : effectiveIA.getCommitArguments().split(" ")) {
