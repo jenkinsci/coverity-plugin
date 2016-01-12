@@ -1,9 +1,9 @@
 package jenkins.plugins.coverity.analysis;
 
 import com.coverity.ws.v6.*;
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Executor;
@@ -11,7 +11,6 @@ import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.util.ArgumentListBuilder;
-import hudson.EnvVars;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
@@ -47,6 +46,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
         File workspace = build.getRootDir();
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        boolean isDisplayChart = publisher.isDisplayChart();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
         
@@ -476,7 +476,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
             }
         }
 
-        if(invocationAssistance != null && !publisher.isSkipFetchingDefects()) {
+        if(isDisplayChart && !publisher.isSkipFetchingDefects()) {
             Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
             BufferedReader reader = new BufferedReader(build.getLogReader());
             String line = null;

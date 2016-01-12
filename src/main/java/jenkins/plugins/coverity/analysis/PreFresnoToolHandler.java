@@ -45,6 +45,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         Node node = Executor.currentExecutor().getOwner().getNode();
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        boolean isDisplayChart = publisher.isDisplayChart();
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
             home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
@@ -276,7 +277,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
             }
         }
 
-        if(invocationAssistance != null && !publisher.isSkipFetchingDefects()) {
+        if(isDisplayChart && !publisher.isSkipFetchingDefects()) {
             Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
             BufferedReader reader = new BufferedReader(build.getLogReader());
             String line = null;

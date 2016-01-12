@@ -11,20 +11,17 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.*;
+import com.coverity.ws.v6.CheckerPropertyDataObj;
+import com.coverity.ws.v6.CheckerPropertyFilterSpecDataObj;
+import com.coverity.ws.v6.CheckerSubcategoryIdDataObj;
+import com.coverity.ws.v6.StreamDataObj;
+import com.coverity.ws.v6.StreamFilterSpecDataObj;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
-import com.coverity.ws.v9.ConfigurationService;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.Descriptor;
-import hudson.model.Node;
-import hudson.model.Result;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -100,6 +97,8 @@ public class CoverityPublisher extends Recorder {
 
     private final ScmOptionBlock scmOptionBlock;
 
+    private final boolean displayChart;
+
     // Internal variable to notify the Publisher that the build should be marked as unstable 
     // since we cannot set the build as unstable within the tool handler
     private boolean unstableBuild;
@@ -107,6 +106,7 @@ public class CoverityPublisher extends Recorder {
     @DataBoundConstructor
     public CoverityPublisher(List<CIMStream> cimStreams,
                              InvocationAssistance invocationAssistance,
+                             boolean displayChart,
                              boolean failBuild,
                              boolean unstable,
                              boolean keepIntDir,
@@ -121,6 +121,7 @@ public class CoverityPublisher extends Recorder {
                              ScmOptionBlock scmOptionBlock) {
         this.cimStreams = cimStreams;
         this.invocationAssistance = invocationAssistance;
+        this.displayChart = displayChart;
         this.failBuild = failBuild;
         this.unstable = unstable;
         this.mailSender = mailSender;
@@ -202,6 +203,10 @@ public class CoverityPublisher extends Recorder {
 
     public InvocationAssistance getInvocationAssistance() {
         return invocationAssistance;
+    }
+
+    public boolean isDisplayChart() {
+        return displayChart;
     }
 
     public boolean isFailBuild() {
