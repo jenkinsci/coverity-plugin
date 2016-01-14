@@ -12,12 +12,14 @@
 package jenkins.plugins.coverity;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Executor;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.EnvVars;
+import hudson.remoting.VirtualChannel;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -96,10 +98,10 @@ public class CoverityUtils {
 		envVars = environment;
 	}
 
-    public static void checkDir(String dir) throws Exception {
-        File dirFile = new File(dir);
-        if(!dirFile.exists()){
-            throw new Exception("Directory: " + dir + " doesn't exist.");
+    public static void checkDir(VirtualChannel channel, String home) throws Exception {
+		FilePath homePath = new FilePath(channel, home);
+        if(!homePath.exists()){
+            throw new Exception("Directory: " + home + " doesn't exist.");
         }
     }
 

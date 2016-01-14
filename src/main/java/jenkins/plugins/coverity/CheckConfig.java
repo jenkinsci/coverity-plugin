@@ -244,15 +244,16 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         try {
             String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
             InvocationAssistance ia = publisher.getInvocationAssistance();
-            if(ia != null && ia.getSaOverride() != null) {
+            if(ia != null && ia.getSaOverride() != null && !ia.getSaOverride().isEmpty()) {
                 home = new CoverityInstallation(ia.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
             }
+
             if(home == null) {
                 return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);
             }
 
             try {
-                CoverityUtils.checkDir(home);
+                CoverityUtils.checkDir(launcher.getChannel(), home);
             } catch (Exception e) {
                 e.printStackTrace();
                 return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);

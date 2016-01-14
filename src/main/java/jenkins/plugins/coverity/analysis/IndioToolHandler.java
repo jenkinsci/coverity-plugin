@@ -57,7 +57,7 @@ public class IndioToolHandler extends CoverityToolHandler {
             home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
-        CoverityUtils.checkDir(home);
+        CoverityUtils.checkDir(launcher.getChannel(), home);
 
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
