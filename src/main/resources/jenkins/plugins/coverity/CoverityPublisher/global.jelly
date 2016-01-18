@@ -16,6 +16,28 @@
 		</f:entry>
 		<f:validateButton method="checkAnalysisLocation" title="Check" progress="Checking..."
         									  with="home"/>
+
+        <f:optionalBlock title="SSL configurations" field="sslConfigurations" checked="${instance.sslConfigurations != null}" name="sslConfigurations">
+            <j:set var="instance" value="${instance.sslConfigurations}"/>
+            <f:block>
+                <table style="padding-left:2%; width:100%;">
+                    <f:entry title="Trust Self-signed Certificate" field="trustNewSelfSignedCert" checked="${instance.trustNewSelfSignedCert}">
+                        <f:checkbox/>
+                    </f:entry>
+                    <f:optionalBlock title="Use extra CA certificate" field="certFileJSON" checked="${instance.certFileJSON != null}" name="certFileJSON">
+                        <j:set var="instance" value="${instance.certFileJSON}"/>
+                        <f:block>
+                            <table style="padding-left:2%; width:100%;">
+                                <f:entry name="certFileName" title="Enter Certificate File:" field="certFileName" value="${it.certFileName}">
+                                    <f:textbox/>
+                                </f:entry>
+                            </table>
+                        </f:block>
+                    </f:optionalBlock>
+                </table>
+            </f:block>
+        </f:optionalBlock>
+
 		<f:entry title="Coverity Connect instances" field="instances">
 			<f:repeatable var="instance" name="instances" items="${descriptor.instances}" add="Add"
 						  header="Coverity Connect Instance">
@@ -33,14 +55,15 @@
 						<f:textbox/>
 					</f:entry>
 					<f:entry title="Use SSL" field="useSSL">
-						<f:checkbox/>
-					</f:entry>
+					    <f:checkbox/>
+                    </f:entry>
 					<f:entry title="User" field="user">
 						<f:textbox/>
 					</f:entry>
 					<f:entry title="Password" field="password">
 						<f:password/>
 					</f:entry>
+
 					<f:validateButton method="checkInstance" title="Check" progress="Checking..."
 									  with="host,port,user,password,useSSL"/>
 					<f:entry title="">

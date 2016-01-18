@@ -317,6 +317,7 @@ public class CoverityPublisher extends Recorder {
 
         private List<CIMInstance> instances = new ArrayList<CIMInstance>();
         private String home;
+        private SSLConfigurations sslConfigurations;
         private String javaCheckers;
         private String cxxCheckers;
         private String csharpCheckers;
@@ -399,7 +400,7 @@ public class CoverityPublisher extends Recorder {
 
         public void setCimJavaCheckers(String javaCheckers) {
             this.javaCheckers = Util.fixEmpty(javaCheckers);
-            this.javaCheckers = StringUtils.join(getCimJavaCheckers(),'\n');
+            this.javaCheckers = StringUtils.join(getCimJavaCheckers(), '\n');
         }
 
         public String getCxxCheckers() {
@@ -457,6 +458,14 @@ public class CoverityPublisher extends Recorder {
             } catch(Exception e) {
             }
             return checkers;
+        }
+
+        public void setSslConfigurations(SSLConfigurations sslConfigurations) {
+            this.sslConfigurations = sslConfigurations;
+        }
+
+        public SSLConfigurations getSslConfigurations() {
+            return this.sslConfigurations;
         }
 
         public void setCxxCheckers(String cxxCheckers) {
@@ -569,7 +578,7 @@ public class CoverityPublisher extends Recorder {
             return "Coverity";
         }
 
-        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter boolean useSSL, @QueryParameter String user, @QueryParameter String password, @QueryParameter int dataPort) throws IOException {
+        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter String user, @QueryParameter String password, @QueryParameter boolean useSSL, @QueryParameter int dataPort) throws IOException {
             return new CIMInstance("", host, port, user, password, useSSL, dataPort).doCheck();
         }
 
