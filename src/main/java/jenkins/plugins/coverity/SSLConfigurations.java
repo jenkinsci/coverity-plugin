@@ -5,6 +5,7 @@ import com.coverity.truststore.url.HttpsTrustStoreStreamHandlerFactory;
 import com.coverity.truststore.url.HttpsTrustStoreUrlConnection;
 import com.sun.org.apache.bcel.internal.classfile.InnerClass;
 import net.sf.json.JSONObject;
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.lang.reflect.Field;
@@ -30,7 +31,6 @@ public class SSLConfigurations {
         String certFileName = null;
         if(certFileJSON != null){
             certFileName = (String) certFileJSON.get("certFileName");
-            HttpsTrustStoreUrlConnection.setDefaultExtraTrustStorePath(certFileName);
         }
 
         if(certFileName != null && !certFileName.isEmpty()){
@@ -91,20 +91,8 @@ public class SSLConfigurations {
             System.setProperty("https.protocols", "TLSv1");
             // Activate our special https protocol handler, which fronts for the real one and sets up
             // the trust stores.
-            Field factoryField = null;
-            try {
-                factoryField = URL.class.getDeclaredField("factory");
-                factoryField.setAccessible(true);
-                //  get current factory
-                Object currentFactory = factoryField.get(null);
-                //  set the factory to null and register MyFactoryDecorator using URL#setURLStreamHandlerFactory.
-                factoryField.set(null, null);
-                URL.setURLStreamHandlerFactory(new HttpsTrustStoreStreamHandlerFactory());
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            TomcatURLStreamHandlerFactory tomcatHandlerFactory = org.apache.catalina.webresources.TomcatURLStreamHandlerFactory.getInstance();
+            tomcatHandlerFactory.addUserFactory(new HttpsTrustStoreStreamHandlerFactory());
 
             // Don't use a UI with trust store operations.  The rationale is that we can't reliably tell whether
             // there's a user there (since the System.console() doesn't seem to do the equivalent of
