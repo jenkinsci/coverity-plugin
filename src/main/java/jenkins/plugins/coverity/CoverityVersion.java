@@ -25,6 +25,8 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
     static final HashMap<String, CoverityVersion> codeNameEquivalents = new HashMap<String, CoverityVersion>();
 
     static {
+        codeNameEquivalents.put("lodi", new CoverityVersion(8, 2, 0));
+        codeNameEquivalents.put("kent", new CoverityVersion(8, 1, 0));
         codeNameEquivalents.put("jasper", new CoverityVersion(8, 0, 0));
         codeNameEquivalents.put("indio", new CoverityVersion(7, 7, 0));
         codeNameEquivalents.put("harmony", new CoverityVersion(7, 6, 0));
