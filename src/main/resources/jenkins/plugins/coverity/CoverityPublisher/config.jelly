@@ -214,7 +214,7 @@
                 <tr>
                     <td class="setting-name" colspan="3">
                         <f:checkbox field="displayChart" default="true"/>
-                        <label class="attach-previous">Display defects</label>
+                        <label class="attach-previous">Display defects on chart</label>
                     </td>
                     <td class="setting-help">
                         <a href="#" class="help-button"
