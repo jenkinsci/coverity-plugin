@@ -37,8 +37,10 @@ public abstract class CoverityToolHandler {
 
         if(version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
             return new PreFresnoToolHandler();
-        } if(version.compareTo(CoverityVersion.VERSION_INDIO) >= 0){
+        } if(version.compareTo(CoverityVersion.VERSION_INDIO) == 0){
             return new IndioToolHandler(version);
+        } if(version.compareTo(CoverityVersion.VERSION_INDIO) > 0){
+            return new JasperToolHandler(version);
         } else {
             return new FresnoToolHandler(version);
         }
