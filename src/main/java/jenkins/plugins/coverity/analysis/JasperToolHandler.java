@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 /**
  * Similar to other handlers, but this one uses v9 ws and has improvement for certificate management.
  */
-public class JasperToolHandler extends CoverityToolHandler {
+public class JasperToolHandler extends CoverityToolHandler{
     CoverityVersion version;
 
     public JasperToolHandler(CoverityVersion version){
@@ -39,6 +39,10 @@ public class JasperToolHandler extends CoverityToolHandler {
         boolean isDisplayChart = publisher.isDisplayChart();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
+
+        SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
+        boolean isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
+        String certFileName = sslConfigurations.getCertFileName();
 
         // Seting the new envVars after jenkins has modified its own
         CoverityUtils.setEnvVars(envVars);
@@ -153,6 +157,14 @@ public class JasperToolHandler extends CoverityToolHandler {
                         cmd.add(cimStream.getStream());
                         if(cim.isUseSSL()){
                             cmd.add("--ssl");
+                            if(isTrustNewSelfSignedCert){
+                                cmd.add("--on-new-cert");
+                                cmd.add("trust");
+                            }
+                            if(certFileName != null){
+                                cmd.add("--certs");
+                                cmd.add(certFileName);
+                            }
                         }
 
                         cmd.add("--user");
@@ -198,8 +210,6 @@ public class JasperToolHandler extends CoverityToolHandler {
                 }
 
                 CoverityLauncherDecorator.SKIP.set(true);
-
-
 
                 List<String> cmd = new ArrayList<String>();
                 cmd.add(covImportScm);
@@ -424,6 +434,15 @@ public class JasperToolHandler extends CoverityToolHandler {
                     }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
                         cmd.add("--https-port");
                         cmd.add(Integer.toString(cim.getPort()));
+                        cmd.add("--ssl");
+                        if(isTrustNewSelfSignedCert){
+                            cmd.add("--on-new-cert");
+                            cmd.add("trust");
+                        }
+                        if(certFileName != null){
+                            cmd.add("--certs");
+                            cmd.add(certFileName);
+                        }
                     }else{
                         cmd.add("--port");
                         cmd.add(Integer.toString(cim.getPort()));
