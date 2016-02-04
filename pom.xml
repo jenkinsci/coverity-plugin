@@ -58,7 +58,8 @@
         <connection>scm:git:ssh://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    </scm>
+      <tag>HEAD</tag>
+  </scm>
 
     <repositories>
         <repository>
