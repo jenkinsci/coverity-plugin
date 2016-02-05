@@ -40,9 +40,13 @@ public class JasperToolHandler extends CoverityToolHandler{
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
 
+        boolean isTrustNewSelfSignedCert = false;
+        String certFileName = null;
         SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
-        boolean isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
-        String certFileName = sslConfigurations.getCertFileName();
+        if(sslConfigurations != null){
+            isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
+            certFileName = sslConfigurations.getCertFileName();
+        }
 
         // Seting the new envVars after jenkins has modified its own
         CoverityUtils.setEnvVars(envVars);

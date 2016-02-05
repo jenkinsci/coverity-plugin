@@ -465,7 +465,17 @@ public class CoverityPublisher extends Recorder {
         }
 
         public SSLConfigurations getSslConfigurations() {
-            return this.sslConfigurations;
+            /**
+             * Fix Bug:85629
+             * If SSL were not configured that resulted on a null pointer exception that marked the build as a failure.
+             * In the case SSL is not configured, by default SSL configurations would be set up to not trust self-signed
+             * certificates and no CA file would be present.
+             */
+            if(this.sslConfigurations != null){
+                return this.sslConfigurations;
+            } else {
+                return new SSLConfigurations(false, null);
+            }
         }
 
         public void setCxxCheckers(String cxxCheckers) {
