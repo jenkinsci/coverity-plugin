@@ -57,6 +57,43 @@ public class JasperToolHandler extends CoverityToolHandler{
 
         CoverityUtils.checkDir(launcher.getChannel(), home);
 
+        //run cov-build for scripting language sources only.
+        if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
+            try {
+                String covBuild = CoverityUtils.getCovBuild(listener, node);
+
+                CoverityLauncherDecorator.SKIP.set(true);
+
+                List<String> cmd = new ArrayList<String>();
+                cmd.add(covBuild);
+                cmd.add("--dir");
+                cmd.add(temp.getTempDir().getRemote());
+                cmd.add("--no-command");
+                cmd.add("--fs-capture-search");
+                cmd.add("$WORKSPACE");
+
+                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+
+                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+
+                int result = launcher.
+                        launch().
+                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+                        pwd(build.getWorkspace()).
+                        stdout(listener).
+                        join();
+
+                if(result != 0) {
+                    listener.getLogger().println("[Coverity] " + covBuild + " returned " + result + ", aborting...");
+                    build.setResult(Result.FAILURE);
+                    return false;
+                }
+
+            } finally {
+                CoverityLauncherDecorator.SKIP.set(false);
+            }
+        }
+
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
         List<String> warFiles = null;

@@ -259,6 +259,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         // Evaluation the args to replace any evironment variables 
         args = CoverityUtils.evaluateEnvVars(args, env);
         launcher.getListener().getLogger().println(args.toString());
+        if(ii.getIsScriptSrc() && !ii.getIsCompiledSrc()){
+            CoverityLauncherDecorator.SKIP.set(true);
+        }
 
         return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
     }
@@ -285,7 +288,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         private String[] getPrefix() {
             String[] tp = prefix.clone();
             if(tp.length > 0){    
-                tp[0] = getCovBuild();
+                tp[0] = CoverityUtils.getCovBuild(decorated.getListener(), node);
             }
             return tp;
         }
@@ -297,6 +300,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     logger.info(starter.cmds().get(0) + " is blacklisted, skipping cov-build");
                     return decorated.launch(starter);
                 }
+
+                Executor executor = Executor.currentExecutor();
+                Queue.Executable exec = executor.getCurrentExecutable();
+                AbstractBuild build = (AbstractBuild) exec;
+                AbstractProject project = build.getProject();
+                CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
+                InvocationAssistance ii = publisher.getInvocationAssistance();
 
                 // Creating a hashmap of the environment variables so that we can evalute the cov-build command
                 Map<String,String> envMap = new HashMap<String,String>();
@@ -316,6 +326,12 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 }
 
                 cmds.addAll(0, Arrays.asList(getPrefix()));
+
+                if(ii.getIsScriptSrc() && ii.getIsCompiledSrc()){
+                    cmds.add("--fs-capture-search");
+                    cmds.add("$WORKSPACE");
+                }
+
                 // parsing the command and replacing all environment variable with their respective value
                 cmds = CoverityUtils.evaluateEnvVars(cmds,new EnvVars(envMap));
                 starter.cmds(cmds);
@@ -376,53 +392,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 }
             }
             return false;
-        }
-
-        /**
-         * getCovBuild
-         *
-         * Retrieves the location of cov-build executable/sh from the system and returns the string of the
-         * path
-         * @return  string of cov-build's path
-         */
-
-        private String getCovBuild() {
-            Executor executor = Executor.currentExecutor();
-            Queue.Executable exec = executor.getCurrentExecutable();
-            AbstractBuild build = (AbstractBuild) exec;
-            AbstractProject project = build.getProject();
-            CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-            InvocationAssistance ii = publisher.getInvocationAssistance();
-
-            String covBuild = "cov-build";
-            TaskListener listener = decorated.getListener();
-            String home = null;
-            try {
-                home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
-            } catch(IOException e) {
-                e.printStackTrace();
-            } catch(InterruptedException e) {
-                e.printStackTrace();
-            }
-            if(ii != null){
-                if(ii.getSaOverride() != null) {
-                    try {
-                        home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
-                        CoverityUtils.checkDir(node.getChannel(), home);
-                    } catch(IOException e) {
-                        e.printStackTrace();
-                    } catch(InterruptedException e) {
-                        e.printStackTrace();
-                    } catch(Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            if(home != null) {
-                covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
-            }
-
-            return covBuild;
         }
     }
 }

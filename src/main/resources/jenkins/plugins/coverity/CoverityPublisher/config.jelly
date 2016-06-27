@@ -134,9 +134,6 @@
 							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"
 											 checked="${instance.invocationAssistanceOverride != null}" name="invocationAssistanceOverride">
 								<j:set var="instance" value="${instance.invocationAssistanceOverride}"/>
-								<!--f:entry title="Additional cov-build arguments:" field="buildArguments">
-									<f:textbox/>
-								</f:entry-->
 								<f:entry title="Additional cov-analyze arguments:" field="analyzeArguments">
 									<f:textbox/>
 								</f:entry>
@@ -230,6 +227,12 @@
 					<j:set var="instance" value="${instance.invocationAssistance}"/>
                     <f:block>
                         <table style="padding-left:2%; width:100%;">
+                            <f:entry title="Support compiled language sources during cov-build phase" field="isCompiledSrc">
+                                <f:checkbox/>
+                            </f:entry>
+                            <f:entry title="Support scripting language sources during cov-build phase" field="isScriptSrc">
+                                <f:checkbox/>
+                            </f:entry>
                             <f:entry title="Additional cov-build arguments:" field="buildArguments">
                                 <f:textbox/>
                             </f:entry>

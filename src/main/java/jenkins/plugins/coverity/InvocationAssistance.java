@@ -35,6 +35,9 @@ public class InvocationAssistance {
     private final String misraConfigFile;
     private JSONObject misraMap;
 
+    private final boolean isCompiledSrc;
+    private final boolean isScriptSrc;
+
     /**
      * Do not wrap any executables with these names with cov-build. Format is comma-separated list.
      */
@@ -45,7 +48,9 @@ public class InvocationAssistance {
      */
     private final String intermediateDir;
 
-    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, boolean isUsingMisra, String misraConfigFile, String csharpAssemblies, List<String> javaWarFilesNames, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist, List<JavaWarFile> javaWarFiles) {
+    public InvocationAssistance(boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, boolean isUsingMisra, String misraConfigFile, String csharpAssemblies, List<String> javaWarFilesNames, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist, List<JavaWarFile> javaWarFiles) {
+        this.isCompiledSrc = isCompiledSrc;
+        this.isScriptSrc = isScriptSrc;
         this.isUsingMisra = isUsingMisra;
         this.misraConfigFile = misraConfigFile;
         this.javaWarFiles = javaWarFiles;
@@ -63,7 +68,9 @@ public class InvocationAssistance {
     }
 
     @DataBoundConstructor
-    public InvocationAssistance(String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, JSONObject misraMap, String csharpAssemblies, List<JavaWarFile> javaWarFiles, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist) {
+    public InvocationAssistance(boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, JSONObject misraMap, String csharpAssemblies, List<JavaWarFile> javaWarFiles, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist) {
+        this.isCompiledSrc = isCompiledSrc;
+        this.isScriptSrc = isScriptSrc;
         this.misraMap = misraMap;
         if(this.misraMap != null) {
             this.misraConfigFile = (String) misraMap.get("misraConfigFile");
@@ -91,7 +98,13 @@ public class InvocationAssistance {
         this.covBuildBlacklist = Util.fixEmpty(covBuildBlacklist);
     }
 
+    public boolean getIsCompiledSrc() {
+        return isCompiledSrc;
+    }
 
+    public boolean getIsScriptSrc() {
+        return isScriptSrc;
+    }
 
     public String getBuildArguments() {
         return buildArguments;
@@ -216,7 +229,9 @@ public class InvocationAssistance {
         String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
         boolean isUsingMisra = override.getIsUsingMisra();
         String misraConfigFile = override.getMisraConfigFile() != null ? override.getMisraConfigFile() : getMisraConfigFile();
-        return new InvocationAssistance(buildArguments, analyzeArguments, commitArguments, intermediateDir, isUsingMisra, misraConfigFile, csharpAssemblies, javaWarFilesNames, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist, javaWarFiles);
+        boolean isCompiledSrc = override.getIsCompiledSrc();
+        boolean isScriptSrc = override.getIsScriptSrc();
+        return new InvocationAssistance(isCompiledSrc, isScriptSrc, buildArguments, analyzeArguments, commitArguments, intermediateDir, isUsingMisra, misraConfigFile, csharpAssemblies, javaWarFilesNames, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist, javaWarFiles);
     }
 
     // Sets the environment varibles for the project so that we can replace environment varibles

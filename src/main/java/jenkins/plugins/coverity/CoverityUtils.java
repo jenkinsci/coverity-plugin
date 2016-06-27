@@ -13,15 +13,12 @@ package jenkins.plugins.coverity;
 
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Executor;
-import hudson.model.Queue;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.EnvVars;
 import hudson.remoting.VirtualChannel;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -104,5 +101,50 @@ public class CoverityUtils {
             throw new Exception("Directory: " + home + " doesn't exist.");
         }
     }
+
+	/**
+	 * getCovBuild
+	 *
+	 * Retrieves the location of cov-build executable/sh from the system and returns the string of the
+	 * path
+	 * @return  string of cov-build's path
+	 */
+	public static String getCovBuild(TaskListener listener, Node node) {
+		Executor executor = Executor.currentExecutor();
+		Queue.Executable exec = executor.getCurrentExecutable();
+		AbstractBuild build = (AbstractBuild) exec;
+		AbstractProject project = build.getProject();
+		CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
+		InvocationAssistance ii = publisher.getInvocationAssistance();
+
+		String covBuild = "cov-build";
+		String home = null;
+		try {
+			home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
+		} catch(IOException e) {
+			e.printStackTrace();
+		} catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		if(ii != null){
+			if(ii.getSaOverride() != null) {
+				try {
+					home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+					CoverityUtils.checkDir(node.getChannel(), home);
+				} catch(IOException e) {
+					e.printStackTrace();
+				} catch(InterruptedException e) {
+					e.printStackTrace();
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		if(home != null) {
+			covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
+		}
+
+		return covBuild;
+	}
 
 }
