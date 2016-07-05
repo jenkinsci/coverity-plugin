@@ -52,6 +52,37 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
         CoverityUtils.checkDir(launcher.getChannel(), home);
 
+        //run post cov-build command.
+        if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovBuildCmd()){
+            try {
+                String postCovBuild = invocationAssistance.getPostCovBuildCmd();
+
+                CoverityLauncherDecorator.SKIP.set(true);
+
+                List<String> cmd = new ArrayList<String>();
+                cmd.add(postCovBuild);
+                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+
+                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+
+                int result = launcher.
+                        launch().
+                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+                        pwd(build.getWorkspace()).
+                        stdout(listener).
+                        join();
+
+                if(result != 0) {
+                    listener.getLogger().println("[Coverity] " + postCovBuild + " returned " + result + ", aborting...");
+                    build.setResult(Result.FAILURE);
+                    return false;
+                }
+
+            } finally {
+                CoverityLauncherDecorator.SKIP.set(false);
+            }
+        }
+
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
         List<String> warFiles = null;
@@ -175,6 +206,37 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                 } finally {
                     CoverityLauncherDecorator.SKIP.set(false);
                 }
+            }
+        }
+
+        //run post cov-analyze command.
+        if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovAnalyzeCmd()){
+            try {
+                String postCovAnalyzeCmd = invocationAssistance.getPostCovAnalyzeCmd();
+
+                CoverityLauncherDecorator.SKIP.set(true);
+
+                List<String> cmd = new ArrayList<String>();
+                cmd.add(postCovAnalyzeCmd);
+                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+
+                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+
+                int result = launcher.
+                        launch().
+                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
+                        pwd(build.getWorkspace()).
+                        stdout(listener).
+                        join();
+
+                if(result != 0) {
+                    listener.getLogger().println("[Coverity] " + postCovAnalyzeCmd + " returned " + result + ", aborting...");
+                    build.setResult(Result.FAILURE);
+                    return false;
+                }
+
+            } finally {
+                CoverityLauncherDecorator.SKIP.set(false);
             }
         }
 

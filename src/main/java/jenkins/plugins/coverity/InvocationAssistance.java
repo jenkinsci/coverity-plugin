@@ -38,6 +38,14 @@ public class InvocationAssistance {
     private final boolean isCompiledSrc;
     private final boolean isScriptSrc;
 
+    private final boolean isUsingPostCovBuildCmd;
+    private final String postCovBuildCmd;
+    private JSONObject postCovBuildJSON;
+
+    private final boolean isUsingPostCovAnalyzeCmd;
+    private final String postCovAnalyzeCmd;
+    private JSONObject postCovAnalyzeJSON;
+
     /**
      * Do not wrap any executables with these names with cov-build. Format is comma-separated list.
      */
@@ -48,7 +56,11 @@ public class InvocationAssistance {
      */
     private final String intermediateDir;
 
-    public InvocationAssistance(boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, boolean isUsingMisra, String misraConfigFile, String csharpAssemblies, List<String> javaWarFilesNames, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist, List<JavaWarFile> javaWarFiles) {
+    public InvocationAssistance(boolean isUsingPostCovBuildCmd, String postCovBuildCmd, boolean isUsingPostCovAnalyzeCmd, String postCovAnalyzeCmd, boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, boolean isUsingMisra, String misraConfigFile, String csharpAssemblies, List<String> javaWarFilesNames, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist, List<JavaWarFile> javaWarFiles) {
+        this.isUsingPostCovBuildCmd = isUsingPostCovBuildCmd;
+        this.postCovBuildCmd = postCovBuildCmd;
+        this.isUsingPostCovAnalyzeCmd = isUsingPostCovAnalyzeCmd;
+        this.postCovAnalyzeCmd = postCovAnalyzeCmd;
         this.isCompiledSrc = isCompiledSrc;
         this.isScriptSrc = isScriptSrc;
         this.isUsingMisra = isUsingMisra;
@@ -68,9 +80,23 @@ public class InvocationAssistance {
     }
 
     @DataBoundConstructor
-    public InvocationAssistance(boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, JSONObject misraMap, String csharpAssemblies, List<JavaWarFile> javaWarFiles, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist) {
+    public InvocationAssistance(JSONObject postCovBuildJSON, JSONObject postCovAnalyzeJSON, boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, JSONObject misraMap, String csharpAssemblies, List<JavaWarFile> javaWarFiles, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist) {
         this.isCompiledSrc = isCompiledSrc;
         this.isScriptSrc = isScriptSrc;
+        this.postCovBuildJSON = postCovBuildJSON;
+        if(this.postCovBuildJSON != null) {
+            this.postCovBuildCmd = (String) postCovBuildJSON.get("postCovBuildCmd");
+        } else {
+            this.postCovBuildCmd = "";
+        }
+        this.isUsingPostCovBuildCmd = this.postCovBuildJSON != null;
+        this.postCovAnalyzeJSON = postCovAnalyzeJSON;
+        if(this.postCovAnalyzeJSON != null) {
+            this.postCovAnalyzeCmd = (String) postCovAnalyzeJSON.get("postCovAnalyzeCmd");
+        } else {
+            this.postCovAnalyzeCmd = "";
+        }
+        this.isUsingPostCovAnalyzeCmd = this.postCovAnalyzeJSON != null;
         this.misraMap = misraMap;
         if(this.misraMap != null) {
             this.misraConfigFile = (String) misraMap.get("misraConfigFile");
@@ -97,6 +123,23 @@ public class InvocationAssistance {
         this.saOverride = Util.fixEmpty(saOverride);
         this.covBuildBlacklist = Util.fixEmpty(covBuildBlacklist);
     }
+
+    public String getPostCovBuildCmd() {
+        return postCovBuildCmd;
+    }
+
+    public boolean getIsUsingPostCovBuildCmd() {
+        return isUsingPostCovBuildCmd;
+    }
+
+    public boolean getIsUsingPostCovAnalyzeCmd() {
+        return isUsingPostCovAnalyzeCmd;
+    }
+
+    public String getPostCovAnalyzeCmd() {
+        return postCovAnalyzeCmd;
+    }
+
 
     public boolean getIsCompiledSrc() {
         return isCompiledSrc;
@@ -231,7 +274,11 @@ public class InvocationAssistance {
         String misraConfigFile = override.getMisraConfigFile() != null ? override.getMisraConfigFile() : getMisraConfigFile();
         boolean isCompiledSrc = override.getIsCompiledSrc();
         boolean isScriptSrc = override.getIsScriptSrc();
-        return new InvocationAssistance(isCompiledSrc, isScriptSrc, buildArguments, analyzeArguments, commitArguments, intermediateDir, isUsingMisra, misraConfigFile, csharpAssemblies, javaWarFilesNames, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist, javaWarFiles);
+        boolean isUsingPostBuildCmd = override.getIsUsingPostCovBuildCmd();
+        String postBuildCmd = override.getPostCovBuildCmd();
+        boolean isUsingPostCovAnalyzeCmd = override.getIsUsingPostCovAnalyzeCmd();
+        String postCovAnalyzeCmd = override.getPostCovAnalyzeCmd();
+        return new InvocationAssistance(isUsingPostBuildCmd, postBuildCmd, isUsingPostCovAnalyzeCmd, postCovAnalyzeCmd, isCompiledSrc, isScriptSrc, buildArguments, analyzeArguments, commitArguments, intermediateDir, isUsingMisra, misraConfigFile, csharpAssemblies, javaWarFilesNames, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist, javaWarFiles);
     }
 
     // Sets the environment varibles for the project so that we can replace environment varibles

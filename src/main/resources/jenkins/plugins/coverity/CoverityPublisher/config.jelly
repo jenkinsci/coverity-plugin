@@ -236,9 +236,27 @@
                             <f:entry title="Additional cov-build arguments:" field="buildArguments">
                                 <f:textbox/>
                             </f:entry>
+                            <f:optionalBlock title="Add post cov-build command" field="postCovBuildJSON" checked="${instance.postCovBuildCmd != null}" >
+                                <f:block>
+                                    <table style="padding-left:2%; width:100%;">
+                                        <f:entry name="postCovBuildCmd" title="Post cov-build command:" field="postCovBuildCmd" value="${it.postCovBuildCmd}">
+                                            <f:textbox/>
+                                        </f:entry>
+                                    </table>
+                                </f:block>
+                            </f:optionalBlock>
                             <f:entry title="Additional cov-analyze arguments:" field="analyzeArguments">
                                 <f:textbox/>
                             </f:entry>
+                            <f:optionalBlock title="Add post cov-analyze command" field="postCovAnalyzeJSON" checked="${instance.postCovAnalyzeCmd != null}" >
+                                <f:block>
+                                    <table style="padding-left:2%; width:100%;">
+                                        <f:entry name="postCovAnalyzeCmd" title="Post cov-analyze command:" field="postCovAnalyzeCmd" value="${it.postCovAnalyzeCmd}">
+                                            <f:textbox/>
+                                        </f:entry>
+                                    </table>
+                                </f:block>
+                            </f:optionalBlock>
                             <f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
                                 <f:textbox/>
                             </f:entry>
