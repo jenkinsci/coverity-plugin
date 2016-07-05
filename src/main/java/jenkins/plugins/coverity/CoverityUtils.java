@@ -19,6 +19,8 @@ import hudson.remoting.VirtualChannel;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -115,29 +117,47 @@ public class CoverityUtils {
 		AbstractBuild build = (AbstractBuild) exec;
 		AbstractProject project = build.getProject();
 		CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-		InvocationAssistance ii = publisher.getInvocationAssistance();
+		InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+
+        if(listener == null){
+            try{
+                throw new Exception("Listener used by getCovBuild() is null.");
+            } catch (Exception e){
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        if(node == null){
+            try{
+                throw new Exception("Node used by getCovBuild() is null.");
+            } catch (Exception e){
+                e.printStackTrace();
+                return null;
+            }
+        }
 
 		String covBuild = "cov-build";
 		String home = null;
 		try {
 			home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
-		} catch(IOException e) {
-			e.printStackTrace();
-		} catch(InterruptedException e) {
-			e.printStackTrace();
+		} catch(Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            listener.getLogger().println("[Error] " + pw.toString());
 		}
-		if(ii != null){
-			if(ii.getSaOverride() != null) {
+		if(invocationAssistance != null){
+			if(invocationAssistance.getSaOverride() != null) {
 				try {
-					home = new CoverityInstallation(ii.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+					home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
 					CoverityUtils.checkDir(node.getChannel(), home);
-				} catch(IOException e) {
-					e.printStackTrace();
-				} catch(InterruptedException e) {
-					e.printStackTrace();
 				} catch(Exception e) {
-					e.printStackTrace();
-				}
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    e.printStackTrace(pw);
+                    listener.getLogger().println("[Error] " + pw.toString());
+                }
 			}
 		}
 		if(home != null) {

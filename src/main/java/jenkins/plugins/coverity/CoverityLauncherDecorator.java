@@ -86,7 +86,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         TaOptionBlock ta = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
-        InvocationAssistance ii = publisher.getInvocationAssistance();
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
 
 
 
@@ -101,12 +101,12 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             isUsingTA = true;
         }
 
-        if(ii != null){
-            String taCheck = ii.checkIAConfig();
+        if(invocationAssistance != null){
+            String taCheck = invocationAssistance.checkIAConfig();
             if(!taCheck.equals("Pass")){
                 throw new RuntimeException(taCheck);
             }
-            isUsingMisra = ii.getIsUsingMisra();
+            isUsingMisra = invocationAssistance.getIsUsingMisra();
         }
 
         if(isUsingTA && isUsingMisra){
@@ -123,21 +123,21 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         try {
-            if(ii == null){
+            if(invocationAssistance == null){
                 FilePath coverityDir = node.getRootPath().child("coverity");
                 coverityDir.mkdirs();
                 temp = coverityDir.createTempDir("temp-", null);
-            }else if(ii.getIntermediateDir() == null) {
+            }else if(invocationAssistance.getIntermediateDir() == null) {
                 FilePath coverityDir = node.getRootPath().child("coverity");
                 coverityDir.mkdirs();
                 temp = coverityDir.createTempDir("temp-", null);
             } else {
-                temp = new FilePath(node.getChannel(), ii.getIntermediateDir());
+                temp = new FilePath(node.getChannel(), invocationAssistance.getIntermediateDir());
                 temp.mkdirs();
             }
 
-            if(ii != null){
-                build.addAction(new CoverityTempDir(temp, ii.getIntermediateDir() == null));
+            if(invocationAssistance != null){
+                build.addAction(new CoverityTempDir(temp, invocationAssistance.getIntermediateDir() == null));
             } else{
                 build.addAction(new CoverityTempDir(temp, true));
             }
@@ -219,7 +219,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
          */
        
         List<String> args = new ArrayList<String>();
-        if(ii != null || ta != null){
+        if(invocationAssistance != null || ta != null){
             args.add("cov-build-placeholder");
             // Adding the intermediate directory
             args.add("--dir");
@@ -235,14 +235,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         String[] blacklist;
-        if(ii != null) {
-            if(ii.getBuildArguments() != null) {
-                for(String arg : ii.getBuildArguments().split(" ")) {
+        if(invocationAssistance != null) {
+            if(invocationAssistance.getBuildArguments() != null) {
+                for(String arg : invocationAssistance.getBuildArguments().split(" ")) {
                     args.add(arg);
                 }
             }
 
-            String blacklistTemp = ii.getCovBuildBlacklist();
+            String blacklistTemp = invocationAssistance.getCovBuildBlacklist();
 
             if(blacklistTemp != null) {
                 blacklist = blacklistTemp.split(",");
@@ -259,7 +259,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         // Evaluation the args to replace any evironment variables 
         args = CoverityUtils.evaluateEnvVars(args, env);
         launcher.getListener().getLogger().println(args.toString());
-        if(ii.getIsScriptSrc() && !ii.getIsCompiledSrc()){
+        if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
             CoverityLauncherDecorator.SKIP.set(true);
         }
 
@@ -306,7 +306,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 AbstractBuild build = (AbstractBuild) exec;
                 AbstractProject project = build.getProject();
                 CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-                InvocationAssistance ii = publisher.getInvocationAssistance();
+                InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
 
                 // Creating a hashmap of the environment variables so that we can evalute the cov-build command
                 Map<String,String> envMap = new HashMap<String,String>();
@@ -327,7 +327,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
                 cmds.addAll(0, Arrays.asList(getPrefix()));
 
-                if(ii.getIsScriptSrc() && ii.getIsCompiledSrc()){
+                if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && invocationAssistance.getIsCompiledSrc()){
                     cmds.add("--fs-capture-search");
                     cmds.add("$WORKSPACE");
                 }
