@@ -95,7 +95,8 @@ public class JasperToolHandler extends CoverityToolHandler{
         }
 
         //run post cov-build command.
-        if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovBuildCmd()){
+        if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovBuildCmd() &&
+                invocationAssistance.getPostCovBuildCmd() != null && !invocationAssistance.getPostCovBuildCmd().isEmpty()){
             try {
                 String postCovBuild = invocationAssistance.getPostCovBuildCmd();
 
@@ -456,7 +457,8 @@ public class JasperToolHandler extends CoverityToolHandler{
         }
 
         //run post cov-analyze command.
-        if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovAnalyzeCmd()){
+        if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovAnalyzeCmd() &&
+                invocationAssistance.getPostCovAnalyzeCmd() != null && !invocationAssistance.getPostCovAnalyzeCmd().isEmpty()){
             try {
                 String postCovAnalyzeCmd = invocationAssistance.getPostCovAnalyzeCmd();
 

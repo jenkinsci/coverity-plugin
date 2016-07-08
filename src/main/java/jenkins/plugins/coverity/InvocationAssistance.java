@@ -87,14 +87,14 @@ public class InvocationAssistance {
         if(this.postCovBuildJSON != null) {
             this.postCovBuildCmd = (String) postCovBuildJSON.get("postCovBuildCmd");
         } else {
-            this.postCovBuildCmd = "";
+            this.postCovBuildCmd = null;
         }
         this.isUsingPostCovBuildCmd = this.postCovBuildJSON != null;
         this.postCovAnalyzeJSON = postCovAnalyzeJSON;
         if(this.postCovAnalyzeJSON != null) {
             this.postCovAnalyzeCmd = (String) postCovAnalyzeJSON.get("postCovAnalyzeCmd");
         } else {
-            this.postCovAnalyzeCmd = "";
+            this.postCovAnalyzeCmd =null;
         }
         this.isUsingPostCovAnalyzeCmd = this.postCovAnalyzeJSON != null;
         this.misraMap = misraMap;
