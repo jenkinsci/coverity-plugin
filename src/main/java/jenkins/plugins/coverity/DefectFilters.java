@@ -127,13 +127,24 @@ public class DefectFilters {
         return components.contains(component);
     }
 
+	/*
     public boolean isCheckerSelected(String checker) {
         if(ignoredCheckers == null) {
             return false;
         }
         return !ignoredCheckers.contains(checker);
     }
-
+	*/
+	
+	/*  From Sergei's original NCR changes.
+	This method is rewritten to use the checkers array, instead of ignoredCheckers.  This fixes the issue where the plugin might
+    not know about all the checkers that are found by analysis (especially findbugs). */
+    public boolean isCheckerSelected(String checker) {   
+        if(checkers == null) {
+            return false;
+        }
+        return checkers.contains(checker);        
+    }		      
 
 
     public String getCutOffDate() {

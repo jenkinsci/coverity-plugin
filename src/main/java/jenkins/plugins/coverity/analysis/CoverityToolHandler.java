@@ -144,7 +144,11 @@ public abstract class CoverityToolHandler {
         cmd.add(temp.getTempDir().getRemote());
         if(javaWarFiles != null && !javaWarFiles.isEmpty()){
             for(String javaWarFile : javaWarFiles){
-                cmd.add("--webapp-archive");
+                if((new File(javaWarFile)).isFile()) {
+                    cmd.add("--webapp-archive");
+                } else {
+                    cmd.add("--findwars");
+    		    }
                 cmd.add(javaWarFile);
             }
         }
