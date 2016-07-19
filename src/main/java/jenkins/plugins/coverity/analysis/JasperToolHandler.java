@@ -139,7 +139,7 @@ public class JasperToolHandler extends CoverityToolHandler{
 
         // If WAR files specified, emit them prior to running analysis
         // Do not check for presence of Java streams or Java in build
-        List<String> warFiles = null;
+        List<String> warFiles = new ArrayList<String>();
         if(invocationAssistance != null){
             List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
             if(givenWarFiles != null && !givenWarFiles.isEmpty()){
