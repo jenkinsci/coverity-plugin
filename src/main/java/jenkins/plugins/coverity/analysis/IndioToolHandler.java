@@ -69,7 +69,7 @@ public class IndioToolHandler extends CoverityToolHandler {
 
                 List<String> cmd = new ArrayList<String>();
                 cmd.add(postCovBuild);
-                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
@@ -140,7 +140,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                     }
 
                     // Evaluation the cmd to replace any evironment variables
-                    cmd = CoverityUtils.evaluateEnvVars(cmd, build,listener);
+                    cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -202,7 +202,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                         cmd.add("--merge");
 
                         // Evaluation the cmd to replace any evironment variables
-                        cmd = CoverityUtils.evaluateEnvVars(cmd, build,listener);
+                        cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
 
                         ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -293,7 +293,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                 }
 
                 // Evaluation the cmd to replace any evironment variables
-                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
 
                 ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 
@@ -393,7 +393,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                     }
                 }
 
-                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
@@ -425,7 +425,7 @@ public class IndioToolHandler extends CoverityToolHandler {
 
                 List<String> cmd = new ArrayList<String>();
                 cmd.add(postCovAnalyzeCmd);
-                cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
@@ -519,7 +519,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                     }
 
                     // Evaluation the cmd to replace any evironment variables
-                    cmd = CoverityUtils.evaluateEnvVars(cmd, build, listener);
+                    cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
 
                     ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
 

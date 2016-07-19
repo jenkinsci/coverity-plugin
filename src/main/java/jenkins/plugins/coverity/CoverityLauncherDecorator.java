@@ -257,7 +257,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         // Evaluation the args to replace any evironment variables 
-        args = CoverityUtils.evaluateEnvVars(args, env);
+        if(env != null){
+            args = CoverityUtils.evaluateEnvVars(args, env);
+        }
         launcher.getListener().getLogger().println(args.toString());
         if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
             CoverityLauncherDecorator.SKIP.set(true);

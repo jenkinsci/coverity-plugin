@@ -68,7 +68,7 @@ public class CoverityUtils {
 	}
 
 	public static String evaluateEnvVars(String input, EnvVars environment)throws RuntimeException{
-		
+
 		try{
 			return environment.expand(input);
 		}catch(Exception e){
@@ -78,18 +78,20 @@ public class CoverityUtils {
 
 	public static List<String> evaluateEnvVars(List<String> input, EnvVars environment)throws RuntimeException{
 		List<String> output = new ArrayList<String>();
-		
 		try{
-				
 			for(String cmd : input){
-				output.add(environment.expand(cmd));
+                /**
+                 * Fix bug 78168
+                 * After evaluating an environment variable, we need to check if more than one options where specified
+                 * on it. In order to do so, we use the command split(" ").
+                 */
+                cmd = environment.expand(cmd).trim().replaceAll(" +", " ");
+                Collections.addAll(output, cmd.split(" "));
 			}
 		}catch(Exception e){
 			throw new RuntimeException("Error trying to evaluate Environment variables in: " + input.toString() );
 		}
-
 		return output;
-
 	}
 
 
@@ -128,15 +130,6 @@ public class CoverityUtils {
             }
         }
 
-        if(node == null){
-            try{
-                throw new Exception("Node used by getCovBuild() is null.");
-            } catch (Exception e){
-                e.printStackTrace();
-                return null;
-            }
-        }
-
 		String covBuild = "cov-build";
 		String home = null;
 		try {
@@ -146,18 +139,20 @@ public class CoverityUtils {
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             listener.getLogger().println("[Error] " + pw.toString());
+			e.printStackTrace();
 		}
 		if(invocationAssistance != null){
 			if(invocationAssistance.getSaOverride() != null) {
 				try {
 					home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
 					CoverityUtils.checkDir(node.getChannel(), home);
+				} catch(IOException e) {
+					e.printStackTrace();
+				} catch(InterruptedException e) {
+					e.printStackTrace();
 				} catch(Exception e) {
-                    StringWriter sw = new StringWriter();
-                    PrintWriter pw = new PrintWriter(sw);
-                    e.printStackTrace(pw);
-                    listener.getLogger().println("[Error] " + pw.toString());
-                }
+					e.printStackTrace();
+				}
 			}
 		}
 		if(home != null) {
