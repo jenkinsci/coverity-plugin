@@ -16,12 +16,15 @@ import hudson.FilePath;
 import hudson.model.*;
 import hudson.EnvVars;
 import hudson.remoting.VirtualChannel;
+import org.apache.commons.lang.StringUtils;
+import org.apache.tools.ant.types.Commandline;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -76,22 +79,51 @@ public class CoverityUtils {
 		}
 	}
 
-	public static List<String> evaluateEnvVars(List<String> input, EnvVars environment)throws RuntimeException{
+    public static List<String> evaluateEnvVars(List<String> input, EnvVars environment)throws RuntimeException{
 		List<String> output = new ArrayList<String>();
+        String inputString = StringUtils.join(input, " ");
+        boolean parsingWasNeeded = false;
 		try{
-			for(String cmd : input){
+            /**
+             * Fix 78168 and 79244.
+             * Environment variables are now parsed properly even with quotes and spaces. This method will use self
+             * recursion until no further parsing is needed.
+             */
+            for(String cmd : input){
+                for(String key : environment.keySet()){
+                    if(cmd.equals("$" + key) || cmd.equals("${" + key + "}")){
+                        cmd = environment.get(key);
+                        parsingWasNeeded = true;
+                        break;
+                    }
+                }
                 /**
-                 * Fix bug 78168
-                 * After evaluating an environment variable, we need to check if more than one options where specified
-                 * on it. In order to do so, we use the command split(" ").
+                 * In the case of a escaped cmd, Commandline.translateCommandline(cmd) would remove the escaping. Hence,
+                 * in that case the plugin should use the original cmd. However, there are cases on which an env variable
+                 * contains a command as value, then this command would require further parsing.
                  */
-                cmd = environment.expand(cmd).trim().replaceAll(" +", " ");
-                Collections.addAll(output, cmd.split(" "));
-			}
+                String expandedCmds[] = Commandline.translateCommandline(cmd);
+                if(expandedCmds.length > 1){
+                    output.addAll(Arrays.asList(expandedCmds));
+                    parsingWasNeeded = true;
+                } else {
+                    output.add(cmd);
+                }
+            }
+
+            /**
+             * The plugin keeps parsing the given command until parsing the command doesn't change the command anymore.
+             * That condition is determined by the boolean parsingWasNeeded which checks if a new environment variable
+             * was found of if new tokens were found.
+             */
+            if(parsingWasNeeded){
+                return evaluateEnvVars(output, environment);
+            } else {
+                return input;
+            }
 		}catch(Exception e){
 			throw new RuntimeException("Error trying to evaluate Environment variables in: " + input.toString() );
 		}
-		return output;
 	}
 
 

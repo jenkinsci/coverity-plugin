@@ -256,7 +256,11 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             blacklist = new String[0];
         }
 
-        // Evaluation the args to replace any evironment variables 
+        /**
+         * Evaluates the args to replace any environment variables.
+         * Some builds have set "env" to null. Although, I don't see this happening consistently, I added this "if"
+         * clause in order to by pass that issue.
+         */
         if(env != null){
             args = CoverityUtils.evaluateEnvVars(args, env);
         }
