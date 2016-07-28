@@ -224,7 +224,7 @@ public class DefectFilters {
         String key = String.format("%s:%s:%s", defect.getCheckerName(), defect.getDomain(), defect.getCheckerSubcategory());
 
         // if a checker does not have a impact, we let it through since the impact is undetermined. 
-        if(!this.impactMap.containsKey(key)){
+        if(this.impactMap == null || key == null || !this.impactMap.containsKey(key)){
             return true;
         }
 
