@@ -94,8 +94,8 @@ public class CoverityUtils {
             output = EnvParser.tokenize(parsedInput);
             return output;
 
-		}catch(Exception e){
-			throw new RuntimeException("Error trying to evaluate Environment variables in: " + input.toString() );
+		}catch(ParseException e){
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
