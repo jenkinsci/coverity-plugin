@@ -275,6 +275,10 @@ public class CoverityPublisher extends Recorder {
 
             CoverityToolHandler cth = CoverityToolHandler.getHandler(version);
 
+            if(cth == null){
+                throw new Exception("Could not create a CoverityToolHanldler for the given analysis version. Please verify the version file under your Coverity Analysis installation.");
+            }
+
             cth.perform(build, launcher, listener, this);
             
             if(isUnstableBuild()){
