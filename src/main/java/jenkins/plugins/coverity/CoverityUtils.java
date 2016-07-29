@@ -80,47 +80,20 @@ public class CoverityUtils {
 	}
 
     public static List<String> evaluateEnvVars(List<String> input, EnvVars environment)throws RuntimeException{
-		List<String> output = new ArrayList<String>();
+		List<String> output = null;
         String inputString = StringUtils.join(input, " ");
-        boolean parsingWasNeeded = false;
 		try{
-            /**
-             * Fix 78168 and 79244.
-             * Environment variables are now parsed properly even with quotes and spaces. This method will use self
-             * recursion until no further parsing is needed.
-             */
-            for(String cmd : input){
-                for(String key : environment.keySet()){
-                    if(cmd.equals("$" + key) || cmd.equals("${" + key + "}")){
-                        cmd = environment.get(key);
-                        parsingWasNeeded = true;
-                        break;
-                    }
-                }
-                /**
-                 * In the case of a escaped cmd, Commandline.translateCommandline(cmd) would remove the escaping. Hence,
-                 * in that case the plugin should use the original cmd. However, there are cases on which an env variable
-                 * contains a command as value, then this command would require further parsing.
-                 */
-                String expandedCmds[] = Commandline.translateCommandline(cmd);
-                if(expandedCmds.length > 1){
-                    output.addAll(Arrays.asList(expandedCmds));
-                    parsingWasNeeded = true;
-                } else {
-                    output.add(cmd);
-                }
-            }
+			/**
+			 * Fix 78168 and 79244.
+			 * Environment variables are now parsed properly even with quotes and spaces.
+			 * The first step, EnvParser.interpolate(), replace all environment variables on a string taking single quotes in
+             * consideration.
+             * The second step, split that string into tokens taking both single and double quotes into consideration.
+			 */
+            String parsedInput = EnvParser.interpolate(inputString, environment);
+            output = EnvParser.tokenize(parsedInput);
+            return output;
 
-            /**
-             * The plugin keeps parsing the given command until parsing the command doesn't change the command anymore.
-             * That condition is determined by the boolean parsingWasNeeded which checks if a new environment variable
-             * was found of if new tokens were found.
-             */
-            if(parsingWasNeeded){
-                return evaluateEnvVars(output, environment);
-            } else {
-                return input;
-            }
 		}catch(Exception e){
 			throw new RuntimeException("Error trying to evaluate Environment variables in: " + input.toString() );
 		}
