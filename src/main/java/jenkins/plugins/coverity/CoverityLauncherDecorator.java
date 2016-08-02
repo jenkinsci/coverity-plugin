@@ -237,9 +237,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         String[] blacklist;
         if(invocationAssistance != null) {
             if(invocationAssistance.getBuildArguments() != null) {
-                for(String arg : invocationAssistance.getBuildArguments().split(" ")) {
-                    args.add(arg);
-                }
+                args.addAll(EnvParser.tokenizeWithRuntimeException(invocationAssistance.getBuildArguments()));
             }
 
             String blacklistTemp = invocationAssistance.getCovBuildBlacklist();

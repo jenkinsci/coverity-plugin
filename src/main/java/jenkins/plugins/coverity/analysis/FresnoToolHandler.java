@@ -134,10 +134,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     cmd.add("--dir");
                     cmd.add(temp.getTempDir().getRemote());
                     cmd.addAll(testAnalysis.getTaCommandArgs());
-
-                    for(String arg : testAnalysis.getCustomTestCommand().split(" ")) {
-                        cmd.add(arg);
-                    }
+                    cmd.addAll(EnvParser.tokenize(testAnalysis.getCustomTestCommand()));
 
                     // Evaluation the cmd to replace any evironment variables 
                     cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
@@ -496,9 +493,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     if(invocationAssistance != null){
                         if(effectiveIA.getCommitArguments() != null) {
-                            for(String arg : effectiveIA.getCommitArguments().split(" ")) {
-                                cmd.add(arg);
-                            }
+                            cmd.addAll(EnvParser.tokenize(effectiveIA.getCommitArguments()));
                         }
                     }
 

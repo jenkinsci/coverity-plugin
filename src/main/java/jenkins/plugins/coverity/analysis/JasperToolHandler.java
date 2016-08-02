@@ -180,10 +180,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                     cmd.add("--dir");
                     cmd.add(temp.getTempDir().getRemote());
                     cmd.addAll(testAnalysis.getTaCommandArgs());
-
-                    for(String arg : testAnalysis.getCustomTestCommand().split(" ")) {
-                        cmd.add(arg);
-                    }
+                    cmd.addAll(EnvParser.tokenize(testAnalysis.getCustomTestCommand()));
 
                     // Evaluation the cmd to replace any evironment variables
                     cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
@@ -339,9 +336,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                 }
 
                 if(scm.getScmAdditionalCmd() != null) {
-                    for(String arg : scm.getScmAdditionalCmd().trim().replaceAll(" +", " ").split(" ")){
-                        cmd.add(arg);
-                    }
+                    cmd.addAll(EnvParser.tokenize(scm.getScmAdditionalCmd()));
                 }
 
                 // Evaluation the cmd to replace any evironment variables
@@ -440,9 +435,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                 }
 
                 if(effectiveIA.getAnalyzeArguments() != null && !isMisraAnalysis) {
-                    for(String arg : effectiveIA.getAnalyzeArguments().trim().replaceAll(" +", " ").split(" ")){
-                        cmd.add(arg);
-                    }
+                    cmd.addAll(EnvParser.tokenize(effectiveIA.getAnalyzeArguments()));
                 }
 
                 cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
@@ -573,9 +566,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                         if(effectiveIA.getIsUsingMisra() && (this.version.compareMajor(7) == 0)){
                             cmd.add("--misra-only");
                         } else if(effectiveIA.getCommitArguments() != null) {
-                            for(String arg : effectiveIA.getCommitArguments().split(" ")) {
-                                cmd.add(arg);
-                            }
+                            cmd.addAll(EnvParser.tokenize(effectiveIA.getCommitArguments()));
                         }
                     }
 

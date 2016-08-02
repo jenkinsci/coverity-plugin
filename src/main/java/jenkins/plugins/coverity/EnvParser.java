@@ -35,7 +35,7 @@ public class EnvParser {
      *   whiteSpace ::= [ \n\t\r]
      *   text ::= any character except '\'' and '"'
      */
-    public static List<String> tokenize(String input) throws RuntimeException, ParseException {
+    public static List<String> tokenize(String input) throws ParseException {
         List<String> result = new ArrayList<>();
         StringBuilder tokenBuilder = new StringBuilder();
         // Start in SPACE state 
@@ -111,6 +111,14 @@ public class EnvParser {
         }
 
         return result;
+    }
+
+    public static List<String> tokenizeWithRuntimeException(String input) throws RuntimeException {
+        try {
+            return tokenize(input);
+        } catch (ParseException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
     
     /*
