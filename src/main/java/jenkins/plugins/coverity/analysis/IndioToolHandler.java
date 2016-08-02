@@ -344,7 +344,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                 cmd.add("--dir");
                 cmd.add(temp.getTempDir().getRemote());
 
-                boolean isMisraAnalysis = effectiveIA.getIsUsingMisra() && (this.version.compareMajor(7) == 0);
+                boolean isMisraAnalysis = effectiveIA.getIsUsingMisra();
 
                 if(isMisraAnalysis) {
                     cmd.add("--cpp");
@@ -502,7 +502,8 @@ public class IndioToolHandler extends CoverityToolHandler {
                     cmd.add(cim.getUser());
 
                     if(invocationAssistance != null){
-                        if(effectiveIA.getIsUsingMisra() && (this.version.compareMajor(7) == 0)){
+                        // --misra-only option should only be used on Indio, it is deprecated on newer versions.
+                        if(effectiveIA.getIsUsingMisra()){
                             cmd.add("--misra-only");
                         } else if(effectiveIA.getCommitArguments() != null) {
                             cmd.addAll(EnvParser.tokenize(effectiveIA.getCommitArguments()));

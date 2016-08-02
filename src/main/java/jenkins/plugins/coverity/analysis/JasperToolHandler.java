@@ -396,7 +396,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                 cmd.add("--dir");
                 cmd.add(temp.getTempDir().getRemote());
 
-                boolean isMisraAnalysis = effectiveIA.getIsUsingMisra() && (this.version.compareMajor(7) == 0);
+                boolean isMisraAnalysis = effectiveIA.getIsUsingMisra();
 
                 if(isMisraAnalysis) {
                     cmd.add("--cpp");
@@ -563,9 +563,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                     cmd.add(cim.getUser());
 
                     if(invocationAssistance != null){
-                        if(effectiveIA.getIsUsingMisra() && (this.version.compareMajor(7) == 0)){
-                            cmd.add("--misra-only");
-                        } else if(effectiveIA.getCommitArguments() != null) {
+                        if(effectiveIA.getCommitArguments() != null) {
                             cmd.addAll(EnvParser.tokenize(effectiveIA.getCommitArguments()));
                         }
                     }
