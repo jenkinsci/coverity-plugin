@@ -1,5 +1,8 @@
 package jenkins.plugins.coverity;
 
+import com.coverity.truststore.SslConnector;
+import com.coverity.truststore.url.HttpsTrustStoreStreamHandlerFactory;
+import com.coverity.truststore.url.HttpsTrustStoreUrlConnection;
 import net.sf.json.JSONObject;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -14,12 +17,12 @@ public class SSLConfigurations {
     public SSLConfigurations(boolean trustNewSelfSignedCert, JSONObject certFileJSON){
         setTrustNewSelfSignedCert(trustNewSelfSignedCert);
 
-        /*SslConfigSingleton singleton = SslConfigSingleton.getInstance();
+        SslConfigSingleton singleton = SslConfigSingleton.getInstance();
         if(trustNewSelfSignedCert){
             singleton.setOnNewSelfSignedCert(SslConnector.OnNewSelfSignedCert.valueOf("trust"));
         } else {
             singleton.setOnNewSelfSignedCert(SslConnector.OnNewSelfSignedCert.valueOf("distrust"));
-        }*/
+        }
 
         String certFileName = null;
         if(certFileJSON != null){
@@ -27,8 +30,7 @@ public class SSLConfigurations {
         }
 
         if(certFileName != null && !certFileName.isEmpty()){
-            //singleton.setCertFile(certFileName);
-            setCertFileName(certFileName);
+            singleton.setCertFile(certFileName);
         }
     }
 
@@ -59,20 +61,20 @@ public class SSLConfigurations {
     /**
      * Singleton used for configurations for ssl in case ssl is selected.
      */
-    /*private static class SslConfigSingleton {
+    private static class SslConfigSingleton {
 
-        *//**
+        /**
          * Specify whether to trust or not a self-signed certificate.
-         *//*
+         */
         private SslConnector.OnNewSelfSignedCert onNewSelfSignedCert;
 
         public void setOnNewSelfSignedCert(SslConnector.OnNewSelfSignedCert onNewSelfSignedCert) {
             this.onNewSelfSignedCert = onNewSelfSignedCert;
         }
 
-        *//**
+        /**
          * Sets default extra trust store path.
-         *//*
+         */
         public void setCertFile(String certFileName) {
             HttpsTrustStoreUrlConnection.setDefaultExtraTrustStorePath(certFileName);
         }
@@ -100,6 +102,6 @@ public class SSLConfigurations {
             }
             return instance;
         }
-    }*/
+    }
 
 }
