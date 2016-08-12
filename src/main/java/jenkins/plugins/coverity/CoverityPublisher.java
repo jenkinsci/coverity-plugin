@@ -321,6 +321,7 @@ public class CoverityPublisher extends Recorder {
 
         private List<CIMInstance> instances = new ArrayList<CIMInstance>();
         private String home;
+        private SSLConfigurations sslConfigurations;
         private String javaCheckers;
         private String cxxCheckers;
         private String csharpCheckers;
@@ -461,6 +462,24 @@ public class CoverityPublisher extends Recorder {
             } catch(Exception e) {
             }
             return checkers;
+        }
+
+        public void setSslConfigurations(SSLConfigurations sslConfigurations) {
+            this.sslConfigurations = sslConfigurations;
+        }
+
+        public SSLConfigurations getSslConfigurations() {
+            /**
+             * Fix Bug:85629
+             * If SSL were not configured that resulted on a null pointer exception that marked the build as a failure.
+             * In the case SSL is not configured, by default SSL configurations would be set up to not trust self-signed
+             * certificates and no CA file would be present.
+             */
+            if(this.sslConfigurations != null){
+                return this.sslConfigurations;
+            } else {
+                return new SSLConfigurations(false, null);
+            }
         }
 
         public void setCxxCheckers(String cxxCheckers) {

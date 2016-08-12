@@ -17,6 +17,27 @@
 		<f:validateButton method="checkAnalysisLocation" title="Check" progress="Checking..."
         									  with="home"/>
 
+        <f:optionalBlock title="SSL configurations" name="sslConfigurations" checked="${instance.sslConfigurations.trustNewSelfSignedCert || instance.sslConfigurations.certFileJSON != null}" field="sslConfigurations">
+            <j:set var="instance" value="${instance.sslConfigurations}"/>
+            <f:block>
+                <table style="padding-left:2%; width:100%;">
+                    <f:entry title="Trust Self-signed Certificate" field="trustNewSelfSignedCert" checked="${instance.trustNewSelfSignedCert}">
+                        <f:checkbox/>
+                    </f:entry>
+                    <f:optionalBlock title="Use extra CA certificate" field="certFileJSON"  name="certFileJSON" checked="${instance.certFileJSON}">
+                        <j:set var="instance" value="${instance.certFileJSON}"/>
+                        <f:block>
+                            <table style="padding-left:2%; width:100%;">
+                                <f:entry name="certFileName" title="Enter Certificate File:" field="certFileName" value="${it.certFileName}">
+                                    <f:textbox/>
+                                </f:entry>
+                            </table>
+                        </f:block>
+                    </f:optionalBlock>
+                </table>
+            </f:block>
+        </f:optionalBlock>
+
 		<f:entry title="Coverity Connect instances" field="instances">
 			<f:repeatable var="instance" name="instances" items="${descriptor.instances}" add="Add"
 						  header="Coverity Connect Instance">

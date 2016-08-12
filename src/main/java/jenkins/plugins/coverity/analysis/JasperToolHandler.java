@@ -40,6 +40,14 @@ public class JasperToolHandler extends CoverityToolHandler{
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
 
+        boolean isTrustNewSelfSignedCert = false;
+        String certFileName = null;
+        SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
+        if(sslConfigurations != null){
+            isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
+            certFileName = sslConfigurations.getCertFileName();
+        }
+
         // Seting the new envVars after jenkins has modified its own
         CoverityUtils.setEnvVars(envVars);
 
@@ -172,10 +180,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                     cmd.add("--dir");
                     cmd.add(temp.getTempDir().getRemote());
                     cmd.addAll(testAnalysis.getTaCommandArgs());
-
-                    for(String arg : testAnalysis.getCustomTestCommand().split(" ")) {
-                        cmd.add(arg);
-                    }
+                    cmd.addAll(EnvParser.tokenize(testAnalysis.getCustomTestCommand()));
 
                     // Evaluation the cmd to replace any evironment variables
                     cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
@@ -233,6 +238,14 @@ public class JasperToolHandler extends CoverityToolHandler{
                         cmd.add(cimStream.getStream());
                         if(cim.isUseSSL()){
                             cmd.add("--ssl");
+                            if(isTrustNewSelfSignedCert){
+                                cmd.add("--on-new-cert");
+                                cmd.add("trust");
+                            }
+                            if(certFileName != null){
+                                cmd.add("--certs");
+                                cmd.add(certFileName);
+                            }
                         }
 
                         cmd.add("--user");
@@ -323,9 +336,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                 }
 
                 if(scm.getScmAdditionalCmd() != null) {
-                    for(String arg : scm.getScmAdditionalCmd().trim().replaceAll(" +", " ").split(" ")){
-                        cmd.add(arg);
-                    }
+                    cmd.addAll(EnvParser.tokenize(scm.getScmAdditionalCmd()));
                 }
 
                 // Evaluation the cmd to replace any evironment variables
@@ -424,9 +435,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                 }
 
                 if(effectiveIA.getAnalyzeArguments() != null && !isMisraAnalysis) {
-                    for(String arg : effectiveIA.getAnalyzeArguments().trim().replaceAll(" +", " ").split(" ")){
-                        cmd.add(arg);
-                    }
+                    cmd.addAll(EnvParser.tokenize(effectiveIA.getAnalyzeArguments()));
                 }
 
                 cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
@@ -535,6 +544,14 @@ public class JasperToolHandler extends CoverityToolHandler{
                         cmd.add("--https-port");
                         cmd.add(Integer.toString(cim.getPort()));
                         cmd.add("--ssl");
+                        if(isTrustNewSelfSignedCert){
+                            cmd.add("--on-new-cert");
+                            cmd.add("trust");
+                        }
+                        if(certFileName != null){
+                            cmd.add("--certs");
+                            cmd.add(certFileName);
+                        }
                     }else{
                         cmd.add("--port");
                         cmd.add(Integer.toString(cim.getPort()));
@@ -547,9 +564,7 @@ public class JasperToolHandler extends CoverityToolHandler{
 
                     if(invocationAssistance != null){
                         if(effectiveIA.getCommitArguments() != null) {
-                            for(String arg : effectiveIA.getCommitArguments().split(" ")) {
-                                cmd.add(arg);
-                            }
+                            cmd.addAll(EnvParser.tokenize(effectiveIA.getCommitArguments()));
                         }
                     }
 
