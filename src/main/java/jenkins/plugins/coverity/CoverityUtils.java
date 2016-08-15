@@ -167,4 +167,27 @@ public class CoverityUtils {
 		return covBuild;
 	}
 
+	/**
+	 * Gets the stacktrace from an exception, so that this exception can be handled.
+	 */
+	public static String getStackTrace(Exception e){
+		StringWriter writer = new StringWriter();
+		PrintWriter printWriter = new PrintWriter( writer );
+		e.printStackTrace(printWriter);
+		printWriter.flush();
+		String stackTrace = writer.toString();
+		try {
+			writer.close();
+			printWriter.close();
+		} catch (IOException e1) {
+		}
+		return stackTrace;
+	}
+
+	public static void handleException(String message, AbstractBuild<?, ?> build, BuildListener listener, Exception exception){
+		listener.getLogger().println(message);
+		listener.getLogger().println("Stacktrace: \n" + CoverityUtils.getStackTrace(exception));
+		build.setResult(Result.FAILURE);
+	}
+
 }
