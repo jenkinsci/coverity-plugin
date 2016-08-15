@@ -540,6 +540,17 @@ public class JasperToolHandler extends CoverityToolHandler{
                     if(useDataPort){
                         cmd.add("--dataport");
                         cmd.add(Integer.toString(cim.getDataPort()));
+                        if(cim.isUseSSL()){
+                            cmd.add("--ssl");
+                            if(isTrustNewSelfSignedCert){
+                                cmd.add("--on-new-cert");
+                                cmd.add("trust");
+                            }
+                            if(certFileName != null){
+                                cmd.add("--certs");
+                                cmd.add(certFileName);
+                            }
+                        }
                     }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
                         cmd.add("--https-port");
                         cmd.add(Integer.toString(cim.getPort()));

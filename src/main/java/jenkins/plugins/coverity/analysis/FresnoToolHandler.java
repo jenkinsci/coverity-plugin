@@ -478,6 +478,9 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     if(useDataPort){
                         cmd.add("--dataport");
                         cmd.add(Integer.toString(cim.getDataPort()));
+                        if(cim.isUseSSL()){
+                            cmd.add("--ssl");
+                        }
                     }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
                         cmd.add("--https-port");
                         cmd.add(Integer.toString(cim.getPort()));
