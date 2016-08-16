@@ -189,7 +189,22 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
     }
 
     public static StreamStatus checkStream(CoverityPublisher publisher, CIMStream cs) {
+
+        if(cs == null || cs.getInstance() == null){
+            return new StreamStatus(false, "Could not connect to a Coverity instance. \n " +
+                    "Verify that a Coverity instance have been configured for this job", cs, null);
+        }
+
         CIMInstance ci = publisher.getDescriptor().getInstance(cs.getInstance());
+
+        if(ci == null){
+            return new StreamStatus(false, "Could not connect to a Coverity instance. \n " +
+                    "Verify that a Coverity instance have been configured for this job", cs, null);
+        }
+
+        if(cs.getStream() == null){
+            return new StreamStatus(false, "Could not find any Stream that matches the given configuration for this job.", cs, null);
+        }
 
         //check if instance is valid
         {

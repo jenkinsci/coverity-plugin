@@ -150,12 +150,24 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         // Do not run cov-build if language is "CSHARP"
         boolean onlyCS = true;
         for(CIMStream cs : publisher.getCimStreams()) {
+            if(cs == null || cs.getInstance() == null){
+                throw new RuntimeException("Could not connect to a Coverity instance. \n " +
+                        "Verify that a Coverity instance have been configured for this job");
+            }
+            CIMInstance cim = publisher.getDescriptor().getInstance(cs.getInstance());
+            if(cim == null){
+                throw new RuntimeException("Could not connect to a Coverity instance. \n " +
+                        "Verify that a Coverity instance have been configured for this job");
+            }
+            if(cs.getStream() == null){
+                throw new RuntimeException("Could not find any Stream that matches the given configuration for this job.");
+            }
+            String id = cs.getInstance() + "/" + cs.getStream();
+
             if(!cs.getDefectFilters().checkConfig()){
                 throw new RuntimeException("Defect Filters Configured incorrectly. Possibly new configuration have been " +
                         "added and needs configurations. \n Please check your build configuration before running another build.");
             }
-            CIMInstance cim = publisher.getDescriptor().getInstance(cs.getInstance());
-            String id = cs.getInstance() + "/" + cs.getStream();
             try {
                 if(cim.getWsVersion().equals("v9")){
                     com.coverity.ws.v9.StreamDataObj stream = cim.getStreamIndio(cs.getStream());
