@@ -258,7 +258,7 @@ public class CoverityPublisher extends Recorder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         if(isOldDataPresent()) {
             logger.info("Old data format detected. Converting to new format.");
             convertOldData();
@@ -286,11 +286,13 @@ public class CoverityPublisher extends Recorder {
             }
             return true;
         } catch(com.coverity.ws.v6.CovRemoteServiceException_Exception e){
-            throw new InterruptedException("Cov Remote Service Error " + e.getMessage());
+            CoverityUtils.handleException("Cov Remote Service Error: \n" + e.getMessage(), build, listener, e);
+            return false;
         } catch(com.coverity.ws.v9.CovRemoteServiceException_Exception e){
-            throw new InterruptedException("Cov Remote Service Error " + e.getMessage());
+            CoverityUtils.handleException("Cov Remote Service Error: \n" + e.getMessage(), build, listener, e);
+            return false;
         } catch (Exception e) {
-            e.printStackTrace();
+            CoverityUtils.handleException("Exception message: \n" + e.getMessage(), build, listener, e);
             return false;
         }
     }
