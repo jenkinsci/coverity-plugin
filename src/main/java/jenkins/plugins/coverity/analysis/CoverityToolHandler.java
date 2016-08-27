@@ -1,9 +1,11 @@
 package jenkins.plugins.coverity.analysis;
 
 import com.coverity.ws.v6.*;
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.util.ArgumentListBuilder;
 import jenkins.plugins.coverity.*;
@@ -137,6 +139,7 @@ public abstract class CoverityToolHandler {
     public boolean covEmitWar(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home, CoverityTempDir temp, List<String> javaWarFiles) throws IOException, InterruptedException {
         String covEmitJava = "cov-emit-java";
         covEmitJava = new FilePath(launcher.getChannel(), home).child("bin").child(covEmitJava).getRemote();
+        EnvVars envVars = build.getEnvironment(listener);
 
         List<String> cmd = new ArrayList<String>();
         cmd.add(covEmitJava);
@@ -152,12 +155,14 @@ public abstract class CoverityToolHandler {
         try {
             CoverityLauncherDecorator.SKIP.set(true);
 
-            int result = launcher.
-                    launch().
-                    cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                    pwd(build.getWorkspace()).
-                    stdout(listener).
-                    join();
+            InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance(build);
+            boolean useAdvancedParser = false;
+
+            if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
+                useAdvancedParser = true;
+            }
+
+            int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
             if(result != 0) {
                 listener.getLogger().println("[Coverity] " + covEmitJava + " returned " + result + ", aborting...");
@@ -174,6 +179,7 @@ public abstract class CoverityToolHandler {
                                 CoverityTempDir temp, boolean csharpMsvsca, String csharpMsvscaOutputFiles) throws IOException, InterruptedException {
         String covImportMsvsca = "cov-import-msvsca";
         covImportMsvsca = new FilePath(launcher.getChannel(), home).child("bin").child(covImportMsvsca).getRemote();
+        EnvVars envVars = build.getEnvironment(listener);
 
         List<String> importCmd = new ArrayList<String>();
         importCmd.add(covImportMsvsca);
@@ -202,12 +208,15 @@ public abstract class CoverityToolHandler {
         } else {
             listener.getLogger().println("[MSVSCA] MSVSCA Import cmd so far is: " + importCmd.toString());
 
-            int importResult = launcher.
-                    launch().
-                    cmds(new ArgumentListBuilder(importCmd.toArray(new String[importCmd.size()]))).
-                    pwd(build.getWorkspace()).
-                    stdout(listener).
-                    join();
+            InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance(build);
+            boolean useAdvancedParser = false;
+
+            if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
+                useAdvancedParser = true;
+            }
+
+            int importResult = CoverityUtils.runCmd(importCmd, build, launcher, listener, envVars, useAdvancedParser);
+
             if(importResult != 0) {
                 listener.getLogger().println("[Coverity] " + covImportMsvsca + " returned " + importResult + ", aborting...");
                 return false;

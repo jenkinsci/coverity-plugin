@@ -263,6 +263,9 @@
                             <f:entry title="Intermediate directory:" field="intermediateDir">
                                 <f:textbox/>
                             </f:entry>
+                            <f:entry title="Use advanced parsing mechanism" field="useAdvancedParser">
+                                <f:checkbox/>
+                            </f:entry>
                             <f:optionalBlock title="Use MISRA for analysis and commit" field="misraMap" checked="${instance.misraConfigFile != null}" >
                                 <f:block>
                                     <table style="padding-left:2%; width:100%;">

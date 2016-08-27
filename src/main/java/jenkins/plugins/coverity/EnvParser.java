@@ -5,7 +5,9 @@ import java.util.List;
 
 import hudson.EnvVars;
 
+import static jenkins.plugins.coverity.EnvParser.State.DOUBLE_QUOTE;
 import static jenkins.plugins.coverity.EnvParser.State.NORMAL;
+import static jenkins.plugins.coverity.EnvParser.State.SINGLE_QUOTE;
 
 /**
  * Parser for replacing environment variables on a given string and split it into tokens.
@@ -277,5 +279,18 @@ public class EnvParser {
 
     private static ParseException makeInterpolationException(String reason) {
         return new ParseException("Error expanding environment variables: " + reason);
+    }
+
+    public static String interpolateRecursively(String input, int depth, EnvVars environment) throws ParseException {
+        if(depth > 20){
+            throw new ParseException("Recursive environment variable referenced in \"" + input + "\"");
+        }
+
+        String interpolated = EnvParser.interpolate(input, environment);
+        if(interpolated.equals(input)){
+            return input;
+        } else {
+            return interpolateRecursively(interpolated, depth + 1, environment);
+        }
     }
 }

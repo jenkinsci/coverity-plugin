@@ -110,7 +110,7 @@ public class EnvParserTest{
      * Tests for the tokenize() method.
      */
     private void assertTokenizesTo(String input, String... output) {
-        try{
+        try {
             assertArrayEquals(output, EnvParser.tokenize(input).toArray());
         } catch(ParseException e) {
             fail();
@@ -123,14 +123,6 @@ public class EnvParserTest{
             fail();
         } catch(ParseException e) {
         }
-    }
-
-    private List<String> toTokenList(String... tokens) {
-        List<String> list = new ArrayList<>();
-        for(String token : tokens) {
-            list.add(token);
-        }
-        return list;
     }
     
     @Test

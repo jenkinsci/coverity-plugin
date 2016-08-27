@@ -266,14 +266,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             blacklist = new String[0];
         }
 
-        /**
-         * Evaluates the args to replace any environment variables.
-         * Some builds have set "env" to null. Although, I don't see this happening consistently, I added this "if"
-         * clause in order to by pass that issue.
-         */
-        if(env != null){
-            args = CoverityUtils.evaluateEnvVars(args, env);
-        }
         launcher.getListener().getLogger().println(args.toString());
         if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
             CoverityLauncherDecorator.SKIP.set(true);
@@ -317,20 +309,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     return decorated.launch(starter);
                 }
 
-                Executor executor = Executor.currentExecutor();
-                Queue.Executable exec = executor.getCurrentExecutable();
-                AbstractBuild build = (AbstractBuild) exec;
-                AbstractProject project = build.getProject();
-                CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-                InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-
-                // Creating a hashmap of the environment variables so that we can evalute the cov-build command
-                Map<String,String> envMap = new HashMap<String,String>();
-
-                for(String env : starter.envs()){
-                    String[] split = env.split("=",2);
-                    envMap.put(env.split("=",2)[0],env.split("=",2)[1]);
-                }
+                InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance();
 
                 List<String> cmds = starter.cmds();
 
@@ -348,8 +327,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     cmds.add("$WORKSPACE");
                 }
 
-                // parsing the command and replacing all environment variable with their respective value
-                cmds = CoverityUtils.evaluateEnvVars(cmds,new EnvVars(envMap));
+                boolean useAdvancedParser = false;
+
+                if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
+                    useAdvancedParser = true;
+                }
+
+                cmds = CoverityUtils.prepareCmds(cmds, starter.envs(), useAdvancedParser);
+
                 starter.cmds(cmds);
                 boolean[] masks = starter.masks();
                 if(masks == null) {

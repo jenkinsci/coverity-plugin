@@ -50,14 +50,26 @@ public class IndioToolHandler extends CoverityToolHandler {
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
 
-        // Seting the new envVars after jenkins has modified its own
-        CoverityUtils.setEnvVars(envVars);
+        boolean useAdvancedParser = false;
+        if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
+            useAdvancedParser = true;
+        }
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
             home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         CoverityUtils.checkDir(launcher.getChannel(), home);
+
+        /**
+         * Fix Bug 84077
+         * Sets COV_ANALYSIS_ROOT and COV_IDIR so they are available to the scripts used, for instance, in the post
+         * cov-build and cov-analyze commands.
+         */
+        envVars.put("COV_IDIR", temp.getTempDir().getRemote());
+        if(home != null) {
+            envVars.put("COV_ANALYSIS_ROOT", home);
+        }
 
         //run post cov-build command.
         if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovBuildCmd() &&
@@ -68,17 +80,11 @@ public class IndioToolHandler extends CoverityToolHandler {
                 CoverityLauncherDecorator.SKIP.set(true);
 
                 List<String> cmd = new ArrayList<String>();
-                cmd.add(postCovBuild);
-                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
+                cmd.addAll(EnvParser.tokenize(postCovBuild));
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                int result = launcher.
-                        launch().
-                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                        pwd(build.getWorkspace()).
-                        stdout(listener).
-                        join();
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] " + postCovBuild + " returned " + result + ", aborting...");
@@ -136,20 +142,9 @@ public class IndioToolHandler extends CoverityToolHandler {
                     cmd.addAll(testAnalysis.getTaCommandArgs());
                     cmd.addAll(EnvParser.tokenize(testAnalysis.getCustomTestCommand()));
 
-                    // Evaluation the cmd to replace any evironment variables
-                    cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
-                    ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
                     listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                    int result = launcher.
-                            launch().
-                            cmds(args).
-                            pwd(CoverityUtils.evaluateEnvVars(testAnalysis.getCustomWorkDir(), build, listener)).
-                            stdout(listener).
-                            stderr(listener.getLogger()).
-                            join();
+                    int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                     if(result != 0) {
                         listener.getLogger().println("[Coverity] cov-capture returned " + result + ", aborting...");
@@ -198,20 +193,11 @@ public class IndioToolHandler extends CoverityToolHandler {
                         cmd.add(cim.getUser());
                         cmd.add("--merge");
 
-                        // Evaluation the cmd to replace any evironment variables
-                        cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
-                        ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
                         listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                        int result = launcher.
-                                launch().
-                                cmds(args).
-                                envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
-                                stdout(listener).
-                                stderr(listener.getLogger()).
-                                join();
+                        EnvVars envVarsWithPassphrase = new EnvVars(envVars);
+                        envVarsWithPassphrase.put("COVERITY_PASSPHRASE", cim.getPassword());
+                        int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVarsWithPassphrase, useAdvancedParser);
 
                         if(result != 0) {
                             listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
@@ -287,21 +273,9 @@ public class IndioToolHandler extends CoverityToolHandler {
                     cmd.addAll(EnvParser.tokenize(scm.getScmAdditionalCmd()));
                 }
 
-                // Evaluation the cmd to replace any evironment variables
-                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
-                ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
-
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                int result = launcher.
-                        launch().
-                        cmds(args).
-                        stdout(listener).
-                        envs(env).
-                        stderr(listener.getLogger()).
-                        join();
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] cov-import-scm returned " + result + ", aborting...");
@@ -386,16 +360,9 @@ public class IndioToolHandler extends CoverityToolHandler {
                     cmd.addAll(EnvParser.tokenize(effectiveIA.getAnalyzeArguments()));
                 }
 
-                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                int result = launcher.
-                        launch().
-                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                        pwd(build.getWorkspace()).
-                        stdout(listener).
-                        join();
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] " + covAnalyze + " returned " + result + ", aborting...");
@@ -417,17 +384,11 @@ public class IndioToolHandler extends CoverityToolHandler {
                 CoverityLauncherDecorator.SKIP.set(true);
 
                 List<String> cmd = new ArrayList<String>();
-                cmd.add(postCovAnalyzeCmd);
-                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
+                cmd.addAll(EnvParser.tokenize(postCovAnalyzeCmd));
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                int result = launcher.
-                        launch().
-                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                        pwd(build.getWorkspace()).
-                        stdout(listener).
-                        join();
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] " + postCovAnalyzeCmd + " returned " + result + ", aborting...");
@@ -513,19 +474,9 @@ public class IndioToolHandler extends CoverityToolHandler {
                         }
                     }
 
-                    // Evaluation the cmd to replace any evironment variables
-                    cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
-                    ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
-                    int result = launcher.
-                            launch().
-                            cmds(args).
-                            envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
-                            stdout(listener).
-                            stderr(listener.getLogger()).
-                            pwd(build.getWorkspace()).
-                            join();
+                    EnvVars envVarsWithPassphrase = new EnvVars(envVars);
+                    envVarsWithPassphrase.put("COVERITY_PASSPHRASE", cim.getPassword());
+                    int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVarsWithPassphrase, useAdvancedParser);
 
                     if(result != 0) {
                         listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");

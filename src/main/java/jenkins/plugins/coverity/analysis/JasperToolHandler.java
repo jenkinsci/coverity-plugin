@@ -48,11 +48,13 @@ public class JasperToolHandler extends CoverityToolHandler{
             certFileName = sslConfigurations.getCertFileName();
         }
 
-        // Seting the new envVars after jenkins has modified its own
-        CoverityUtils.setEnvVars(envVars);
+        boolean useAdvancedParser = false;
+        if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
+            useAdvancedParser = true;
+        }
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars)).forEnvironment(build.getEnvironment(listener)).getHome();
+            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         CoverityUtils.checkDir(launcher.getChannel(), home);
@@ -60,13 +62,12 @@ public class JasperToolHandler extends CoverityToolHandler{
         /**
          * Fix Bug 84077
          * Sets COV_ANALYSIS_ROOT and COV_IDIR so they are available to the scripts used, for instance, in the post
-         * cov-build command.
+         * cov-build and cov-analyze commands.
          */
         envVars.put("COV_IDIR", temp.getTempDir().getRemote());
         if(home != null) {
             envVars.put("COV_ANALYSIS_ROOT", home);
         }
-        CoverityUtils.setEnvVars(envVars);
 
         //run cov-build for scripting language sources only.
         if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
@@ -83,16 +84,9 @@ public class JasperToolHandler extends CoverityToolHandler{
                 cmd.add("--fs-capture-search");
                 cmd.add("$WORKSPACE");
 
-                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                int result = launcher.
-                        launch().
-                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                        pwd(build.getWorkspace()).
-                        stdout(listener).
-                        join();
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] " + covBuild + " returned " + result + ", aborting...");
@@ -114,17 +108,11 @@ public class JasperToolHandler extends CoverityToolHandler{
                 CoverityLauncherDecorator.SKIP.set(true);
 
                 List<String> cmd = new ArrayList<String>();
-                cmd.add(postCovBuild);
-                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
+                cmd.addAll(EnvParser.tokenize(postCovBuild));
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                int result = launcher.
-                        launch().
-                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                        pwd(build.getWorkspace()).
-                        stdout(listener).
-                        join();
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] " + postCovBuild + " returned " + result + ", aborting...");
@@ -144,7 +132,7 @@ public class JasperToolHandler extends CoverityToolHandler{
             List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
             if(givenWarFiles != null && !givenWarFiles.isEmpty()){
                 for(String givenJar : givenWarFiles){
-                    String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, envVars) : null;
+                    String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, build, listener) : null;
                     if(javaWarFile != null) {
                         listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
                         warFiles.add(javaWarFile);
@@ -182,20 +170,9 @@ public class JasperToolHandler extends CoverityToolHandler{
                     cmd.addAll(testAnalysis.getTaCommandArgs());
                     cmd.addAll(EnvParser.tokenize(testAnalysis.getCustomTestCommand()));
 
-                    // Evaluation the cmd to replace any evironment variables
-                    cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
-                    ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
                     listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                    int result = launcher.
-                            launch().
-                            cmds(args).
-                            pwd(CoverityUtils.evaluateEnvVars(testAnalysis.getCustomWorkDir(), envVars)).
-                            stdout(listener).
-                            stderr(listener.getLogger()).
-                            join();
+                    int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                     if(result != 0) {
                         listener.getLogger().println("[Coverity] cov-capture returned " + result + ", aborting...");
@@ -252,20 +229,11 @@ public class JasperToolHandler extends CoverityToolHandler{
                         cmd.add(cim.getUser());
                         cmd.add("--merge");
 
-                        // Evaluation the cmd to replace any evironment variables
-                        cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
-                        ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
                         listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                        int result = launcher.
-                                launch().
-                                cmds(args).
-                                envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
-                                stdout(listener).
-                                stderr(listener.getLogger()).
-                                join();
+                        EnvVars envVarsWithPassphrase = new EnvVars(envVars);
+                        envVarsWithPassphrase.put("COVERITY_PASSPHRASE", cim.getPassword());
+                        int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVarsWithPassphrase, useAdvancedParser);
 
                         if(result != 0) {
                             listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
@@ -332,28 +300,16 @@ public class JasperToolHandler extends CoverityToolHandler{
                 // Perforce requires p4port to be set when running scm
                 Map<String,String> env = new HashMap<String,String>();;
                 if(scm.getScmSystem().equals("perforce")){
-                    env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), envVars));
+                    env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), build, listener));
                 }
 
                 if(scm.getScmAdditionalCmd() != null) {
                     cmd.addAll(EnvParser.tokenize(scm.getScmAdditionalCmd()));
                 }
 
-                // Evaluation the cmd to replace any evironment variables
-                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
-                ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
-
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                int result = launcher.
-                        launch().
-                        cmds(args).
-                        stdout(listener).
-                        envs(env).
-                        stderr(listener.getLogger()).
-                        join();
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] cov-import-scm returned " + result + ", aborting...");
@@ -438,16 +394,9 @@ public class JasperToolHandler extends CoverityToolHandler{
                     cmd.addAll(EnvParser.tokenize(effectiveIA.getAnalyzeArguments()));
                 }
 
-                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                int result = launcher.
-                        launch().
-                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                        pwd(build.getWorkspace()).
-                        stdout(listener).
-                        join();
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] " + covAnalyze + " returned " + result + ", aborting...");
@@ -469,17 +418,11 @@ public class JasperToolHandler extends CoverityToolHandler{
                 CoverityLauncherDecorator.SKIP.set(true);
 
                 List<String> cmd = new ArrayList<String>();
-                cmd.add(postCovAnalyzeCmd);
-                cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
+                cmd.addAll(EnvParser.tokenize(postCovAnalyzeCmd));
 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
-                int result = launcher.
-                        launch().
-                        cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).
-                        pwd(build.getWorkspace()).
-                        stdout(listener).
-                        join();
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] " + postCovAnalyzeCmd + " returned " + result + ", aborting...");
@@ -495,7 +438,7 @@ public class JasperToolHandler extends CoverityToolHandler{
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), envVars);
+            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), build, listener);
             if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
                 boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
                 if(!result) {
@@ -579,19 +522,9 @@ public class JasperToolHandler extends CoverityToolHandler{
                         }
                     }
 
-                    // Evaluation the cmd to replace any evironment variables
-                    cmd = CoverityUtils.evaluateEnvVars(cmd, envVars);
-
-                    ArgumentListBuilder args = new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]));
-
-                    int result = launcher.
-                            launch().
-                            cmds(args).
-                            envs(Collections.singletonMap("COVERITY_PASSPHRASE", cim.getPassword())).
-                            stdout(listener).
-                            stderr(listener.getLogger()).
-                            pwd(build.getWorkspace()).
-                            join();
+                    EnvVars envVarsWithPassphrase = new EnvVars(envVars);
+                    envVarsWithPassphrase.put("COVERITY_PASSPHRASE", cim.getPassword());
+                    int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVarsWithPassphrase, useAdvancedParser);
 
                     if(result != 0) {
                         listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
