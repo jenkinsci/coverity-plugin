@@ -39,12 +39,12 @@ public abstract class CoverityToolHandler {
 
         if(version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
             return new PreFresnoToolHandler();
-        } if(version.compareTo(CoverityVersion.VERSION_INDIO) == 0){
-            return new IndioToolHandler(version);
-        } if(version.compareTo(CoverityVersion.VERSION_INDIO) > 0){
-            return new JasperToolHandler(version);
-        } else {
+        } if(version.compareTo(CoverityVersion.VERSION_FRESNO) >= 0 && version.compareTo(CoverityVersion.VERSION_INDIO) < 0){
             return new FresnoToolHandler(version);
+        } if(version.compareTo(CoverityVersion.VERSION_INDIO) >= 0 && version.compareTo(CoverityVersion.VERSION_JASPER) < 0){
+            return new IndioToolHandler(version);
+        } else {
+            return new JasperToolHandler(version);
         }
     }
 

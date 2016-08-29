@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 public class CoverityVersion implements Comparable<CoverityVersion>, Serializable {
     public static final CoverityVersion VERSION_FRESNO = new CoverityVersion("fresno");
     public static final CoverityVersion VERSION_INDIO = new CoverityVersion("indio");
+    public static final CoverityVersion VERSION_JASPER = new CoverityVersion("jasper");
 
     static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\w+)");
 
@@ -25,8 +26,9 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
     static final HashMap<String, CoverityVersion> codeNameEquivalents = new HashMap<String, CoverityVersion>();
 
     static {
-        codeNameEquivalents.put("lodi", new CoverityVersion(8, 2, 0));
-        codeNameEquivalents.put("kent", new CoverityVersion(8, 1, 0));
+        codeNameEquivalents.put("lodi", new CoverityVersion(8, 6, 0));
+        codeNameEquivalents.put("kent1", new CoverityVersion(8, 5, 1));
+        codeNameEquivalents.put("kent", new CoverityVersion(8, 5, 0));
         codeNameEquivalents.put("jasper", new CoverityVersion(8, 0, 0));
         codeNameEquivalents.put("indio", new CoverityVersion(7, 7, 0));
         codeNameEquivalents.put("harmony", new CoverityVersion(7, 6, 0));
