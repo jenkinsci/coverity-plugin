@@ -152,7 +152,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                     for(Status s : status) {
                         if(s instanceof StreamStatus) {
                             StreamStatus ss = (StreamStatus) s;
-                            if(!ss.getStream().getLanguage().equals("ALL")) {
+                            if(ss.getStream() != null && ss.getStream().getLanguage() != null && !ss.getStream().getLanguage().equals("ALL")) {
                                 singleDomainStreamExists = true;
                                 languagesToAnalyze.add(ss.getStream().getLanguage());
                             } else {
