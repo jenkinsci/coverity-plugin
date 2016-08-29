@@ -378,27 +378,45 @@ public class CIMInstance {
         return result;
     }
 
+    /**
+     * Returns a StreamDataObj for a given streamId. This object must be not null in order to avoid null pointer exceptions.
+     * If the stream is not found an exception explaining the issue is raised.
+     */
     public StreamDataObj getStream(String streamId) throws IOException, CovRemoteServiceException_Exception {
         StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
         List<StreamDataObj> streams = getConfigurationService().getStreams(filter);
-        if(streams.isEmpty()) {
-            return null;
+        if(streams == null || streams.isEmpty()) {
+            throw new IOException("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
         } else {
-            return streams.get(0);
+            StreamDataObj streamDataObj = streams.get(0);
+            if(streamDataObj == null){
+                throw new IOException("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
+            } else {
+                return streams.get(0);
+            }
         }
     }
 
+    /**
+     * Returns a StreamDataObj for a given streamId. This object must be not null in order to avoid null pointer exceptions.
+     * If the stream is not found an exception explaining the issue is raised.
+     */
     public com.coverity.ws.v9.StreamDataObj getStreamIndio(String streamId) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
         com.coverity.ws.v9.StreamFilterSpecDataObj filter = new com.coverity.ws.v9.StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
         List<com.coverity.ws.v9.StreamDataObj> streams = getConfigurationServiceIndio().getStreams(filter);
-        if(streams.isEmpty()) {
-            return null;
+        if(streams == null || streams.isEmpty()) {
+            throw new IOException("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
         } else {
-            return streams.get(0);
+            com.coverity.ws.v9.StreamDataObj streamDataObj = streams.get(0);
+            if(streamDataObj == null){
+                throw new IOException("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
+            } else {
+                return streams.get(0);
+            }
         }
     }
 
