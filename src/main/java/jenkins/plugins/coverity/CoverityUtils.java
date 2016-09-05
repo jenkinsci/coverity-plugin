@@ -17,6 +17,7 @@ import hudson.Launcher;
 import hudson.model.*;
 import hudson.EnvVars;
 import hudson.model.Queue;
+import hudson.remoting.Channel;
 import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -34,10 +35,17 @@ import java.util.regex.Pattern;
 
 public class CoverityUtils {
 
-	public static String evaluateEnvVars(String input, AbstractBuild build, TaskListener listener)throws RuntimeException{
-
+	/**
+     * Evaluates an environment variable using the specified parser. The result is an interpolated string.
+     */
+    public static String evaluateEnvVars(String input, EnvVars environment, boolean useAdvancedParser)throws RuntimeException{
 		try{
-			return build.getEnvironment(listener).expand(input);
+            if(useAdvancedParser){
+                String interpolated = EnvParser.interpolateRecursively(input, 1, environment);
+                return interpolated;
+            } else {
+                return environment.expand(input);
+            }
 		}catch(Exception e){
 			throw new RuntimeException("Error trying to evaluate environment variable: " + input);
 		}
@@ -58,9 +66,7 @@ public class CoverityUtils {
 	 * @return  string of cov-build's path
 	 */
 	public static String getCovBuild(TaskListener listener, Node node) {
-		Executor executor = Executor.currentExecutor();
-		Queue.Executable exec = executor.getCurrentExecutable();
-		AbstractBuild build = (AbstractBuild) exec;
+		AbstractBuild build = getBuild();
 		AbstractProject project = build.getProject();
 		CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
 		InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
@@ -160,6 +166,12 @@ public class CoverityUtils {
 		build.setResult(Result.FAILURE);
 	}
 
+    public static void handleException(String message, AbstractBuild<?, ?> build, TaskListener listener, Exception exception){
+        listener.getLogger().println(message);
+        listener.getLogger().println("Stacktrace: \n" + CoverityUtils.getStackTrace(exception));
+        build.setResult(Result.FAILURE);
+    }
+
     /**
      * Prepares command according with the specified parsing mechanism. If "useAdvancedParser" is set to true, the plugin
      * will evaluate environment variables with its custom mechanism. If not, environment variable substitution will be
@@ -167,6 +179,14 @@ public class CoverityUtils {
      */
     public static List<String> prepareCmds(List<String> input, String[] envVarsArray, boolean useAdvancedParser){
         EnvVars envVars = new EnvVars(arrayToMap(envVarsArray));
+        if(useAdvancedParser){
+            return CoverityUtils.evaluateEnvVars(input, envVars);
+        } else {
+            return input;
+        }
+    }
+
+    public static List<String> prepareCmds(List<String> input, EnvVars envVars, boolean useAdvancedParser){
         if(useAdvancedParser){
             return CoverityUtils.evaluateEnvVars(input, envVars);
         } else {
@@ -209,9 +229,7 @@ public class CoverityUtils {
      * available, for example while decorating the launcher.
      */
     public static InvocationAssistance getInvocationAssistance(){
-        Executor executor = Executor.currentExecutor();
-        Queue.Executable exec = executor.getCurrentExecutable();
-        AbstractBuild build = (AbstractBuild) exec;
+        AbstractBuild build = getBuild();
         return getInvocationAssistance(build);
     }
 
@@ -251,5 +269,12 @@ public class CoverityUtils {
                 envs(launcherEnvVars).
                 join();
         return result;
+    }
+
+    public static AbstractBuild getBuild(){
+        Executor executor = Executor.currentExecutor();
+        Queue.Executable exec = executor.getCurrentExecutable();
+        AbstractBuild build = (AbstractBuild) exec;
+        return build;
     }
 }

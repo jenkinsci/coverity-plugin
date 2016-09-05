@@ -54,7 +54,7 @@ public class JasperToolHandler extends CoverityToolHandler{
         }
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
+            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars, useAdvancedParser)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         CoverityUtils.checkDir(launcher.getChannel(), home);
@@ -132,7 +132,7 @@ public class JasperToolHandler extends CoverityToolHandler{
             List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
             if(givenWarFiles != null && !givenWarFiles.isEmpty()){
                 for(String givenJar : givenWarFiles){
-                    String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, build, listener) : null;
+                    String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, envVars, useAdvancedParser) : null;
                     if(javaWarFile != null) {
                         listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
                         warFiles.add(javaWarFile);
@@ -300,7 +300,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                 // Perforce requires p4port to be set when running scm
                 Map<String,String> env = new HashMap<String,String>();;
                 if(scm.getScmSystem().equals("perforce")){
-                    env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), build, listener));
+                    env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), envVars, useAdvancedParser));
                 }
 
                 if(scm.getScmAdditionalCmd() != null) {
@@ -438,7 +438,7 @@ public class JasperToolHandler extends CoverityToolHandler{
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), build, listener);
+            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), envVars, useAdvancedParser);
             if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
                 boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
                 if(!result) {

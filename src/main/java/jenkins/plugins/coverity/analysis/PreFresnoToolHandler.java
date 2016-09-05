@@ -43,13 +43,12 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         boolean isDisplayChart = publisher.isDisplayChart();
-        if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), build, listener)).forEnvironment(build.getEnvironment(listener)).getHome();
-        }
-
         boolean useAdvancedParser = false;
         if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
             useAdvancedParser = true;
+        }
+        if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
+            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars, useAdvancedParser)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         /**
@@ -97,7 +96,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
             List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
             if(givenWarFiles != null && !givenWarFiles.isEmpty()){
                 for(String givenJar : givenWarFiles){
-                    String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, build,  listener) : null;
+                    String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, envVars, useAdvancedParser) : null;
                     if(javaWarFile != null) {
                         listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
                         warFiles.add(javaWarFile);
@@ -233,7 +232,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), build, listener);
+            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), envVars, useAdvancedParser);
             if(analyzedLanguages.contains("CSHARP") && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
                 boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
                 if(!result) {

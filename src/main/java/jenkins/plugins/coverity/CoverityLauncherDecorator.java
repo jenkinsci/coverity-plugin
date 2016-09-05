@@ -27,6 +27,7 @@ import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.remoting.Channel;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -88,9 +89,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         ScmOptionBlock scm = publisher.getScmOptionBlock();
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
 
-
-
-        FilePath temp;
         boolean isUsingTA = false;
         boolean isUsingMisra = false;
         if(ta != null){
@@ -120,31 +118,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             if(!scmCheck.equals("Pass")){
                 throw new RuntimeException(scmCheck);
             }
-        }
-
-        try {
-            if(invocationAssistance == null){
-                FilePath coverityDir = node.getRootPath().child("coverity");
-                coverityDir.mkdirs();
-                temp = coverityDir.createTempDir("temp-", null);
-            }else if(invocationAssistance.getIntermediateDir() == null) {
-                FilePath coverityDir = node.getRootPath().child("coverity");
-                coverityDir.mkdirs();
-                temp = coverityDir.createTempDir("temp-", null);
-            } else {
-                temp = new FilePath(node.getChannel(), invocationAssistance.getIntermediateDir());
-                temp.mkdirs();
-            }
-
-            if(invocationAssistance != null){
-                build.addAction(new CoverityTempDir(temp, invocationAssistance.getIntermediateDir() == null));
-            } else{
-                build.addAction(new CoverityTempDir(temp, true));
-            }
-        } catch(IOException e) {
-            throw new RuntimeException("Error while creating temporary directory for Coverity", e);
-        } catch(InterruptedException e) {
-            throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
         }
 
         // Do not run cov-build if language is "CSHARP"
@@ -236,7 +209,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             // Adding the intermediate directory
             args.add("--dir");
             // Adding the build command for the code
-            args.add(temp.getRemote());
+            args.add("$COV_IDIR");
         }
 
         // Adding in Test Analysis arguments into the code when no other test command is needed to run.
@@ -266,7 +239,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             blacklist = new String[0];
         }
 
-        launcher.getListener().getLogger().println(args.toString());
         if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
             CoverityLauncherDecorator.SKIP.set(true);
         }
@@ -333,15 +305,48 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     useAdvancedParser = true;
                 }
 
-                cmds = CoverityUtils.prepareCmds(cmds, starter.envs(), useAdvancedParser);
+                /**
+                 * Gets environment variables from the build and add them to the ProcStarter without overriding its variables.
+                 */
+                AbstractBuild build = CoverityUtils.getBuild();
+                EnvVars envVars = null;
+                try {
+                    envVars = build.getEnvironment(listener);
+                } catch (InterruptedException e) {
+                    CoverityUtils.handleException(e.getMessage(), build, listener, e);
+                }
 
-                starter.cmds(cmds);
+                /**
+                 * Notice COV_IDIR variable must be resolved before running cov-build. Also this method creates the
+                 * necessary directories.
+                 */
+                setupIntermediateDirectory(build, this.getListener(), node, envVars);
+
+                /**
+                 * Overrides environment variables on the ProcStarter.
+                 *
+                 * First, get the environment variables from the ProcStarter. Then, add more environment variables to it.
+                 * Finally, creates a new ProcStarter object identically to the first one but with overridden variables.
+                 */
+                String[] starterEnvVars = starter.envs();
+                starterEnvVars = CoverityUtils.addEnvVars(starterEnvVars, envVars);
+                starter = starter.envs(starterEnvVars);
+
+                cmds = CoverityUtils.prepareCmds(cmds, envVars, useAdvancedParser);
+
+                /**
+                 * Display cov-build command on the console. Coverity's parser is used in order to resolve environment
+                 * variables on that command just for display purposes.
+                 */
+                getListener().getLogger().println(CoverityUtils.prepareCmds(cmds, envVars, true).toString());
+
+                starter = starter.cmds(cmds);
                 boolean[] masks = starter.masks();
                 if(masks == null) {
                     masks = new boolean[cmds.size()];
-                    starter.masks(masks);
+                    starter = starter.masks(masks);
                 } else {
-                    starter.masks(prefix(masks));
+                    starter = starter.masks(prefix(masks));
                 }
             }
             return decorated.launch(starter);
@@ -393,6 +398,68 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 }
             }
             return false;
+        }
+    }
+
+    /**
+     * Resolves environment variables on the specified intermediate directory. If the result is a null object or the
+     * path is empty an exception is thrown.
+     */
+    public FilePath resolveIntermediateDirectory(AbstractBuild<?,?> build, TaskListener listener, EnvVars envVars, String idirInput){
+        File idirFile = null;
+        FilePath idirFilePath = null;
+        try {
+            String idir = EnvParser.interpolateRecursively(idirInput, 1, envVars);
+            idirFile = new File(idir);
+            idirFilePath = new FilePath(idirFile);
+            if(idirFilePath == null){
+                throw new RuntimeException("The specified Intermediate Directory is not valid: " + idirInput);
+            }
+        } catch (ParseException e) {
+            CoverityUtils.handleException(e.getMessage(), build, listener, e);
+        } catch (Exception e){
+            CoverityUtils.handleException("The specified Intermediate Directory is not valid: " + idirInput, build, listener, e);
+        }
+        return idirFilePath;
+    }
+
+    /**
+     * Sets the value of environment variable "COV_IDIR" and creates necessary directories. This variable is used as argument of "--dir" for
+     * cov-build.
+     *
+     * If the environment variable has already being set then that value is used. Otherwise, the value of
+     * this variable is set to either a temporary directory or the idir specified on the UI under the
+     * Intermediate Directory option.
+     *
+     * Notice this variable must be resolved before running cov-build. Also this method creates necessary directories.
+     */
+    public void setupIntermediateDirectory(AbstractBuild<?,?> build, TaskListener listener, Node node, EnvVars envVars){
+        if(!envVars.containsKey("COV_IDIR")){
+            FilePath temp;
+            InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance(build);
+            try {
+                if(invocationAssistance == null || invocationAssistance.getIntermediateDir() == null ||
+                        invocationAssistance.getIntermediateDir().isEmpty()){
+                    FilePath coverityDir = node.getRootPath().child("coverity");
+                    coverityDir.mkdirs();
+                    temp = coverityDir.createTempDir("temp-", null);
+                } else {
+                    // Gets a not null nor empty intermediate directory.
+                    temp = resolveIntermediateDirectory(build, listener, envVars, invocationAssistance.getIntermediateDir());
+                    temp.mkdirs();
+                }
+
+                if(invocationAssistance != null){
+                    build.addAction(new CoverityTempDir(temp, invocationAssistance.getIntermediateDir() == null));
+                } else{
+                    build.addAction(new CoverityTempDir(temp, true));
+                }
+            } catch(IOException e) {
+                throw new RuntimeException("Error while creating temporary directory for Coverity", e);
+            } catch(InterruptedException e) {
+                throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
+            }
+            envVars.put("COV_IDIR", temp.getRemote());
         }
     }
 }
