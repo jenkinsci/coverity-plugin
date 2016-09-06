@@ -323,7 +323,8 @@ public class IndioToolHandler extends CoverityToolHandler {
                 if(isMisraAnalysis) {
                     cmd.add("--cpp");
                     if(effectiveIA.getMisraConfigFile() != null && !effectiveIA.getMisraConfigFile().isEmpty()){
-                        cmd.add("--misra-config " + effectiveIA.getMisraConfigFile());
+                        cmd.add("--misra-config ");
+                        cmd.add(effectiveIA.getMisraConfigFile());
                     } else {
                         throw new RuntimeException("Couldn't find MISRA configuration file.");
                     }
