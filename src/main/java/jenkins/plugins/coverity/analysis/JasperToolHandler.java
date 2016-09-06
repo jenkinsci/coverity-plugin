@@ -436,7 +436,7 @@ public class JasperToolHandler extends CoverityToolHandler{
         }
 
         // Import Microsoft Visual Studio Code Anaysis results
-        if(invocationAssistance != null) {
+        if(invocationAssistance != null && invocationAssistance.getCsharpMsvscaOutputFiles() != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
             String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), envVars, useAdvancedParser);
             if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
