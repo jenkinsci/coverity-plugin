@@ -124,7 +124,11 @@ public class CoverityUtils {
          */
         List<String> output = new ArrayList<>();
         String interpolated = EnvParser.interpolateRecursively(input, 1, environment);
-        output.addAll(EnvParser.tokenize(interpolated));
+        if(interpolated.equals(input)){
+            output.add(interpolated);
+        } else {
+            output.addAll(EnvParser.tokenize(interpolated));
+        }
         return output;
     }
 

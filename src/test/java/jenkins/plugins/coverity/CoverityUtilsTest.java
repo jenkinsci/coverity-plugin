@@ -85,8 +85,8 @@ public class CoverityUtilsTest {
         assertExpand("\"\"$ABC\"\"", Arrays.asList("123"), environment);
 
         //Expands environment variables with single quotes
-        assertExpand("\'$ABC\'", Arrays.asList("$ABC"), environment);
-        assertExpand("\'$DOUBLE_QUOTE_VAR1\'", Arrays.asList("$DOUBLE_QUOTE_VAR1"), environment);
+        assertExpand("\'$ABC\'", Arrays.asList("\'$ABC\'"), environment);
+        assertExpand("\'$DOUBLE_QUOTE_VAR1\'", Arrays.asList("\'$DOUBLE_QUOTE_VAR1\'"), environment);
         assertExpand("$SINGLE_QUOTE_VAR1", Arrays.asList("a b"), environment);
         assertExpand("$SINGLE_QUOTE_VAR2", Arrays.asList("a \" b", "123"), environment);
     }
