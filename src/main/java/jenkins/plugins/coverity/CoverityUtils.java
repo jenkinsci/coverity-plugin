@@ -281,4 +281,17 @@ public class CoverityUtils {
     public  static String doubleQuote(String input){
         return "\"" + input + "\"";
     }
+
+    /**
+     * Coverity's parser remove double/single quotes but Jenkins parser does not. When dealing (for instance) with
+     * streams with spaces, we would expect [--stream, My Stream]. In order to do this the token "My Stream" must be
+     * quoted if using out parser, but not if using Jenkins.
+     */
+    public  static String doubleQuote(String input, boolean useAdvancedParser){
+        if(useAdvancedParser){
+            return "\"" + input + "\"";
+        } else {
+            return input;
+        }
+    }
 }

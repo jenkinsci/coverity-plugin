@@ -184,7 +184,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                         cmd.add("--port");
                         cmd.add(Integer.toString(cim.getPort()));
                         cmd.add("--stream");
-                        cmd.add(CoverityUtils.doubleQuote(cimStream.getStream()));
+                        cmd.add(CoverityUtils.doubleQuote(cimStream.getStream(), useAdvancedParser));
                         if(cim.isUseSSL()){
                             cmd.add("--ssl");
                         }
@@ -443,7 +443,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
                     }
 
                     cmd.add("--stream");
-                    cmd.add(CoverityUtils.doubleQuote(cimStream.getStream()));
+                    cmd.add(CoverityUtils.doubleQuote(cimStream.getStream(), useAdvancedParser));
                     cmd.add("--user");
                     cmd.add(cim.getUser());
 
