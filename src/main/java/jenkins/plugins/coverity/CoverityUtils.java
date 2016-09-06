@@ -124,11 +124,7 @@ public class CoverityUtils {
          */
         List<String> output = new ArrayList<>();
         String interpolated = EnvParser.interpolateRecursively(input, 1, environment);
-        if(interpolated.equals(input)){
-            output.add(interpolated);
-        } else {
-            output.addAll(EnvParser.tokenize(interpolated));
-        }
+        output.addAll(EnvParser.tokenize(interpolated));
         return output;
     }
 
@@ -280,5 +276,9 @@ public class CoverityUtils {
         Queue.Executable exec = executor.getCurrentExecutable();
         AbstractBuild build = (AbstractBuild) exec;
         return build;
+    }
+
+    public  static String doubleQuote(String input){
+        return "\"" + input + "\"";
     }
 }

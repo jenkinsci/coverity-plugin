@@ -280,7 +280,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     cmd.add(useDataPort ? "--dataport" : "--port");
                     cmd.add(useDataPort ? Integer.toString(cim.getDataPort()) : Integer.toString(cim.getPort()));
                     cmd.add("--stream");
-                    cmd.add(cimStream.getStream());
+                    cmd.add(CoverityUtils.doubleQuote(cimStream.getStream()));
                     cmd.add("--user");
                     cmd.add(cim.getUser());
 
