@@ -273,12 +273,12 @@ public class JasperToolHandler extends CoverityToolHandler{
 
                 if(scm.getScmToolArguments() != null){
                     cmd.add("--tool-arg");
-                    cmd.add(scm.getScmToolArguments());
+                    cmd.add(CoverityUtils.doubleQuote(scm.getScmToolArguments(), useAdvancedParser));
                 }
 
                 if(scm.getScmCommandArgs() != null){
                     cmd.add("--command-arg");
-                    cmd.add(scm.getScmCommandArgs());
+                    cmd.add(CoverityUtils.doubleQuote(scm.getScmCommandArgs(), useAdvancedParser));
                 }
 
                 if(scm.getLogFileLoc() != null){
