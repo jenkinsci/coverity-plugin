@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -48,6 +47,19 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
      * A ThreadLocal that is used to disable cov-build when running other Coverity tools during the build.
      */
     public static ThreadLocal<Boolean> SKIP = new ThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
+
+    /**
+     * A ThreadLocal that is used to disable the pre-cov-build configurations (such as creating an idir directory.
+     *
+     * Notice that there are scenarios on which it is necessary to run this pre-cov-build configuration without
+     * running cov-build. This happens for example when running analysis for scripting languages only.
+     */
+    public static ThreadLocal<Boolean> SKIP_PRECOVBUILD = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
             return false;
@@ -275,23 +287,29 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         @Override
         public Proc launch(ProcStarter starter) throws IOException {
-            if(!SKIP.get()) {
-                if(isBlacklisted(starter.cmds().get(0))) {
-                    logger.info(starter.cmds().get(0) + " is blacklisted, skipping cov-build");
-                    return decorated.launch(starter);
-                }
+            /**
+             * Sets the intermediate diretory before running cov-build. This will only be run one time per build in order
+             * to avoid recreating the idir.
+             */
+            if(!SKIP_PRECOVBUILD.get()){
+                /**
+                 * Gets environment variables from the build.
+                 */
+                AbstractBuild build = CoverityUtils.getBuild();
+                EnvVars envVars = CoverityUtils.getBuildEnvVars(listener);
 
+                /**
+                 * Notice COV_IDIR variable must be resolved before running cov-build. Also this method creates the
+                 * necessary directories.
+                 */
+                setupIntermediateDirectory(build, this.getListener(), node, envVars);
+                SKIP_PRECOVBUILD.set(true);
+            }
+            if(!SKIP.get()) {
+                String firstStarterCmd = starter.cmds().get(0);
                 InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance();
 
                 List<String> cmds = starter.cmds();
-
-                //skip jdk installations
-                String lastArg = cmds.get(cmds.size() - 1);
-                if(lastArg.startsWith(toolsDir) && lastArg.endsWith(".sh")) {
-                    logger.info(lastArg + " is a tools script, skipping cov-build");
-                    return decorated.launch(starter);
-                }
-
                 cmds.addAll(0, Arrays.asList(getPrefix()));
 
                 if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && invocationAssistance.getIsCompiledSrc()){
@@ -308,19 +326,19 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 /**
                  * Gets environment variables from the build and add them to the ProcStarter without overriding its variables.
                  */
-                AbstractBuild build = CoverityUtils.getBuild();
-                EnvVars envVars = null;
-                try {
-                    envVars = build.getEnvironment(listener);
-                } catch (InterruptedException e) {
-                    CoverityUtils.handleException(e.getMessage(), build, listener, e);
+                EnvVars envVars = CoverityUtils.getBuildEnvVars(listener);
+
+                if(isBlacklisted(firstStarterCmd)) {
+                    logger.info(firstStarterCmd + " is blacklisted, skipping cov-build");
+                    return decorated.launch(starter);
                 }
 
-                /**
-                 * Notice COV_IDIR variable must be resolved before running cov-build. Also this method creates the
-                 * necessary directories.
-                 */
-                setupIntermediateDirectory(build, this.getListener(), node, envVars);
+                //skip jdk installations
+                String lastArg = cmds.get(cmds.size() - 1);
+                if(lastArg.startsWith(toolsDir) && lastArg.endsWith(".sh")) {
+                    logger.info(lastArg + " is a tools script, skipping cov-build");
+                    return decorated.launch(starter);
+                }
 
                 /**
                  * Overrides environment variables on the ProcStarter.

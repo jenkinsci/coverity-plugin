@@ -294,4 +294,18 @@ public class CoverityUtils {
             return input;
         }
     }
+
+    /**
+     * Gets environment variables from the build.
+     */
+    public static EnvVars getBuildEnvVars(TaskListener listener){
+        AbstractBuild build = CoverityUtils.getBuild();
+        EnvVars envVars = null;
+        try {
+            envVars = build.getEnvironment(listener);
+        } catch (Exception e) {
+            CoverityUtils.handleException(e.getMessage(), build, listener, e);
+        }
+        return envVars;
+    }
 }
