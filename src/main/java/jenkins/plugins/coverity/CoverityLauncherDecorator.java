@@ -287,6 +287,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         @Override
         public Proc launch(ProcStarter starter) throws IOException {
+            EnvVars envVars = CoverityUtils.getBuildEnvVars(listener);
             /**
              * Sets the intermediate diretory before running cov-build. This will only be run one time per build in order
              * to avoid recreating the idir.
@@ -296,7 +297,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                  * Gets environment variables from the build.
                  */
                 AbstractBuild build = CoverityUtils.getBuild();
-                EnvVars envVars = CoverityUtils.getBuildEnvVars(listener);
+                envVars = CoverityUtils.getBuildEnvVars(listener);
 
                 /**
                  * Notice COV_IDIR variable must be resolved before running cov-build. Also this method creates the
@@ -322,11 +323,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
                     useAdvancedParser = true;
                 }
-
-                /**
-                 * Gets environment variables from the build and add them to the ProcStarter without overriding its variables.
-                 */
-                EnvVars envVars = CoverityUtils.getBuildEnvVars(listener);
 
                 if(isBlacklisted(firstStarterCmd)) {
                     logger.info(firstStarterCmd + " is blacklisted, skipping cov-build");
