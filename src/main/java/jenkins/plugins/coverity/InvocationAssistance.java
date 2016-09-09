@@ -1,13 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011 Coverity, Inc
-
+ * Copyright (c) 2016 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Coverity, Inc - initial implementation and documentation
+ *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
 package jenkins.plugins.coverity;
 import hudson.EnvVars;
