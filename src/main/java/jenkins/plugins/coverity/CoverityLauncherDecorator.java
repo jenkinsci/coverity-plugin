@@ -419,20 +419,18 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
      * Resolves environment variables on the specified intermediate directory. If the result is a null object or the
      * path is empty an exception is thrown.
      */
-    public FilePath resolveIntermediateDirectory(AbstractBuild<?,?> build, TaskListener listener, EnvVars envVars, String idirInput){
-        File idirFile = null;
+    public FilePath resolveIntermediateDirectory(AbstractBuild<?,?> build, TaskListener listener, Node node, EnvVars envVars, String idirInput){
         FilePath idirFilePath = null;
         try {
             String idir = EnvParser.interpolateRecursively(idirInput, 1, envVars);
-            idirFile = new File(idir);
-            idirFilePath = new FilePath(idirFile);
-            if(idirFilePath == null){
-                throw new RuntimeException("The specified Intermediate Directory is not valid: " + idirInput);
+            if(idir == null || idir.isEmpty()){
+                throw new Exception("The specified Intermediate Directory is not valid: " + idirInput);
             }
+            idirFilePath = new FilePath(node.getChannel(), idir);
         } catch (ParseException e) {
             CoverityUtils.handleException(e.getMessage(), build, listener, e);
         } catch (Exception e){
-            CoverityUtils.handleException("The specified Intermediate Directory is not valid: " + idirInput, build, listener, e);
+            CoverityUtils.handleException("An error occured while setting intermediate directory: " + idirInput, build, listener, e);
         }
         return idirFilePath;
     }
@@ -459,7 +457,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     temp = coverityDir.createTempDir("temp-", null);
                 } else {
                     // Gets a not null nor empty intermediate directory.
-                    temp = resolveIntermediateDirectory(build, listener, envVars, invocationAssistance.getIntermediateDir());
+                    temp = resolveIntermediateDirectory(build, listener, node, envVars, invocationAssistance.getIntermediateDir());
                     temp.mkdirs();
                 }
 
