@@ -80,6 +80,36 @@ public class IndioToolHandler extends CoverityToolHandler {
             envVars.put("COV_ANALYSIS_ROOT", home);
         }
 
+        //run cov-build for scripting language sources only.
+        if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
+            try {
+                String covBuild = CoverityUtils.getCovBuild(listener, node);
+
+                CoverityLauncherDecorator.SKIP.set(true);
+
+                List<String> cmd = new ArrayList<String>();
+                cmd.add(covBuild);
+                cmd.add("--dir");
+                cmd.add(temp.getTempDir().getRemote());
+                cmd.add("--no-command");
+                cmd.add("--fs-capture-search");
+                cmd.add("$WORKSPACE");
+
+                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
+
+                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
+
+                if(result != 0) {
+                    listener.getLogger().println("[Coverity] " + covBuild + " returned " + result + ", aborting...");
+                    build.setResult(Result.FAILURE);
+                    return false;
+                }
+
+            } finally {
+                CoverityLauncherDecorator.SKIP.set(false);
+            }
+        }
+
         //run post cov-build command.
         if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovBuildCmd() &&
                 invocationAssistance.getPostCovBuildCmd() != null && !invocationAssistance.getPostCovBuildCmd().isEmpty()){
