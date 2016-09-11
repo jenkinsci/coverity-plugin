@@ -310,12 +310,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance();
 
                 List<String> cmds = starter.cmds();
-                cmds.addAll(0, Arrays.asList(getPrefix()));
 
                 if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && invocationAssistance.getIsCompiledSrc()){
-                    cmds.add("--fs-capture-search");
-                    cmds.add("$WORKSPACE");
+                    cmds.add(0, "$WORKSPACE");
+                    cmds.add(0, "--fs-capture-search");
                 }
+
+                cmds.addAll(0, Arrays.asList(getPrefix()));
 
                 boolean useAdvancedParser = false;
 
