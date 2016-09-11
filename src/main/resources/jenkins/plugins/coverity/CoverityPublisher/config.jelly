@@ -210,21 +210,7 @@
 				</f:optionalBlock>
 				-->
 
-                <tr>
-                    <td class="setting-name" colspan="3">
-                        <f:checkbox field="displayChart" default="true"/>
-                        <label class="attach-previous">Display defects on chart</label>
-                    </td>
-                    <td class="setting-help">
-                        <a href="#" class="help-button"
-                           helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/displayDefects">
-                            <img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
-                        </a>
-                    </td>
-                </tr>
-                <f:helpArea/>
-
-				<f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
+                <f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
 								 checked="${instance.invocationAssistance != null}" name="invocationAssistance">
 					<j:set var="instance" value="${instance.invocationAssistance}"/>
                     <f:block>

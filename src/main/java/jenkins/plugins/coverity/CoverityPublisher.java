@@ -96,8 +96,6 @@ public class CoverityPublisher extends Recorder {
 
     private final ScmOptionBlock scmOptionBlock;
 
-    private final boolean displayChart;
-
     // Internal variable to notify the Publisher that the build should be marked as unstable 
     // since we cannot set the build as unstable within the tool handler
     private boolean unstableBuild;
@@ -105,7 +103,6 @@ public class CoverityPublisher extends Recorder {
     @DataBoundConstructor
     public CoverityPublisher(List<CIMStream> cimStreams,
                              InvocationAssistance invocationAssistance,
-                             boolean displayChart,
                              boolean failBuild,
                              boolean unstable,
                              boolean keepIntDir,
@@ -120,7 +117,6 @@ public class CoverityPublisher extends Recorder {
                              ScmOptionBlock scmOptionBlock) {
         this.cimStreams = cimStreams;
         this.invocationAssistance = invocationAssistance;
-        this.displayChart = displayChart;
         this.failBuild = failBuild;
         this.unstable = unstable;
         this.mailSender = mailSender;
@@ -202,10 +198,6 @@ public class CoverityPublisher extends Recorder {
 
     public InvocationAssistance getInvocationAssistance() {
         return invocationAssistance;
-    }
-
-    public boolean isDisplayChart() {
-        return displayChart;
     }
 
     public boolean isFailBuild() {

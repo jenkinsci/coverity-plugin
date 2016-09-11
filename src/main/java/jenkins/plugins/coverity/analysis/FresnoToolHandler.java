@@ -56,7 +56,6 @@ public class FresnoToolHandler extends CoverityToolHandler {
         File workspace = build.getRootDir();
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        boolean isDisplayChart = publisher.isDisplayChart();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
 
@@ -491,7 +490,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
             }
         }
 
-        if(isDisplayChart && !publisher.isSkipFetchingDefects()) {
+        if(!publisher.isSkipFetchingDefects()) {
             Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
             BufferedReader reader = new BufferedReader(build.getLogReader());
             String line = null;
