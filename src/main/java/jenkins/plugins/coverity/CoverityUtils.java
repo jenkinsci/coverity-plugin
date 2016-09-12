@@ -20,6 +20,7 @@ import hudson.remoting.Channel;
 import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.apache.tools.ant.types.Commandline;
 
 import java.io.File;
@@ -51,6 +52,8 @@ public class CoverityUtils {
 	}
 
     public static void checkDir(VirtualChannel channel, String home) throws Exception {
+        Validate.notNull(channel, VirtualChannel.class.getName() + " object can't be null");
+        Validate.notNull(home, String.class.getName() + " object can't be null");
 		FilePath homePath = new FilePath(channel, home);
         if(!homePath.exists()){
             throw new Exception("Directory: " + home + " doesn't exist.");

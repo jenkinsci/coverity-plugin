@@ -41,6 +41,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -388,8 +389,8 @@ public class CoverityPublisher extends Recorder {
 
         public void setJavaCheckers(String javaCheckers) {
             this.javaCheckers = Util.fixEmpty(javaCheckers);
-            try{
-                this.javaCheckers = IOUtils.toString(getClass().getResourceAsStream("java-checkers.txt"));
+            try(InputStream inputStream = getClass().getResourceAsStream("java-checkers.txt")){
+                this.javaCheckers = IOUtils.toString(inputStream);
             }catch(IOException e){
                 logger.info("Failed loading Java Checkers text file.");
             }
@@ -477,8 +478,8 @@ public class CoverityPublisher extends Recorder {
 
         public void setCxxCheckers(String cxxCheckers) {
             this.cxxCheckers = Util.fixEmpty(cxxCheckers);
-            try{
-                this.cxxCheckers = IOUtils.toString(getClass().getResourceAsStream("cxx-checkers.txt"));
+            try(InputStream inputStream = getClass().getResourceAsStream("cxx-checkers.txt")){
+                this.cxxCheckers = IOUtils.toString(inputStream);
             }catch(IOException e){
                 logger.info("Failed to load Cxx Checkers text file");
             }
@@ -538,8 +539,8 @@ public class CoverityPublisher extends Recorder {
         public void setCsharpCheckers(String csharpCheckers) {
             this.csharpCheckers = Util.fixEmpty(csharpCheckers);
 
-            try{
-                this.csharpCheckers = IOUtils.toString(getClass().getResourceAsStream("csharp-checkers.txt"));
+            try(InputStream inputStream = getClass().getResourceAsStream("csharp-checkers.txt")){
+                this.csharpCheckers = IOUtils.toString(inputStream);
             }catch(IOException e){
                 logger.info("Failed to load C sharp Checkers text file");
             }

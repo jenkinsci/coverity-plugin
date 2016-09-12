@@ -25,7 +25,9 @@ import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.remoting.Channel;
+import org.apache.commons.lang.Validate;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -296,7 +298,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                  * Gets environment variables from the build.
                  */
                 AbstractBuild build = CoverityUtils.getBuild();
-                envVars = CoverityUtils.getBuildEnvVars(listener);
 
                 /**
                  * Notice COV_IDIR variable must be resolved before running cov-build. Also this method creates the
@@ -445,7 +446,11 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
      *
      * Notice this variable must be resolved before running cov-build. Also this method creates necessary directories.
      */
-    public void setupIntermediateDirectory(AbstractBuild<?,?> build, TaskListener listener, Node node, EnvVars envVars){
+    public void setupIntermediateDirectory(@Nonnull AbstractBuild<?,?> build, @Nonnull TaskListener listener, @Nonnull Node node, @Nonnull EnvVars envVars){
+        Validate.notNull(build, AbstractBuild.class.getName() + " object can't be null");
+        Validate.notNull(listener, TaskListener.class.getName() + " object can't be null");
+        Validate.notNull(node, Node.class.getName() + " object can't be null");
+        Validate.notNull(envVars, EnvVars.class.getName() + " object can't be null");
         if(!envVars.containsKey("COV_IDIR")){
             FilePath temp;
             InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance(build);
