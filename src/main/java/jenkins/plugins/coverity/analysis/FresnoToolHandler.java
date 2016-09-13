@@ -277,6 +277,10 @@ public class FresnoToolHandler extends CoverityToolHandler {
                 if(scm.getScmSystem().equals("perforce")){
                     env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), envVars, useAdvancedParser));
                 }
+
+                if(scm.getScmAdditionalCmd() != null) {
+                    cmd.addAll(EnvParser.tokenize(scm.getScmAdditionalCmd()));
+                }
                 
                 listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
 
