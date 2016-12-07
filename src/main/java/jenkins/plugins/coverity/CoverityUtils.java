@@ -29,11 +29,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class CoverityUtils {
+
+    private static final Logger logger = Logger.getLogger(CoverityUtils.class.getName());
 
 	/**
      * Evaluates an environment variable using the specified parser. The result is an interpolated string.
@@ -180,8 +183,8 @@ public class CoverityUtils {
      * handled by Jenkins in the standard way.
      */
     public static List<String> prepareCmds(List<String> input, String[] envVarsArray, boolean useAdvancedParser){
-        EnvVars envVars = new EnvVars(arrayToMap(envVarsArray));
         if(useAdvancedParser){
+            EnvVars envVars = new EnvVars(arrayToMap(envVarsArray));
             return CoverityUtils.evaluateEnvVars(input, envVars);
         } else {
             return input;
@@ -204,14 +207,39 @@ public class CoverityUtils {
     public static Map<String, String> arrayToMap(String[] input){
         Map<String, String> result = new HashMap<String, String>();
         for(int i=0; i<input.length; i++){
-            int index = input[i].indexOf('=');
-            // If an element on the array doesn't have
-            if(index <= 0){
-                throw new RuntimeException("Array of environment variables contains a malformed element: " + input[i]);
+            List<String> keyValuePair = splitKeyValue(input[i]);
+            if(keyValuePair != null && !keyValuePair.isEmpty()){
+                String key = keyValuePair.get(0);
+                String value = keyValuePair.get(1);
+                result.put(key, value);
             }
-            String key = input[i].substring(0, index);
-            String value = input[i].substring(index + 1);
-            result.put(key, value);
+        }
+
+        return result;
+    }
+
+    /**
+     * Split string of the form key=value into an array [key, value]
+     */
+    public static List<String> splitKeyValue(String input){
+        if(input == null){
+            return null;
+        }
+
+        List<String> result = new ArrayList<>();
+
+        int index = input.indexOf('=');
+        if(index == 0){
+            logger.warning("Could not parse environment variable \"" + input + "\" because its key is empty.");
+        } else if (index < 0){
+            logger.warning("Could not parse environment variable \"" + input + "\" because no value for it has been defined.");
+        } else if(index == input.length() - 1){
+            logger.warning("Could not parse environment variable \"" + input + "\" because the value for it is empty.");
+        } else {
+            String key = input.substring(0, index);
+            String value = input.substring(index + 1);
+            result.add(key);
+            result.add(value);
         }
 
         return result;

@@ -14,10 +14,7 @@ import hudson.EnvVars;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -105,5 +102,18 @@ public class CoverityUtilsTest {
     public void expandFailureTest(){
         // If environment variables contains recursive definitions an exception is thrown.
         assertExpandFails("$WRONGVAR1");
+    }
+
+    private void assertprepareCmds(List<String> cmdsInput, String[] envVarsArray, boolean useAdvancedParser, List<String> expectedResult){
+        List<String> output = CoverityUtils.prepareCmds(cmdsInput, envVarsArray, useAdvancedParser);
+        assertThat(output, is(expectedResult));
+    }
+
+    @Test
+    public void prepareCmdsSuccessTest(){
+        assertprepareCmds(Arrays.asList("$key"), new String[]{"key=value"}, true, Arrays.asList("value"));
+        assertprepareCmds(Arrays.asList("$key"), new String[]{"key=value=with=equals"}, true, Arrays.asList("value=with=equals"));
+        assertprepareCmds(Arrays.asList("$key"), new String[]{"key="}, true, new ArrayList<String>());
+        assertprepareCmds(Arrays.asList("$key"), new String[]{"=key=value"}, true, new ArrayList<String>());
     }
 }
