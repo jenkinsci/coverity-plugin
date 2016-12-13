@@ -68,6 +68,9 @@ public class DefectFilters {
             actions = allActions;
             severities = allSeverities;
             components = allComponents;
+
+            // remove the "Intentional", "False Positive", "No Test Needed", "Tested Elsewhere" classifications to match default outstanding filters
+            allClassifications.removeAll(Arrays.asList("Intentional", "False Positive", "No Test Needed", "Tested Elsewhere"));
             classifications = allClassifications;
         } else {
             ignoredCheckers = new ArrayList<String>(allCheckers);
