@@ -16,7 +16,7 @@
         <l:main-panel>
 
             <H2>Coverity Defects</H2>
-            <table border="1">
+            <table>
                 <tr class="pane">
                     <th align="left">CID</th>
                     <th align="left">Checker</th>
