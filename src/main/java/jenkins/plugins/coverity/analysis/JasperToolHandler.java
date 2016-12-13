@@ -636,10 +636,6 @@ public class JasperToolHandler extends CoverityToolHandler{
                     CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
                     build.addAction(action);
 
-                    if(!matchingDefects.isEmpty() && publisher.getMailSender() != null) {
-                        publisher.getMailSender().execute(action, listener);
-                    }
-
                     String rootUrl = Hudson.getInstance().getRootUrl();
                     if(rootUrl != null) {
                         listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
