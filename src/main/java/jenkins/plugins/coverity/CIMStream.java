@@ -24,6 +24,7 @@ import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -173,32 +174,67 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
-        public ListBoxModel doFillProjectItems(@QueryParameter String instance) throws IOException, CovRemoteServiceException_Exception {
+        public ListBoxModel doFillProjectItems(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
             ListBoxModel result = new ListBoxModel();
+            boolean containCurrentProject = false;
             if(!StringUtils.isEmpty(instance)) {
-                for(ProjectDataObj project : getInstance(instance).getProjects()) {
+                for(ProjectDataObj projectFromCIM : getInstance(instance).getProjects()) {
                     // don't add projects for which there are no valid streams
-                    ListBoxModel streams = doFillStreamItems(instance, project.getId().getName());
+                    ListBoxModel streams = doFillStreamItems(instance, projectFromCIM.getId().getName(), stream);
                     if(!streams.isEmpty()) {
-                        result.add(project.getId().getName());
+                        result.add(projectFromCIM.getId().getName());
+                        if (!StringUtils.isEmpty(project) && projectFromCIM.getId().getName().equalsIgnoreCase(project)){
+                            containCurrentProject = true;
+                        }
                     }
                 }
+            }
+            if (!containCurrentProject && !StringUtils.isEmpty(project)){
+                result.add(project);
             }
             return result;
         }
 
-        public ListBoxModel doFillStreamItems(@QueryParameter String instance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
-            ListBoxModel result = new ListBoxModel();
-            if(StringUtils.isEmpty(project)) return result;
-            CIMInstance cimInstance = getInstance(instance);
-            if(cimInstance != null) {
-                for(StreamDataObj stream : cimInstance.getStaticStreams(project)) {
-                    if("MIXED".equals(stream.getLanguage()) || "JAVA".equals(stream.getLanguage()) || "CXX".equals(stream.getLanguage()) || "CSHARP".equals(stream.getLanguage())) {
-                        result.add(stream.getId().getName());
+        public FormValidation doCheckProject(@QueryParameter String instance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
+            if (!StringUtils.isEmpty(instance)){
+                for (ProjectDataObj projectFromCIM : getInstance(instance).getProjects()){
+                    if (projectFromCIM.getId().getName().equalsIgnoreCase(project)){
+                        return FormValidation.ok();
                     }
                 }
             }
+            return FormValidation.error("Project [ " + project + " ] is not found");
+        }
+
+        public ListBoxModel doFillStreamItems(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
+            ListBoxModel result = new ListBoxModel();
+            boolean containCurrentStream = false;
+            if (StringUtils.isEmpty(project)) return result;
+            CIMInstance cimInstance = getInstance(instance);
+            if (cimInstance != null) {
+                for (StreamDataObj streamFromCIM : cimInstance.getStaticStreams(project)) {
+                    result.add(streamFromCIM.getId().getName());
+                    if (!StringUtils.isEmpty(stream) && streamFromCIM.getId().getName().equalsIgnoreCase(stream)) {
+                        containCurrentStream = true;
+                    }
+                }
+            }
+            if (!containCurrentStream && !StringUtils.isEmpty(stream)) {
+                result.add(stream);
+            }
             return result;
+        }
+
+        public FormValidation doCheckStream(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
+            CIMInstance cimInstance = getInstance(instance);
+            if (cimInstance != null){
+                for (StreamDataObj streamFromCIM : cimInstance.getStaticStreams(project)){
+                    if (streamFromCIM.getId().getName().equalsIgnoreCase(stream)){
+                        return FormValidation.ok();
+                    }
+                }
+            }
+            return FormValidation.error("Stream [ " + stream + " ] is not found");
         }
 
         public ListBoxModel doFillLanguageItems(@QueryParameter String instance, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {

@@ -368,12 +368,13 @@ public class CIMInstance {
 
         ProjectDataObj project = getProject(projectId);
         List<StreamDataObj> result = new ArrayList<StreamDataObj>();
-        for(StreamDataObj stream : project.getStreams()) {
-            if(!stream.getId().getName().matches(STREAM_NAME_IGNORE_PATTERN)) {
-                result.add(stream);
+        if (project != null){
+            for(StreamDataObj stream : project.getStreams()) {
+                if(!stream.getId().getName().matches(STREAM_NAME_IGNORE_PATTERN)) {
+                    result.add(stream);
+                }
             }
         }
-
         return result;
     }
 
