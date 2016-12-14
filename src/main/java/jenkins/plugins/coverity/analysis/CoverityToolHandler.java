@@ -186,7 +186,7 @@ public abstract class CoverityToolHandler {
     }
 
     public boolean importMsvsca(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home,
-                                CoverityTempDir temp, boolean csharpMsvsca, String csharpMsvscaOutputFiles) throws IOException, InterruptedException {
+                                CoverityTempDir temp, boolean csharpMsvsca) throws IOException, InterruptedException {
         String covImportMsvsca = "cov-import-msvsca";
         covImportMsvsca = new FilePath(launcher.getChannel(), home).child("bin").child(covImportMsvsca).getRemote();
         EnvVars envVars = build.getEnvironment(listener);
@@ -205,15 +205,10 @@ public abstract class CoverityToolHandler {
         }
 
         for(File outputFile : msvscaOutputFiles) {
-            //importCmd.add(outputFile.getName());
             importCmd.add(outputFile.getAbsolutePath());
         }
 
-        if(csharpMsvscaOutputFiles != null && csharpMsvscaOutputFiles.length() > 0) {
-            importCmd.add(csharpMsvscaOutputFiles);
-        }
-
-        if(msvscaOutputFiles.length == 0 && (csharpMsvscaOutputFiles == null || csharpMsvscaOutputFiles.length() == 0)) {
+        if(msvscaOutputFiles.length == 0) {
             listener.getLogger().println("[MSVSCA] MSVSCA No results found, skipping");
         } else {
             listener.getLogger().println("[MSVSCA] MSVSCA Import cmd so far is: " + importCmd.toString());
