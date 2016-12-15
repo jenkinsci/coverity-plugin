@@ -259,20 +259,6 @@ public class CIMInstance {
         }
     }
 
-    public String getWsVersion(){
-        com.coverity.ws.v9.ConfigurationService simpleWsCall = null;
-        // Set the default ws version value to v6.
-        String wsVersion = "v6";
-        try {
-            String testMessage = this.getConfigurationServiceIndio().getVersion().getExternalVersion();
-            if(testMessage != null){
-                wsVersion = "v9";
-            }
-        } catch (Exception e) {
-        }
-        return wsVersion;
-    }
-
     public List<com.coverity.ws.v9.MergedDefectDataObj> getDefectsIndio(String streamId, List<Long> defectIds) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
         com.coverity.ws.v9.MergedDefectFilterSpecDataObj filterSpec = new com.coverity.ws.v9.MergedDefectFilterSpecDataObj();
         com.coverity.ws.v9.StreamIdDataObj stream = new com.coverity.ws.v9.StreamIdDataObj();
@@ -422,22 +408,12 @@ public class CIMInstance {
     public FormValidation doCheck() throws IOException {
         try {
             URL url = getURL();
-            // Fix:77968 by using different wsdl for v9 and v6.
-            if(this.getWsVersion().equals("v9")){
-                int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V9_WSDL));
-                if(responseCode != 200) {
-                    return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
-                }
-                getConfigurationServiceIndio().getServerTime();
-                return FormValidation.ok("Successfully connected to the instance.");
-            } else {
-                int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V5_WSDL));
-                if(responseCode != 200) {
-                    return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
-                }
-                getConfigurationService().getServerTime();
-                return FormValidation.ok("Successfully connected to the instance.");
+            int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V9_WSDL));
+            if(responseCode != 200) {
+                return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
             }
+            getConfigurationServiceIndio().getServerTime();
+            return FormValidation.ok("Successfully connected to the instance.");
         } catch(UnknownHostException e) {
             return FormValidation.error("Host name unknown");
         } catch(ConnectException e) {
