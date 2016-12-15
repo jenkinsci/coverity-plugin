@@ -359,12 +359,6 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
                     List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId,listener);
 
-                    Set<String> checkers = new HashSet<String>();
-                    for(MergedDefectDataObj defect : defects) {
-                        checkers.add(defect.getCheckerName());
-                    }
-                    publisher.getDescriptor().updateCheckers(getLanguage(cimStream, cim), checkers);
-
                     List<Long> matchingDefects = new ArrayList<Long>();
 
                     cimStream.getDefectFilters().createImpactMap(cim);

@@ -536,17 +536,6 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
 
-                    Set<String> checkers = new HashSet<String>();
-                    // Adding the checkers that the defects were found in
-                    for(MergedDefectDataObj defect : defects) {
-                        checkers.add(defect.getCheckerName());
-                    }
-                    // This could be an issue! 
-                    if(!"ALL".equals(cimStream.getLanguage())) {
-                        //we can only update checkers if we analyzed exactly one language
-                        publisher.getDescriptor().updateCheckers(getLanguage(cimStream, cim), checkers);
-                    }
-
                     cimStream.getDefectFilters().createImpactMap(cim);
 
                     List<Long> matchingDefects = new ArrayList<Long>();
