@@ -412,23 +412,9 @@ public class CoverityPublisher extends Recorder {
         public List<String> getAllCimCheckers() {
             List<String> checkers = new ArrayList<String>();
             for(CIMInstance instance :instances){
-                if(instance.getWsVersion().equals("v9")){
-                    try {
-                        checkers.addAll(instance.getConfigurationServiceIndio().getCheckerNames());
-                    } catch(Exception e) {
-                    }
-                } else{
-                    try {
-                        CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
-                        List<CheckerPropertyDataObj> checkerPropertyList = instance.getConfigurationService().getCheckerProperties(checkerPropFilter);
-                        for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
-                            CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
-                            if(!checkers.contains(checkerSub.getCheckerName())){
-                                checkers.add(checkerSub.getCheckerName());
-                            }
-                        }
-                    } catch(Exception e) {
-                    }
+                try {
+                    checkers.addAll(instance.getConfigurationServiceIndio().getCheckerNames());
+                } catch(Exception e) {
                 }
             }
             return checkers;

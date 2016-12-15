@@ -327,23 +327,10 @@ public class DefectFilters {
      * @throws CovRemoteServiceException_Exception
      */
     public void setCheckers(CIMInstance cimInstance,long streamId) throws IOException,CovRemoteServiceException_Exception{
-
-        String wsversion = cimInstance.getWsVersion();
         try {
-            if(wsversion.equals("v9")){
-                // Retrieve all defects for a specific cim instance.
-                String cs = cimInstance.getCimInstanceCheckers();
-                checkers = getPublisherDescriptor().split2List(cs);
-            } else {
-                StreamDataObj stream = getStream(String.valueOf(streamId), cimInstance);
-                String type = stream.getLanguage();
-
-                if("MIXED".equals(type)) {
-                    type = "ALL";
-                }
-                String cs = getPublisherDescriptor().getCheckers(type);
-                checkers = getPublisherDescriptor().split2List(cs);
-            }
+            // Retrieve all defects for a specific cim instance.
+            String cs = cimInstance.getCimInstanceCheckers();
+            checkers = getPublisherDescriptor().split2List(cs);
         } catch(Exception e) {
             checkers = new LinkedList<String>();
         }

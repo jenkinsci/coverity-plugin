@@ -10,7 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.AttributeDefinitionDataObj;
 import com.coverity.ws.v6.AttributeDefinitionIdDataObj;
 import com.coverity.ws.v6.AttributeValueDataObj;
 import com.coverity.ws.v6.ComponentDataObj;
@@ -336,22 +335,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             CIMInstance instance = getInstance(cimInstance);
             if(instance == null) return new ListBoxModel();
 
-            String wsversion = instance.getWsVersion();
             try {
-                if(wsversion.equals("v9")){
-                    // Retrieve all defects for a specific cim instance.
-                    String cs = instance.getCimInstanceCheckers();
-                    return getPublisherDescriptor().split(cs);
-                } else {
-                    StreamDataObj stream = instance.getStream(streamId);
-                    String type = stream.getLanguage();
-
-                    if("MIXED".equals(type)) {
-                        type = language;
-                    }
-                    String cs = getPublisherDescriptor().getCheckers(type);
-                    return getPublisherDescriptor().split(cs);
-                }
+                // Retrieve all defects for a specific cim instance.
+                String cs = instance.getCimInstanceCheckers();
+                return getPublisherDescriptor().split(cs);
             } catch(Exception e) {
                 return new ListBoxModel();
             }

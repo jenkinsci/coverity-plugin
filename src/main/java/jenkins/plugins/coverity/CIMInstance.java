@@ -480,23 +480,9 @@ public class CIMInstance {
     public String getCimInstanceCheckers() {
         List<String> checkers = new ArrayList<String>();
 
-        if(this.getWsVersion().equals("v9")){
-            try {
-                checkers.addAll(this.getConfigurationServiceIndio().getCheckerNames());
-            } catch(Exception e) {
-            }
-        } else{
-            try {
-                CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
-                List<CheckerPropertyDataObj> checkerPropertyList = this.getConfigurationService().getCheckerProperties(checkerPropFilter);
-                for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
-                    CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
-                    if(!checkers.contains(checkerSub.getCheckerName())){
-                        checkers.add(checkerSub.getCheckerName());
-                    }
-                }
-            } catch(Exception e) {
-            }
+        try {
+            checkers.addAll(this.getConfigurationServiceIndio().getCheckerNames());
+        } catch(Exception e) {
         }
         Collections.sort(checkers);
         return StringUtils.join(checkers, '\n');
