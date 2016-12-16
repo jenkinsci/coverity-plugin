@@ -10,11 +10,8 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CheckerPropertyDataObj;
-import com.coverity.ws.v6.CheckerPropertyFilterSpecDataObj;
-import com.coverity.ws.v6.CheckerSubcategoryIdDataObj;
-import com.coverity.ws.v6.StreamDataObj;
-import com.coverity.ws.v6.StreamFilterSpecDataObj;
+import com.coverity.ws.v9.StreamDataObj;
+import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -289,11 +286,11 @@ public class CoverityPublisher extends Recorder {
         }
     }
 
-    public StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, com.coverity.ws.v6.CovRemoteServiceException_Exception {
+    public StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
         StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
-        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
+        List<StreamDataObj> streams = cimInstance.getConfigurationServiceIndio().getStreams(filter);
         if(streams.isEmpty()) {
             return null;
         } else {
@@ -301,7 +298,7 @@ public class CoverityPublisher extends Recorder {
         }
     }
 
-    public String getLanguage(CIMStream cimStream) throws IOException, com.coverity.ws.v6.CovRemoteServiceException_Exception {
+    public String getLanguage(CIMStream cimStream) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
         String domain = getStream(cimStream.getStream(), getDescriptor().getInstance(cimStream.getInstance())).getLanguage();
         return "MIXED".equals(domain) ? cimStream.getLanguage() : domain;
     }

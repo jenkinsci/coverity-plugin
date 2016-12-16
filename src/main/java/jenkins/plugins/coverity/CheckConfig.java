@@ -10,9 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.StreamDataObj;
-import com.coverity.ws.v6.StreamFilterSpecDataObj;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.StreamDataObj;
+import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -233,7 +233,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         CoverityVersion version = null;
         {
             try {
-                version = CoverityVersion.parse(ci.getConfigurationService().getVersion().getExternalVersion());
+                version = CoverityVersion.parse(ci.getConfigurationServiceIndio().getVersion().getExternalVersion());
             } catch(CovRemoteServiceException_Exception e) {
                 e.printStackTrace();
                 return new StreamStatus(false, "Could not retrive version info: " + e, cs, null);
@@ -248,7 +248,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             try {
                 StreamFilterSpecDataObj sf = new StreamFilterSpecDataObj();
                 sf.setNamePattern(cs.getStream());
-                List<StreamDataObj> ls = ci.getConfigurationService().getStreams(sf);
+                List<StreamDataObj> ls = ci.getConfigurationServiceIndio().getStreams(sf);
                 if(ls.size() == 0) {
                     return new StreamStatus(false, "Stream does not exist", cs, version);
                 }

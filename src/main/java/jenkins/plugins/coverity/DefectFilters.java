@@ -10,7 +10,8 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.*;
+import com.coverity.ws.v6.CheckerSubcategoryFilterSpecDataObj;
+import com.coverity.ws.v9.*;
 import com.coverity.ws.v9.DefectStateAttributeValueDataObj;
 import hudson.Util;
 import hudson.model.BuildListener;
@@ -37,7 +38,6 @@ public class DefectFilters {
     private List<String> checkers;
     private List<String> ignoredCheckers;
     private Date cutOffDate;
-    private Map<String,String> impactMap;
     private List<String> impacts;
 
     @DataBoundConstructor
@@ -148,10 +148,10 @@ public class DefectFilters {
 
     public List<String> getImpacts(){return impacts;}
 
-    public List<ComponentIdDataObj> getComponents(){
-        List<ComponentIdDataObj> componentIdDataList = new ArrayList<ComponentIdDataObj>();
+    public List<com.coverity.ws.v6.ComponentIdDataObj> getComponents(){
+        List<com.coverity.ws.v6.ComponentIdDataObj> componentIdDataList = new ArrayList<com.coverity.ws.v6.ComponentIdDataObj>();
         for(String comp : components){
-            ComponentIdDataObj cIdDataObj = new ComponentIdDataObj();
+            com.coverity.ws.v6.ComponentIdDataObj cIdDataObj = new com.coverity.ws.v6.ComponentIdDataObj();
             cIdDataObj.setName(comp);
             componentIdDataList.add(cIdDataObj);
         }
@@ -183,77 +183,14 @@ public class DefectFilters {
         return null;
     }
 
-    /*
-    createImpactMap
-        Creates an impact map with a key that is based upon the Checkername:Domain:Subcategory. 
-            We use that as the key because it can be easily obtained from the mergedDefectDataObj 
-            and can be tied to the CheckerSubcategoryDataObj since that contains the impact. 
+    public boolean matches(com.coverity.ws.v6.MergedDefectDataObj defect, BuildListener listener) {
 
-        That map is then stored within DefectFilters which it will later use to filter defects. 
-     */
-    public void createImpactMap(CIMInstance cim){
-        this.impactMap = new HashMap<String,String>();
-
-        try{
-            // Setting up the ws call to get all CheckerSubcategory for the current project
-            ConfigurationService configurationService = cim.getConfigurationService();
-            CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
-            List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkerPropFilter);
-            // Going through each CheckerSubcategory to get the ID object, which contains the Checker name, domain and Subcategory information
-            for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
-                // Make sure we save the impact
-                String impact = checkerProp.getImpact();
-                CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
-                // Creating the key based on the format of CheckerName:Domain:Subcategory
-                String key = String.format("%s:%s:%s", checkerSub.getCheckerName(), checkerSub.getDomain(), checkerSub.getSubcategory());
-                impactMap.put(key,impact);
-            }
-        }catch(Exception e){
-            // We dont to do anything if this fails since it happens so late within the build.
-        }
-    }
-
-    /*
-    checkImpactSelected
-        The function is used to see if the mergeDefect that is passed in has a impact that matches with the impacts 
-        selected within the configuration. 
-     */
-    public boolean checkImpactSelected(MergedDefectDataObj defect){
-        // Creating the key with  a specific format. CheckerName:Domain:CheckerSubcategory
-        String key = String.format("%s:%s:%s", defect.getCheckerName(), defect.getDomain(), defect.getCheckerSubcategory());
-
-        // if a checker does not have a impact, we let it through since the impact is undetermined. 
-        if(this.impactMap == null || key == null || !this.impactMap.containsKey(key)){
-            return true;
-        }
-
-        if(this.impacts != null && this.impactMap != null){
-            // Go through the impacts map that will have the key associated with an impact. 
-            for(String selectedImpact : this.impacts){
-                if(selectedImpact != null){
-                    if(this.impactMap.get(key).equals(selectedImpact)){
-                        return true;
-                    }  
-                }
-            }
-        }
-
-        return false;
-    }
-
-
-    public boolean matches(MergedDefectDataObj defect, BuildListener listener) {
-        return isActionSelected(defect.getAction()) &&
-                isClassificationSelected(defect.getClassification()) &&
-                isSeveritySelected(defect.getSeverity()) &&
-                isComponentSelected(defect.getComponentName()) &&
+        return isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getCheckerName()) &&
-                checkImpactSelected(defect) &&
-                Arrays.asList("New", "Triaged", "Various", "新規", "選別済み", "混在").contains(defect.getStatus()) &&
                 (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
     }
 
-    public boolean matchesIndio(com.coverity.ws.v9.MergedDefectDataObj defect, BuildListener listener) {
+    public boolean matchesIndio(MergedDefectDataObj defect, BuildListener listener) {
         String status = "";
         String action = "";
         String classification = "";
@@ -340,7 +277,7 @@ public class DefectFilters {
         StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
-        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
+        List<StreamDataObj> streams = cimInstance.getConfigurationServiceIndio().getStreams(filter);
         if(streams.isEmpty()) {
             return null;
         } else {

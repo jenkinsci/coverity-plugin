@@ -123,7 +123,7 @@ public abstract class CoverityToolHandler {
         }, true);
     }
 
-    public MergedDefectFilterSpecDataObj addFilters(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener)throws IOException,CovRemoteServiceException_Exception{
+    public MergedDefectFilterSpecDataObj addFilters(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener)throws IOException,com.coverity.ws.v9.CovRemoteServiceException_Exception{
         MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
         DefectFilters defectFilter = cimStream.getDefectFilters();
 

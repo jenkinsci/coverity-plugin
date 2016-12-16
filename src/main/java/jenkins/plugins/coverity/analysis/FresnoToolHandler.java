@@ -536,8 +536,6 @@ public class FresnoToolHandler extends CoverityToolHandler {
 
                     listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
 
-                    cimStream.getDefectFilters().createImpactMap(cim);
-
                     List<Long> matchingDefects = new ArrayList<Long>();
                     // Loop through all defects
                     for(MergedDefectDataObj defect : defects) {
@@ -597,11 +595,11 @@ public class FresnoToolHandler extends CoverityToolHandler {
         return true;
     }
 
-    public StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, CovRemoteServiceException_Exception {
-        StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
+    public com.coverity.ws.v9.StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
+        com.coverity.ws.v9.StreamFilterSpecDataObj filter = new com.coverity.ws.v9.StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
-        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
+        List<com.coverity.ws.v9.StreamDataObj> streams = cimInstance.getConfigurationServiceIndio().getStreams(filter);
         if(streams.isEmpty()) {
             return null;
         } else {
@@ -609,7 +607,7 @@ public class FresnoToolHandler extends CoverityToolHandler {
         }
     }
 
-    public String getLanguage(CIMStream cimStream, CIMInstance cimInstance) throws IOException, CovRemoteServiceException_Exception {
+    public String getLanguage(CIMStream cimStream, CIMInstance cimInstance) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
         String domain = getStream(cimStream.getStream(), cimInstance).getLanguage();
         return "MIXED".equals(domain) ? cimStream.getLanguage() : domain;
     }
