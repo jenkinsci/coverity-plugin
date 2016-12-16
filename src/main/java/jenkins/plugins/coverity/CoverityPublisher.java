@@ -251,6 +251,9 @@ public class CoverityPublisher extends Recorder {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+        // set initial state for unstable build to false
+        this.unstableBuild = false;
+
         if(isOldDataPresent()) {
             logger.info("Old data format detected. Converting to new format.");
             convertOldData();

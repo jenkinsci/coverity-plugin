@@ -21,15 +21,6 @@
     <tr>
         <td colspan="3">
             <table id="filters-${id}" style="display: none;">
-				<!--f:entry>
-					instance=${instance}<br />
-					cimInstance=${cimInstance}<br />
-					stream=${stream}<br />
-					it=${it}<br />
-					descriptor=${descriptor}<br />
-					id=${id}<br />
-					d.dfcdfi=${descriptor.doFillClassificationDefectFilterItems(cimInstance)}<br />
-				</f:entry-->
                 <f:entry title="Classification is among:">
                     <j:forEach var="e" items="${descriptor.doFillClassificationDefectFilterItems(cimInstance)}">
                         <f:checkbox name="classifications" json="${e.value}"

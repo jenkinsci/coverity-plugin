@@ -68,6 +68,9 @@ public class DefectFilters {
             actions = allActions;
             severities = allSeverities;
             components = allComponents;
+
+            // remove the "Intentional", "False Positive", "No Test Needed", "Tested Elsewhere" classifications to match default outstanding filters
+            allClassifications.removeAll(Arrays.asList("Intentional", "False Positive", "No Test Needed", "Tested Elsewhere"));
             classifications = allClassifications;
         } else {
             ignoredCheckers = new ArrayList<String>(allCheckers);
@@ -249,7 +252,6 @@ public class DefectFilters {
                 isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getCheckerName()) &&
                 checkImpactSelected(defect) &&
-                Arrays.asList("New", "Triaged", "Various", "新規", "選別済み", "混在").contains(defect.getStatus()) &&
                 (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
     }
 
@@ -281,7 +283,6 @@ public class DefectFilters {
                 isComponentSelected(defect.getComponentName()) &&
                 isCheckerSelected(defect.getCheckerName()) &&
                 isImpactsSelected(defect.getDisplayImpact()) &&
-                Arrays.asList("New", "Triaged", "Various", "新規", "選別済み", "混在").contains(status) &&
                 (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
     }
 
