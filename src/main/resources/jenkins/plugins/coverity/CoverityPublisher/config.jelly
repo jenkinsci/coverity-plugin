@@ -201,15 +201,6 @@
 					</f:repeatable>
 				</f:entry>
 
-				<!--
-				<f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">
-					<j:set var="instance" value="${instance.mailSender}"/>
-					<f:entry title="Additional recipients" field="recipients">
-						<f:textbox/>
-					</f:entry>
-				</f:optionalBlock>
-				-->
-
                 <f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
 								 checked="${instance.invocationAssistance != null}" name="invocationAssistance">
 					<j:set var="instance" value="${instance.invocationAssistance}"/>
