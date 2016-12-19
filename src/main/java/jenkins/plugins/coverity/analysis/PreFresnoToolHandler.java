@@ -13,7 +13,6 @@ package jenkins.plugins.coverity.analysis;
 import com.coverity.ws.v9.*;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Executor;
@@ -21,7 +20,6 @@ import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.EnvVars;
-import hudson.util.ArgumentListBuilder;
 import jenkins.plugins.coverity.*;
 
 
@@ -30,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -359,7 +356,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                         if(cimStream.getDefectFilters() == null) {
                             matchingDefects.add(defect.getCid());
                         } else {
-                            boolean match = cimStream.getDefectFilters().matchesIndio(defect,listener);
+                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
                             if(match) {
                                 matchingDefects.add(defect.getCid());
                             }
@@ -415,7 +412,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         com.coverity.ws.v9.StreamFilterSpecDataObj filter = new com.coverity.ws.v9.StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
-        List<com.coverity.ws.v9.StreamDataObj> streams = cimInstance.getConfigurationServiceIndio().getStreams(filter);
+        List<com.coverity.ws.v9.StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
         if(streams.isEmpty()) {
             return null;
         } else {
@@ -434,7 +431,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
         DefectFilters defectFilter = cimStream.getDefectFilters();
 
-        DefectService ds = cim.getDefectServiceIndio();
+        DefectService ds = cim.getDefectService();
 
         PageSpecDataObj pageSpec = new PageSpecDataObj();
 

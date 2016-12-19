@@ -60,7 +60,7 @@ public class CoverityBuildAction implements Action {
      */
     public List<MergedDefectDataObj> getDefects() throws IOException, CovRemoteServiceException_Exception {
         CIMInstance cim = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
-        return cim.getDefectsIndio(streamId, defectIds);
+        return cim.getDefects(streamId, defectIds);
     }
 
     /**

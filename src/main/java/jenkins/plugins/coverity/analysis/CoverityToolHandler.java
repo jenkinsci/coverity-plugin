@@ -123,29 +123,6 @@ public abstract class CoverityToolHandler {
         }, true);
     }
 
-    public MergedDefectFilterSpecDataObj addFilters(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener)throws IOException,com.coverity.ws.v9.CovRemoteServiceException_Exception{
-        MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
-        DefectFilters defectFilter = cimStream.getDefectFilters();
-
-        // Add all the classifications
-        filter.getClassificationNameList().addAll(defectFilter.getClassifications());
-        filter.getActionNameList().addAll(defectFilter.getActions());
-        filter.getSeverityNameList().addAll(defectFilter.getSeverities());
-        filter.getComponentIdList().addAll(defectFilter.getComponents());
-        // Check to see if checker list is empty because of pre-existing settings
-        // We reset the checker list to have all checkers.
-        if(defectFilter.getCheckersList() == null){
-            defectFilter.setCheckers(cim,snapshotId);
-        }
-        filter.getCheckerSubcategoryFilterSpecList().addAll(defectFilter.getCheckers(listener));
-        // Getting the cutoff date to add into filter. But only should be done if the cut off date is specified.
-        if(defectFilter.getCutOffDate() != null){
-            filter.setFirstDetectedStartDate(defectFilter.getXMLCutOffDate());
-        }
-
-        return filter;
-    }
-
     public boolean covEmitWar(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home, CoverityTempDir temp, List<String> javaWarFiles) throws IOException, InterruptedException {
         String covEmitJava = "cov-emit-java";
         covEmitJava = new FilePath(launcher.getChannel(), home).child("bin").child(covEmitJava).getRemote();

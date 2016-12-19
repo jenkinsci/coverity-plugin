@@ -10,7 +10,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.StreamDataObj;
+import com.coverity.ws.v9.StreamDataObj;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -154,7 +154,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                         "added and needs configurations. \n Please check your build configuration before running another build.");
             }
             try {
-                com.coverity.ws.v9.StreamDataObj stream = cim.getStreamIndio(cs.getStream());
+                StreamDataObj stream = cim.getStream(cs.getStream());
                 if(stream == null) {
                     throw new RuntimeException("Could not find stream: " + id);
                 }

@@ -211,7 +211,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             if(instance != null) {
                 com.coverity.ws.v9.AttributeDefinitionIdDataObj adido = new com.coverity.ws.v9.AttributeDefinitionIdDataObj();
                 adido.setName("Classification");
-                com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationServiceIndio().getAttribute(adido);
+                com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationService().getAttribute(adido);
                 for(com.coverity.ws.v9.AttributeValueDataObj classification : addo.getConfigurableValues()) {
                     result.add(classification.getAttributeValueId().getName());
                 }
@@ -225,7 +225,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             if(instance != null) {
                 com.coverity.ws.v9.AttributeDefinitionIdDataObj adido = new com.coverity.ws.v9.AttributeDefinitionIdDataObj();
                 adido.setName("Action");
-                com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationServiceIndio().getAttribute(adido);
+                com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationService().getAttribute(adido);
                 for(com.coverity.ws.v9.AttributeValueDataObj classification : addo.getConfigurableValues()) {
                     result.add(classification.getAttributeValueId().getName());
                 }
@@ -247,7 +247,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             if(instance != null) {
                 com.coverity.ws.v9.AttributeDefinitionIdDataObj adido = new com.coverity.ws.v9.AttributeDefinitionIdDataObj();
                 adido.setName("Severity");
-                com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationServiceIndio().getAttribute(adido);
+                com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationService().getAttribute(adido);
                 for(com.coverity.ws.v9.AttributeValueDataObj classification : addo.getConfigurableValues()) {
                     result.add(classification.getAttributeValueId().getName());
                 }
@@ -259,12 +259,12 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             ListBoxModel result = new ListBoxModel();
             CIMInstance instance = getInstance(cimInstance);
             if(instance != null && !StringUtils.isEmpty(streamId)) {
-                com.coverity.ws.v9.StreamDataObj stream = instance.getStreamIndio(streamId);
+                StreamDataObj stream = instance.getStream(streamId);
                 String componentMapId = stream.getComponentMapId().getName();
 
                 com.coverity.ws.v9.ComponentMapFilterSpecDataObj componentMapFilterSpec = new com.coverity.ws.v9.ComponentMapFilterSpecDataObj();
                 componentMapFilterSpec.setNamePattern(componentMapId);
-                for(com.coverity.ws.v9.ComponentMapDataObj map : instance.getConfigurationServiceIndio().getComponentMaps(componentMapFilterSpec)) {
+                for(com.coverity.ws.v9.ComponentMapDataObj map : instance.getConfigurationService().getComponentMaps(componentMapFilterSpec)) {
                     for(com.coverity.ws.v9.ComponentDataObj component : map.getComponents()) {
                         result.add(component.getComponentId().getName());
                     }

@@ -23,7 +23,6 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
-import hudson.util.IOUtils;
 import hudson.util.ListBoxModel;
 import jenkins.plugins.coverity.analysis.CoverityToolHandler;
 import net.sf.json.JSON;
@@ -38,7 +37,6 @@ import org.kohsuke.stapler.StaplerResponse;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -290,7 +288,7 @@ public class CoverityPublisher extends Recorder {
         StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
-        List<StreamDataObj> streams = cimInstance.getConfigurationServiceIndio().getStreams(filter);
+        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
         if(streams.isEmpty()) {
             return null;
         } else {
@@ -368,7 +366,7 @@ public class CoverityPublisher extends Recorder {
             List<String> checkers = new ArrayList<String>();
             for(CIMInstance instance :instances){
                 try {
-                    checkers.addAll(instance.getConfigurationServiceIndio().getCheckerNames());
+                    checkers.addAll(instance.getConfigurationService().getCheckerNames());
                 } catch(Exception e) {
                 }
             }

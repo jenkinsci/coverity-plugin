@@ -10,7 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CheckerSubcategoryFilterSpecDataObj;
 import com.coverity.ws.v9.*;
 import com.coverity.ws.v9.DefectStateAttributeValueDataObj;
 import hudson.Util;
@@ -158,18 +157,6 @@ public class DefectFilters {
         return componentIdDataList;
     }
 
-    public List<CheckerSubcategoryFilterSpecDataObj> getCheckers(BuildListener listener){
-        List<CheckerSubcategoryFilterSpecDataObj> checkerSubFilterSpecDataObjList = new ArrayList<CheckerSubcategoryFilterSpecDataObj>();
-        for(String check : checkers){
-            if(check != null){
-                CheckerSubcategoryFilterSpecDataObj checkerSubFilterSpecDataObj = new CheckerSubcategoryFilterSpecDataObj();
-                checkerSubFilterSpecDataObj.setCheckerName(check);
-                checkerSubFilterSpecDataObjList.add(checkerSubFilterSpecDataObj);
-            }
-        }
-        return checkerSubFilterSpecDataObjList;
-    }
-
     public List<String> getIgnoredChecker(){return ignoredCheckers;}
 
     public XMLGregorianCalendar getXMLCutOffDate(){
@@ -183,14 +170,7 @@ public class DefectFilters {
         return null;
     }
 
-    public boolean matches(com.coverity.ws.v6.MergedDefectDataObj defect, BuildListener listener) {
-
-        return isComponentSelected(defect.getComponentName()) &&
-                isCheckerSelected(defect.getCheckerName()) &&
-                (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
-    }
-
-    public boolean matchesIndio(MergedDefectDataObj defect, BuildListener listener) {
+    public boolean matches(MergedDefectDataObj defect, BuildListener listener) {
         String status = "";
         String action = "";
         String classification = "";
@@ -277,7 +257,7 @@ public class DefectFilters {
         StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
-        List<StreamDataObj> streams = cimInstance.getConfigurationServiceIndio().getStreams(filter);
+        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
         if(streams.isEmpty()) {
             return null;
         } else {

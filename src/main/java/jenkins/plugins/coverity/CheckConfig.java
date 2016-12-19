@@ -25,7 +25,6 @@ import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.util.FormValidation;
-import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -233,7 +232,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         CoverityVersion version = null;
         {
             try {
-                version = CoverityVersion.parse(ci.getConfigurationServiceIndio().getVersion().getExternalVersion());
+                version = CoverityVersion.parse(ci.getConfigurationService().getVersion().getExternalVersion());
             } catch(CovRemoteServiceException_Exception e) {
                 e.printStackTrace();
                 return new StreamStatus(false, "Could not retrive version info: " + e, cs, null);
@@ -248,7 +247,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             try {
                 StreamFilterSpecDataObj sf = new StreamFilterSpecDataObj();
                 sf.setNamePattern(cs.getStream());
-                List<StreamDataObj> ls = ci.getConfigurationServiceIndio().getStreams(sf);
+                List<StreamDataObj> ls = ci.getConfigurationService().getStreams(sf);
                 if(ls.size() == 0) {
                     return new StreamStatus(false, "Stream does not exist", cs, version);
                 }

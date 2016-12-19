@@ -87,22 +87,12 @@ public class CIMInstance {
     /**
      * cached webservice port for Defect service
      */
-    private transient com.coverity.ws.v6.DefectServiceService defectServiceService;
+    private transient DefectServiceService defectServiceService;
 
     /**
      * cached webservice port for Configuration service
      */
-    private transient com.coverity.ws.v6.ConfigurationServiceService configurationServiceService;
-
-    /**
-     * cached webservice port for Defect service for Indio
-     */
-    private transient com.coverity.ws.v9.DefectServiceService defectServiceServiceIndio;
-
-    /**
-     * cached webservice port for Configuration service for Indio
-     */
-    private transient com.coverity.ws.v9.ConfigurationServiceService configurationServiceServiceIndio;
+    private transient ConfigurationServiceService configurationServiceService;
 
     @DataBoundConstructor
     public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort) {
@@ -156,10 +146,10 @@ public class CIMInstance {
     /**
      * Returns a Defect service client using v9 web services.
      */
-    public com.coverity.ws.v9.DefectService getDefectServiceIndio() throws IOException {
+    public DefectService getDefectService() throws IOException {
         synchronized(this) {
-            if(defectServiceServiceIndio == null) {
-                defectServiceServiceIndio = new com.coverity.ws.v9.DefectServiceService(
+            if(defectServiceService == null) {
+                defectServiceService = new DefectServiceService(
                         new URL(getURL(), DEFECT_SERVICE_V9_WSDL),
                         new QName(COVERITY_V9_NAMESPACE, "DefectServiceService"));
             }
@@ -167,7 +157,7 @@ public class CIMInstance {
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
-            com.coverity.ws.v9.DefectService defectService = defectServiceServiceIndio.getDefectServicePort();
+            DefectService defectService = defectServiceService.getDefectServicePort();
             attachAuthenticationHandler((BindingProvider) defectService);
 
             return defectService;
@@ -186,11 +176,11 @@ public class CIMInstance {
     /**
      * Returns a Configuration service client using v9 web services.
      */
-    public com.coverity.ws.v9.ConfigurationService getConfigurationServiceIndio() throws IOException {
+    public ConfigurationService getConfigurationService() throws IOException {
         synchronized(this) {
-            if(configurationServiceServiceIndio == null) {
+            if(configurationServiceService == null) {
                 // Create a Web Services port to the server
-                configurationServiceServiceIndio = new com.coverity.ws.v9.ConfigurationServiceService(
+                configurationServiceService = new ConfigurationServiceService(
                         new URL(getURL(), CONFIGURATION_SERVICE_V9_WSDL),
                         new QName(COVERITY_V9_NAMESPACE, "ConfigurationServiceService"));
             }
@@ -198,7 +188,7 @@ public class CIMInstance {
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
-            com.coverity.ws.v9.ConfigurationService configurationService = configurationServiceServiceIndio.getConfigurationServicePort();
+            ConfigurationService configurationService = configurationServiceService.getConfigurationServicePort();
             attachAuthenticationHandler((BindingProvider) configurationService);
 
             return configurationService;
@@ -207,24 +197,24 @@ public class CIMInstance {
         }
     }
 
-    public List<com.coverity.ws.v9.MergedDefectDataObj> getDefectsIndio(String streamId, List<Long> defectIds) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
-        com.coverity.ws.v9.MergedDefectFilterSpecDataObj filterSpec = new com.coverity.ws.v9.MergedDefectFilterSpecDataObj();
-        com.coverity.ws.v9.StreamIdDataObj stream = new com.coverity.ws.v9.StreamIdDataObj();
+    public List<MergedDefectDataObj> getDefects(String streamId, List<Long> defectIds) throws IOException, CovRemoteServiceException_Exception {
+        MergedDefectFilterSpecDataObj filterSpec = new MergedDefectFilterSpecDataObj();
+        StreamIdDataObj stream = new StreamIdDataObj();
         stream.setName(streamId);
-        List<com.coverity.ws.v9.StreamIdDataObj> streamList = new ArrayList<com.coverity.ws.v9.StreamIdDataObj>();
+        List<StreamIdDataObj> streamList = new ArrayList<StreamIdDataObj>();
         streamList.add(stream);
-        com.coverity.ws.v9.PageSpecDataObj pageSpec = new com.coverity.ws.v9.PageSpecDataObj();
+        PageSpecDataObj pageSpec = new PageSpecDataObj();
         pageSpec.setPageSize(2500);
 
         SnapshotScopeSpecDataObj snapshotScopeSpecDataObj = new SnapshotScopeSpecDataObj();
 
-        List<com.coverity.ws.v9.MergedDefectDataObj> result = new ArrayList<com.coverity.ws.v9.MergedDefectDataObj>();
+        List<MergedDefectDataObj> result = new ArrayList<MergedDefectDataObj>();
         int defectCount = 0;
-        com.coverity.ws.v9.MergedDefectsPageDataObj defects = null;
+        MergedDefectsPageDataObj defects = null;
         do {
             pageSpec.setStartIndex(defectCount);
-            defects = getDefectServiceIndio().getMergedDefectsForStreams(streamList, filterSpec, pageSpec, snapshotScopeSpecDataObj);
-            for(com.coverity.ws.v9.MergedDefectDataObj defect : defects.getMergedDefects()) {
+            defects = getDefectService().getMergedDefectsForStreams(streamList, filterSpec, pageSpec, snapshotScopeSpecDataObj);
+            for(MergedDefectDataObj defect : defects.getMergedDefects()) {
                 if(defectIds.contains(defect.getCid())) {
                     result.add(defect);
                 }
@@ -238,7 +228,7 @@ public class CIMInstance {
     public ProjectDataObj getProject(String projectId) throws IOException, CovRemoteServiceException_Exception {
         ProjectFilterSpecDataObj filterSpec = new ProjectFilterSpecDataObj();
         filterSpec.setNamePattern(projectId);
-        List<ProjectDataObj> projects = getConfigurationServiceIndio().getProjects(filterSpec);
+        List<ProjectDataObj> projects = getConfigurationService().getProjects(filterSpec);
         if(projects.size() == 0) {
             return null;
         } else {
@@ -262,7 +252,7 @@ public class CIMInstance {
     }
 
     public List<ProjectDataObj> getProjects() throws IOException, CovRemoteServiceException_Exception {
-        return getConfigurationServiceIndio().getProjects(new ProjectFilterSpecDataObj());
+        return getConfigurationService().getProjects(new ProjectFilterSpecDataObj());
     }
 
     public List<StreamDataObj> getStaticStreams(String projectId) throws IOException, CovRemoteServiceException_Exception {
@@ -295,32 +285,11 @@ public class CIMInstance {
         StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
-        List<StreamDataObj> streams = getConfigurationServiceIndio().getStreams(filter);
+        List<StreamDataObj> streams = getConfigurationService().getStreams(filter);
         if(streams == null || streams.isEmpty()) {
             throw new IOException("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
         } else {
             StreamDataObj streamDataObj = streams.get(0);
-            if(streamDataObj == null){
-                throw new IOException("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
-            } else {
-                return streams.get(0);
-            }
-        }
-    }
-
-    /**
-     * Returns a StreamDataObj for a given streamId. This object must be not null in order to avoid null pointer exceptions.
-     * If the stream is not found an exception explaining the issue is raised.
-     */
-    public com.coverity.ws.v9.StreamDataObj getStreamIndio(String streamId) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
-        com.coverity.ws.v9.StreamFilterSpecDataObj filter = new com.coverity.ws.v9.StreamFilterSpecDataObj();
-        filter.setNamePattern(streamId);
-
-        List<com.coverity.ws.v9.StreamDataObj> streams = getConfigurationServiceIndio().getStreams(filter);
-        if(streams == null || streams.isEmpty()) {
-            throw new IOException("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
-        } else {
-            com.coverity.ws.v9.StreamDataObj streamDataObj = streams.get(0);
             if(streamDataObj == null){
                 throw new IOException("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
             } else {
@@ -336,7 +305,7 @@ public class CIMInstance {
             if(responseCode != 200) {
                 return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
             }
-            getConfigurationServiceIndio().getServerTime();
+            getConfigurationService().getServerTime();
             return FormValidation.ok("Successfully connected to the instance.");
         } catch(UnknownHostException e) {
             return FormValidation.error("Host name unknown");
@@ -381,7 +350,7 @@ public class CIMInstance {
         List<String> checkers = new ArrayList<String>();
 
         try {
-            checkers.addAll(this.getConfigurationServiceIndio().getCheckerNames());
+            checkers.addAll(this.getConfigurationService().getCheckerNames());
         } catch(Exception e) {
         }
         Collections.sort(checkers);
