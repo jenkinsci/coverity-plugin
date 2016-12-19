@@ -24,7 +24,6 @@ public class InvocationAssistance {
     private final String csharpAssemblies;
     private List<String> javaWarFilesNames;
     private final List<JavaWarFile> javaWarFiles;
-    private final String csharpMsvscaOutputFiles;
     private final boolean csharpAutomaticAssemblies;
     private final boolean csharpMsvsca;
     private final String saOverride;
@@ -61,7 +60,7 @@ public class InvocationAssistance {
 
     private final boolean useAdvancedParser;
 
-    public InvocationAssistance(boolean isUsingPostCovBuildCmd, String postCovBuildCmd, boolean isUsingPostCovAnalyzeCmd, String postCovAnalyzeCmd, boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, boolean isUsingMisra, String misraConfigFile, String csharpAssemblies, List<String> javaWarFilesNames, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist, List<JavaWarFile> javaWarFiles, boolean useAdvancedParser) {
+    public InvocationAssistance(boolean isUsingPostCovBuildCmd, String postCovBuildCmd, boolean isUsingPostCovAnalyzeCmd, String postCovAnalyzeCmd, boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, boolean isUsingMisra, String misraConfigFile, String csharpAssemblies, List<String> javaWarFilesNames, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist, List<JavaWarFile> javaWarFiles, boolean useAdvancedParser) {
         this.useAdvancedParser = useAdvancedParser;
         this.isUsingPostCovBuildCmd = isUsingPostCovBuildCmd;
         this.postCovBuildCmd = postCovBuildCmd;
@@ -78,7 +77,6 @@ public class InvocationAssistance {
         this.commitArguments = Util.fixEmpty(commitArguments);
         this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
         this.javaWarFilesNames = javaWarFilesNames;
-        this.csharpMsvscaOutputFiles = Util.fixEmpty(csharpMsvscaOutputFiles);
         this.csharpMsvsca = csharpMsvsca;
         this.csharpAutomaticAssemblies = csharpAutomaticAssemblies;
         this.saOverride = Util.fixEmpty(saOverride);
@@ -86,7 +84,7 @@ public class InvocationAssistance {
     }
 
     @DataBoundConstructor
-    public InvocationAssistance(JSONObject postCovBuildJSON, JSONObject postCovAnalyzeJSON, boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, JSONObject misraMap, String csharpAssemblies, List<JavaWarFile> javaWarFiles, String csharpMsvscaOutputFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist, boolean useAdvancedParser) {
+    public InvocationAssistance(JSONObject postCovBuildJSON, JSONObject postCovAnalyzeJSON, boolean isCompiledSrc, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, JSONObject misraMap, String csharpAssemblies, List<JavaWarFile> javaWarFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, String covBuildBlacklist, boolean useAdvancedParser) {
         this.isCompiledSrc = isCompiledSrc;
         this.isScriptSrc = isScriptSrc;
         this.postCovBuildJSON = postCovBuildJSON;
@@ -124,7 +122,6 @@ public class InvocationAssistance {
         }
         this.javaWarFilesNames = tempJavaWarFilesPaths;
         this.javaWarFiles = javaWarFiles;
-        this.csharpMsvscaOutputFiles = Util.fixEmpty(csharpMsvscaOutputFiles);
         this.csharpMsvsca = csharpMsvsca;
         this.csharpAutomaticAssemblies = csharpAutomaticAssemblies;
         this.saOverride = Util.fixEmpty(saOverride);
@@ -184,10 +181,6 @@ public class InvocationAssistance {
         return javaWarFilesNames;
     }
 
-    public String getCsharpMsvscaOutputFiles() {
-        return csharpMsvscaOutputFiles;
-    }
-
     public boolean getCsharpMsvsca() {
         return csharpMsvsca;
     }
@@ -233,8 +226,6 @@ public class InvocationAssistance {
             return false;
         if(csharpAssemblies != null ? !csharpAssemblies.equals(that.csharpAssemblies) : that.csharpAssemblies != null)
             return false;
-        if(csharpMsvscaOutputFiles != null ? !csharpMsvscaOutputFiles.equals(that.csharpMsvscaOutputFiles) : that.csharpMsvscaOutputFiles != null)
-            return false;
         if(intermediateDir != null ? !intermediateDir.equals(that.intermediateDir) : that.intermediateDir != null)
             return false;
         if(javaWarFiles != null ? !javaWarFiles.equals(that.javaWarFiles) : that.javaWarFiles != null) return false;
@@ -250,7 +241,6 @@ public class InvocationAssistance {
         result = 31 * result + (commitArguments != null ? commitArguments.hashCode() : 0);
         result = 31 * result + (csharpAssemblies != null ? csharpAssemblies.hashCode() : 0);
         result = 31 * result + (javaWarFiles != null ? javaWarFiles.hashCode() : 0);
-        result = 31 * result + (csharpMsvscaOutputFiles != null ? csharpMsvscaOutputFiles.hashCode() : 0);
         result = 31 * result + (csharpAutomaticAssemblies ? 1 : 0);
         result = 31 * result + (csharpMsvsca ? 1 : 0);
         result = 31 * result + (saOverride != null ? saOverride.hashCode() : 0);
@@ -273,7 +263,6 @@ public class InvocationAssistance {
         String csharpAssemblies = override.getCsharpAssemblies() != null ? override.getCsharpAssemblies() : getCsharpAssemblies();
         String intermediateDir = override.getIntermediateDir() != null ? override.getIntermediateDir() : getIntermediateDir();
         List<String> javaWarFilesNames = override.getJavaWarFilesNames() != null ? override.getJavaWarFilesNames() : getJavaWarFilesNames();
-        String csharpMsvscaOutputFiles = override.getCsharpMsvscaOutputFiles() != null ? override.getCsharpMsvscaOutputFiles() : getCsharpMsvscaOutputFiles();
         boolean csharpAutomaticAssemblies = override.getCsharpAutomaticAssemblies();
         boolean csharpMsvsca = override.getCsharpMsvsca();
         String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
@@ -287,7 +276,7 @@ public class InvocationAssistance {
         String postCovAnalyzeCmd = override.getPostCovAnalyzeCmd();
         List<JavaWarFile> javaWarFiles = override.getJavaWarFiles();
         boolean useAdvancedParser = override.getUseAdvancedParser();
-        return new InvocationAssistance(isUsingPostBuildCmd, postBuildCmd, isUsingPostCovAnalyzeCmd, postCovAnalyzeCmd, isCompiledSrc, isScriptSrc, buildArguments, analyzeArguments, commitArguments, intermediateDir, isUsingMisra, misraConfigFile, csharpAssemblies, javaWarFilesNames, csharpMsvscaOutputFiles, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist, javaWarFiles, useAdvancedParser);
+        return new InvocationAssistance(isUsingPostBuildCmd, postBuildCmd, isUsingPostCovAnalyzeCmd, postCovAnalyzeCmd, isCompiledSrc, isScriptSrc, buildArguments, analyzeArguments, commitArguments, intermediateDir, isUsingMisra, misraConfigFile, csharpAssemblies, javaWarFilesNames, csharpAutomaticAssemblies, csharpMsvsca, saOverride, covBuildBlacklist, javaWarFiles, useAdvancedParser);
     }
 
     // Sets the environment varibles for the project so that we can replace environment varibles
