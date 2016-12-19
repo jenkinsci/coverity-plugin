@@ -10,7 +10,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.analysis;
 
-import com.coverity.ws.v6.*;
+import com.coverity.ws.v9.*;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
@@ -359,7 +359,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                         if(cimStream.getDefectFilters() == null) {
                             matchingDefects.add(defect.getCid());
                         } else {
-                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
+                            boolean match = cimStream.getDefectFilters().matchesIndio(defect,listener);
                             if(match) {
                                 matchingDefects.add(defect.getCid());
                             }
@@ -434,7 +434,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
         DefectFilters defectFilter = cimStream.getDefectFilters();
 
-        DefectService ds = cim.getDefectService();
+        DefectService ds = cim.getDefectServiceIndio();
 
         PageSpecDataObj pageSpec = new PageSpecDataObj();
 
@@ -443,21 +443,16 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
         MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
 
+        SnapshotScopeSpecDataObj snapid = new SnapshotScopeSpecDataObj();
 
-        StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
-        SnapshotIdDataObj snapid = new SnapshotIdDataObj();
-        snapid.setId(snapshotId);
-
-        sfilter.setStreamId(streamId);
-
-        sfilter.getSnapshotIdIncludeList().add(snapid);
-        filter.getStreamSnapshotFilterSpecIncludeList().add(sfilter);
+        filter.setStreamIncludeQualifier(cimStream.getStream());
+        filter.setSnapshotComparisonField(String.valueOf(snapshotId));
         // The loop will pull up to the maximum amount of defect, doing per page size
         for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
             pageSpec.setPageSize(pageSize);
             pageSpec.setStartIndex(pageStart);
             pageSpec.setSortAscending(true);
-            mergeList.addAll(ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec).getMergedDefects());
+            mergeList.addAll(ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec, snapid).getMergedDefects());
 
         }
         return mergeList;
