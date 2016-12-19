@@ -10,7 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.analysis;
 
-import com.coverity.ws.v6.*;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
