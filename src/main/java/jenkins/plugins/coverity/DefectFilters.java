@@ -147,10 +147,10 @@ public class DefectFilters {
 
     public List<String> getImpacts(){return impacts;}
 
-    public List<com.coverity.ws.v6.ComponentIdDataObj> getComponents(){
-        List<com.coverity.ws.v6.ComponentIdDataObj> componentIdDataList = new ArrayList<com.coverity.ws.v6.ComponentIdDataObj>();
+    public List<ComponentIdDataObj> getComponents(){
+        List<ComponentIdDataObj> componentIdDataList = new ArrayList<ComponentIdDataObj>();
         for(String comp : components){
-            com.coverity.ws.v6.ComponentIdDataObj cIdDataObj = new com.coverity.ws.v6.ComponentIdDataObj();
+            ComponentIdDataObj cIdDataObj = new ComponentIdDataObj();
             cIdDataObj.setName(comp);
             componentIdDataList.add(cIdDataObj);
         }

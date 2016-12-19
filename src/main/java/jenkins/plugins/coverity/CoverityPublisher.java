@@ -272,9 +272,6 @@ public class CoverityPublisher extends Recorder {
                 build.setResult(Result.UNSTABLE);
             }
             return true;
-        } catch(com.coverity.ws.v6.CovRemoteServiceException_Exception e){
-            CoverityUtils.handleException("Cov Remote Service Error: \n" + e.getMessage(), build, listener, e);
-            return false;
         } catch(com.coverity.ws.v9.CovRemoteServiceException_Exception e){
             CoverityUtils.handleException("Cov Remote Service Error: \n" + e.getMessage(), build, listener, e);
             return false;
@@ -591,7 +588,7 @@ public class CoverityPublisher extends Recorder {
             }
         }
 
-        public void doDefectFiltersConfig(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException, com.coverity.ws.v6.CovRemoteServiceException_Exception {
+        public void doDefectFiltersConfig(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException, CovRemoteServiceException_Exception {
             logger.info(req.getSubmittedForm().toString());
 
             JSONObject json = getJSONClassObject(req.getSubmittedForm(), getId());
