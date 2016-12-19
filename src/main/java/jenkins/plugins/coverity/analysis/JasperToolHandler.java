@@ -15,7 +15,6 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
-import hudson.util.ArgumentListBuilder;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
@@ -606,7 +605,7 @@ public class JasperToolHandler extends CoverityToolHandler{
                         } else {
 
                             // Check to see if defectFilter matches the defect
-                            boolean match = cimStream.getDefectFilters().matchesIndio(defect,listener);
+                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
                             if(match) {
                                 matchingDefects.add(defect.getCid());
                             }
@@ -656,7 +655,7 @@ public class JasperToolHandler extends CoverityToolHandler{
         int pageSize = 1000; // Size of page to be pulled
         List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
 
-        DefectService ds = cim.getDefectServiceIndio();
+        DefectService ds = cim.getDefectService();
 
         StreamIdDataObj streamId = new StreamIdDataObj();
         streamId.setName(cimStream.getStream());

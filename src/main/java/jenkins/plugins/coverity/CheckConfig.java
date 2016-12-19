@@ -10,9 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.StreamDataObj;
-import com.coverity.ws.v6.StreamFilterSpecDataObj;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.StreamDataObj;
+import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -25,7 +25,6 @@ import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.util.FormValidation;
-import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

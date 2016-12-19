@@ -20,14 +20,12 @@ import hudson.model.Executor;
 import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
-import hudson.util.ArgumentListBuilder;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -585,7 +583,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                         } else {
 
                             // Check to see if defectFilter matches the defect
-                            boolean match = cimStream.getDefectFilters().matchesIndio(defect,listener);
+                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
                             if(match) {
                                 matchingDefects.add(defect.getCid());
                             }
@@ -635,7 +633,7 @@ public class IndioToolHandler extends CoverityToolHandler {
         int pageSize = 1000; // Size of page to be pulled
         List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
 
-        DefectService ds = cim.getDefectServiceIndio();
+        DefectService ds = cim.getDefectService();
 
         StreamIdDataObj streamId = new StreamIdDataObj();
         streamId.setName(cimStream.getStream());

@@ -10,15 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.AttributeDefinitionDataObj;
-import com.coverity.ws.v6.AttributeDefinitionIdDataObj;
-import com.coverity.ws.v6.AttributeValueDataObj;
-import com.coverity.ws.v6.ComponentDataObj;
-import com.coverity.ws.v6.ComponentMapDataObj;
-import com.coverity.ws.v6.ComponentMapFilterSpecDataObj;
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.ProjectDataObj;
-import com.coverity.ws.v6.StreamDataObj;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.ProjectDataObj;
+import com.coverity.ws.v9.StreamDataObj;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
@@ -242,19 +236,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             if(StringUtils.isEmpty(stream)) return result;
             CIMInstance cimInstance = getInstance(instance);
             if(cimInstance != null) {
-                if(cimInstance.getWsVersion().equals("v9")){
-                    result.add("ALL");
-                } else {
-                    StreamDataObj str = cimInstance.getStream(stream);
-                    if("MIXED".equals(str.getLanguage())) {
-                        result.add("ALL");
-                        result.add("JAVA");
-                        result.add("CXX");
-                        result.add("CSHARP");
-                    } else {
-                        result.add(str.getLanguage());
-                    }
-                }
+                result.add("ALL");
             }
             return result;
         }
@@ -263,20 +245,11 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             ListBoxModel result = new ListBoxModel();
             CIMInstance instance = getInstance(cimInstance);
             if(instance != null) {
-                if(instance.getWsVersion().equals("v9")){
-                    com.coverity.ws.v9.AttributeDefinitionIdDataObj adido = new com.coverity.ws.v9.AttributeDefinitionIdDataObj();
-                    adido.setName("Classification");
-                    com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationServiceIndio().getAttribute(adido);
-                    for(com.coverity.ws.v9.AttributeValueDataObj classification : addo.getConfigurableValues()) {
-                        result.add(classification.getAttributeValueId().getName());
-                    }
-                } else {
-                    com.coverity.ws.v6.AttributeDefinitionIdDataObj adido = new AttributeDefinitionIdDataObj();
-                    adido.setName("Classification");
-                    com.coverity.ws.v6.AttributeDefinitionDataObj addo = instance.getConfigurationService().getAttribute(adido);
-                    for(AttributeValueDataObj classification : addo.getConfigurableValues()) {
-                        result.add(classification.getAttributeValueId().getName());
-                    }
+                com.coverity.ws.v9.AttributeDefinitionIdDataObj adido = new com.coverity.ws.v9.AttributeDefinitionIdDataObj();
+                adido.setName("Classification");
+                com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationService().getAttribute(adido);
+                for(com.coverity.ws.v9.AttributeValueDataObj classification : addo.getConfigurableValues()) {
+                    result.add(classification.getAttributeValueId().getName());
                 }
             }
             return result;
@@ -286,20 +259,11 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             ListBoxModel result = new ListBoxModel();
             CIMInstance instance = getInstance(cimInstance);
             if(instance != null) {
-                if(instance.getWsVersion().equals("v9")){
-                    com.coverity.ws.v9.AttributeDefinitionIdDataObj adido = new com.coverity.ws.v9.AttributeDefinitionIdDataObj();
-                    adido.setName("Action");
-                    com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationServiceIndio().getAttribute(adido);
-                    for(com.coverity.ws.v9.AttributeValueDataObj classification : addo.getConfigurableValues()) {
-                        result.add(classification.getAttributeValueId().getName());
-                    }
-                } else {
-                    com.coverity.ws.v6.AttributeDefinitionIdDataObj adido = new AttributeDefinitionIdDataObj();
-                    adido.setName("Action");
-                    com.coverity.ws.v6.AttributeDefinitionDataObj addo = instance.getConfigurationService().getAttribute(adido);
-                    for(AttributeValueDataObj classification : addo.getConfigurableValues()) {
-                        result.add(classification.getAttributeValueId().getName());
-                    }
+                com.coverity.ws.v9.AttributeDefinitionIdDataObj adido = new com.coverity.ws.v9.AttributeDefinitionIdDataObj();
+                adido.setName("Action");
+                com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationService().getAttribute(adido);
+                for(com.coverity.ws.v9.AttributeValueDataObj classification : addo.getConfigurableValues()) {
+                    result.add(classification.getAttributeValueId().getName());
                 }
             }
             return result;
@@ -317,20 +281,11 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             ListBoxModel result = new ListBoxModel();
             CIMInstance instance = getInstance(cimInstance);
             if(instance != null) {
-                if(instance.getWsVersion().equals("v9")){
-                    com.coverity.ws.v9.AttributeDefinitionIdDataObj adido = new com.coverity.ws.v9.AttributeDefinitionIdDataObj();
-                    adido.setName("Severity");
-                    com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationServiceIndio().getAttribute(adido);
-                    for(com.coverity.ws.v9.AttributeValueDataObj classification : addo.getConfigurableValues()) {
-                        result.add(classification.getAttributeValueId().getName());
-                    }
-                } else {
-                    com.coverity.ws.v6.AttributeDefinitionIdDataObj adido = new AttributeDefinitionIdDataObj();
-                    adido.setName("Severity");
-                    com.coverity.ws.v6.AttributeDefinitionDataObj addo = instance.getConfigurationService().getAttribute(adido);
-                    for(AttributeValueDataObj classification : addo.getConfigurableValues()) {
-                        result.add(classification.getAttributeValueId().getName());
-                    }
+                com.coverity.ws.v9.AttributeDefinitionIdDataObj adido = new com.coverity.ws.v9.AttributeDefinitionIdDataObj();
+                adido.setName("Severity");
+                com.coverity.ws.v9.AttributeDefinitionDataObj addo = instance.getConfigurationService().getAttribute(adido);
+                for(com.coverity.ws.v9.AttributeValueDataObj classification : addo.getConfigurableValues()) {
+                    result.add(classification.getAttributeValueId().getName());
                 }
             }
             return result;
@@ -340,27 +295,14 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             ListBoxModel result = new ListBoxModel();
             CIMInstance instance = getInstance(cimInstance);
             if(instance != null && !StringUtils.isEmpty(streamId)) {
-                if(instance.getWsVersion().equals("v9")){
-                    com.coverity.ws.v9.StreamDataObj stream = instance.getStreamIndio(streamId);
-                    String componentMapId = stream.getComponentMapId().getName();
+                StreamDataObj stream = instance.getStream(streamId);
+                String componentMapId = stream.getComponentMapId().getName();
 
-                    com.coverity.ws.v9.ComponentMapFilterSpecDataObj componentMapFilterSpec = new com.coverity.ws.v9.ComponentMapFilterSpecDataObj();
-                    componentMapFilterSpec.setNamePattern(componentMapId);
-                    for(com.coverity.ws.v9.ComponentMapDataObj map : instance.getConfigurationServiceIndio().getComponentMaps(componentMapFilterSpec)) {
-                        for(com.coverity.ws.v9.ComponentDataObj component : map.getComponents()) {
-                            result.add(component.getComponentId().getName());
-                        }
-                    }
-                } else {
-                    StreamDataObj stream = instance.getStream(streamId);
-                    String componentMapId = stream.getComponentMapId().getName();
-
-                    ComponentMapFilterSpecDataObj componentMapFilterSpec = new ComponentMapFilterSpecDataObj();
-                    componentMapFilterSpec.setNamePattern(componentMapId);
-                    for(ComponentMapDataObj map : instance.getConfigurationService().getComponentMaps(componentMapFilterSpec)) {
-                        for(ComponentDataObj component : map.getComponents()) {
-                            result.add(component.getComponentId().getName());
-                        }
+                com.coverity.ws.v9.ComponentMapFilterSpecDataObj componentMapFilterSpec = new com.coverity.ws.v9.ComponentMapFilterSpecDataObj();
+                componentMapFilterSpec.setNamePattern(componentMapId);
+                for(com.coverity.ws.v9.ComponentMapDataObj map : instance.getConfigurationService().getComponentMaps(componentMapFilterSpec)) {
+                    for(com.coverity.ws.v9.ComponentDataObj component : map.getComponents()) {
+                        result.add(component.getComponentId().getName());
                     }
                 }
             }
@@ -372,22 +314,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             CIMInstance instance = getInstance(cimInstance);
             if(instance == null) return new ListBoxModel();
 
-            String wsversion = instance.getWsVersion();
             try {
-                if(wsversion.equals("v9")){
-                    // Retrieve all defects for a specific cim instance.
-                    String cs = instance.getCimInstanceCheckers();
-                    return getPublisherDescriptor().split(cs);
-                } else {
-                    StreamDataObj stream = instance.getStream(streamId);
-                    String type = stream.getLanguage();
-
-                    if("MIXED".equals(type)) {
-                        type = language;
-                    }
-                    String cs = getPublisherDescriptor().getCheckers(type);
-                    return getPublisherDescriptor().split(cs);
-                }
+                // Retrieve all defects for a specific cim instance.
+                String cs = instance.getCimInstanceCheckers();
+                return getPublisherDescriptor().split(cs);
             } catch(Exception e) {
                 return new ListBoxModel();
             }
