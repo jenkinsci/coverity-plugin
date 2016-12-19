@@ -86,7 +86,6 @@ public class CoverityPublisher extends Recorder {
      * Hide the chart to make page loads faster
      */
     private final boolean hideChart;
-    private final CoverityMailSender mailSender;
 
     private final TaOptionBlock taOptionBlock;
 
@@ -104,7 +103,6 @@ public class CoverityPublisher extends Recorder {
                              boolean keepIntDir,
                              boolean skipFetchingDefects,
                              boolean hideChart,
-                             CoverityMailSender mailSender,
                              String cimInstance,
                              String project,
                              String stream,
@@ -115,7 +113,6 @@ public class CoverityPublisher extends Recorder {
         this.invocationAssistance = invocationAssistance;
         this.failBuild = failBuild;
         this.unstable = unstable;
-        this.mailSender = mailSender;
         this.keepIntDir = keepIntDir;
         this.skipFetchingDefects = skipFetchingDefects;
         this.hideChart = hideChart;
@@ -224,10 +221,6 @@ public class CoverityPublisher extends Recorder {
         unstableBuild = unstable;
     }
 
-    public CoverityMailSender getMailSender() {
-        return mailSender;
-    }
-
     public TaOptionBlock getTaOptionBlock(){return taOptionBlock;}
 
     public ScmOptionBlock getScmOptionBlock(){return scmOptionBlock;}
@@ -246,6 +239,9 @@ public class CoverityPublisher extends Recorder {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+        // set initial state for unstable build to false
+        this.unstableBuild = false;
+
         if(isOldDataPresent()) {
             logger.info("Old data format detected. Converting to new format.");
             convertOldData();
