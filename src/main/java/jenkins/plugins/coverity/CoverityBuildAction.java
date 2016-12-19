@@ -10,8 +10,8 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.MergedDefectDataObj;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.MergedDefectDataObj;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.Hudson;
@@ -60,7 +60,7 @@ public class CoverityBuildAction implements Action {
      */
     public List<MergedDefectDataObj> getDefects() throws IOException, CovRemoteServiceException_Exception {
         CIMInstance cim = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
-        return cim.getDefects(streamId, defectIds);
+        return cim.getDefectsIndio(streamId, defectIds);
     }
 
     /**

@@ -10,9 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.ProjectDataObj;
-import com.coverity.ws.v6.StreamDataObj;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.ProjectDataObj;
+import com.coverity.ws.v9.StreamDataObj;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;

@@ -10,8 +10,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.*;
-import com.coverity.ws.v9.SnapshotScopeSpecDataObj;
+import com.coverity.ws.v9.*;
 import hudson.model.Hudson;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
@@ -40,11 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CIMInstance {
 
-    public static final String COVERITY_V5_NAMESPACE = "http://ws.coverity.com/v6";
     public static final String COVERITY_V9_NAMESPACE = "http://ws.coverity.com/v9";
-
-    public static final String CONFIGURATION_SERVICE_V5_WSDL = "/ws/v6/configurationservice?wsdl";
-    public static final String DEFECT_SERVICE_V5_WSDL = "/ws/v6/defectservice?wsdl";
 
     public static final String CONFIGURATION_SERVICE_V9_WSDL = "/ws/v9/configurationservice?wsdl";
     public static final String DEFECT_SERVICE_V9_WSDL = "/ws/v9/defectservice?wsdl";
@@ -159,29 +154,6 @@ public class CIMInstance {
     }
 
     /**
-     * Returns a Defect service client using v6 web services.
-     */
-    public com.coverity.ws.v6.DefectService getDefectService() throws IOException {
-        synchronized(this) {
-            if(defectServiceService == null) {
-                defectServiceService = new com.coverity.ws.v6.DefectServiceService(
-                        new URL(getURL(), DEFECT_SERVICE_V5_WSDL),
-                        new QName(COVERITY_V5_NAMESPACE, "DefectServiceService"));
-            }
-        }
-
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            com.coverity.ws.v6.DefectService defectService = defectServiceService.getDefectServicePort();
-            attachAuthenticationHandler((BindingProvider) defectService);
-
-            return defectService;
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
-        }
-    }
-
-    /**
      * Returns a Defect service client using v9 web services.
      */
     public com.coverity.ws.v9.DefectService getDefectServiceIndio() throws IOException {
@@ -209,30 +181,6 @@ public class CIMInstance {
      */
     private void attachAuthenticationHandler(BindingProvider service) {
         service.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(user, password)));
-    }
-
-    /**
-     * Returns a Configuration service client using v6 web services.
-     */
-    public ConfigurationService getConfigurationService() throws IOException {
-        synchronized(this) {
-            if(configurationServiceService == null) {
-                // Create a Web Services port to the server
-                configurationServiceService = new ConfigurationServiceService(
-                        new URL(getURL(), CONFIGURATION_SERVICE_V5_WSDL),
-                        new QName(COVERITY_V5_NAMESPACE, "ConfigurationServiceService"));
-            }
-        }
-
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            ConfigurationService configurationService = configurationServiceService.getConfigurationServicePort();
-            attachAuthenticationHandler((BindingProvider) configurationService);
-
-            return configurationService;
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
-        }
     }
 
     /**
@@ -287,34 +235,10 @@ public class CIMInstance {
         return result;
     }
 
-    public List<MergedDefectDataObj> getDefects(String streamId, List<Long> defectIds) throws IOException, CovRemoteServiceException_Exception {
-        MergedDefectFilterSpecDataObj filterSpec1 = new MergedDefectFilterSpecDataObj();
-        StreamIdDataObj stream = new StreamIdDataObj();
-        stream.setName(streamId);
-        PageSpecDataObj pageSpec = new PageSpecDataObj();
-        pageSpec.setPageSize(2500);
-
-        List<MergedDefectDataObj> result = new ArrayList<MergedDefectDataObj>();
-        int defectCount = 0;
-        MergedDefectsPageDataObj defects = null;
-        do {
-            pageSpec.setStartIndex(defectCount);
-            defects = getDefectService().getMergedDefectsForStreams(Arrays.asList(stream), filterSpec1, pageSpec);
-            for(MergedDefectDataObj defect : defects.getMergedDefects()) {
-                if(defectIds.contains(defect.getCid())) {
-                    result.add(defect);
-                }
-            }
-            defectCount += defects.getMergedDefects().size();
-        } while(defectCount < defects.getTotalNumberOfRecords());
-
-        return result;
-    }
-
     public ProjectDataObj getProject(String projectId) throws IOException, CovRemoteServiceException_Exception {
         ProjectFilterSpecDataObj filterSpec = new ProjectFilterSpecDataObj();
         filterSpec.setNamePattern(projectId);
-        List<ProjectDataObj> projects = getConfigurationService().getProjects(filterSpec);
+        List<ProjectDataObj> projects = getConfigurationServiceIndio().getProjects(filterSpec);
         if(projects.size() == 0) {
             return null;
         } else {
@@ -338,7 +262,7 @@ public class CIMInstance {
     }
 
     public List<ProjectDataObj> getProjects() throws IOException, CovRemoteServiceException_Exception {
-        return getConfigurationService().getProjects(new ProjectFilterSpecDataObj());
+        return getConfigurationServiceIndio().getProjects(new ProjectFilterSpecDataObj());
     }
 
     public List<StreamDataObj> getStaticStreams(String projectId) throws IOException, CovRemoteServiceException_Exception {
@@ -371,7 +295,7 @@ public class CIMInstance {
         StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
-        List<StreamDataObj> streams = getConfigurationService().getStreams(filter);
+        List<StreamDataObj> streams = getConfigurationServiceIndio().getStreams(filter);
         if(streams == null || streams.isEmpty()) {
             throw new IOException("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
         } else {
