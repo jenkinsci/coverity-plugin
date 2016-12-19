@@ -274,14 +274,14 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             }
 
             if(home == null) {
-                return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);
+                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + home + "]", node, null);
             }
 
             try {
                 CoverityUtils.checkDir(launcher.getChannel(), home);
             } catch (Exception e) {
                 e.printStackTrace();
-                return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);
+                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + home + "]", node, null);
             }
 
             FilePath homePath = new FilePath(launcher.getChannel(), home);
