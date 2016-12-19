@@ -37,20 +37,20 @@ public abstract class CoverityToolHandler {
      * Find a suitable {@link CoverityToolHandler} to run analysis.
      * @param version the version of Coverity analysis present on the {@link hudson.model.Node} where the analysis will
      *                run.
-     * @return A {@link CoverityToolHandler} that can run the given version of analysis.
+     * @return A {@link CoverityToolHandler} that can run the given version of analysis. Otherwise returns null when
+     *         the given version of analysis is not supported.
      */
     public static CoverityToolHandler getHandler(CoverityVersion version) {
         // A fail safe for testing so that when we have new versions of analysis and platform, the build steps will
-        // Automatically go to fresnotoolhandler
+        // Automatically go to JasperToolHandler
         if (version.isCodeName() && !version.containsCodeName()){
-            return new FresnoToolHandler(version);
+            return new JasperToolHandler(version);
         }
 
-        if(version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
-            return new PreFresnoToolHandler();
-        } if(version.compareTo(CoverityVersion.VERSION_FRESNO) >= 0 && version.compareTo(CoverityVersion.VERSION_INDIO) < 0){
-            return new FresnoToolHandler(version);
-        } if(version.compareTo(CoverityVersion.VERSION_INDIO) >= 0 && version.compareTo(CoverityVersion.VERSION_JASPER) < 0){
+        if(version.compareTo(CoverityVersion.VERSION_INDIO) < 0) {
+            return null;
+        }
+        if(version.compareTo(CoverityVersion.VERSION_INDIO) >= 0 && version.compareTo(CoverityVersion.VERSION_JASPER) < 0){
             return new IndioToolHandler(version);
         } else {
             return new JasperToolHandler(version);
@@ -96,29 +96,6 @@ public abstract class CoverityToolHandler {
             public boolean accept(File dir, String filename) {
                 return filename.endsWith("CodeAnalysisLog.xml");
             }
-        }, true);
-    }
-
-    public File[] findAssemblies(String dirName) {
-        File dir = new File(dirName);
-
-        return listFilesAsArray(dir, new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                if(filename.endsWith(".exe") || filename.endsWith(".dll")) {
-                    String pathname = dir.getAbsolutePath();
-                    pathname = pathname + File.separator + filename;
-                    ;
-                    String pdbFilename = pathname.replaceAll(".exe$", ".pdb");
-                    pdbFilename = pdbFilename.replaceAll(".dll$", ".pdb");
-
-                    File pdbFile = new File(pdbFilename);
-
-                    return pdbFile.exists();
-                }
-
-                return false;
-            }
-
         }, true);
     }
 
