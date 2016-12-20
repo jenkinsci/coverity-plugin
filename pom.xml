@@ -41,6 +41,21 @@
             <name>Franco Rossi</name>
             <email>frossi@coverity.com</email>
         </developer>
+        <developer>
+            <id>ahcho0819</id>
+            <name>Andrew Cho</name>
+            <email>acho@synopsys.com</email>
+        </developer>
+        <developer>
+            <id>jbriggs</id>
+            <name>Joel Briggs</name>
+            <email>jbriggs@synopsys.com</email>
+        </developer>
+        <developer>
+            <id>shami</id>
+            <name>Shami Willms</name>
+            <email>kwillms@synopsys.com</email>
+        </developer>
     </developers>
 
     <repositories>
