@@ -33,11 +33,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents one Coverity Integrity Manager server. Abstracts functions like getting streams and defects.
  */
 public class CIMInstance {
+    private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
 
     public static final String COVERITY_V9_NAMESPACE = "http://ws.coverity.com/v9";
 
@@ -226,9 +229,17 @@ public class CIMInstance {
     }
 
     public ProjectDataObj getProject(String projectId) throws IOException, CovRemoteServiceException_Exception {
-        ProjectFilterSpecDataObj filterSpec = new ProjectFilterSpecDataObj();
-        filterSpec.setNamePattern(projectId);
-        List<ProjectDataObj> projects = getConfigurationService().getProjects(filterSpec);
+        List<ProjectDataObj> projects = new ArrayList<>();
+        try {
+            ProjectFilterSpecDataObj filterSpec = new ProjectFilterSpecDataObj();
+            filterSpec.setNamePattern(projectId);
+            projects = getConfigurationService().getProjects(filterSpec);
+        }
+        catch (Exception e)
+        {
+            logger.warning("Error getting project " + projectId + " from instance " + name + " (" + host + ":" + port + ")");
+        }
+
         if(projects.size() == 0) {
             return null;
         } else {
@@ -252,7 +263,15 @@ public class CIMInstance {
     }
 
     public List<ProjectDataObj> getProjects() throws IOException, CovRemoteServiceException_Exception {
-        return getConfigurationService().getProjects(new ProjectFilterSpecDataObj());
+        try {
+            return getConfigurationService().getProjects(new ProjectFilterSpecDataObj());
+        }
+        catch (Exception e)
+        {
+            logger.warning("Error getting projects from instance " + name + " (" + host + ":" + port + ")");
+        }
+
+        return new ArrayList<>();
     }
 
     public List<StreamDataObj> getStaticStreams(String projectId) throws IOException, CovRemoteServiceException_Exception {
@@ -304,7 +323,7 @@ public class CIMInstance {
             URL url = getURL();
             int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V9_WSDL));
             if(responseCode != 200) {
-                return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
+                return FormValidation.error("Coverity web services were not detected. Connection attempt responded with " + responseCode + ", check Coverity Connect version.");
             }
             getConfigurationService().getServerTime();
             return FormValidation.ok("Successfully connected to the instance.");
