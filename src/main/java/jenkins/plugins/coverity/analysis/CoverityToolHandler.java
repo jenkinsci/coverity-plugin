@@ -10,7 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.analysis;
 
-import com.coverity.ws.v6.*;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -123,29 +122,6 @@ public abstract class CoverityToolHandler {
         }, true);
     }
 
-    public MergedDefectFilterSpecDataObj addFilters(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener)throws IOException,CovRemoteServiceException_Exception{
-        MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
-        DefectFilters defectFilter = cimStream.getDefectFilters();
-
-        // Add all the classifications
-        filter.getClassificationNameList().addAll(defectFilter.getClassifications());
-        filter.getActionNameList().addAll(defectFilter.getActions());
-        filter.getSeverityNameList().addAll(defectFilter.getSeverities());
-        filter.getComponentIdList().addAll(defectFilter.getComponents());
-        // Check to see if checker list is empty because of pre-existing settings
-        // We reset the checker list to have all checkers.
-        if(defectFilter.getCheckersList() == null){
-            defectFilter.setCheckers(cim,snapshotId);
-        }
-        filter.getCheckerSubcategoryFilterSpecList().addAll(defectFilter.getCheckers(listener));
-        // Getting the cutoff date to add into filter. But only should be done if the cut off date is specified.
-        if(defectFilter.getCutOffDate() != null){
-            filter.setFirstDetectedStartDate(defectFilter.getXMLCutOffDate());
-        }
-
-        return filter;
-    }
-
     public boolean covEmitWar(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home, CoverityTempDir temp, List<String> javaWarFiles) throws IOException, InterruptedException {
         String covEmitJava = "cov-emit-java";
         covEmitJava = new FilePath(launcher.getChannel(), home).child("bin").child(covEmitJava).getRemote();
@@ -186,7 +162,7 @@ public abstract class CoverityToolHandler {
     }
 
     public boolean importMsvsca(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home,
-                                CoverityTempDir temp, boolean csharpMsvsca, String csharpMsvscaOutputFiles) throws IOException, InterruptedException {
+                                CoverityTempDir temp, boolean csharpMsvsca) throws IOException, InterruptedException {
         String covImportMsvsca = "cov-import-msvsca";
         covImportMsvsca = new FilePath(launcher.getChannel(), home).child("bin").child(covImportMsvsca).getRemote();
         EnvVars envVars = build.getEnvironment(listener);
@@ -205,15 +181,10 @@ public abstract class CoverityToolHandler {
         }
 
         for(File outputFile : msvscaOutputFiles) {
-            //importCmd.add(outputFile.getName());
             importCmd.add(outputFile.getAbsolutePath());
         }
 
-        if(csharpMsvscaOutputFiles != null && csharpMsvscaOutputFiles.length() > 0) {
-            importCmd.add(csharpMsvscaOutputFiles);
-        }
-
-        if(msvscaOutputFiles.length == 0 && (csharpMsvscaOutputFiles == null || csharpMsvscaOutputFiles.length() == 0)) {
+        if(msvscaOutputFiles.length == 0) {
             listener.getLogger().println("[MSVSCA] MSVSCA No results found, skipping");
         } else {
             listener.getLogger().println("[MSVSCA] MSVSCA Import cmd so far is: " + importCmd.toString());

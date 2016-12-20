@@ -20,14 +20,12 @@ import hudson.model.Executor;
 import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
-import hudson.util.ArgumentListBuilder;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -442,11 +440,10 @@ public class IndioToolHandler extends CoverityToolHandler {
         }
 
         // Import Microsoft Visual Studio Code Anaysis results
-        if(invocationAssistance != null && invocationAssistance.getCsharpMsvscaOutputFiles() != null) {
+        if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), envVars, useAdvancedParser);
-            if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
-                boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
+            if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && csharpMsvsca) {
+                boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca);
                 if(!result) {
                     build.setResult(Result.FAILURE);
                     return false;
@@ -586,7 +583,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                         } else {
 
                             // Check to see if defectFilter matches the defect
-                            boolean match = cimStream.getDefectFilters().matchesIndio(defect,listener);
+                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
                             if(match) {
                                 matchingDefects.add(defect.getCid());
                             }
@@ -615,10 +612,6 @@ public class IndioToolHandler extends CoverityToolHandler {
                     CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
                     build.addAction(action);
 
-                    if(!matchingDefects.isEmpty() && publisher.getMailSender() != null) {
-                        publisher.getMailSender().execute(action, listener);
-                    }
-
                     String rootUrl = Hudson.getInstance().getRootUrl();
                     if(rootUrl != null) {
                         listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
@@ -640,7 +633,7 @@ public class IndioToolHandler extends CoverityToolHandler {
         int pageSize = 1000; // Size of page to be pulled
         List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
 
-        DefectService ds = cim.getDefectServiceIndio();
+        DefectService ds = cim.getDefectService();
 
         StreamIdDataObj streamId = new StreamIdDataObj();
         streamId.setName(cimStream.getStream());

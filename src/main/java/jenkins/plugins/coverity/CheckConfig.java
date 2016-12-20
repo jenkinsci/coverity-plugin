@@ -10,9 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.StreamDataObj;
-import com.coverity.ws.v6.StreamFilterSpecDataObj;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.StreamDataObj;
+import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -25,7 +25,6 @@ import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.util.FormValidation;
-import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -274,14 +273,14 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             }
 
             if(home == null) {
-                return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);
+                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + home + "]", node, null);
             }
 
             try {
                 CoverityUtils.checkDir(launcher.getChannel(), home);
             } catch (Exception e) {
                 e.printStackTrace();
-                return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);
+                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + home + "]", node, null);
             }
 
             FilePath homePath = new FilePath(launcher.getChannel(), home);

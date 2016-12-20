@@ -142,27 +142,9 @@
 								<f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
 									<f:textbox/>
 								</f:entry>
-								<!--f:entry title="Intermediate directory:" field="intermediateDir">
-									<f:textbox/>
-								</f:entry-->
 								<f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
 									<f:textbox/>
 								</f:entry>
-								<!--f:entry title="(Only for C#) Search for DLL and EXE files to analyze:" field="csharpAutomaticAssemblies">
-									<f:checkbox/>
-								</f:entry-->
-								<!--f:entry title="(Only for C#) Microsoft Code Analysis results files:" field="csharpMsvscaOutputFiles">
-									<f:textbox/>
-								</f:entry-->
-								<!--f:entry title="(Only for C#) Search for Microsoft Code Analysis results:" field="csharpMsvsca">
-									<f:checkbox/>
-								</f:entry-->
-								<!--f:entry title="Static analysis location override:" field="saOverride">
-									<f:textbox/>
-								</f:entry-->
-								<!--f:entry title="cov-build blacklist:" field="covBuildBlacklist">
-									<f:textbox/>
-								</f:entry-->
 							</f:optionalBlock>
 							<f:entry title="" field="defectFilters">
 								<tr>
@@ -200,15 +182,6 @@
 						</div>
 					</f:repeatable>
 				</f:entry>
-
-				<!--
-				<f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">
-					<j:set var="instance" value="${instance.mailSender}"/>
-					<f:entry title="Additional recipients" field="recipients">
-						<f:textbox/>
-					</f:entry>
-				</f:optionalBlock>
-				-->
 
                 <f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
 								 checked="${instance.invocationAssistance != null}" name="invocationAssistance">

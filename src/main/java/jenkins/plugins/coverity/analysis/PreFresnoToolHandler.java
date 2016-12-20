@@ -10,10 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.analysis;
 
-import com.coverity.ws.v6.*;
+import com.coverity.ws.v9.*;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Executor;
@@ -21,7 +20,6 @@ import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.EnvVars;
-import hudson.util.ArgumentListBuilder;
 import jenkins.plugins.coverity.*;
 
 
@@ -30,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -132,7 +129,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
             String language = null;
             try {
                 language = getLanguage(cimStream, cim);
-            } catch(CovRemoteServiceException_Exception e) {
+            } catch(com.coverity.ws.v9.CovRemoteServiceException_Exception e) {
                 e.printStackTrace(listener.error("Error while retrieving stream information for " + cimStream.getStream()));
                 return false;
             }
@@ -239,11 +236,10 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         }
 
         // Import Microsoft Visual Studio Code Anaysis results
-        if(invocationAssistance != null && invocationAssistance.getCsharpMsvscaOutputFiles() != null) {
+        if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            String csharpMsvscaOutputFiles = CoverityUtils.evaluateEnvVars(invocationAssistance.getCsharpMsvscaOutputFiles(), envVars, useAdvancedParser);
-            if(analyzedLanguages.contains("CSHARP") && (csharpMsvsca || csharpMsvscaOutputFiles != null)) {
-                boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca, csharpMsvscaOutputFiles);
+            if(analyzedLanguages.contains("CSHARP") && csharpMsvsca) {
+                boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca);
                 if(!result) {
                     build.setResult(Result.FAILURE);
                     return false;
@@ -254,14 +250,6 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         //run cov-commit-defects
         for(CIMStream cimStream : publisher.getCimStreams()) {
             CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
-
-            String language = null;
-            try {
-                language = getLanguage(cimStream, cim);
-            } catch(CovRemoteServiceException_Exception e) {
-                e.printStackTrace(listener.error("Error while retrieving stream information for " + cimStream.getStream()));
-                return false;
-            }
 
             if(invocationAssistance != null) {
                 InvocationAssistance effectiveIA = invocationAssistance;
@@ -359,15 +347,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
                     List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId,listener);
 
-                    Set<String> checkers = new HashSet<String>();
-                    for(MergedDefectDataObj defect : defects) {
-                        checkers.add(defect.getCheckerName());
-                    }
-                    publisher.getDescriptor().updateCheckers(getLanguage(cimStream, cim), checkers);
-
                     List<Long> matchingDefects = new ArrayList<Long>();
-
-                    cimStream.getDefectFilters().createImpactMap(cim);
 
 
                     for(MergedDefectDataObj defect : defects) {
@@ -405,10 +385,6 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
                     CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
                     build.addAction(action);
 
-                    if(!matchingDefects.isEmpty() && publisher.getMailSender() != null) {
-                        publisher.getMailSender().execute(action, listener);
-                    }
-
                     String rootUrl = Hudson.getInstance().getRootUrl();
                     if(rootUrl != null) {
                         listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
@@ -427,11 +403,11 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         return true;
     }
 
-    public StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, CovRemoteServiceException_Exception {
-        StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
+    public com.coverity.ws.v9.StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
+        com.coverity.ws.v9.StreamFilterSpecDataObj filter = new com.coverity.ws.v9.StreamFilterSpecDataObj();
         filter.setNamePattern(streamId);
 
-        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
+        List<com.coverity.ws.v9.StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
         if(streams.isEmpty()) {
             return null;
         } else {
@@ -439,7 +415,7 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
         }
     }
 
-    public String getLanguage(CIMStream cimStream, CIMInstance cimInstance) throws IOException, CovRemoteServiceException_Exception {
+    public String getLanguage(CIMStream cimStream, CIMInstance cimInstance) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
         String domain = getStream(cimStream.getStream(), cimInstance).getLanguage();
         return "MIXED".equals(domain) ? cimStream.getLanguage() : domain;
     }
@@ -459,21 +435,16 @@ public class PreFresnoToolHandler extends CoverityToolHandler {
 
         MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
 
+        SnapshotScopeSpecDataObj snapid = new SnapshotScopeSpecDataObj();
 
-        StreamSnapshotFilterSpecDataObj sfilter = new StreamSnapshotFilterSpecDataObj();
-        SnapshotIdDataObj snapid = new SnapshotIdDataObj();
-        snapid.setId(snapshotId);
-
-        sfilter.setStreamId(streamId);
-
-        sfilter.getSnapshotIdIncludeList().add(snapid);
-        filter.getStreamSnapshotFilterSpecIncludeList().add(sfilter);
+        filter.setStreamIncludeQualifier(cimStream.getStream());
+        filter.setSnapshotComparisonField(String.valueOf(snapshotId));
         // The loop will pull up to the maximum amount of defect, doing per page size
         for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
             pageSpec.setPageSize(pageSize);
             pageSpec.setStartIndex(pageStart);
             pageSpec.setSortAscending(true);
-            mergeList.addAll(ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec).getMergedDefects());
+            mergeList.addAll(ds.getMergedDefectsForStreams(Arrays.asList(streamId), filter, pageSpec, snapid).getMergedDefects());
 
         }
         return mergeList;
