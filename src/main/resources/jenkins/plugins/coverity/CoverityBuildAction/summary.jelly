@@ -14,7 +14,7 @@
          xmlns:t="/lib/hudson">
 
     <t:summary icon="/plugin/coverity/icons/coverity-logo-400px.png">
-        <a href="${it.getUrlName()}">${it.defects.size()}</a>
+        <a href="${it.getUrlName()}">${it.defectIds.size()}</a>
         matching Coverity defect(s) found.
     </t:summary>
 
