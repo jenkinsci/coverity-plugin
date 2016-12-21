@@ -43,7 +43,7 @@
 				</j:if>
 				<j:if test="${!instance.isValid()}">
 					<tr style="font-weight: bolder">
-						<td colspan="2" class="valid">Stream configuration is invalid.</td>
+						<td colspan="2" class="invalid">Stream configuration is invalid.</td>
 					</tr>
 				</j:if>
 				<j:forEach items="${instance.getStatus()}" var="si">
