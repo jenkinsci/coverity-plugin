@@ -57,7 +57,7 @@ public class CoverityPublisher extends Recorder {
     private transient String stream;
     private transient DefectFilters defectFilters;
     /**
-     * ID of the CIM instance used
+     * List of CIM streams configured
      */
     private List<CIMStream> cimStreams;
     /**
@@ -91,8 +91,10 @@ public class CoverityPublisher extends Recorder {
 
     private final ScmOptionBlock scmOptionBlock;
 
-    // Internal variable to notify the Publisher that the build should be marked as unstable 
-    // since we cannot set the build as unstable within the tool handler
+    /**
+     * Internal variable to notify the Publisher that the build should be marked as unstable
+     * since we cannot set the build as unstable within the tool handler
+     */
     private boolean unstableBuild;
 
     @DataBoundConstructor
@@ -129,6 +131,11 @@ public class CoverityPublisher extends Recorder {
         }
     }
 
+    /**
+     * Converts the old data values cimInstance, project, stream, defectFilters to a {@link CIMStream} object
+     * and adds to the configured streams. Then trims any configured streams which are not valid (when a stream
+     * is missing a instance, project or stream name it is not valid).
+     */
     private void convertOldData() {
         CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null, null, null);
 
@@ -144,10 +151,17 @@ public class CoverityPublisher extends Recorder {
         trimInvalidStreams();
     }
 
+    /**
+     * Checks for old data values cimInstance, project, stream, defectFilters being set
+     */
     private boolean isOldDataPresent() {
         return cimInstance != null || project != null || stream != null || defectFilters != null;
     }
 
+    /**
+     * Trims any configured streams which are not valid. A stream which is missing a instance, project
+     * or stream name is not valid. Duplicate steams are also not valid.
+     */
     private void trimInvalidStreams() {
         Iterator<CIMStream> i = getCimStreams().iterator();
         while(i.hasNext()) {
