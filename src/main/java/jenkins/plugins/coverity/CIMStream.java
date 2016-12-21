@@ -168,6 +168,17 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
+        public FormValidation doCheckInstance(@QueryParameter String instance) throws IOException, CovRemoteServiceException_Exception {
+            if (!StringUtils.isEmpty(instance)){
+                CIMInstance cimInstance = getInstance(instance);
+                FormValidation checkResult = cimInstance.doCheck();
+
+                // return FormValidation.ok in order to suppress any success messages, these don't need to show automatically here
+                return checkResult.kind.equals(FormValidation.Kind.OK) ? FormValidation.ok() : checkResult;
+            }
+            return FormValidation.warning("Coverity Connect instance is required to select project and stream");
+        }
+
         public ListBoxModel doFillProjectItems(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
             ListBoxModel result = new ListBoxModel();
             boolean containCurrentProject = false;
