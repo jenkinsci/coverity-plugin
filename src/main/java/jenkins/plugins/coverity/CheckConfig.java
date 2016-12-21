@@ -34,9 +34,7 @@ import java.io.Reader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -147,50 +145,6 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                             }
                         }
                     }
-                    status.addAll(newStatus);
-                }
-            }
-
-            //can we commit to each stream, given the languages we are analyzing? (assuming analysis >= fresno
-            {
-                if(analysisVersion.compareTo(CoverityVersion.codeNameEquivalents.get("fresno")) >= 0) {
-                    List<Status> newStatus = new ArrayList<Status>();
-                    Set<String> languagesToAnalyze = new HashSet<String>();
-                    boolean singleDomainStreamExists = false;
-
-                    for(Status s : status) {
-                        if(s instanceof StreamStatus) {
-                            StreamStatus ss = (StreamStatus) s;
-                            if(ss.getStream() != null && ss.getStream().getLanguage() != null && !ss.getStream().getLanguage().equals("ALL")) {
-                                singleDomainStreamExists = true;
-                                languagesToAnalyze.add(ss.getStream().getLanguage());
-                            } else {
-                                languagesToAnalyze.add("JAVA");
-                                languagesToAnalyze.add("CXX");
-                                languagesToAnalyze.add("CSHARP");
-                            }
-                        }
-                    }
-
-                    if(singleDomainStreamExists && languagesToAnalyze.size() > 1) {
-                        System.out.println(languagesToAnalyze);
-                        newStatus.add(new Status(false, "There is a single-domain stream, but there are multiple languages to be committed."));
-                    }
-
-                    if(languagesToAnalyze.size() == 1) {
-                        String language = languagesToAnalyze.iterator().next();
-                        for(Status s : status) {
-                            if(s instanceof StreamStatus) {
-                                StreamStatus ss = (StreamStatus) s;
-                                if(ss.getStream().getDomain().equals("MIXED") || ss.getStream().getDomain().equals(language)) {
-                                    //we're fine so far
-                                } else {
-                                    newStatus.add(new Status(false, "Language " + language + " cannot be committed to stream " + ss.getStream().toPrettyString()));
-                                }
-                            }
-                        }
-                    }
-
                     status.addAll(newStatus);
                 }
             }
