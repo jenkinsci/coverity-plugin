@@ -323,7 +323,9 @@ public class CIMInstance {
             URL url = getURL();
             int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V9_WSDL));
             if(responseCode != 200) {
-                return FormValidation.error("Coverity web services were not detected. Connection attempt responded with " + responseCode + ", check Coverity Connect version.");
+                return FormValidation.error("Coverity web services were not detected. Connection attempt responded with " +
+                    responseCode + ", check Coverity Connect version (minimum supported version is " +
+                    CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().getEffectiveVersion() + ").");
             }
             getConfigurationService().getServerTime();
             return FormValidation.ok("Successfully connected to the instance.");
