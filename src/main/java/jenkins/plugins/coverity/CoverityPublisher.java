@@ -15,6 +15,7 @@ import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.model.*;
@@ -452,6 +453,19 @@ public class CoverityPublisher extends Recorder {
             File analysisVersionXml = new File(home, "VERSION.xml");
             if(analysisDir.exists()){
                 if(analysisVersionXml.isFile()){
+                    try {
+                        // check the version file value and validate it is greater than minimum version
+                        CoverityVersion version = CheckConfig.getVersion(new FilePath(analysisDir), null);
+
+                        if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
+                            return FormValidation.error("\"Coverity Static Analysis\" version " + version.toString() + " detected. " +
+                                "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().toString());
+                        }
+
+                    } catch (InterruptedException e) {
+                        return FormValidation.error("Unable to verify the \"Coverity Static Analysis\" directory version.");
+                    }
+
                     return FormValidation.ok("Analysis installation directory has been verified.");
                 } else{
                     return FormValidation.error("The specified \"Coverity Static Analysis\" directory doesn't contain a VERSION.xml file.");

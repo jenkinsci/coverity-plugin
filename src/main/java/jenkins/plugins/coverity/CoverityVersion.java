@@ -24,6 +24,8 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
     public static final CoverityVersion VERSION_INDIO = new CoverityVersion("indio");
     public static final CoverityVersion VERSION_JASPER = new CoverityVersion("jasper");
 
+    public static final CoverityVersion MINIMUM_SUPPORTED_VERSION = VERSION_INDIO;
+
     static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\w+)");
 
     final int major;
