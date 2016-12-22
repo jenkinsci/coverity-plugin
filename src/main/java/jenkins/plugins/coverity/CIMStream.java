@@ -201,6 +201,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         }
 
         public FormValidation doCheckProject(@QueryParameter String instance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
+            // allow initial empty project selection
+            if (StringUtils.isEmpty(project))
+                return FormValidation.ok();
+
             if (!StringUtils.isEmpty(instance)){
                 for (ProjectDataObj projectFromCIM : getInstance(instance).getProjects()){
                     if (projectFromCIM.getId().getName().equalsIgnoreCase(project)){
@@ -231,8 +235,12 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         }
 
         public FormValidation doCheckStream(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
+            // allow initial empty stream selection
+            if (StringUtils.isEmpty(stream))
+                return FormValidation.ok();
+
             CIMInstance cimInstance = getInstance(instance);
-            if (cimInstance != null){
+            if (cimInstance != null && !StringUtils.isEmpty(project)){
                 for (StreamDataObj streamFromCIM : cimInstance.getStaticStreams(project)){
                     if (streamFromCIM.getId().getName().equalsIgnoreCase(stream)){
                         return FormValidation.ok();
