@@ -307,6 +307,11 @@ public class CIMInstance {
                 return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
             }
             getConfigurationService().getServerTime();
+
+            if (!checkUserPermission()){
+                return FormValidation.error("\"" + user + "\" does not enough permission!");
+            }
+
             return FormValidation.ok("Successfully connected to the instance.");
         } catch(UnknownHostException e) {
             return FormValidation.error("Host name unknown");
@@ -358,4 +363,38 @@ public class CIMInstance {
         return StringUtils.join(checkers, '\n');
     }
 
+    private boolean checkUserPermission() throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
+
+        boolean canCommit = false;
+        boolean canAccessWs = false;
+        boolean canViewIssues = false;
+
+        UserDataObj userData = getConfigurationService().getUser(user);
+        if (userData != null){
+
+            if (userData.isSuperUser()){
+                return true;
+            }
+
+            for (RoleAssignmentDataObj role : userData.getRoleAssignments()){
+                RoleDataObj roleData = getConfigurationService().getRole(role.getRoleId());
+                if (roleData != null){
+                    for (PermissionDataObj permission : roleData.getPermissionDataObjs()){
+                        if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")){
+                            canCommit = true;
+                        } else if (permission.getPermissionValue().equalsIgnoreCase("accessWS")){
+                            canAccessWs = true;
+                        } else if (permission.getPermissionValue().equalsIgnoreCase("viewDefects")){
+                            canViewIssues = true;
+                        }
+
+                        if (canCommit && canAccessWs && canViewIssues){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }
