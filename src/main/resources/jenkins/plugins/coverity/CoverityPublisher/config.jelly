@@ -242,9 +242,6 @@
                             <f:entry title="(Only for C#) Search for DLL and EXE files to analyze:" field="csharpAutomaticAssemblies">
                                 <f:checkbox/>
                             </f:entry>
-                            <f:entry title="(Only for C#) Microsoft Code Analysis results files:" field="csharpMsvscaOutputFiles">
-                                <f:textbox/>
-                            </f:entry>
                             <f:entry title="(Only for C#) Search for Microsoft Code Analysis results:" field="csharpMsvsca">
                                 <f:checkbox/>
                             </f:entry>
