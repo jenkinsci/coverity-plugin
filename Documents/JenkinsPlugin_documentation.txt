@@ -1,0 +1,621 @@
+{jenkins-plugin-info:coverity}
+
+{excerpt}
+This plugin integrates Jenkins with the&nbsp;[Coverity Connect|http://www.coverity.com/products/coverity-connect/]&nbsp;and [Coverity Static Analysis|http://www.coverity.com/products/code-advisor/] tools.
+{excerpt}
+
+{toc:maxLevel=1|exclude=Plugin Information|printable=false}
+{color:#d24939}{*}Compatibility with Coverity Connect{*}{color}
+
+|| Plugin version || Coverity Integrity Manager/Connect version ||
+| *1.3.0* to *1.6.0* | *7.5.1* to *7.7.0* |
+| *1.7.0* to *1.8.0* | *7.5.1*&nbsp;to&nbsp;*8.6.0* |
+
+h2. Functions
+
+The Coverity plugin for Jenkins performs four functions:
+
+* It can transparently invoke the Coverity Static Analysis tools during your build (optional)
+* It can transparently invoke the Coverity Test Advisor tools during your build (optional)
+* It can fail the build if defects are found matching certain criteria
+* It reports found defects after the build
+
+
+h2. Getting Started
+
+* Install the plugin using the Plugin Manager, and restart Jenkins.
+* Go to the global configuration page (Manage Jenkins > Configure System).
+* If the Coverity Static Analysis tools are not on the PATH, configure the location (for the master) here.
+* Add connection details for any number of Coverity Connect instances you want to use. Click ‘check’ to validate your settings.
+* For any node where Coverity Static Analysis is not on the PATH (and is at a different location than on the master), configure the location on the node configuration page.
+
+h2. Job Setup
+
+* Create the job, by creating it from scratch or copying from an existing job.
+* Under Post-build actions, check ‘Coverity.’
+* Select the Coverity Connect instance, project and stream relevant for this job.
+* If you want the plugin to invoke cov-build/cov-analyze/cov-commit-defects for you, check ‘Perform Coverity build, analysis and commit’. You can add additional arguments for each of these tools, and configure the intermediate directory used (all optional).
+* If your build already invokes Coverity, leave the checkbox unchecked.
+* If you want to fail the build when defects are found, check the corresponding checkbox. By default all defects are considered, but you can specify filters. Every filter should match for a defect to be included.
+* If you want the plugin to invoke test and Test Advisor functions for you, check "Perform Coverity Test Advisor and Commit". You can add additional arguments and functionality to the build by entering your source control configurations (optional).
+
+Now start your build. After the build has completed, a link to Coverity Defects will be available on the build page. On the project page, a graph with historical defect counts will be visible (as soon as more than one build has been performed).
+
+
+
+h2. Project Configuration Settings
+
+To access the Coverity Plugin Configuration dialog, first choose a project in your Jenkins server, and select Configuration.
+Under the Project name and Description, there are several options that can be selected. For more information, click the Help icon next to each item.
+
+
+| *Option* | *Description* |
+| Discard Old Builds | Jenkins controls disk consumption by deleting records according to their age, or according to the number of build records. |
+| This build is parameterized | Select if parameters are added to the build process, such as parameters representing user input. If selected, click Add Parameter to choose the type of parameter to add. |
+| Disable Build | Select to prevent this build from being launched. |
+| Execute concurrent builds | If necessary, can be selected to more efficiently use resources for certain types of builds. |
+| Restrict where this project can be run | Force Jenkins to build the project on a specific machine. If selected, enter the name of the machine in the text box that appears. |
+Click "Advanced Project Options" to display the following options.
+|| {color:#000000}Option{color} || {color:#000000}Description{color} ||
+| Quiet period | This is a delay in seconds before the build is performed. |
+| Retry count | Number of times Jenkins will try to checkout a build. |
+| Block build when upstream project is building | Prevents the build in question from building when dependencies are building. |
+| Block build when downstream project is building | Prevents the build in question from building when children are building. |
+| Use custom workspace | Usually Jenkins will create and delete workspaces for builds automatically, but there are cases where a specific one should be used. When selected, text boxes appear for entering the Directory and Display Name of the workspace. |
+| Keep the build logs of dependencies | This will prevent builds referenced by this build from being deleted by log rotation. |
+| Source Code Management | Jenkins can connect to CVS, CVS Projectset, and Subversion. When an option is selected, the corresponding fields for entering connection strings and other login information appear. |
+| Build Triggers | When Build after other projects are built, Build periodically, or Poll SCM is selected, fields appear for specifying the trigger projects or the schedule for the selected option. |
+| Build | Specify build steps, such as Execute Windows batch command, Execute shell, Invoke Ant, and Invoke top-level Maven targets. Click Add build step to add a step, and specify the relevant parameters in the fields that appear. |
+In the "Post-build Actions" section, the following actions can be set to execute after the build completes:&nbsp;
+
+* Aggregate downstream test results
+* Archive the artifacts
+* Build other projects
+* Coverity
+* Publish Junit test result report
+* Publish Javadoc
+* Record fingerprints of files to track usage
+* E-mail Notification
+
+h4. &nbsp;Coverity Post-build Action Settings
+
+The Coverity post-build action has the following options:
+|| {color:#000000}Option{color} || {color:#000000}Description{color} ||
+| Check configuration | Click to verify that the connection to a stream in Coverity Connect is configured correctly. |
+| Streams | Select the Coverity Connect instance, Project, Stream, and Language. |
+| Override default tool settings | Specify other arguments for Coverity tools, or Assemblies in the case of C#. |
+| Defect Filters | Select defects according to Classification, Action, Severity, Impact, Component, Checker, or Date first detected. |
+| Add Stream | Click to add another stream to the analysis process. |
+| Remove Stream for Analysis | Click to remove a stream from the analysis process. |
+| Perform Coverity build, analysis, and commit | When this option is selected, Jenkins will monitor the build using cov-build, run the analysis, and commit defects to Coverity Connect. Various arguments can be specified to optimize the build process. |
+| Perform Coverity Test Advisor and Commit | Make settings for Test Advisor Configuration, and Coverage Configuration settings specific to C/C++, C#, and Java. |
+| Source Control Configuration 'SCM' (optional) | Make settings to enable retrieval of the version history from source control. |
+| Fail the build if matching defects are found | Mark the build as unstable if defects are found that pass all the defect filters. |
+| Do not fetch defects after the build | Select this if builds are slow or fetching defects is taking too many resources. |
+| Preserve the intermediate directory after each build | This only has an effect if a non-default intermediate directory is chosen. |
+| Hide the defects chart on the project page | This setting will speed up page loads when there are a large number of defects or builds. |
+
+h2. Coverity Advanced Parsing
+
+The Coverity plugin now provides an optional Coverity parser for interpreting commands that are executed on a Jenkins instance. If *Use advanced parsing mechanism* is selected, the Coverity parser is used instead of the default Jenkins parser. Either parser interprets environmental variables entered on the command line with a Jenkins command. The following rules describe how the Coverity parser interprets environmental variables.
+
+The value of an environmental variable is passed into an array as follows. For example, if the variable VAR has the value “Some value”:
+* If the variable is listed in the form $VAR, then it is interpreted as \[Some, value\].
+* Double quotes: If listed as “$VAR”, then it is interpreted as \[some value\].
+* String literals: If listed as ‘$VAR’, using single quotes, then it is interpreted as \[$VAR\].
+* As with the bash shell, single quotes escape double quotes and conversely double quotes escape single quotes. For example:
+{noformat}
+”’”a”’”   - >   [‘a’]
+’”’a’”’   - >   [“a”]
+{noformat}
+* Concatenated environment variables are also supported. For example:
+{noformat}
+If VAR1=ABC and VAR2=123
+$VAR1$VAR2   - >   [ABC123]
+{noformat}
+* Environment variables can be concatenated to a string. For example:
+{noformat}
+${VAR1}DEF -> [ABCDEF]
+{noformat}
+
+h4. How the Coverity parser works
+
+The Coverity parser works in two stages, interpolation and tokenization. In the interpolation stage, the values of the command line arguments (variables) are resolved. For example, if you have the following environmental variables:
+
+
+{noformat}
+VAR1=Hello
+VAR2=$VAR3
+VAR3=$VAR4
+VAR4=World
+VAR5="$VAR1 $VAR2"
+VAR6=$VAR1 $VAR2
+{noformat}
+
+Then the variables VAR5 and VAR6 are resolved as follows:
+
+
+{noformat}
+VAR5  - > "Hello World"
+VAR6  - > Hello World
+{noformat}
+
+In the tokenization stage, the plugin splits up the resolved values (strings) and places them into an array.&nbsp;&nbsp;
+
+Following the example above:
+
+
+{noformat}
+VAR5  - > [Hello World]
+VAR6  - > [Hello, World]
+{noformat}
+
+Note that the “Hello World” string, surrounded by unescaped quotes, is placed into the array as a single value, and the quotes are removed. The unquoted Hello World string is split into two array elements.&nbsp;
+
+
+h2. {color:#d24939}{*}Troubleshooting{*}{color}
+
+When you encounter problems while using the plugin, please provide the following information:
+* What you were doing when the problem occurred.
+* The error message
+* The Jenkins server log file (the location is dependent on the container you use)
+* The content of ‘Manage Jenkins > System Information’ (_Jenkins root_/systemInfo)
+* The configuration file for the job (_Jenkins root_/jobs/_job name_/config.xml)
+* The global configuration file for Jenkins (_Jenkins root_/config.xml)
+* In case of problems while saving the job configuration, a screenshot before submitting, and the browser you are using.
+
+h2. Known Issues
+
+To enable the Jenkins Coverity plugin to operate with a Coverity Connect instance that is configured to use SSL, do the following:
+
+# Set the environmental variable CATALINA_OPTS to this value: " \-Djavax.net.ssl.trustStore=$keystore \-Djavax.net.ssl.trustStorePassword=changeit";
+# Make sure that the environmental variable $keystore points to the Java keystore used by Coverity Connect.
+# Restart the Tomcat server.
+
+h2. Upgrading
+
+When upgrading, make sure that all jobs using the Coverity plugin are finished and not running during upgrade. For best results, restart your Jenkins after upgrade.
+
+
+
+
+h2. Changelog
+
+h4. *Version 1.8.0 (September 23, 2016)*
+
+* Added support for 'Additional SCM arguments' on Coverity version 7.0.x. (BZ 94678)
+* Added new Coverity parser for interpreting environmental variables (BZ 94604)
+* Resolved issue with a master/slave setup, where the intermediate directory was preserved when it should have been deleted. (BZ 94550)
+* Resolved an issue with a plugin crash occurring when setting 'cov-build blacklist' and 'display chart' to true. (BZ 94413)
+* Added support for \--filename-regex option in Coverity 7.0.x. (BZ 94036)
+* Resolved an issue with parsing environmental variables by using the Coverity parser." (BZ 94034)
+* Resolved an issue with incorrectly wrapping argument to \--misra-config. (BZ 94031)
+* Added messages for when attempting to build with an incorrect or partially configured Coverity Connect information. (BZ 93458)
+* Resolved issues with environmental variables not being resolved correctly. (BZ 93390)
+* Resolved issues with parsing environmental variables. (BZ 93380)
+* Displays error message when stream or language settings are left blank. (BZ 93288)
+* Fixed an issue with incorrect parsing of environment variable values containing spaces. (BZ 93136)
+* Resolved an issue where the \-ssl option was used with incompatible Coverity versions. (BZ 92290)
+* If a change in source code doesn't result in a new build, cov-analyze fails. Workaround is to add a dummy file which always gets built. (BZ 89440)
+* Resolved an issue so that an error message is displayed when Stream is left blank in configuration. (BZ 89238)
+* Resolved an issue with running cov-commit-defects command with \--on-new-cert trust set. (BZ 88959)
+* Resolved an issue that caused builds to fail when a WAR file is specified. (BZ 88086)
+* Resolved an issue where path names containing spaces were split. (BZ 87862)
+* Provided support for using scripting languages only, compiled languages only, or both scripting and compiled language sources. (BZ 87531)
+* Resolved an issue where arguments were not properly wrapped in quotes. (BZ 87051)
+* Resolved an issue where defects were not fetched from Coverity Connect and displayed on a graph in Jenkins after upgrading the plugin. (BZ 86997)
+* Resolved an issue with the \--misra-config option. (BZ 86622)
+* Resolved an issue that caused plugin to fail when stream name contains spaces. (BZ 85945)
+* Resolved issue that prevented MISRA checkers being enabled. (BZ 85858)
+* Added environmental variables to enable running cov-import with a script after cov-build and cov-analyze commands. (BZ 84077)
+* Resolved an issue with using environmental variables in the intermediate directory setting. (BZ 82984)
+* Resolved a problem to support having spaces in the Coverity Static Analysis Location. (BZ 81464)
+* Resolved an issue with cov-analyze failing when the options list included two or more embedded spaces. (BZ 75510)
+* Resolved issue with a null pointer exception occurring when clicking Defect Filters. (BZ 71782)
+* Resolved an issue with null pointer exception when filtering by impact. (BZ 71499)
+* Resolved an issue to warn the user of a delay when changing a project in Coverity Connect. (BZ 69229)
+* Added a method to allow users to execute commands after cov-build and cov-analyze commands. (BZ 66147)
+* Resolved an issue so that the job configuration page loads normally even if the Coverity Connect configuration is invalid. (BZ 59241)
+* Resolved issue where removing a user's web access permission caused a crash. Now reports a message concerning insufficient user permissions. (BZ 46833)
+* Resolves a problem by issuing an error message when a stream is deleted from a job configuration. (BZ 35447)
+
+h4. *Version 1.7.3 (August 5, 2016)*
+
+* Resolved issue that prevented analysis of multiple .WAR files. (BZ 66004)
+
+h4. *Version 1.7.2 (August 3, 2016)*
+
+* Skipped due to logistics issue.
+
+h4. *Version 1.7.1 (February 8, 2016)*
+
+* Resolved issue that caused the plugin to fail to analyze after cov-build executes. This issue only occurred when using Coverity Analysis 8.0.0 (BZ 85629)
+
+h4. *Version 1.7.0 (February 4, 2016)*
+
+* Resolved issue of defects not being counted when local was set to Japanese. (BZ 79147)
+* The deprecated&nbsp;cov-analyze\[-java\] has changed to&nbsp;cov-analyze. (BZ 83277)
+* The option&nbsp;--misra-only will not be used on Jasper and later releases. (BZ 83372)
+* Resolved issue of chart not drawing job numbers&nbsp;correctly. Adding the "Display defects on chat option in order to address this issue. (BZ 85014)
+* Resolved issue of finding analysis home directory on slave machines. (BZ 81254)
+
+h4. *Version 1.6.0 (October 9, 2015)*
+
+* Resolved incompatibility between \--misra-only and Test Advisor. (BZ 78807)
+* Added the capability for adding many war files. (BZ 66004)
+* Resolved issues when using an intermediate directory. (BZ 79060)
+* Added a field for \--filename-regex option. Also, added a field for additional commands for the scm option. (BZ 79395)
+* Added a check button for the analysis installation directory. When the user clicks on it the plugin verifies that the given directory exists. In case the user doesn't verify this, additional checking mechanisms were added during the build to prevent misleading exception messages. (BZ 79525)
+
+h4. *Version 1.5.2 (July 9, 2015)*
+
+* Added MISRA support. In order to perform analysis and commit when using MISRA, there is a new option for called "{color:#333333}Use MISRA for analysis and commit" that once selected will display a text box where a configuration file should be specified.{color}
+* {color:#333333}Fix issue with "--include-java" &nbsp;option being added by default.{color}&nbsp;
+* Fix error message when checking configurations.
+
+h4. *Version 1.5.1 (June 23, 2015)*
+
+* Removed "Advanced Options" from the Configure System page.
+* When using 7.7.0.
+** Drop-down menu for languages only allows “ALL”.
+** Under “Defect filters” for each job configuration, the “show checkers” option displays all checkers for the Coverity Connect instance&nbsp;associated with that job.&nbsp;
+* Added support for Coverity Web Services v9.
+
+h4. *Version 1.5.0 (January 30, 2015)*
+
+
+* User input in configuration now resolves environment variables
+* Added new checkers to the defect list for each language. List has been updated to all checkers present to 7.6.0&nbsp;
+* {expand:title=New C/C++ Checkers}ASSIGN_NOT_RETURNING_STAR_THIS
+ATOMICITY
+BAD_EQ
+BAD_EQ_TYPES
+BAD_LOCK_OBJECT
+BAD_OVERRIDE
+BAD_SHIFT
+BUFFER_SIZE
+CALL_SUPER
+CHROOT
+COM.ADDROF_LEAK
+COM.BAD_FREE
+COM.BSTR.ALLOC
+COM.BSTR.BAD_COMPARE
+COM.BSTR.CONV
+COM.BSTR.NE_NON_BSTR
+CONFIG.STRUTS2_ENABLED_DEV_MODE
+COPY_PASTE_ERROR
+COPY_WITHOUT_ASSIGN
+CTOR_DTOR_LEAK
+DC.STREAM_BUFFER
+DC.STRING_BUFFER
+DC.WEAK_CRYPTO
+DELETE_ARRAY
+DELETE_VOID
+GUARDED_BY_VIOLATION
+HFA
+IDENTICAL_BRANCHES
+INTEGER_OVERFLOW
+INVALIDATE_ITERATOR
+LOCK
+LOCK_EVASION
+LOCK_INVERSION
+MISMATCHED_ITERATOR
+MISSING_ASSIGN
+MISSING_COMMA
+MISSING_COPY
+MISSING_COPY_OR_ASSIGN
+MISSING_LOCK
+MISSING_RESTORE
+MISSING_THROW
+NON_STATIC_GUARDING_STATIC
+OPEN_ARGS
+ORDER_REVERSAL
+OVERRUN_STATIC
+PARSE_ERROR
+PASS_BY_VALUE
+PW.INCLUDE_RECURSION
+READLINK
+RISKY_CRYPTO
+RW.ROUTINE_NOT_EMITTED
+SECURE_CODING
+SECURE_TEMP
+SELF_ASSIGN
+SLEEP
+SW.INCOMPLETE_TYPE_NOT_ALLOWED
+SWAPPED_ARGUMENTS
+SYMBIAN.CLEANUP_STACK
+SYMBIAN.NAMING
+UNCAUGHT_EXCEPT
+UNINIT
+UNINIT_CTOR
+UNINTENDED_INTEGER_DIVISION
+UNREACHABLE
+UNUSED_VALUE
+USELESS_CALL
+USE_AFTER_FREE
+VARARGS
+VIRTUAL_DTOR
+VOLATILE_ATOMICITY
+WRAPPER_ESCAPE{expand}
+* {expand:title=New Java Checkers}ATOMICITY
+BAD_CHECK_OF_WAIT_COND
+BAD_LOCK_OBJECT
+BAD_SHIFT
+CONFIG.DUPLICATE_SERVLET_DEFINITION
+CONFIG.DWR_DEBUG_MODE
+CONFIG.DYNAMIC_DATA_HTML_COMMENT
+CONFIG.HTTP_VERB_TAMPERING
+CONFIG.JAVAEE_MISSING_HTTPONLY
+CONFIG.MISSING_GLOBAL_EXCEPTION_HANDLER
+CONFIG.MISSING_JSF2_SECURITY_CONSTRAINT
+CONFIG.SPRING_SECURITY_DEBUG_MODE
+CONFIG.SPRING_SECURITY_DISABLE_AUTH_TAGS
+CONFIG.SPRING_SECURITY_HARDCODED_CREDENTIALS
+CONFIG.SPRING_SECURITY_REMEMBER_ME_HARDCODED_KEY
+CONFIG.SPRING_SECURITY_SESSION_FIXATION
+CONFIG.STRUTS2_CONFIG_BROWSER_PLUGIN
+CONFIG.STRUTS2_DYNAMIC_METHOD_INVOCATION
+CONFIG.STRUTS2_ENABLED_DEV_MODE
+CONSTANT_EXPRESSION_RESULT
+COPY_PASTE_ERROR
+CSRF
+DC.CODING_STYLE
+DC.DANGEROUS
+DC.DEADLOCK
+DC.EXPLICIT_DEPRECATION
+DC.GC
+DC.JRE14COMPATIBLE
+DC.JRE15COMPATIBLE
+DC.LOCALIZATION
+DC.PERFORMANCE
+DC.THREADING
+DEADCODE
+DIVIDE_BY_ZERO
+DOUBLE_CHECK_LOCK
+EL_INJECTION
+GUARDED_BY_VIOLATION
+HARDCODED_CREDENTIALS
+HEADER_INJECTION
+HIBERNATE_BAD_HASHCODE
+IDENTICAL_BRANCHES
+INDIRECT_GUARDED_BY_VIOLATION
+INFINITE_LOOP
+JAVA_CODE_INJECTION
+JCR_INJECTION
+JSP_DYNAMIC_INCLUDE
+JSP_SQL_INJECTION
+LDAP_INJECTION
+LOCK_EVASION
+LOCK_INVERSION
+LOCK_ORDERING
+MISSING_BREAK
+MISSING_RESTORE
+MISSING_THROW
+MIXED_ENUMS
+NESTING_INDENT_MISMATCH
+NON_STATIC_GUARDING_STATIC
+NOSQL_QUERY_INJECTION
+OGNL_INJECTION
+ORM_LOAD_NULL_CHECK
+ORM_LOST_UPDATE
+ORM_UNNECESSARY_GET
+OS_CMD_INJECTION
+OVERFLOW_BEFORE_WIDEN
+PATH_MANIPULATION
+REGEX_CONFUSION
+REGEX_INJECTION
+RISKY_CRYPTO
+SCRIPT_CODE_INJECTION
+SENSITIVE_DATA_LEAK
+SERVLET_ATOMICITY
+SESSION_FIXATION
+SINGLETON_RACE
+SQLI
+STRAY_SEMICOLON
+SWAPPED_ARGUMENTS
+TAINT_ASSERT
+UNEXPECTED_SYNC
+UNINTENDED_INTEGER_DIVISION
+UNKNOWN_LANGUAGE_INJECTION
+UNREACHABLE
+UNRESTRICTED_DISPATCH
+UNSAFE_DESERIALIZATION
+UNSAFE_JNI
+UNSAFE_LAZY_INIT
+UNSAFE_REFLECTION
+UNUSED_VALUE
+USELESS_CALL
+WEAK_PASSWORD_HASH
+WRONG_METHOD
+XPATH_INJECTION
+XSS{expand}
+* {expand:title=New C# Checkers}ALLOC_FREE_MISMATCH
+ARRAY_VS_SINGLETON
+ASSERT_SIDE_EFFECT
+ASSIGN_NOT_RETURNING_STAR_THIS
+BAD_ALLOC_ARITHMETIC
+BAD_ALLOC_STRLEN
+BAD_COMPARE
+BAD_FREE
+BAD_LOCK_OBJECT
+BAD_OVERRIDE
+BAD_SHIFT
+BAD_SIZEOF
+BUFFER_SIZE
+CALL_SUPER
+CHAR_IO
+CHECKED_RETURN
+CHROOT
+COM.ADDROF_LEAK
+COM.BAD_FREE
+COM.BSTR.ALLOC
+COM.BSTR.BAD_COMPARE
+COM.BSTR.CONV
+COM.BSTR.NE_NON_BSTR
+CONSTANT_EXPRESSION_RESULT
+COPY_PASTE_ERROR
+COPY_WITHOUT_ASSIGN
+CTOR_DTOR_LEAK
+DC.STREAM_BUFFER
+DC.STRING_BUFFER
+DC.WEAK_CRYPTO
+DEADCODE
+DELETE_ARRAY
+DELETE_VOID
+DIVIDE_BY_ZERO
+ENUM_AS_BOOLEAN
+EVALUATION_ORDER
+FORWARD_CLASSCAST
+FORWARD_NULL
+IDENTICAL_BRANCHES
+INCOMPATIBLE_CAST
+INFINITE_LOOP
+INTEGER_OVERFLOW
+INVALIDATE_ITERATOR
+LOCK
+LOCK_EVASION
+MISMATCHED_ITERATOR
+MISRA_CAST
+MISSING_BREAK
+MISSING_COMMA
+MISSING_COPY_OR_ASSIGN
+MISSING_LOCK
+MISSING_RESTORE
+MISSING_RETURN
+MISSING_THROW
+MIXED_ENUMS
+NEGATIVE_RETURNS
+NESTING_INDENT_MISMATCH
+NO_EFFECT
+NULL_RETURNS
+OPEN_ARGS
+ORDER_REVERSAL
+OVERFLOW_BEFORE_WIDEN
+OVERRUN
+OVERRUN_DYNAMIC
+OVERRUN_STATIC
+PARSE_ERROR
+PASS_BY_VALUE
+READLINK
+RESOURCE_LEAK
+RETURN_LOCAL
+REVERSE_INULL
+REVERSE_NEGATIVE
+RISKY_CRYPTO
+SECURE_CODING
+SECURE_TEMP
+SELF_ASSIGN
+SIGN_EXTENSION
+SIZECHECK
+SIZEOF_MISMATCH
+SLEEP
+STACK_USE
+STRAY_SEMICOLON
+STREAM_FORMAT_STATE
+STRING_NULL
+STRING_OVERFLOW
+STRING_SIZE
+SWAPPED_ARGUMENTS
+SYMBIAN.CLEANUP_STACK
+SYMBIAN.NAMING
+TAINTED_SCALAR
+TAINTED_STRING
+TOCTOU
+UNCAUGHT_EXCEPT
+UNINIT
+UNINIT_CTOR
+UNINTENDED_INTEGER_DIVISION
+UNREACHABLE
+UNUSED_VALUE
+USELESS_CALL
+USER_POINTER
+USE_AFTER_FREE
+VARARGS
+VIRTUAL_DTOR
+VOLATILE_ATOMICITY
+WRAPPER_ESCAPE{expand}
+* &nbsp;Fixed SSL issue with cov-manage-history &nbsp;
+* &nbsp;Fixed issue where cov-build was run when "{color:#333333}Perform Coverity build, analysis and commit" was not selected{color}
+* {color:#333333}&nbsp;Fixed graphs breaking when a build has more than one CIM instances.&nbsp;{color}
+* {color:#333333}&nbsp;Added Impact into defect filters. Checkers can now be filtered by impact{color}\*\* *_(_{*}{color:#333333}{*}{_}Note)_{*}{color} {color:#333333}After upgrade, the build configuration might need to be reconfigured so that impact filtering can be added. Initial build after upgrade might return zero defects.&nbsp;{color}
+* &nbsp;Builds can now be marked as 'Unstable' if defects are found
+* &nbsp;Fixed issue where defect totals was being printed as total defects instead of matched defects
+
+h4. *Version 1.4.1 (July 25, 2014)*
+
+* Fixed issues with receiving ERROR text within Defect Filters
+* Fixed issue where checking configuration in Views gave back an ERROR text
+* Commit to SSL now works properly&nbsp;
+* Plugin now connects correctly with Coverity Connect 6.5.0
+
+h4. {color:#d24939}{*}Version 1.4.0 (June 30, 2014)*{color}
+
+* Added Coverity Test Advisor tools to be ran during build
+* Added cov-history command and source control functionality to Coverity Test Advisor tools.&nbsp;
+
+
+h4. Version 1.3.1 (March 31, 2014)
+
+* Changed method for determining Static Analysis version (BZ 61464)
+* Allowed Coverity Plugin to accept similar version of Coverity Connect and Analysis , but different patches &nbsp;(BZ 62013)
+* Increased maximum number of defects shown in job page to 3000 (BZ 60322)
+* Allowed older versions of Static Analysis work with new versions of Coverity Connect (BZ 62196)
+
+
+h4. Version 1.3.0 (December 19, 2013)
+
+* Improve documentation
+* Increase maximum number of defects shown in job page to 1000 (BZ 55368)
+* Add support for 'Mixed Domain' (any language) streams (BZ 57461)
+* Add support for Coverity Analysis 7.0.0 (BZ 55618)
+* Don't fail the build if analysis and defect checking are both disabled (BZ 49096)
+
+h4. Version 1.2.7 (August 12, 2013)
+
+* Improve compatibility with older versions of Connect/CIM. (BZ 54854)
+
+h4. Version 1.2.6 (July 24, 2013)
+
+* Allow overrides for analysis/commit settings for an individual job (BZ 47499, BZ 45728)
+* Add support for cov-emit-java \--webapp-archive
+* Add support for FxCop/MSVSCA results (BZ 50247)
+* Add automatic searching for C# assemblies
+* Fix a bug where builds would hang when JDKs were automatically installed (BZ 50669)
+* Fix a bug that caused linux/solaris executables to called as if they were on windows (BZ 55117)
+* Improve error message when a configured stream is absent in CIM/Connect (BZ 54068, BZ 51304)
+
+h4. Version 1.2.5 (June 28, 2013)
+
+* Upgrade Coverity web services code to v5. (BZ 51322)
+
+h4. Version 1.2.4 (May 20, 2013)
+
+* Redo the previous fix from 1.2.3, as it broke some workflows. (BZ 52107)
+
+h4. Version 1.2.3 (May 10, 2013)
+
+* Fix a NullPointerException that occurred when the build/analyze/commit checkbox was unchecked. (BZ 52034)
+
+h4. Version 1.2.2 (April 29, 2013)
+
+* Add an option for specifying the commit port of a CIM instance manually, as a workaround for an issue with committing defects. (BZ 51458)
+
+h4. Version 1.2.1 (April 29, 2013)
+
+* Fix a NullPointerException during C# builds. (BZ 50321)
+
+h4. Version 1.2.0 (March 25, 2013)
+
+* Allow configuration of multiple streams and languages for each job. The appropriate analysis and commit steps will be run for each. (BZ 47499)
+
+h4. Version 1.1.5 (February 4, 2013)
+
+* Fix a bug where normally hidden streams would be available for selection in configuration (BZ 49226)
+* Add a field for blacklisting executables from being wrapped by cov-build (BZ 38025, BZ 47534, BZ 48921, JIRA JENKINS-14834)
+* Add an option to hide the defects chart (BZ 47524)
+* Update checkers list to match 6.5.0 checker documentation (BZ 48917)
+
+h4. Version 1.1.4 (January 14, 2013)
+
+* Add an option to not fetch defects after commit (BZ 47226)
+* Allow static analysis binaries to be specified on a per-job basis (BZ 47224)
