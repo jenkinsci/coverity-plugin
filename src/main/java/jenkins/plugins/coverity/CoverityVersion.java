@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
  * codenames are all valid and comparable.
  */
 public class CoverityVersion implements Comparable<CoverityVersion>, Serializable {
-    public static final CoverityVersion VERSION_FRESNO = new CoverityVersion("fresno");
     public static final CoverityVersion VERSION_INDIO = new CoverityVersion("indio");
     public static final CoverityVersion VERSION_JASPER = new CoverityVersion("jasper");
 
