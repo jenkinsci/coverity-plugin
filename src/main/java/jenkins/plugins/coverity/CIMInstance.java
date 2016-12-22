@@ -308,8 +308,14 @@ public class CIMInstance {
             }
             getConfigurationService().getServerTime();
 
-            if (!checkUserPermission()){
-                return FormValidation.error("\"" + user + "\" does not enough permission!");
+            List<String> missingPermission = checkUserPermission();
+            if (missingPermission != null && !missingPermission.isEmpty()){
+                StringBuilder errorMessage = new StringBuilder();
+                errorMessage.append("\"" + user + "\" does not following permission: ");
+                for (String permission : missingPermission){
+                    errorMessage.append("\"" + permission + "\" ");
+                }
+                return FormValidation.error(errorMessage.toString());
             }
 
             return FormValidation.ok("Successfully connected to the instance.");
@@ -327,15 +333,10 @@ public class CIMInstance {
                     return FormValidation.error(e, "Please use Java 1.6.0_26 or later to run Jenkins.");
                 }
             }
+            if (StringUtils.isNotEmpty(e.getMessage())){
+                return FormValidation.error(e.getMessage());
+            }
             return FormValidation.error(e, "An unexpected error occurred.");
-        }
-    }
-
-    private FormValidation error(Throwable t) {
-        if(Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
-            return FormValidation.error(t, t.getMessage());
-        } else {
-            return FormValidation.error(t.getMessage());
         }
     }
 
@@ -363,17 +364,17 @@ public class CIMInstance {
         return StringUtils.join(checkers, '\n');
     }
 
-    private boolean checkUserPermission() throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
+    private List<String> checkUserPermission() throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
 
         boolean canCommit = false;
-        boolean canAccessWs = false;
         boolean canViewIssues = false;
+        List<String> missingPermissions = new ArrayList<String>();
 
         UserDataObj userData = getConfigurationService().getUser(user);
         if (userData != null){
 
             if (userData.isSuperUser()){
-                return true;
+                return missingPermissions;
             }
 
             for (RoleAssignmentDataObj role : userData.getRoleAssignments()){
@@ -382,19 +383,24 @@ public class CIMInstance {
                     for (PermissionDataObj permission : roleData.getPermissionDataObjs()){
                         if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")){
                             canCommit = true;
-                        } else if (permission.getPermissionValue().equalsIgnoreCase("accessWS")){
-                            canAccessWs = true;
                         } else if (permission.getPermissionValue().equalsIgnoreCase("viewDefects")){
                             canViewIssues = true;
                         }
-
-                        if (canCommit && canAccessWs && canViewIssues){
-                            return true;
+                        if (canCommit && canViewIssues){
+                            return missingPermissions;
                         }
                     }
                 }
             }
         }
-        return false;
+
+        if (!canCommit){
+            missingPermissions.add("Commit to a stream");
+        }
+        if (!canViewIssues){
+            missingPermissions.add("View issues");
+        }
+
+        return missingPermissions;
     }
 }
