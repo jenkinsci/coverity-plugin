@@ -132,50 +132,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             }
         }
 
-        // Do not run cov-build if language is "CSHARP"
-        boolean onlyCS = true;
-        for(CIMStream cs : publisher.getCimStreams()) {
-            if(cs == null || cs.getInstance() == null){
-                throw new RuntimeException("Could not connect to a Coverity instance. \n " +
-                        "Verify that a Coverity instance have been configured for this job");
-            }
-            CIMInstance cim = publisher.getDescriptor().getInstance(cs.getInstance());
-            if(cim == null){
-                throw new RuntimeException("Could not connect to a Coverity instance. \n " +
-                        "Verify that a Coverity instance have been configured for this job");
-            }
-            if(cs.getStream() == null){
-                throw new RuntimeException("Could not find any Stream that matches the given configuration for this job.");
-            }
-            String id = cs.getInstance() + "/" + cs.getStream();
-
-            if(!cs.getDefectFilters().checkConfig()){
-                throw new RuntimeException("Defect Filters Configured incorrectly. Possibly new configuration have been " +
-                        "added and needs configurations. \n Please check your build configuration before running another build.");
-            }
-            try {
-                StreamDataObj stream = cim.getStream(cs.getStream());
-                if(stream == null) {
-                    throw new RuntimeException("Could not find stream: " + id);
-                }
-                String language = stream.getLanguage();
-                if(!"CSHARP".equals(language)) {
-                    onlyCS = false;
-                    break;
-                }
-            } catch(IOException e) {
-                throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
-            } catch (com.coverity.ws.v9.CovRemoteServiceException_Exception e) {
-                throw new RuntimeException("Error while retrieving stream information for instance/stream: " + id, e);
-            }
-        }
-
-        if(onlyCS && version.compareTo(CoverityVersion.VERSION_FRESNO) < 0) {
-            logger.info("Only streams of type CSHARP were found, skipping cov-build");
-
-            return launcher;
-        }
-
         
         /**
          * Putting together the arguments for cov-build. The placeholder is there so that we can later determine the
