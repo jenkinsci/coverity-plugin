@@ -11,7 +11,6 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v9.*;
-import hudson.model.Hudson;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -19,6 +18,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.soap.SOAPFaultException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -306,12 +306,11 @@ public class CIMInstance {
             if(responseCode != 200) {
                 return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
             }
-            getConfigurationService().getServerTime();
 
-            List<String> missingPermission = checkUserPermission();
-            if (missingPermission != null && !missingPermission.isEmpty()){
+            List<String> missingPermission = new ArrayList<String>();;
+            if (!checkUserPermission(missingPermission) && !missingPermission.isEmpty()){
                 StringBuilder errorMessage = new StringBuilder();
-                errorMessage.append("\"" + user + "\" does not following permission: ");
+                errorMessage.append("\"" + user + "\" does not have following permission(s): ");
                 for (String permission : missingPermission){
                     errorMessage.append("\"" + permission + "\" ");
                 }
@@ -325,16 +324,18 @@ public class CIMInstance {
             return FormValidation.error("Connection refused");
         } catch(SocketException e) {
             return FormValidation.error("Error connecting to CIM. Please check your connection settings.");
-        } catch(Throwable e) {
+        } catch(SOAPFaultException e){
+            if (StringUtils.isNotEmpty(e.getMessage())){
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.error(e, "An unexpected error occurred.");
+        } catch (Throwable e) {
             String javaVersion = System.getProperty("java.version");
             if(javaVersion.startsWith("1.6.0_")) {
                 int patch = Integer.parseInt(javaVersion.substring(javaVersion.indexOf('_') + 1));
                 if(patch < 26) {
                     return FormValidation.error(e, "Please use Java 1.6.0_26 or later to run Jenkins.");
                 }
-            }
-            if (StringUtils.isNotEmpty(e.getMessage())){
-                return FormValidation.error(e.getMessage());
             }
             return FormValidation.error(e, "An unexpected error occurred.");
         }
@@ -364,17 +365,16 @@ public class CIMInstance {
         return StringUtils.join(checkers, '\n');
     }
 
-    private List<String> checkUserPermission() throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
+    private boolean checkUserPermission(List<String> missingPermissions) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
 
         boolean canCommit = false;
         boolean canViewIssues = false;
-        List<String> missingPermissions = new ArrayList<String>();
 
         UserDataObj userData = getConfigurationService().getUser(user);
         if (userData != null){
 
             if (userData.isSuperUser()){
-                return missingPermissions;
+                return true;
             }
 
             for (RoleAssignmentDataObj role : userData.getRoleAssignments()){
@@ -387,7 +387,7 @@ public class CIMInstance {
                             canViewIssues = true;
                         }
                         if (canCommit && canViewIssues){
-                            return missingPermissions;
+                            return true;
                         }
                     }
                 }
@@ -401,6 +401,6 @@ public class CIMInstance {
             missingPermissions.add("View issues");
         }
 
-        return missingPermissions;
+        return false;
     }
 }
