@@ -11,7 +11,6 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v9.*;
-import hudson.model.Hudson;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -19,6 +18,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.soap.SOAPFaultException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -327,7 +327,17 @@ public class CIMInstance {
                     responseCode + ", check Coverity Connect version (minimum supported version is " +
                     CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().getEffectiveVersion() + ").");
             }
-            getConfigurationService().getServerTime();
+
+            List<String> missingPermission = new ArrayList<String>();;
+            if (!checkUserPermission(missingPermission) && !missingPermission.isEmpty()){
+                StringBuilder errorMessage = new StringBuilder();
+                errorMessage.append("\"" + user + "\" does not have following permission(s): ");
+                for (String permission : missingPermission){
+                    errorMessage.append("\"" + permission + "\" ");
+                }
+                return FormValidation.error(errorMessage.toString());
+            }
+
             return FormValidation.ok("Successfully connected to the instance.");
         } catch(UnknownHostException e) {
             return FormValidation.error("Host name unknown");
@@ -335,7 +345,12 @@ public class CIMInstance {
             return FormValidation.error("Connection refused");
         } catch(SocketException e) {
             return FormValidation.error("Error connecting to CIM. Please check your connection settings.");
-        } catch(Throwable e) {
+        } catch(SOAPFaultException e){
+            if (StringUtils.isNotEmpty(e.getMessage())){
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.error(e, "An unexpected error occurred.");
+        } catch (Throwable e) {
             String javaVersion = System.getProperty("java.version");
             if(javaVersion.startsWith("1.6.0_")) {
                 int patch = Integer.parseInt(javaVersion.substring(javaVersion.indexOf('_') + 1));
@@ -344,14 +359,6 @@ public class CIMInstance {
                 }
             }
             return FormValidation.error(e, "An unexpected error occurred.");
-        }
-    }
-
-    private FormValidation error(Throwable t) {
-        if(Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
-            return FormValidation.error(t, t.getMessage());
-        } else {
-            return FormValidation.error(t.getMessage());
         }
     }
 
@@ -379,4 +386,42 @@ public class CIMInstance {
         return StringUtils.join(checkers, '\n');
     }
 
+    private boolean checkUserPermission(List<String> missingPermissions) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
+
+        boolean canCommit = false;
+        boolean canViewIssues = false;
+
+        UserDataObj userData = getConfigurationService().getUser(user);
+        if (userData != null){
+
+            if (userData.isSuperUser()){
+                return true;
+            }
+
+            for (RoleAssignmentDataObj role : userData.getRoleAssignments()){
+                RoleDataObj roleData = getConfigurationService().getRole(role.getRoleId());
+                if (roleData != null){
+                    for (PermissionDataObj permission : roleData.getPermissionDataObjs()){
+                        if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")){
+                            canCommit = true;
+                        } else if (permission.getPermissionValue().equalsIgnoreCase("viewDefects")){
+                            canViewIssues = true;
+                        }
+                        if (canCommit && canViewIssues){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!canCommit){
+            missingPermissions.add("Commit to a stream");
+        }
+        if (!canViewIssues){
+            missingPermissions.add("View issues");
+        }
+
+        return false;
+    }
 }
