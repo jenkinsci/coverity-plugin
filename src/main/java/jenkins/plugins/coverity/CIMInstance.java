@@ -386,6 +386,13 @@ public class CIMInstance {
         return StringUtils.join(checkers, '\n');
     }
 
+    /**
+     * A user requires 3 sets of permissions in order to use Coverity plugin.
+     * The required permissions are "WebService Access", "Commit To a Stream", and "View Issues".
+     * This method check whether the configured user have all the required permissions.
+     * Returns true if the user have all the permissions, otherwise, return false with
+     * a list of missing permissions.
+     */
     private boolean checkUserPermission(List<String> missingPermissions) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
 
         boolean canCommit = false;
