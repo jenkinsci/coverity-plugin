@@ -161,6 +161,17 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
+        public FormValidation doCheckInstance(@QueryParameter String instance) throws IOException, CovRemoteServiceException_Exception {
+            if (!StringUtils.isEmpty(instance)){
+                CIMInstance cimInstance = getInstance(instance);
+                FormValidation checkResult = cimInstance.doCheck();
+
+                // return FormValidation.ok in order to suppress any success messages, these don't need to show automatically here
+                return checkResult.kind.equals(FormValidation.Kind.OK) ? FormValidation.ok() : checkResult;
+            }
+            return FormValidation.warning("Coverity Connect instance is required to select project and stream");
+        }
+
         public ListBoxModel doFillProjectItems(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
             ListBoxModel result = new ListBoxModel();
             boolean containCurrentProject = false;
@@ -183,6 +194,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         }
 
         public FormValidation doCheckProject(@QueryParameter String instance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
+            // allow initial empty project selection
+            if (StringUtils.isEmpty(project))
+                return FormValidation.ok();
+
             if (!StringUtils.isEmpty(instance)){
                 for (ProjectDataObj projectFromCIM : getInstance(instance).getProjects()){
                     if (projectFromCIM.getId().getName().equalsIgnoreCase(project)){
@@ -213,8 +228,12 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         }
 
         public FormValidation doCheckStream(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
+            // allow initial empty stream selection
+            if (StringUtils.isEmpty(stream))
+                return FormValidation.ok();
+
             CIMInstance cimInstance = getInstance(instance);
-            if (cimInstance != null){
+            if (cimInstance != null && !StringUtils.isEmpty(project)){
                 for (StreamDataObj streamFromCIM : cimInstance.getStaticStreams(project)){
                     if (streamFromCIM.getId().getName().equalsIgnoreCase(stream)){
                         return FormValidation.ok();

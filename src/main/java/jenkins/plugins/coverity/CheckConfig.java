@@ -35,6 +35,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -48,6 +50,7 @@ import org.xml.sax.XMLReader;
  * A configuration checker, and the results of such a check.
  */
 public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
+    private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
     private CoverityPublisher publisher;
     private final List<Status> status;
     private Launcher launcher;
@@ -241,20 +244,16 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
 
             final TaskListener listen = listener; // Final copy of listner to help print debugging messages
 
-            // Function to go into Analysis directory and find the VERSION.xml file, then pull the version number.
-            CoverityVersion version = homePath.child("VERSION.xml").act(new FilePath.FileCallable<CoverityVersion>() {
-                public CoverityVersion invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                    InputStream fis = new FileInputStream(f);
+            CoverityVersion version = getVersion(homePath, listen);
 
-                    // Setting up reader into UTF-8 format since xml document is that format
-                    Reader reader = new InputStreamReader(fis,"UTF-8");
-                    InputSource is = new InputSource(reader);
-                    is.setEncoding("UTF-8");
-                    CoverityVersion cv = parseVersionXML(is,listen);
-                    fis.close();
-                    return cv;
-                }
-            });
+            if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
+                return new NodeStatus(false,
+                    "\"Coverity Static Analysis\" version " + version.toString() + " is not supported. " +
+                    "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().toString(),
+                    node,
+                    version);
+            }
+
             return new NodeStatus(true, "version " + version, node, version);
 
         } catch(IOException e) {
@@ -266,6 +265,27 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         }
     }
 
+    /*
+     * Gets the {@link CoverityVersion} given a static analysis tools home directory by finding the VERSION.xml file,
+     * then reading the version number
+     */
+    public static CoverityVersion getVersion(FilePath homePath, final TaskListener listener) throws IOException, InterruptedException {
+        CoverityVersion version = homePath.child("VERSION.xml").act(new FilePath.FileCallable<CoverityVersion>() {
+                                                                        public CoverityVersion invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+                                                                            InputStream fis = new FileInputStream(f);
+
+                                                                            // Setting up reader into UTF-8 format since xml document is that format
+                                                                            Reader reader = new InputStreamReader(fis,"UTF-8");
+                                                                            InputSource is = new InputSource(reader);
+                                                                            is.setEncoding("UTF-8");
+                                                                            CoverityVersion cv = parseVersionXML(is, listener);
+                                                                            fis.close();
+                                                                            return cv;
+                                                                        }});
+
+        return version;
+    }
+
     /**
      * Parse Version XML File
      * We use SAX Parser to go thought the VERSION.xml file, and extract the Major, Minor, Revision, and Beta elements.
@@ -275,8 +295,9 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
      * @return {@link CoverityVersion}
      */
     private static CoverityVersion parseVersionXML(InputSource path, TaskListener listener){
-        try{
+        String errorMessage;
 
+        try{
             // Setting up SAX Parser
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(false);
@@ -309,14 +330,21 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                     return new CoverityVersion(connectorParser.major);
             }
         }catch(ParserConfigurationException x){
-            listener.fatalError("Unable to configure XML parser: " + x.getMessage());
+            errorMessage = "Unable to configure XML parser: " + x.getMessage();
         }catch(SAXException x){
-            listener.fatalError("Unable to parse VERSION.xml: " + x.getMessage());
+            errorMessage = "Unable to parse VERSION.xml: " + x.getMessage();
         }catch(FileNotFoundException x){
-            listener.fatalError("Could not find VERSION.xml file at: " + path.toString());
+            errorMessage = "Could not find VERSION.xml file at: " + path.toString();
         }catch(IOException x){
-            listener.fatalError("IOException reading VERSION.xml: " + x.getMessage());
+            errorMessage = "IOException reading VERSION.xml: " + x.getMessage();
         }
+
+        if (listener != null) {
+            listener.fatalError(errorMessage);
+        } else {
+            logger.warning(errorMessage);
+        }
+
         return null;
     }
 

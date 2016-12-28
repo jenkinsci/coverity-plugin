@@ -11,7 +11,6 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v9.*;
-import hudson.model.Hudson;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -19,6 +18,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.soap.SOAPFaultException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -33,11 +33,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents one Coverity Integrity Manager server. Abstracts functions like getting streams and defects.
  */
 public class CIMInstance {
+    private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
 
     public static final String COVERITY_V9_NAMESPACE = "http://ws.coverity.com/v9";
 
@@ -226,9 +229,17 @@ public class CIMInstance {
     }
 
     public ProjectDataObj getProject(String projectId) throws IOException, CovRemoteServiceException_Exception {
-        ProjectFilterSpecDataObj filterSpec = new ProjectFilterSpecDataObj();
-        filterSpec.setNamePattern(projectId);
-        List<ProjectDataObj> projects = getConfigurationService().getProjects(filterSpec);
+        List<ProjectDataObj> projects = new ArrayList<>();
+        try {
+            ProjectFilterSpecDataObj filterSpec = new ProjectFilterSpecDataObj();
+            filterSpec.setNamePattern(projectId);
+            projects = getConfigurationService().getProjects(filterSpec);
+        }
+        catch (Exception e)
+        {
+            logger.warning("Error getting project " + projectId + " from instance " + name + " (" + host + ":" + port + ")");
+        }
+
         if(projects.size() == 0) {
             return null;
         } else {
@@ -252,7 +263,15 @@ public class CIMInstance {
     }
 
     public List<ProjectDataObj> getProjects() throws IOException, CovRemoteServiceException_Exception {
-        return getConfigurationService().getProjects(new ProjectFilterSpecDataObj());
+        try {
+            return getConfigurationService().getProjects(new ProjectFilterSpecDataObj());
+        }
+        catch (Exception e)
+        {
+            logger.warning("Error getting projects from instance " + name + " (" + host + ":" + port + ")");
+        }
+
+        return new ArrayList<>();
     }
 
     public List<StreamDataObj> getStaticStreams(String projectId) throws IOException, CovRemoteServiceException_Exception {
@@ -304,9 +323,21 @@ public class CIMInstance {
             URL url = getURL();
             int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V9_WSDL));
             if(responseCode != 200) {
-                return FormValidation.error("Connected successfully, but Coverity web services were not detected.");
+                return FormValidation.error("Coverity web services were not detected. Connection attempt responded with " +
+                    responseCode + ", check Coverity Connect version (minimum supported version is " +
+                    CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().getEffectiveVersion() + ").");
             }
-            getConfigurationService().getServerTime();
+
+            List<String> missingPermission = new ArrayList<String>();;
+            if (!checkUserPermission(missingPermission) && !missingPermission.isEmpty()){
+                StringBuilder errorMessage = new StringBuilder();
+                errorMessage.append("\"" + user + "\" does not have following permission(s): ");
+                for (String permission : missingPermission){
+                    errorMessage.append("\"" + permission + "\" ");
+                }
+                return FormValidation.error(errorMessage.toString());
+            }
+
             return FormValidation.ok("Successfully connected to the instance.");
         } catch(UnknownHostException e) {
             return FormValidation.error("Host name unknown");
@@ -314,7 +345,12 @@ public class CIMInstance {
             return FormValidation.error("Connection refused");
         } catch(SocketException e) {
             return FormValidation.error("Error connecting to CIM. Please check your connection settings.");
-        } catch(Throwable e) {
+        } catch(SOAPFaultException e){
+            if (StringUtils.isNotEmpty(e.getMessage())){
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.error(e, "An unexpected error occurred.");
+        } catch (Throwable e) {
             String javaVersion = System.getProperty("java.version");
             if(javaVersion.startsWith("1.6.0_")) {
                 int patch = Integer.parseInt(javaVersion.substring(javaVersion.indexOf('_') + 1));
@@ -323,14 +359,6 @@ public class CIMInstance {
                 }
             }
             return FormValidation.error(e, "An unexpected error occurred.");
-        }
-    }
-
-    private FormValidation error(Throwable t) {
-        if(Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
-            return FormValidation.error(t, t.getMessage());
-        } else {
-            return FormValidation.error(t.getMessage());
         }
     }
 
@@ -358,4 +386,49 @@ public class CIMInstance {
         return StringUtils.join(checkers, '\n');
     }
 
+    /**
+     * A user requires 3 sets of permissions in order to use Coverity plugin.
+     * The required permissions are "WebService Access", "Commit To a Stream", and "View Issues".
+     * This method check whether the configured user have all the required permissions.
+     * Returns true if the user have all the permissions, otherwise, return false with
+     * a list of missing permissions.
+     */
+    private boolean checkUserPermission(List<String> missingPermissions) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
+
+        boolean canCommit = false;
+        boolean canViewIssues = false;
+
+        UserDataObj userData = getConfigurationService().getUser(user);
+        if (userData != null){
+
+            if (userData.isSuperUser()){
+                return true;
+            }
+
+            for (RoleAssignmentDataObj role : userData.getRoleAssignments()){
+                RoleDataObj roleData = getConfigurationService().getRole(role.getRoleId());
+                if (roleData != null){
+                    for (PermissionDataObj permission : roleData.getPermissionDataObjs()){
+                        if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")){
+                            canCommit = true;
+                        } else if (permission.getPermissionValue().equalsIgnoreCase("viewDefects")){
+                            canViewIssues = true;
+                        }
+                        if (canCommit && canViewIssues){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!canCommit){
+            missingPermissions.add("Commit to a stream");
+        }
+        if (!canViewIssues){
+            missingPermissions.add("View issues");
+        }
+
+        return false;
+    }
 }

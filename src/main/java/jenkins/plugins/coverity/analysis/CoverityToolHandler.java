@@ -47,10 +47,10 @@ public abstract class CoverityToolHandler {
             return new JasperToolHandler(version);
         }
 
-        if(version.compareTo(CoverityVersion.VERSION_INDIO) < 0) {
+        if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
             return null;
         }
-        if(version.compareTo(CoverityVersion.VERSION_INDIO) >= 0 && version.compareTo(CoverityVersion.VERSION_JASPER) < 0){
+        if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) >= 0 && version.compareTo(CoverityVersion.VERSION_JASPER) < 0){
             return new IndioToolHandler(version);
         } else {
             return new JasperToolHandler(version);
