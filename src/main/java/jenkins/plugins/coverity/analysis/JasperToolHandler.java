@@ -330,17 +330,6 @@ public class JasperToolHandler extends CoverityToolHandler{
             }
         }
 
-        //what languages are we analyzing?
-        String languageToAnalyze = null;
-        for(CIMStream cimStream : publisher.getCimStreams()) {
-            if(languageToAnalyze == null) {
-                languageToAnalyze = cimStream.getLanguage();
-            } else {
-                //we should have failed already during the pre-build check if we get here
-                assert (languageToAnalyze.equals(cimStream.getLanguage()));
-            }
-        }
-
         //run cov-analyze
         if(invocationAssistance != null || testAnalysis != null){
             InvocationAssistance effectiveIA = invocationAssistance;
@@ -370,16 +359,6 @@ public class JasperToolHandler extends CoverityToolHandler{
                     } else {
                         throw new RuntimeException("Couldn't find MISRA configuration file.");
                     }
-                } else if("ALL".equals(languageToAnalyze)) {
-                    // do nothing, all languages are added by default
-                } else if("JAVA".equals(languageToAnalyze)) {
-                    cmd.add("--java");
-                } else if("CXX".equals(languageToAnalyze)) {
-                    cmd.add("--cpp");
-                } else if("CSHARP".equals(languageToAnalyze)) {
-                    cmd.add("--cs");
-                } else {
-                    throw new RuntimeException("Couldn't find a language to analyze.");
                 }
                 // Turning on test analysis and adding required policy file
                 if(testAnalysis != null && !isMisraAnalysis){
@@ -447,7 +426,7 @@ public class JasperToolHandler extends CoverityToolHandler{
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
             boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            if(("CSHARP".equals(languageToAnalyze) || "ALL".equals(languageToAnalyze)) && csharpMsvsca) {
+            if(csharpMsvsca) {
                 boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca);
                 if(!result) {
                     build.setResult(Result.FAILURE);

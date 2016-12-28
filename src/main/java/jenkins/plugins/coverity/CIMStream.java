@@ -35,7 +35,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
     private final String project;
     private final String stream;
     private final String id;
-    private final String language;
 
     /**
      * Defines how to filter discovered defects. Null for no filtering.
@@ -45,12 +44,11 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
     private final InvocationAssistance invocationAssistanceOverride;
 
     @DataBoundConstructor
-    public CIMStream(String instance, String project, String stream, DefectFilters defectFilters, String id, String language, InvocationAssistance invocationAssistanceOverride) {
+    public CIMStream(String instance, String project, String stream, DefectFilters defectFilters, String id, InvocationAssistance invocationAssistanceOverride) {
         this.instance = Util.fixEmpty(instance);
         this.project = Util.fixEmpty(project);
         this.stream = Util.fixEmpty(stream);
         this.id = Util.fixEmpty(id);
-        this.language = Util.fixEmpty(language);
         this.defectFilters = defectFilters;
         this.invocationAssistanceOverride = invocationAssistanceOverride;
     }
@@ -65,10 +63,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 
     public String getStream() {
         return stream;
-    }
-
-    public String getLanguage() {
-        return language;
     }
 
     public String getId() {
@@ -108,7 +102,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 ", project='" + project + '\'' +
                 ", stream='" + stream + '\'' +
                 ", id='" + id + '\'' +
-                ", language='" + language + '\'' +
                 ", defectFilters=" + defectFilters +
                 ", invocationAssistanceOverride=" + invocationAssistanceOverride +
                 '}';
@@ -248,16 +241,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 }
             }
             return FormValidation.error("Stream [ " + stream + " ] is not found");
-        }
-
-        public ListBoxModel doFillLanguageItems(@QueryParameter String instance, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
-            ListBoxModel result = new ListBoxModel();
-            if(StringUtils.isEmpty(stream)) return result;
-            CIMInstance cimInstance = getInstance(instance);
-            if(cimInstance != null) {
-                result.add("ALL");
-            }
-            return result;
         }
 
         public ListBoxModel doFillClassificationDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception, com.coverity.ws.v9.CovRemoteServiceException_Exception {

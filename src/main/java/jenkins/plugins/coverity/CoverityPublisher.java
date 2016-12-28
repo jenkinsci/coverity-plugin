@@ -138,7 +138,7 @@ public class CoverityPublisher extends Recorder {
      * is missing a instance, project or stream name it is not valid).
      */
     private void convertOldData() {
-        CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null, null, null);
+        CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null, null);
 
         cimInstance = null;
         project = null;
@@ -302,11 +302,6 @@ public class CoverityPublisher extends Recorder {
         } else {
             return streams.get(0);
         }
-    }
-
-    public String getLanguage(CIMStream cimStream) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
-        String domain = getStream(cimStream.getStream(), getDescriptor().getInstance(cimStream.getInstance())).getLanguage();
-        return "MIXED".equals(domain) ? cimStream.getLanguage() : domain;
     }
 
     public DescriptorImpl getDescriptor() {
