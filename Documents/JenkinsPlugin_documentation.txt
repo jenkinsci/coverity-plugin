@@ -183,9 +183,9 @@ h2. Changelog
 
 h4. *Version 1.8.1 (January 6, 2017)*
 
-* Support for Coverity Connect v6 web services is deprecated, and will be removed in a future release. (BZ 98801)
-* Support for Coverity Analysis versions 7.6.x and earlier is removed. (BZ 98801)
+* Support for Coverity Connect v6 web services is deprecated, and in a future release support for Coverity Analysis and Coverity Connect versions 7.6.x and earlier will be removed. (BZ 98801)
 * Resolved an issue with environment variables that caused the plugin to fail on Windows (This issue was introduced in 1.8.0). (BZ 94839)
+* Resolved an issue where the Coverity plugin could cause the build job results page to take a long time to load. (BZ 95459)
 
 h4. *Version 1.8.0 (September 23, 2016)*
 
