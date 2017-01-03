@@ -311,7 +311,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
-        public ListBoxModel doFillCheckerDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance, @QueryParameter(value = "../stream") String streamId, @QueryParameter(value = "../language") String language) throws IOException, CovRemoteServiceException_Exception {
+        public ListBoxModel doFillCheckerDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance, @QueryParameter(value = "../stream") String streamId) throws IOException, CovRemoteServiceException_Exception {
             if(StringUtils.isEmpty(streamId)) return new ListBoxModel();
             CIMInstance instance = getInstance(cimInstance);
             if(instance == null) return new ListBoxModel();

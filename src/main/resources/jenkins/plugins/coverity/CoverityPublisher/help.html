@@ -24,14 +24,13 @@
     <span style="font-weight: bold; font-size: 1.2em">Coverity Analysis 7.7.0 or later</span>
 
     <p>
-        Coverity Connect allows you to specify one or all languages for each stream. Since analysis results are
+        Coverity Connect allows you to specify all languages for each stream. Since analysis results are
         combined in version 7.7.0, each stream must be able to receive results for each analyzed language.
     </p>
     <ul>
         <li>
             To analyze all languages, make sure your streams are set to the 'Any' language type in Coverity
-            Connect. Then select the 'All' language setting in the Coverity Jenkins plugin in every stream you
-            would like to commit results to. This is the recommended configuration.
+            Connect. This is the recommended configuration.
         </li>
         <li>
             Streams configured in Coverity Connect to receive single language will be restricted to that language
