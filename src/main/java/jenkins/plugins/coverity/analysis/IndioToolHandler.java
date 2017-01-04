@@ -330,63 +330,17 @@ public class IndioToolHandler extends CoverityToolHandler {
             InvocationAssistance effectiveIA = invocationAssistance;
 
             try {
-                String covAnalyze = "cov-analyze";
+                ICovCommand covAnalyzeCommand = CommandFactory.getCovAnalyzeCommand(build, launcher, listener, publisher, home);
 
-                if(home != null) {
-                    covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
-                }
+                listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + covAnalyzeCommand.getCommandLines().toString());
 
-                CoverityLauncherDecorator.SKIP.set(true);
-
-
-                List<String> cmd = new ArrayList<String>();
-                cmd.add(covAnalyze);
-                cmd.add("--dir");
-                cmd.add(temp.getTempDir().getRemote());
-
-                boolean isMisraAnalysis = effectiveIA.getIsUsingMisra();
-
-                if(isMisraAnalysis) {
-                    cmd.add("--cpp");
-                    if(effectiveIA.getMisraConfigFile() != null && !effectiveIA.getMisraConfigFile().isEmpty()){
-                        cmd.add("--misra-config");
-                        cmd.add(effectiveIA.getMisraConfigFile());
-                    } else {
-                        throw new RuntimeException("Couldn't find MISRA configuration file.");
-                    }
-                }
-                // Turning on test analysis and adding required policy file
-                if(testAnalysis != null && !isMisraAnalysis){
-                    cmd.add("--test-advisor");
-                    cmd.add("--test-advisor-policy");
-                    cmd.add(testAnalysis.getPolicyFile());
-                    // Adding in strip paths
-                    cmd.add("--strip-path");
-                    if(testAnalysis.getTaStripPath() == null){
-                        cmd.add(build.getWorkspace().getRemote());
-                    }else{
-                        cmd.add(testAnalysis.getTaStripPath());
-                    }
-
-                    if(effectiveIA == null){
-                        cmd.add("--disable-default");
-                    }
-                }
-
-                if(effectiveIA.getAnalyzeArguments() != null && !isMisraAnalysis) {
-                    cmd.addAll(EnvParser.tokenize(effectiveIA.getAnalyzeArguments()));
-                }
-
-                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
+                int result = covAnalyzeCommand.runCommand();
 
                 if(result != 0) {
-                    listener.getLogger().println("[Coverity] " + covAnalyze + " returned " + result + ", aborting...");
+                    listener.getLogger().println("[Coverity] cov-analyze returned " + result + ", aborting...");
                     build.setResult(Result.FAILURE);
                     return false;
                 }
-
             } finally {
                 CoverityLauncherDecorator.SKIP.set(false);
             }
