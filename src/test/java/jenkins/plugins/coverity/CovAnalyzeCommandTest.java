@@ -10,61 +10,19 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-
-import hudson.model.BuildListener;
 import jenkins.plugins.coverity.analysis.CommandFactory;
-import jenkins.plugins.coverity.analysis.CovAnalyzeCommand;
 import jenkins.plugins.coverity.analysis.ICovCommand;
 import org.apache.commons.lang.StringUtils;
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class CovAnalyzeCommandTest {
-
-    private AbstractBuild build;
-    private Launcher launcher;
-    private BuildListener buildListener;
-    private IMocksControl mocker;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setup(){
-        mocker = EasyMock.createNiceControl();
-        build = mocker.createMock(AbstractBuild.class);
-        launcher = mocker.createMock(Launcher.class);
-        buildListener = mocker.createMock(BuildListener.class);
-
-        File temp = new File("TestDir");
-        FilePath filePath = new FilePath(temp);
-        CoverityTempDir tempDir = new CoverityTempDir(filePath, false);
-
-        expect(build.getAction(CoverityTempDir.class)).andReturn(tempDir);
-    }
-
-    @After
-    public void teardown() {
-        expectedException = ExpectedException.none();
-        mocker.reset();
-    }
+public class CovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
     public void CovAnalyzeCommand_IntermediateDirTest(){

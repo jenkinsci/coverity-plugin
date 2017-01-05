@@ -17,7 +17,11 @@ import jenkins.plugins.coverity.CoverityPublisher;
 
 public class CommandFactory {
 
-    public static ICovCommand getCovAnalyzeCommand(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home){
+    public static ICovCommand getCovAnalyzeCommand(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home) {
         return new CovAnalyzeCommand(build, launcher, listener, publisher, home).getCovAnalyzeCommand();
+    }
+
+    public static ICovCommand getCovCaptureCommand(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home) {
+        return new CovCaptureCommand(build, launcher, listener, publisher, home).getCovCaptureCommand();
     }
 }

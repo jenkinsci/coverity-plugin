@@ -162,30 +162,14 @@ public class IndioToolHandler extends CoverityToolHandler {
         if(testAnalysis != null){
             if(testAnalysis.getCustomTestCommand() != null){
                 try {
-                    listener.getLogger().println(testAnalysis.getTaCommandArgs().toString());
-
-                    String covCapture = "cov-capture";
-
-                    if(home != null) {
-                        covCapture = new FilePath(launcher.getChannel(), home).child("bin").child(covCapture).getRemote();
-                    }
-
                     CoverityLauncherDecorator.SKIP.set(true);
+                    ICovCommand covCaptureCommand = CommandFactory.getCovCaptureCommand(build, launcher, listener, publisher, home);
+                    listener.getLogger().println("[Coverity] cov-capture command line arguments: " + covCaptureCommand.getCommandLines().toString());
 
-                    List<String> cmd = new ArrayList<String>();
-                    cmd.add(covCapture);
-                    cmd.add("--dir");
-                    cmd.add(temp.getTempDir().getRemote());
-                    cmd.addAll(testAnalysis.getTaCommandArgs());
-                    cmd.addAll(EnvParser.tokenize(testAnalysis.getCustomTestCommand()));
-
-                    listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                    int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
+                    int result = covCaptureCommand.runCommand();
 
                     if(result != 0) {
                         listener.getLogger().println("[Coverity] cov-capture returned " + result + ", aborting...");
-
                         build.setResult(Result.FAILURE);
                         return false;
                     }
@@ -330,6 +314,7 @@ public class IndioToolHandler extends CoverityToolHandler {
             InvocationAssistance effectiveIA = invocationAssistance;
 
             try {
+                CoverityLauncherDecorator.SKIP.set(true);
                 ICovCommand covAnalyzeCommand = CommandFactory.getCovAnalyzeCommand(build, launcher, listener, publisher, home);
 
                 listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + covAnalyzeCommand.getCommandLines().toString());

@@ -95,15 +95,16 @@ public class CovAnalyzeCommand extends CovCommandBase{
             return;
         }
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        if (invocationAssistance != null){
-            String additionalArgument = invocationAssistance.getAnalyzeArguments();
-            if (!StringUtils.isEmpty(additionalArgument)){
-                try{
+        try{
+            if (invocationAssistance != null){
+                String additionalArgument = invocationAssistance.getAnalyzeArguments();
+                if (!StringUtils.isEmpty(additionalArgument)){
                     addArguments(EnvParser.tokenize(additionalArgument));
-                }catch(ParseException parseException){
-                    throw new RuntimeException("ParseException occurred during tokenizing the cov analyze additional arguments.");
                 }
             }
+        }catch(ParseException parseException){
+            throw new RuntimeException("ParseException occurred during tokenizing the cov analyze additional arguments.");
         }
+
     }
 }
