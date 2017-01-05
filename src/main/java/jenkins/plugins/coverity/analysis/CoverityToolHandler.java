@@ -99,45 +99,6 @@ public abstract class CoverityToolHandler {
         }, true);
     }
 
-    public boolean covEmitWar(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home, CoverityTempDir temp, List<String> javaWarFiles) throws IOException, InterruptedException {
-        String covEmitJava = "cov-emit-java";
-        covEmitJava = new FilePath(launcher.getChannel(), home).child("bin").child(covEmitJava).getRemote();
-        EnvVars envVars = build.getEnvironment(listener);
-
-        List<String> cmd = new ArrayList<String>();
-        cmd.add(covEmitJava);
-        cmd.add("--dir");
-        cmd.add(temp.getTempDir().getRemote());
-        if(javaWarFiles != null && !javaWarFiles.isEmpty()){
-            for(String javaWarFile : javaWarFiles){
-                cmd.add("--webapp-archive");
-                cmd.add(javaWarFile);
-            }
-        }
-
-        try {
-            CoverityLauncherDecorator.SKIP.set(true);
-
-            InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance(build);
-            boolean useAdvancedParser = false;
-
-            if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
-                useAdvancedParser = true;
-            }
-
-            int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
-
-            if(result != 0) {
-                listener.getLogger().println("[Coverity] " + covEmitJava + " returned " + result + ", aborting...");
-                return false;
-            }
-        } finally {
-            CoverityLauncherDecorator.SKIP.set(false);
-        }
-
-        return true;
-    }
-
     public boolean importMsvsca(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, String home,
                                 CoverityTempDir temp, boolean csharpMsvsca) throws IOException, InterruptedException {
         String covImportMsvsca = "cov-import-msvsca";

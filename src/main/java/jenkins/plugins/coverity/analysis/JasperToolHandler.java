@@ -134,27 +134,23 @@ public class JasperToolHandler extends CoverityToolHandler{
             }
         }
 
-        // If WAR files specified, emit them prior to running analysis
-        // Do not check for presence of Java streams or Java in build
-        List<String> warFiles = new ArrayList<String>();
+        // Run Cov-Emit-Java
         if(invocationAssistance != null){
-            List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
-            if(givenWarFiles != null && !givenWarFiles.isEmpty()){
-                for(String givenJar : givenWarFiles){
-                    String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, envVars, useAdvancedParser) : null;
-                    if(javaWarFile != null) {
-                        listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
-                        warFiles.add(javaWarFile);
-                    }
-                }
-            }
-        }
+            try {
+                CoverityLauncherDecorator.SKIP.set(true);
+                ICovCommand covEmitJavaCommand = CommandFactory.getCovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
 
-        if(warFiles != null && !warFiles.isEmpty()){
-            boolean resultCovEmitWar = covEmitWar(build, launcher, listener, home, temp, warFiles);
-            if(!resultCovEmitWar) {
-                build.setResult(Result.FAILURE);
-                return false;
+                listener.getLogger().println("[Coverity] cov-capture command line arguments: " + covEmitJavaCommand.getCommandLines().toString());
+
+                int result = covEmitJavaCommand.runCommand();
+
+                if(result != 0) {
+                    listener.getLogger().println("[Coverity] cov-emit-java returned " + result + ", aborting...");
+                    build.setResult(Result.FAILURE);
+                    return false;
+                }
+            } finally {
+                CoverityLauncherDecorator.SKIP.set(false);
             }
         }
 

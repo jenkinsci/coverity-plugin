@@ -20,30 +20,8 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class CovAnalyzeCommandTest extends CommandTestBase {
-
-    @Test
-    public void CovAnalyzeCommand_IntermediateDirTest(){
-        mocker.replay();
-
-        ICovCommand covAnalyzeCommand = CommandFactory.getCovAnalyzeCommand(build, launcher, buildListener, null, StringUtils.EMPTY);
-        List<String> covAnalyzeArguments = covAnalyzeCommand.getCommandLines();
-
-        assertEquals(3, covAnalyzeArguments.size());
-
-        assertTrue(covAnalyzeArguments.contains("cov-analyze"));
-        covAnalyzeArguments.remove("cov-analyze");
-
-        assertTrue(covAnalyzeArguments.contains("--dir"));
-        covAnalyzeArguments.remove("--dir");
-
-        assertTrue(covAnalyzeArguments.contains("TestDir"));
-        covAnalyzeArguments.remove("TestDir");
-
-        assertEquals(0, covAnalyzeArguments.size());
-    }
 
     @Test
     public void CovAnalyzeCommand_MisraConfigurationTest() throws IOException {
@@ -69,20 +47,11 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
         assertEquals(5, covAnalyzeArguments.size());
 
-        assertTrue(covAnalyzeArguments.contains("cov-analyze"));
-        covAnalyzeArguments.remove("cov-analyze");
-
-        assertTrue(covAnalyzeArguments.contains("--dir"));
-        covAnalyzeArguments.remove("--dir");
-
-        assertTrue(covAnalyzeArguments.contains("TestDir"));
-        covAnalyzeArguments.remove("TestDir");
-
-        assertTrue(covAnalyzeArguments.contains("--misra-config"));
-        covAnalyzeArguments.remove("--misra-config");
-
-        assertTrue(covAnalyzeArguments.contains(misraConfigFile.getPath()));
-        covAnalyzeArguments.remove(misraConfigFile.getPath());
+        checkCommandLineArg(covAnalyzeArguments, "cov-analyze");
+        checkCommandLineArg(covAnalyzeArguments, "--dir");
+        checkCommandLineArg(covAnalyzeArguments, "TestDir");
+        checkCommandLineArg(covAnalyzeArguments, "--misra-config");
+        checkCommandLineArg(covAnalyzeArguments, misraConfigFile.getPath());
 
         assertEquals(0, covAnalyzeArguments.size());
 
@@ -156,17 +125,10 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
         assertEquals(4, covAnalyzeArguments.size());
 
-        assertTrue(covAnalyzeArguments.contains("cov-analyze"));
-        covAnalyzeArguments.remove("cov-analyze");
-
-        assertTrue(covAnalyzeArguments.contains("--dir"));
-        covAnalyzeArguments.remove("--dir");
-
-        assertTrue(covAnalyzeArguments.contains("TestDir"));
-        covAnalyzeArguments.remove("TestDir");
-
-        assertTrue(covAnalyzeArguments.contains("additionalArgs"));
-        covAnalyzeArguments.remove("additionalArgs");
+        checkCommandLineArg(covAnalyzeArguments, "cov-analyze");
+        checkCommandLineArg(covAnalyzeArguments, "--dir");
+        checkCommandLineArg(covAnalyzeArguments, "TestDir");
+        checkCommandLineArg(covAnalyzeArguments, "additionalArgs");
 
         assertEquals(0, covAnalyzeArguments.size());
     }
@@ -220,29 +182,14 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
         assertEquals(8, covAnalyzeArguments.size());
 
-        assertTrue(covAnalyzeArguments.contains("cov-analyze"));
-        covAnalyzeArguments.remove("cov-analyze");
-
-        assertTrue(covAnalyzeArguments.contains("--dir"));
-        covAnalyzeArguments.remove("--dir");
-
-        assertTrue(covAnalyzeArguments.contains("TestDir"));
-        covAnalyzeArguments.remove("TestDir");
-
-        assertTrue(covAnalyzeArguments.contains("--test-advisor"));
-        covAnalyzeArguments.remove("--test-advisor");
-
-        assertTrue(covAnalyzeArguments.contains("--test-advisor-policy"));
-        covAnalyzeArguments.remove("--test-advisor-policy");
-
-        assertTrue(covAnalyzeArguments.contains(taPolicyFile.getPath()));
-        covAnalyzeArguments.remove(taPolicyFile.getPath());
-
-        assertTrue(covAnalyzeArguments.contains("--strip-path"));
-        covAnalyzeArguments.remove("--strip-path");
-
-        assertTrue(covAnalyzeArguments.contains("Path2Strip"));
-        covAnalyzeArguments.remove("Path2Strip");
+        checkCommandLineArg(covAnalyzeArguments, "cov-analyze");
+        checkCommandLineArg(covAnalyzeArguments, "--dir");
+        checkCommandLineArg(covAnalyzeArguments, "TestDir");
+        checkCommandLineArg(covAnalyzeArguments, "--test-advisor");
+        checkCommandLineArg(covAnalyzeArguments, "--test-advisor-policy");
+        checkCommandLineArg(covAnalyzeArguments, taPolicyFile.getPath());
+        checkCommandLineArg(covAnalyzeArguments, "--strip-path");
+        checkCommandLineArg(covAnalyzeArguments, "Path2Strip");
 
         assertEquals(0, covAnalyzeArguments.size());
 

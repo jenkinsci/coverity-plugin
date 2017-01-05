@@ -18,30 +18,8 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class CovCaptureCommandTest extends CommandTestBase {
-
-    @Test
-    public void CovCaptureCommand_IntermediateDirTest(){
-        mocker.replay();
-
-        ICovCommand covCaptureCommand = CommandFactory.getCovCaptureCommand(build, launcher, buildListener, null, StringUtils.EMPTY);
-        List<String> covCaptureArguments = covCaptureCommand.getCommandLines();
-
-        assertEquals(3, covCaptureArguments.size());
-
-        assertTrue(covCaptureArguments.contains("cov-capture"));
-        covCaptureArguments.remove("cov-capture");
-
-        assertTrue(covCaptureArguments.contains("--dir"));
-        covCaptureArguments.remove("--dir");
-
-        assertTrue(covCaptureArguments.contains("TestDir"));
-        covCaptureArguments.remove("TestDir");
-
-        assertEquals(0, covCaptureArguments.size());
-    }
 
     @Test
     public void CovCaptureCommand_TestAdvisorConfigurationTest() {
@@ -67,26 +45,13 @@ public class CovCaptureCommandTest extends CommandTestBase {
 
         assertEquals(7, covCaptureArguments.size());
 
-        assertTrue(covCaptureArguments.contains("cov-capture"));
-        covCaptureArguments.remove("cov-capture");
-
-        assertTrue(covCaptureArguments.contains("--dir"));
-        covCaptureArguments.remove("--dir");
-
-        assertTrue(covCaptureArguments.contains("TestDir"));
-        covCaptureArguments.remove("TestDir");
-
-        assertTrue(covCaptureArguments.contains("--java-coverage"));
-        covCaptureArguments.remove("--java-coverage");
-
-        assertTrue(covCaptureArguments.contains("Jacoco"));
-        covCaptureArguments.remove("Jacoco");
-
-        assertTrue(covCaptureArguments.contains("--java-test"));
-        covCaptureArguments.remove("--java-test");
-
-        assertTrue(covCaptureArguments.contains("junit"));
-        covCaptureArguments.remove("junit");
+        checkCommandLineArg(covCaptureArguments, "cov-capture");
+        checkCommandLineArg(covCaptureArguments, "--dir");
+        checkCommandLineArg(covCaptureArguments, "TestDir");
+        checkCommandLineArg(covCaptureArguments, "--java-coverage");
+        checkCommandLineArg(covCaptureArguments, "Jacoco");
+        checkCommandLineArg(covCaptureArguments, "--java-test");
+        checkCommandLineArg(covCaptureArguments, "junit");
 
         assertEquals(0, covCaptureArguments.size());
     }
@@ -115,17 +80,10 @@ public class CovCaptureCommandTest extends CommandTestBase {
 
         assertEquals(4, covCaptureArguments.size());
 
-        assertTrue(covCaptureArguments.contains("cov-capture"));
-        covCaptureArguments.remove("cov-capture");
-
-        assertTrue(covCaptureArguments.contains("--dir"));
-        covCaptureArguments.remove("--dir");
-
-        assertTrue(covCaptureArguments.contains("TestDir"));
-        covCaptureArguments.remove("TestDir");
-
-        assertTrue(covCaptureArguments.contains("CustomTestCommand"));
-        covCaptureArguments.remove("CustomTestCommand");
+        checkCommandLineArg(covCaptureArguments, "cov-capture");
+        checkCommandLineArg(covCaptureArguments, "--dir");
+        checkCommandLineArg(covCaptureArguments, "TestDir");
+        checkCommandLineArg(covCaptureArguments, "CustomTestCommand");
 
         assertEquals(0, covCaptureArguments.size());
     }

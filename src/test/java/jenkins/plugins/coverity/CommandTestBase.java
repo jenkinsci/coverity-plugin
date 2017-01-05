@@ -22,8 +22,10 @@ import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
 import java.io.File;
+import java.util.List;
 
 import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertTrue;
 
 public abstract class CommandTestBase {
 
@@ -53,5 +55,10 @@ public abstract class CommandTestBase {
     public void teardown() {
         expectedException = ExpectedException.none();
         mocker.reset();
+    }
+
+    public static void checkCommandLineArg(List<String> argList, String arg){
+        assertTrue(argList.contains(arg));
+        argList.remove(arg);
     }
 }
