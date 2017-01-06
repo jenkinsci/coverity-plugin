@@ -23,12 +23,9 @@ if __name__ == "__main__":
 	version = sys.argv[1]
 	build_number = sys.argv[2]
 	build_id = sys.argv[3]
-	# Grep git commit id
-	output = subprocess.Popen("git log --name-status HEAD^..HEAD | grep \"commit*\"", stdout=subprocess.PIPE, shell=True)
-	commit = output.stdout.read()
-	# Remove all head information, so that only the commit id is left
-	commit_id = re.sub(r'\(.*?\)','',commit)
-	commit_id = re.sub("commit","",commit_id)
+	# git log for the current commit id hash
+	output = subprocess.Popen("git log --pretty=format:'%H' -n 1", stdout=subprocess.PIPE, shell=True)
+	commit_id = output.stdout.read()
 	# Generate the json output text
 	json_output = json.dumps({ "commit_id" : commit_id.strip(), "build_number" : build_number, "build_id" : build_id }, indent=4)
 	# Run the typical build for jenkins
