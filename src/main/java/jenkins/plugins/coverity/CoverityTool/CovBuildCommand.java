@@ -26,7 +26,7 @@ public class CovBuildCommand extends CovCommand {
     private static final String fileSystemCapture = "--fs-capture-search";
     private boolean forCompiledSrc;
 
-    public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, boolean forCompiledSrc, EnvVars envVars) {
+    public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(command, build, launcher, listener, publisher, home, envVars);
         this.forCompiledSrc = forCompiledSrc;
         prepareCommand();
@@ -35,10 +35,16 @@ public class CovBuildCommand extends CovCommand {
     @Override
     protected void prepareCommand() {
         addIntermediateDir();
-        if (!forCompiledSrc){
-            prepareCovBuildCommandForScriptSources();
-        }else{
-            prepareCovBuildCommandForCompileSources();
+
+        if (publisher != null){
+            InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+            if (invocationAssistance != null){
+                if (invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
+                    prepareCovBuildCommandForScriptSources();
+                } else if (invocationAssistance.getIsCompiledSrc()){
+                    prepareCovBuildCommandForCompileSources();
+                }
+            }
         }
     }
 

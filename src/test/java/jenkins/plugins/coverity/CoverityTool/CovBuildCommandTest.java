@@ -27,7 +27,19 @@ public class CovBuildCommandTest extends CommandTestBase {
     public void CovBuildCommand_CommandForScriptSourcesTest() {
         mocker.replay();
 
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, null, StringUtils.EMPTY, false, envVars);
+        InvocationAssistance invocationAssistance = new InvocationAssistance(
+                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, true,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, null, false
+        );
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, invocationAssistance, false, false, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                null, null, null
+        );
+
+        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         List<String> covBuildArguments = covBuildCommand.getCommandLines();
 
         assertEquals(6, covBuildArguments.size());
@@ -58,7 +70,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, true, envVars);
+        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         List<String> covBuildArguments = covBuildCommand.getCommandLines();
 
         assertEquals(5, covBuildArguments.size());
@@ -76,6 +88,13 @@ public class CovBuildCommandTest extends CommandTestBase {
     public void CovBuildCommand_CommandForCompileSourcesTest_WithTaOptions() {
         mocker.replay();
 
+        InvocationAssistance invocationAssistance = new InvocationAssistance(
+                false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, null, false
+        );
+
         TaOptionBlock taOptionBlock = new TaOptionBlock(
                 StringUtils.EMPTY, false, false, true,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -86,24 +105,53 @@ public class CovBuildCommandTest extends CommandTestBase {
         );
 
         CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
+                null, invocationAssistance, false, false, false, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 null, taOptionBlock, null
         );
 
-        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covCaptureArguments = covCaptureCommand.getCommandLines();
+        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        List<String> covBuildArguments = covBuildCommand.getCommandLines();
 
-        assertEquals(7, covCaptureArguments.size());
+        assertEquals(7, covBuildArguments.size());
 
-        checkCommandLineArg(covCaptureArguments, "cov-capture");
-        checkCommandLineArg(covCaptureArguments, "--dir");
-        checkCommandLineArg(covCaptureArguments, "TestDir");
-        checkCommandLineArg(covCaptureArguments, "--java-coverage");
-        checkCommandLineArg(covCaptureArguments, "Jacoco");
-        checkCommandLineArg(covCaptureArguments, "--java-test");
-        checkCommandLineArg(covCaptureArguments, "junit");
+        checkCommandLineArg(covBuildArguments, "cov-build");
+        checkCommandLineArg(covBuildArguments, "--dir");
+        checkCommandLineArg(covBuildArguments, "TestDir");
+        checkCommandLineArg(covBuildArguments, "--java-coverage");
+        checkCommandLineArg(covBuildArguments, "Jacoco");
+        checkCommandLineArg(covBuildArguments, "--java-test");
+        checkCommandLineArg(covBuildArguments, "junit");
 
-        assertEquals(0, covCaptureArguments.size());
+        assertEquals(0, covBuildArguments.size());
+    }
+
+    @Test
+    public void CovBuildCommand_CommandForCompileSourcesTest_WithAdditionalBuildArguments() {
+        mocker.replay();
+
+        InvocationAssistance invocationAssistance = new InvocationAssistance(
+                false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, false,
+                "AdditionalBuildArguments", StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, null, false
+        );
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, invocationAssistance, false, false, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                null, null, null
+        );
+
+        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        List<String> covBuildArguments = covBuildCommand.getCommandLines();
+
+        assertEquals(4, covBuildArguments.size());
+
+        checkCommandLineArg(covBuildArguments, "cov-build");
+        checkCommandLineArg(covBuildArguments, "--dir");
+        checkCommandLineArg(covBuildArguments, "TestDir");
+        checkCommandLineArg(covBuildArguments, "AdditionalBuildArguments");
+
+        assertEquals(0, covBuildArguments.size());
     }
 }

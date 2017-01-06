@@ -81,7 +81,7 @@ public class IndioToolHandler extends CoverityToolHandler {
             try {
                 CoverityLauncherDecorator.SKIP.set(true);
 
-                CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, false, envVars);
+                CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, envVars);
                 listener.getLogger().println("[Coverity] cov-build command line arguments: " + covBuildCommand.toString());
                 int result = covBuildCommand.runCommand();
 

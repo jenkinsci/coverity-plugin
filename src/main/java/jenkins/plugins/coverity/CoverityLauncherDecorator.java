@@ -137,7 +137,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         setupIntermediateDirectory(build, launcher.getListener(), node, env);
-        List<String> args = new CovBuildCommand(build, launcher, launcher.getListener(), publisher, home, true, env).getCommandLines();
+        List<String> args = new CovBuildCommand(build, launcher, launcher.getListener(), publisher, home, env).getCommandLines();
 
         String[] blacklist;
         if(invocationAssistance != null) {
@@ -263,12 +263,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
              * to avoid recreating the idir.
              */
             if(!SKIP_PRECOVBUILD.get()){
-                /**
-                 * Gets environment variables from the build.
-                 */
-                AbstractBuild build = CoverityUtils.getBuild();
-//                setupIntermediateDirectory(build, this.getListener(), node, envVars);
-
                 SKIP_PRECOVBUILD.set(true);
             }
             if(!SKIP.get()) {

@@ -80,7 +80,7 @@ public abstract class CovCommand {
             useAdvancedParser = true;
         }
 
-        return CoverityUtils.runCmd(commandLine, build, launcher, listener, build.getEnvironment(listener), useAdvancedParser);
+        return CoverityUtils.runCmd(commandLine, build, launcher, listener, envVars, useAdvancedParser);
     }
 
     public List<String> getCommandLines() {
