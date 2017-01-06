@@ -42,7 +42,7 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
                 null, null, null
         );
         EnvVars envVars = new EnvVars();
-        CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY, envVars, false);
+        CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
         List<String> covEmitJavaArguments = covEmitJavaCommand.getCommandLines();
 
         assertEquals(7, covEmitJavaArguments.size());

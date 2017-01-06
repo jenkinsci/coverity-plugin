@@ -40,7 +40,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         List<String> covCaptureArguments = covCaptureCommand.getCommandLines();
 
         assertEquals(7, covCaptureArguments.size());
@@ -75,7 +75,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         List<String> covCaptureArguments = covCaptureCommand.getCommandLines();
 
         assertEquals(4, covCaptureArguments.size());
@@ -110,6 +110,6 @@ public class CovCaptureCommandTest extends CommandTestBase {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("ParseException occurred during tokenizing the cov capture custom test command.");
 
-        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
     }
 }

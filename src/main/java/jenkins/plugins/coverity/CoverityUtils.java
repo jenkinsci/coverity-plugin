@@ -281,7 +281,7 @@ public class CoverityUtils {
         return r;
     }
 
-    public static int runCmd(List<String> cmd, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener,
+    public static int runCmd(List<String> cmd, AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener,
                              EnvVars envVars, boolean useAdvancedParser) throws IOException, InterruptedException {
         /**
          * Get environment variables from a launcher, add custom environment environment variables if needed,
@@ -330,6 +330,19 @@ public class CoverityUtils {
      */
     public static EnvVars getBuildEnvVars(TaskListener listener){
         AbstractBuild build = CoverityUtils.getBuild();
+        EnvVars envVars = null;
+        try {
+            envVars = build.getEnvironment(listener);
+        } catch (Exception e) {
+            CoverityUtils.handleException(e.getMessage(), build, listener, e);
+        }
+        return envVars;
+    }
+
+    /**
+     * Gets environment variables from the given build
+     */
+    public static EnvVars getBuildEnvVars(AbstractBuild build, TaskListener listener){
         EnvVars envVars = null;
         try {
             envVars = build.getEnvironment(listener);

@@ -10,9 +10,10 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
+import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 
@@ -27,8 +28,8 @@ public class CovAnalyzeCommand extends CovCommand {
     private static final String stripPath = "--strip-path";
 
 
-    public CovAnalyzeCommand(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home) {
-        super(command, build, launcher, listener, publisher, home);
+    public CovAnalyzeCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
+        super(command, build, launcher, listener, publisher, home, envVars);
         prepareCommand();
     }
 
@@ -38,7 +39,6 @@ public class CovAnalyzeCommand extends CovCommand {
         addMisraConfiguration();
         addTaConfiguration();
         addAdditionalAnalysisArguments();
-        expandEnvironmentVariables();
     }
 
     private void addMisraConfiguration(){
@@ -105,6 +105,5 @@ public class CovAnalyzeCommand extends CovCommand {
         }catch(ParseException parseException){
             throw new RuntimeException("ParseException occurred during tokenizing the cov analyze additional arguments.");
         }
-
     }
 }

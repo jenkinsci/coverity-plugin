@@ -14,7 +14,7 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import jenkins.plugins.coverity.CoverityTempDir;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
@@ -34,8 +34,9 @@ public abstract class CommandTestBase {
 
     protected AbstractBuild build;
     protected Launcher launcher;
-    protected BuildListener buildListener;
+    protected TaskListener listener;
     protected IMocksControl mocker;
+    protected EnvVars envVars;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -45,17 +46,16 @@ public abstract class CommandTestBase {
         mocker = EasyMock.createNiceControl();
         build = mocker.createMock(AbstractBuild.class);
         launcher = mocker.createMock(Launcher.class);
-        buildListener = mocker.createMock(BuildListener.class);
+        listener = mocker.createMock(TaskListener.class);
 
         File temp = new File("TestDir");
         FilePath filePath = new FilePath(temp);
         CoverityTempDir tempDir = new CoverityTempDir(filePath, false);
 
-        EnvVars envVars = new EnvVars();
+        envVars = new EnvVars();
         envVars.put("COV_IDIR", "TestDir");
 
-//        expect(build.getAction(CoverityTempDir.class)).andReturn(tempDir);
-        expect(build.getEnvironment(buildListener)).andReturn(envVars);
+        expect(build.getAction(CoverityTempDir.class)).andReturn(tempDir);
     }
 
     @After

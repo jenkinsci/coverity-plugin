@@ -13,7 +13,7 @@ package jenkins.plugins.coverity.CoverityTool;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityUtils;
 import jenkins.plugins.coverity.InvocationAssistance;
@@ -28,8 +28,8 @@ public class CovEmitJavaCommand extends CovCommand {
     private EnvVars envVars;
     private boolean useAdvancedParser;
 
-    public CovEmitJavaCommand(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home, EnvVars envVars, boolean useAdvancedParser) {
-        super(command, build, launcher, listener, publisher, home);
+    public CovEmitJavaCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars, boolean useAdvancedParser) {
+        super(command, build, launcher, listener, publisher, home, envVars);
         this.envVars = envVars;
         this.useAdvancedParser = useAdvancedParser;
         prepareCommand();
@@ -39,7 +39,6 @@ public class CovEmitJavaCommand extends CovCommand {
     protected void prepareCommand() {
         addIntermediateDir();
         addJavaWarFiles();
-        expandEnvironmentVariables();
     }
 
     private void addJavaWarFiles(){

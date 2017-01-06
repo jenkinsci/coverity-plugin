@@ -43,7 +43,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         List<String> covAnalyzeArguments = covAnalyzeCommand.getCommandLines();
 
         assertEquals(5, covAnalyzeArguments.size());
@@ -78,7 +78,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Misra configuration file is required to run Misra analysis.");
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Could not find MISRA configuration file at \"" + misraConfigFile.getAbsolutePath() + "\"");
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         List<String> covAnalyzeArguments = covAnalyzeCommand.getCommandLines();
 
         assertEquals(4, covAnalyzeArguments.size());
@@ -153,7 +153,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("ParseException occurred during tokenizing the cov analyze additional arguments.");
 
-        new CovAnalyzeCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
     }
 
     @Test
@@ -178,7 +178,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         List<String> covAnalyzeArguments = covAnalyzeCommand.getCommandLines();
 
         assertEquals(8, covAnalyzeArguments.size());
@@ -219,7 +219,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Test Advisor Policy File is required to run the Test Advisor.");
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
     }
 
     @Test
@@ -246,6 +246,6 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Could not find test policy file at \"" + taPolicyFile.getAbsolutePath() + "\"");
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
     }
 }

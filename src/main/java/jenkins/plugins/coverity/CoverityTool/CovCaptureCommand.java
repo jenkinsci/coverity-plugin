@@ -10,9 +10,10 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
+import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.EnvParser;
 import jenkins.plugins.coverity.ParseException;
@@ -23,8 +24,8 @@ public class CovCaptureCommand extends CovCommand {
 
     private static final String command = "cov-capture";
 
-    public CovCaptureCommand(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home) {
-        super(command, build, launcher, listener, publisher, home);
+    public CovCaptureCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
+        super(command, build, launcher, listener, publisher, home, envVars);
         prepareCommand();
     }
 
@@ -33,17 +34,6 @@ public class CovCaptureCommand extends CovCommand {
         addIntermediateDir();
         addTaCommandArgs();
         addCustomTestCommand();
-        expandEnvironmentVariables();
-    }
-
-    private void addTaCommandArgs(){
-        if (publisher == null){
-            return;
-        }
-        TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
-        if (taOptionBlock != null){
-            addArguments(taOptionBlock.getTaCommandArgs());
-        }
     }
 
     private void addCustomTestCommand(){

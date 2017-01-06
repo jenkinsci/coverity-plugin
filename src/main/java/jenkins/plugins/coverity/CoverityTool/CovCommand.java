@@ -10,13 +10,12 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.CoverityUtils;
-import jenkins.plugins.coverity.InvocationAssistance;
+import hudson.model.TaskListener;
+import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -31,14 +30,16 @@ public abstract class CovCommand {
     protected List<String> commandLine;
     protected AbstractBuild build;
     private Launcher launcher;
-    protected BuildListener buildListener;
+    protected TaskListener listener;
     protected CoverityPublisher publisher;
+    private EnvVars envVars;
 
-    public CovCommand(String command, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home){
+    public CovCommand(String command, AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars){
         this.build = build;
         this.launcher = launcher;
-        this.buildListener = listener;
+        this.listener = listener;
         this.publisher = publisher;
+        this.envVars = envVars;
 
         commandLine = new ArrayList<>();
         addCommand(command, home);
@@ -55,7 +56,13 @@ public abstract class CovCommand {
 
     protected void addIntermediateDir(){
         commandLine.add(intermediateDirArguments);
-        commandLine.add(covIdirEnvVar);
+        String idir = envVars.expand(covIdirEnvVar);
+        if (!StringUtils.isEmpty(idir) && !idir.equalsIgnoreCase(covIdirEnvVar)){
+            commandLine.add(idir);
+        }else{
+            CoverityTempDir tempDir = build.getAction(CoverityTempDir.class);
+            commandLine.add(tempDir.getTempDir().getRemote());
+        }
     }
 
     protected void addArgument(String args){
@@ -73,22 +80,21 @@ public abstract class CovCommand {
             useAdvancedParser = true;
         }
 
-        return CoverityUtils.runCmd(commandLine, build, launcher, buildListener, build.getEnvironment(buildListener), useAdvancedParser);
+        return CoverityUtils.runCmd(commandLine, build, launcher, listener, build.getEnvironment(listener), useAdvancedParser);
     }
 
     public List<String> getCommandLines() {
         return commandLine;
     }
 
-    protected void expandEnvironmentVariables() {
-        try{
-            commandLine = CoverityUtils.evaluateEnvVars(commandLine, build.getEnvironment(buildListener));
-        }catch(IOException ioe) {
-            throw new RuntimeException("IOException occurred during evaluating the environmental variables.");
-        }catch(InterruptedException ie) {
-            throw new RuntimeException("IOException occurred during evaluating the environmental variables.");
+    protected void addTaCommandArgs(){
+        if (publisher == null){
+            return;
         }
-
+        TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
+        if (taOptionBlock != null){
+            addArguments(taOptionBlock.getTaCommandArgs());
+        }
     }
 
     protected abstract void prepareCommand();

@@ -10,10 +10,14 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
+import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.EnvParser;
+import jenkins.plugins.coverity.InvocationAssistance;
+import org.apache.commons.lang.StringUtils;
 
 public class CovBuildCommand extends CovCommand {
 
@@ -22,30 +26,55 @@ public class CovBuildCommand extends CovCommand {
     private static final String fileSystemCapture = "--fs-capture-search";
     private boolean forCompiledSrc;
 
-    public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home, boolean forCompiledSrc) {
-        super(command, build, launcher, listener, publisher, home);
+    public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, boolean forCompiledSrc, EnvVars envVars) {
+        super(command, build, launcher, listener, publisher, home, envVars);
         this.forCompiledSrc = forCompiledSrc;
         prepareCommand();
     }
 
     @Override
     protected void prepareCommand() {
+        addIntermediateDir();
         if (!forCompiledSrc){
             prepareCovBuildCommandForScriptSources();
         }else{
             prepareCovBuildCommandForCompileSources();
         }
-        expandEnvironmentVariables();
     }
 
     private void prepareCovBuildCommandForScriptSources() {
-        addIntermediateDir();
         addArgument(noCommandArg);
+        addScriptSourcesArgs();
+    }
+
+    private void prepareCovBuildCommandForCompileSources() {
+        if (publisher == null) {
+            return;
+        }
+
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+
+        // It is possible for users to run cov-build for compiled sources and script sources at the same time.
+        if (invocationAssistance != null && invocationAssistance.getIsScriptSrc()) {
+            addScriptSourcesArgs();
+        }
+
+        addTaCommandArgs();
+        addAdditionalBuildArguments();
+    }
+
+    private void addScriptSourcesArgs() {
         addArgument(fileSystemCapture);
         addArgument("$WORKSPACE");
     }
 
-    private void prepareCovBuildCommandForCompileSources() {
-
+    private void addAdditionalBuildArguments() {
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        if (invocationAssistance != null){
+            String buildArgs = invocationAssistance.getBuildArguments();
+            if (!StringUtils.isEmpty(buildArgs)){
+                addArguments(EnvParser.tokenizeWithRuntimeException(buildArgs));
+            }
+        }
     }
 }

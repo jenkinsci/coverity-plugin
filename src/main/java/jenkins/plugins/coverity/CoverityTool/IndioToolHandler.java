@@ -23,7 +23,6 @@ import hudson.model.Result;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,7 +81,7 @@ public class IndioToolHandler extends CoverityToolHandler {
             try {
                 CoverityLauncherDecorator.SKIP.set(true);
 
-                CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, false);
+                CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, false, envVars);
                 listener.getLogger().println("[Coverity] cov-build command line arguments: " + covBuildCommand.toString());
                 int result = covBuildCommand.runCommand();
 
@@ -125,19 +124,21 @@ public class IndioToolHandler extends CoverityToolHandler {
 
         // Run Cov-Emit-Java
         if(invocationAssistance != null){
-            try {
-                CoverityLauncherDecorator.SKIP.set(true);
-                CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
-                listener.getLogger().println("[Coverity] cov-emit-java command line arguments: " + covEmitJavaCommand.toString());
-                int result = covEmitJavaCommand.runCommand();
+            if (invocationAssistance.getJavaWarFiles() != null && !invocationAssistance.getJavaWarFiles().isEmpty()){
+                try {
+                    CoverityLauncherDecorator.SKIP.set(true);
+                    CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
+                    listener.getLogger().println("[Coverity] cov-emit-java command line arguments: " + covEmitJavaCommand.toString());
+                    int result = covEmitJavaCommand.runCommand();
 
-                if(result != 0) {
-                    listener.getLogger().println("[Coverity] cov-emit-java returned " + result + ", aborting...");
-                    build.setResult(Result.FAILURE);
-                    return false;
+                    if(result != 0) {
+                        listener.getLogger().println("[Coverity] cov-emit-java returned " + result + ", aborting...");
+                        build.setResult(Result.FAILURE);
+                        return false;
+                    }
+                } finally {
+                    CoverityLauncherDecorator.SKIP.set(false);
                 }
-            } finally {
-                CoverityLauncherDecorator.SKIP.set(false);
             }
         }
 
@@ -146,7 +147,7 @@ public class IndioToolHandler extends CoverityToolHandler {
             if(testAnalysis.getCustomTestCommand() != null){
                 try {
                     CoverityLauncherDecorator.SKIP.set(true);
-                    CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, home);
+                    CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, home, envVars);
                     listener.getLogger().println("[Coverity] cov-capture command line arguments: " + covCaptureCommand.toString());
                     int result = covCaptureCommand.runCommand();
 
@@ -297,7 +298,7 @@ public class IndioToolHandler extends CoverityToolHandler {
 
             try {
                 CoverityLauncherDecorator.SKIP.set(true);
-                CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, home);
+                CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, home, envVars);
                 listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + covAnalyzeCommand.toString());
                 int result = covAnalyzeCommand.runCommand();
 
