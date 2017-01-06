@@ -8,12 +8,13 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity;
+package jenkins.plugins.coverity.CoverityTool;
 
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import jenkins.plugins.coverity.CoverityTempDir;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.junit.After;

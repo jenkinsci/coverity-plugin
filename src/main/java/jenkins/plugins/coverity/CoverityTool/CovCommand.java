@@ -8,7 +8,7 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity.analysis;
+package jenkins.plugins.coverity.CoverityTool;
 
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class CovCommandBase implements ICovCommand{
+public abstract class CovCommand {
 
     private static final String intermediateDirArguments = "--dir";
 
@@ -36,7 +36,7 @@ public abstract class CovCommandBase implements ICovCommand{
     protected CoverityPublisher publisher;
     private CoverityTempDir coverityTempDir;
 
-    public CovCommandBase(String command, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home){
+    public CovCommand(String command, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home){
         this.build = build;
         this.launcher = launcher;
         this.buildListener = listener;
@@ -69,7 +69,6 @@ public abstract class CovCommandBase implements ICovCommand{
         commandLine.addAll(args);
     }
 
-    @Override
     public int runCommand() throws IOException, InterruptedException {
         boolean useAdvancedParser = false;
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
@@ -79,9 +78,9 @@ public abstract class CovCommandBase implements ICovCommand{
 
         return CoverityUtils.runCmd(commandLine, build, launcher, buildListener, build.getEnvironment(buildListener), useAdvancedParser);
     }
-
-    @Override
     public List<String> getCommandLines() {
         return commandLine;
     }
+
+    protected abstract void prepareCommand();
 }

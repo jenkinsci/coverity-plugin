@@ -8,38 +8,30 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity.analysis;
+package jenkins.plugins.coverity.CoverityTool;
 
 import com.coverity.ws.v9.*;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.Executor;
-import hudson.model.Hudson;
-import hudson.model.Node;
-import hudson.model.Result;
+import hudson.model.*;
 import jenkins.plugins.coverity.*;
+import org.codehaus.groovy.tools.shell.Command;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Similar to other handlers, but this one uses v9 ws.
+ * Similar to other handlers, but this one uses v9 ws and has improvement for certificate management.
  */
-public class IndioToolHandler extends CoverityToolHandler {
-
+public class JasperToolHandler extends CoverityToolHandler{
     CoverityVersion version;
 
-    public IndioToolHandler(CoverityVersion version){
+    public JasperToolHandler(CoverityVersion version){
         this.version = version;
     }
 
@@ -56,6 +48,14 @@ public class IndioToolHandler extends CoverityToolHandler {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
+
+        boolean isTrustNewSelfSignedCert = false;
+        String certFileName = null;
+        SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
+        if(sslConfigurations != null){
+            isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
+            certFileName = sslConfigurations.getCertFileName();
+        }
 
         boolean useAdvancedParser = false;
         if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
@@ -81,24 +81,14 @@ public class IndioToolHandler extends CoverityToolHandler {
         //run cov-build for scripting language sources only.
         if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
             try {
-                String covBuild = CoverityUtils.getCovBuild(listener, node);
-
                 CoverityLauncherDecorator.SKIP.set(true);
 
-                List<String> cmd = new ArrayList<String>();
-                cmd.add(covBuild);
-                cmd.add("--dir");
-                cmd.add(temp.getTempDir().getRemote());
-                cmd.add("--no-command");
-                cmd.add("--fs-capture-search");
-                cmd.add("$WORKSPACE");
-
-                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
+                CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, false);
+                listener.getLogger().println("[Coverity] cov-build command line arguments: " + covBuildCommand.toString());
+                int result = covBuildCommand.runCommand();
 
                 if(result != 0) {
-                    listener.getLogger().println("[Coverity] " + covBuild + " returned " + result + ", aborting...");
+                    listener.getLogger().println("[Coverity] cov-build returned " + result + ", aborting...");
                     build.setResult(Result.FAILURE);
                     return false;
                 }
@@ -138,10 +128,8 @@ public class IndioToolHandler extends CoverityToolHandler {
         if(invocationAssistance != null){
             try {
                 CoverityLauncherDecorator.SKIP.set(true);
-                ICovCommand covEmitJavaCommand = CommandFactory.getCovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
-
-                listener.getLogger().println("[Coverity] cov-capture command line arguments: " + covEmitJavaCommand.getCommandLines().toString());
-
+                CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
+                listener.getLogger().println("[Coverity] cov-emit-java command line arguments: " + covEmitJavaCommand.toString());
                 int result = covEmitJavaCommand.runCommand();
 
                 if(result != 0) {
@@ -159,9 +147,8 @@ public class IndioToolHandler extends CoverityToolHandler {
             if(testAnalysis.getCustomTestCommand() != null){
                 try {
                     CoverityLauncherDecorator.SKIP.set(true);
-                    ICovCommand covCaptureCommand = CommandFactory.getCovCaptureCommand(build, launcher, listener, publisher, home);
-                    listener.getLogger().println("[Coverity] cov-capture command line arguments: " + covCaptureCommand.getCommandLines().toString());
-
+                    CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, home);
+                    listener.getLogger().println("[Coverity] cov-capture command line arguments: " + covCaptureCommand.toString());
                     int result = covCaptureCommand.runCommand();
 
                     if(result != 0) {
@@ -204,6 +191,14 @@ public class IndioToolHandler extends CoverityToolHandler {
                         cmd.add(CoverityUtils.doubleQuote(cimStream.getStream(), useAdvancedParser));
                         if(cim.isUseSSL()){
                             cmd.add("--ssl");
+                            if(isTrustNewSelfSignedCert){
+                                cmd.add("--on-new-cert");
+                                cmd.add("trust");
+                            }
+                            if(certFileName != null){
+                                cmd.add("--certs");
+                                cmd.add(certFileName);
+                            }
                         }
 
                         cmd.add("--user");
@@ -240,8 +235,6 @@ public class IndioToolHandler extends CoverityToolHandler {
                 }
 
                 CoverityLauncherDecorator.SKIP.set(true);
-
-
 
                 List<String> cmd = new ArrayList<String>();
                 cmd.add(covImportScm);
@@ -311,10 +304,8 @@ public class IndioToolHandler extends CoverityToolHandler {
 
             try {
                 CoverityLauncherDecorator.SKIP.set(true);
-                ICovCommand covAnalyzeCommand = CommandFactory.getCovAnalyzeCommand(build, launcher, listener, publisher, home);
-
-                listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + covAnalyzeCommand.getCommandLines().toString());
-
+                CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, home);
+                listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + covAnalyzeCommand.toString());
                 int result = covAnalyzeCommand.runCommand();
 
                 if(result != 0) {
@@ -322,6 +313,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                     build.setResult(Result.FAILURE);
                     return false;
                 }
+
             } finally {
                 CoverityLauncherDecorator.SKIP.set(false);
             }
@@ -400,9 +392,29 @@ public class IndioToolHandler extends CoverityToolHandler {
                     if(useDataPort){
                         cmd.add("--dataport");
                         cmd.add(Integer.toString(cim.getDataPort()));
-                    }else if(cim.isUseSSL()){
+                        if(cim.isUseSSL()){
+                            cmd.add("--ssl");
+                            if(isTrustNewSelfSignedCert){
+                                cmd.add("--on-new-cert");
+                                cmd.add("trust");
+                            }
+                            if(certFileName != null){
+                                cmd.add("--certs");
+                                cmd.add(certFileName);
+                            }
+                        }
+                    }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
                         cmd.add("--https-port");
                         cmd.add(Integer.toString(cim.getPort()));
+                        cmd.add("--ssl");
+                        if(isTrustNewSelfSignedCert){
+                            cmd.add("--on-new-cert");
+                            cmd.add("trust");
+                        }
+                        if(certFileName != null){
+                            cmd.add("--certs");
+                            cmd.add(certFileName);
+                        }
                     }else{
                         cmd.add("--port");
                         cmd.add(Integer.toString(cim.getPort()));
@@ -414,10 +426,7 @@ public class IndioToolHandler extends CoverityToolHandler {
                     cmd.add(cim.getUser());
 
                     if(invocationAssistance != null){
-                        // --misra-only option should only be used on Indio, it is deprecated on newer versions.
-                        if(effectiveIA.getIsUsingMisra()){
-                            cmd.add("--misra-only");
-                        } else if(effectiveIA.getCommitArguments() != null) {
+                        if(effectiveIA.getCommitArguments() != null) {
                             cmd.addAll(EnvParser.tokenize(effectiveIA.getCommitArguments()));
                         }
                     }

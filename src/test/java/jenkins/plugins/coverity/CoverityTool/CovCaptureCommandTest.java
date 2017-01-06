@@ -8,10 +8,10 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity;
+package jenkins.plugins.coverity.CoverityTool;
 
-import jenkins.plugins.coverity.analysis.CommandFactory;
-import jenkins.plugins.coverity.analysis.ICovCommand;
+import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -40,7 +40,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        ICovCommand covCaptureCommand = CommandFactory.getCovCaptureCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
         List<String> covCaptureArguments = covCaptureCommand.getCommandLines();
 
         assertEquals(7, covCaptureArguments.size());
@@ -75,7 +75,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        ICovCommand covCaptureCommand = CommandFactory.getCovCaptureCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
         List<String> covCaptureArguments = covCaptureCommand.getCommandLines();
 
         assertEquals(4, covCaptureArguments.size());
@@ -110,6 +110,6 @@ public class CovCaptureCommandTest extends CommandTestBase {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("ParseException occurred during tokenizing the cov capture custom test command.");
 
-        CommandFactory.getCovCaptureCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
+        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY);
     }
 }

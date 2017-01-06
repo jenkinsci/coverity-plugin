@@ -25,7 +25,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.plugins.coverity.analysis.CoverityToolHandler;
+import jenkins.plugins.coverity.CoverityTool.CoverityToolHandler;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

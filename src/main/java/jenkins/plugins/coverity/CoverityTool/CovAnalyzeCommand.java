@@ -8,7 +8,7 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity.analysis;
+package jenkins.plugins.coverity.CoverityTool;
 
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -18,7 +18,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 
-public class CovAnalyzeCommand extends CovCommandBase{
+public class CovAnalyzeCommand extends CovCommand {
 
     private static final String command = "cov-analyze";
     private static final String misraConfig = "--misra-config";
@@ -29,16 +29,15 @@ public class CovAnalyzeCommand extends CovCommandBase{
 
     public CovAnalyzeCommand(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home) {
         super(command, build, launcher, listener, publisher, home);
+        prepareCommand();
     }
 
-    public CovAnalyzeCommand getCovAnalyzeCommand() {
-
+    @Override
+    protected void prepareCommand() {
         addIntermediateDir();
         addMisraConfiguration();
         addTaConfiguration();
         addAdditionalAnalysisArguments();
-
-        return this;
     }
 
     private void addMisraConfiguration(){

@@ -8,11 +8,11 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity;
+package jenkins.plugins.coverity.CoverityTool;
 
 import hudson.EnvVars;
-import jenkins.plugins.coverity.analysis.CommandFactory;
-import jenkins.plugins.coverity.analysis.ICovCommand;
+import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.InvocationAssistance;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -41,8 +41,8 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 null, null, null
         );
-
-        ICovCommand covEmitJavaCommand = CommandFactory.getCovEmitJavaCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY, new EnvVars(), false);
+        EnvVars envVars = new EnvVars();
+        CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, buildListener, publisher, StringUtils.EMPTY, envVars, false);
         List<String> covEmitJavaArguments = covEmitJavaCommand.getCommandLines();
 
         assertEquals(7, covEmitJavaArguments.size());

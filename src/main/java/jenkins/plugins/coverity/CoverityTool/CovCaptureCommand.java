@@ -8,7 +8,7 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity.analysis;
+package jenkins.plugins.coverity.CoverityTool;
 
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -19,20 +19,20 @@ import jenkins.plugins.coverity.ParseException;
 import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
 
-public class CovCaptureCommand extends CovCommandBase{
+public class CovCaptureCommand extends CovCommand {
 
     private static final String command = "cov-capture";
 
     public CovCaptureCommand(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home) {
         super(command, build, launcher, listener, publisher, home);
+        prepareCommand();
     }
 
-    public CovCaptureCommand getCovCaptureCommand() {
+    @Override
+    protected void prepareCommand() {
         addIntermediateDir();
         addTaCommandArgs();
         addCustomTestCommand();
-
-        return this;
     }
 
     private void addTaCommandArgs(){

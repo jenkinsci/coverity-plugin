@@ -8,7 +8,7 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity.analysis;
+package jenkins.plugins.coverity.CoverityTool;
 
 import hudson.EnvVars;
 import hudson.FilePath;

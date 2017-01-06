@@ -8,7 +8,7 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity.analysis;
+package jenkins.plugins.coverity.CoverityTool;
 
 import hudson.EnvVars;
 import hudson.Launcher;
@@ -21,7 +21,7 @@ import jenkins.plugins.coverity.InvocationAssistance;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CovEmitJavaCommand extends CovCommandBase {
+public class CovEmitJavaCommand extends CovCommand {
 
     private static final String command = "cov-emit-java";
     private static final String webAppArchive = "--webapp-archive";
@@ -32,14 +32,13 @@ public class CovEmitJavaCommand extends CovCommandBase {
         super(command, build, launcher, listener, publisher, home);
         this.envVars = envVars;
         this.useAdvancedParser = useAdvancedParser;
+        prepareCommand();
     }
 
-    public CovEmitJavaCommand getCovEmitJavaCommand() {
-
+    @Override
+    protected void prepareCommand() {
         addIntermediateDir();
         addJavaWarFiles();
-
-        return this;
     }
 
     private void addJavaWarFiles(){
