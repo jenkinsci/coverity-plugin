@@ -27,7 +27,7 @@ if __name__ == "__main__":
 	output = subprocess.Popen("git log --pretty=format:'%H' -n 1", stdout=subprocess.PIPE, shell=True)
 	commit_id = output.stdout.read()
 	# Generate the json output text
-	json_output = json.dumps({ "commit_id" : commit_id.strip(), "build_number" : build_number, "build_id" : build_id }, indent=4)
+	json_output = json.dumps({ "commit_id" : commit_id.strip(), "build_number" : build_number, "build_id" : build_id, "external_version" : version }, indent=4)
 	# Run the typical build for jenkins
 	subprocess.check_call("mvn clean install", shell=True)
 	# write the version output file
