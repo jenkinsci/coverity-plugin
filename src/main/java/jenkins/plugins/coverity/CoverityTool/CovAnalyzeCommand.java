@@ -38,6 +38,7 @@ public class CovAnalyzeCommand extends CovCommand {
         addMisraConfiguration();
         addTaConfiguration();
         addAdditionalAnalysisArguments();
+        expandEnvironmentVariables();
     }
 
     private void addMisraConfiguration(){

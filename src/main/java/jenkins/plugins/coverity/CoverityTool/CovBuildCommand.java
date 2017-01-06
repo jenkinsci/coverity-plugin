@@ -35,6 +35,7 @@ public class CovBuildCommand extends CovCommand {
         }else{
             prepareCovBuildCommandForCompileSources();
         }
+        expandEnvironmentVariables();
     }
 
     private void prepareCovBuildCommandForScriptSources() {

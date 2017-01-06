@@ -289,7 +289,7 @@ public class CoverityUtils {
          */
         String[] launcherEnvVars = launcher.launch().envs();
         launcherEnvVars = CoverityUtils.addEnvVars(launcherEnvVars, envVars);
-        cmd = CoverityUtils.prepareCmds(cmd, launcherEnvVars, useAdvancedParser);
+        cmd = prepareCmds(cmd, launcherEnvVars, useAdvancedParser);
         int result = launcher.
                 launch().
                 cmds(new ArgumentListBuilder(cmd.toArray(new String[cmd.size()]))).

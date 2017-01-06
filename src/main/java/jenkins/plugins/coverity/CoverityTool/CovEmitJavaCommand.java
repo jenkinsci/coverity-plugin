@@ -39,6 +39,7 @@ public class CovEmitJavaCommand extends CovCommand {
     protected void prepareCommand() {
         addIntermediateDir();
         addJavaWarFiles();
+        expandEnvironmentVariables();
     }
 
     private void addJavaWarFiles(){

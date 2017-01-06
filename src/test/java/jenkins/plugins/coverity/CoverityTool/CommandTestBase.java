@@ -10,6 +10,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -23,6 +24,7 @@ import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static org.easymock.EasyMock.expect;
@@ -39,7 +41,7 @@ public abstract class CommandTestBase {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
-    public void setup(){
+    public void setup() throws IOException, InterruptedException {
         mocker = EasyMock.createNiceControl();
         build = mocker.createMock(AbstractBuild.class);
         launcher = mocker.createMock(Launcher.class);
@@ -49,7 +51,11 @@ public abstract class CommandTestBase {
         FilePath filePath = new FilePath(temp);
         CoverityTempDir tempDir = new CoverityTempDir(filePath, false);
 
-        expect(build.getAction(CoverityTempDir.class)).andReturn(tempDir);
+        EnvVars envVars = new EnvVars();
+        envVars.put("COV_IDIR", "TestDir");
+
+//        expect(build.getAction(CoverityTempDir.class)).andReturn(tempDir);
+        expect(build.getEnvironment(buildListener)).andReturn(envVars);
     }
 
     @After

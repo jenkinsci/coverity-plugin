@@ -10,13 +10,11 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.CoverityTempDir;
 import jenkins.plugins.coverity.CoverityUtils;
 import jenkins.plugins.coverity.InvocationAssistance;
 import org.apache.commons.lang.StringUtils;
@@ -28,20 +26,19 @@ import java.util.List;
 public abstract class CovCommand {
 
     private static final String intermediateDirArguments = "--dir";
+    private static final String covIdirEnvVar = "$COV_IDIR";
 
     protected List<String> commandLine;
     protected AbstractBuild build;
     private Launcher launcher;
     protected BuildListener buildListener;
     protected CoverityPublisher publisher;
-    private CoverityTempDir coverityTempDir;
 
     public CovCommand(String command, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher, String home){
         this.build = build;
         this.launcher = launcher;
         this.buildListener = listener;
         this.publisher = publisher;
-        this.coverityTempDir = build.getAction(CoverityTempDir.class);
 
         commandLine = new ArrayList<>();
         addCommand(command, home);
@@ -58,7 +55,7 @@ public abstract class CovCommand {
 
     protected void addIntermediateDir(){
         commandLine.add(intermediateDirArguments);
-        commandLine.add(coverityTempDir.getTempDir().getRemote());
+        commandLine.add(covIdirEnvVar);
     }
 
     protected void addArgument(String args){
@@ -78,8 +75,20 @@ public abstract class CovCommand {
 
         return CoverityUtils.runCmd(commandLine, build, launcher, buildListener, build.getEnvironment(buildListener), useAdvancedParser);
     }
+
     public List<String> getCommandLines() {
         return commandLine;
+    }
+
+    protected void expandEnvironmentVariables() {
+        try{
+            commandLine = CoverityUtils.evaluateEnvVars(commandLine, build.getEnvironment(buildListener));
+        }catch(IOException ioe) {
+            throw new RuntimeException("IOException occurred during evaluating the environmental variables.");
+        }catch(InterruptedException ie) {
+            throw new RuntimeException("IOException occurred during evaluating the environmental variables.");
+        }
+
     }
 
     protected abstract void prepareCommand();

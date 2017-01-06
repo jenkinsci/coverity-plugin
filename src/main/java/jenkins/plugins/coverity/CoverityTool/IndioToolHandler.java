@@ -51,7 +51,6 @@ public class IndioToolHandler extends CoverityToolHandler {
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
-        File workspace = build.getRootDir();
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();

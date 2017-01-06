@@ -33,6 +33,7 @@ public class CovCaptureCommand extends CovCommand {
         addIntermediateDir();
         addTaCommandArgs();
         addCustomTestCommand();
+        expandEnvironmentVariables();
     }
 
     private void addTaCommandArgs(){
