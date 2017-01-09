@@ -284,11 +284,9 @@
                                     <f:textbox />
                                 </f:entry>
                                 <f:entry title="TA Policy File (Required):" field="policyFile">
-                                    <st:nbsp />
                                     <f:textbox/>
                                 </f:entry>
                                 <f:entry title="Strip Path:" field="taStripPath">
-                                    <st:nbsp />
                                     <f:textbox/>
                                 </f:entry>
                                 <f:entry title="Enable Cov-Manage-History" field="covHistoryCheckbox">
@@ -364,7 +362,7 @@
                                                 </select>
                                             </f:entry>
 
-                                            <f:entry title="Choose a C# Test Framework:">
+                                            <f:entry title="Choose a C# Test Framework:" field="csFramework">
                                                 <st:nbsp /><st:nbsp />
                                                 <f:radio name="csFramework"
                                                          checked="${instance.csFramework == 'mstest' &amp;&amp; instance.csOptionBlock}" value="mstest"/>
@@ -421,14 +419,14 @@
                                                 </select>
                                             </f:entry>
 
-                                                <f:entry title="Choose a Java Test Framework:">
-                                                    <st:nbsp /><st:nbsp />
-                                                    <f:checkbox title="junit" field="junitFramework"
+                                            <f:entry title="Choose a Java Test Framework:">
+                                                <st:nbsp /><st:nbsp />
+                                                <f:checkbox title="junit" field="junitFramework"
                                                             checked="${instance.junitFramework &amp;&amp; instance.javaOptionBlock}"/>
-                                                    <st:nbsp /><st:nbsp />
-                                                    <f:checkbox title="junit4" field="junit4Framework"
-                                                                checked="${instance.junit4Framework &amp;&amp; instance.javaOptionBlock}"/>
-                                                </f:entry>
+                                                <st:nbsp /><st:nbsp />
+                                                <f:checkbox title="junit4" field="junit4Framework"
+                                                            checked="${instance.junit4Framework &amp;&amp; instance.javaOptionBlock}"/>
+                                            </f:entry>
                                         </table>
                                     </f:block>
                                 </tr>
@@ -551,11 +549,9 @@
                             </select>
                         </f:entry>
                         <f:entry title="AccuRev root repository" field="accRevRepo">
-                                <st:nbsp /><st:nbsp />
                                 <f:textbox/>
                             </f:entry>
                             <f:entry title="Perforce P4PORT" field="p4Port">
-                                <st:nbsp /><st:nbsp />
                                 <f:textbox/>
                         </f:entry>
 
