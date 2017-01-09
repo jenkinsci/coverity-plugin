@@ -191,66 +191,11 @@ public class IndioToolHandler extends CoverityToolHandler {
         if(scm != null && !scm.getScmSystem().equals("none")){
 
             try {
-                String covImportScm = "cov-import-scm";
-
-                if(home != null) {
-                    covImportScm = new FilePath(launcher.getChannel(), home).child("bin").child(covImportScm).getRemote();
-                }
-
                 CoverityLauncherDecorator.SKIP.set(true);
 
-
-
-                List<String> cmd = new ArrayList<String>();
-                cmd.add(covImportScm);
-                cmd.add("--dir");
-                cmd.add(temp.getTempDir().getRemote());
-                cmd.add("--scm");
-                cmd.add(scm.getScmSystem());
-                if(scm.getCustomTestTool() != null){
-                    cmd.add("--tool");
-                    cmd.add(scm.getCustomTestTool());
-                }
-
-                if(scm.getScmToolArguments() != null){
-                    cmd.add("--tool-arg");
-                    cmd.add(CoverityUtils.doubleQuote(scm.getScmToolArguments(), useAdvancedParser));
-                }
-
-                if(scm.getScmCommandArgs() != null){
-                    cmd.add("--command-arg");
-                    cmd.add(CoverityUtils.doubleQuote(scm.getScmCommandArgs(), useAdvancedParser));
-                }
-
-                if(scm.getLogFileLoc() != null){
-                    cmd.add("--log");
-                    cmd.add(scm.getLogFileLoc());
-                }
-
-                if(scm.getFileRegex() != null){
-                    cmd.add("--filename-regex");
-                    cmd.add(scm.getFileRegex());
-                }
-
-                // Adding accurev's root repo, which is optional
-                if(scm.getScmSystem().equals("accurev") && scm.getAccRevRepo() != null){
-                    cmd.add("--project-root");
-                    cmd.add(scm.getAccRevRepo());
-                }
-
-                // Perforce requires p4port to be set when running scm
-                Map<String,String> env = new HashMap<String,String>();;
-                if(scm.getScmSystem().equals("perforce")){
-                    env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), envVars, useAdvancedParser));
-                }
-
-                if(scm.getScmAdditionalCmd() != null) {
-                    cmd.addAll(EnvParser.tokenize(scm.getScmAdditionalCmd()));
-                }
-
-                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
+                CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, home, envVars);
+                listener.getLogger().println("[Coverity] cov-import-scm command line arguments: " + covImportScmCommand.toString());
+                int result = covImportScmCommand.runCommand();
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] cov-import-scm returned " + result + ", aborting...");
