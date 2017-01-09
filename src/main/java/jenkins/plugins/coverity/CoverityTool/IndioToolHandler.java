@@ -168,40 +168,11 @@ public class IndioToolHandler extends CoverityToolHandler {
                 for(CIMStream cimStream : publisher.getCimStreams()) {
                     CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
                     try {
-                        String covManageHistory = "cov-manage-history";
-
-                        if(home != null) {
-                            covManageHistory = new FilePath(launcher.getChannel(), home).child("bin").child(covManageHistory).getRemote();
-                        }
-
                         CoverityLauncherDecorator.SKIP.set(true);
 
-                        boolean useDataPort = cim.getDataPort() != 0;
-
-                        List<String> cmd = new ArrayList<String>();
-                        cmd.add(covManageHistory);
-                        cmd.add("--dir");
-                        cmd.add(temp.getTempDir().getRemote());
-                        cmd.add("download");
-                        cmd.add("--host");
-                        cmd.add(cim.getHost());
-                        cmd.add("--port");
-                        cmd.add(Integer.toString(cim.getPort()));
-                        cmd.add("--stream");
-                        cmd.add(CoverityUtils.doubleQuote(cimStream.getStream(), useAdvancedParser));
-                        if(cim.isUseSSL()){
-                            cmd.add("--ssl");
-                        }
-
-                        cmd.add("--user");
-                        cmd.add(cim.getUser());
-                        cmd.add("--merge");
-
-                        listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                        EnvVars envVarsWithPassphrase = new EnvVars(envVars);
-                        envVarsWithPassphrase.put("COVERITY_PASSPHRASE", cim.getPassword());
-                        int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVarsWithPassphrase, useAdvancedParser);
+                        CovCommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+                        listener.getLogger().println("[Coverity] cov-manage-history command line arguments: " + covManageHistoryCommand.toString());
+                        int result = covManageHistoryCommand.runCommand();
 
                         if(result != 0) {
                             listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");

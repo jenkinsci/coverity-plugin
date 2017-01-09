@@ -25,14 +25,14 @@ import java.util.List;
 public abstract class CovCommand {
 
     private static final String intermediateDirArguments = "--dir";
-    private static final String covIdirEnvVar = "$COV_IDIR";
+    private static final String covIdirEnvVar = "COV_IDIR";
 
     protected List<String> commandLine;
     protected AbstractBuild build;
     private Launcher launcher;
     protected TaskListener listener;
     protected CoverityPublisher publisher;
-    private EnvVars envVars;
+    protected EnvVars envVars;
 
     public CovCommand(String command, AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars){
         this.build = build;
@@ -56,8 +56,8 @@ public abstract class CovCommand {
 
     protected void addIntermediateDir(){
         commandLine.add(intermediateDirArguments);
-        String idir = envVars.expand(covIdirEnvVar);
-        if (!StringUtils.isEmpty(idir) && !idir.equalsIgnoreCase(covIdirEnvVar)){
+        String idir = envVars.get(covIdirEnvVar);
+        if (!StringUtils.isEmpty(idir)){
             commandLine.add(idir);
         }else{
             CoverityTempDir tempDir = build.getAction(CoverityTempDir.class);
