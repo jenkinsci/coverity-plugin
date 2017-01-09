@@ -23,6 +23,7 @@ import hudson.model.Result;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -254,14 +255,29 @@ public class IndioToolHandler extends CoverityToolHandler {
             }
         }
 
-        // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
-            boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            if(csharpMsvsca) {
-                boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca);
-                if(!result) {
-                    build.setResult(Result.FAILURE);
-                    return false;
+            if(invocationAssistance.getCsharpMsvsca()) {
+                listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
+                File[] outputFiles = findMsvscaOutputFiles(temp.getTempDir().getRemote());
+                if (outputFiles == null || outputFiles.length == 0){
+                    listener.getLogger().println("[Coverity] MSVSCA No results found, skipping");
+                }else{
+                    try{
+                        CoverityLauncherDecorator.SKIP.set(true);
+                        CovCommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, home, envVars, outputFiles);
+                        listener.getLogger().println("[Coverity] cov-import-msvsca command line arguments: " + covImportMsvscaCommand.getCommandLines());
+
+                        int result = covImportMsvscaCommand.runCommand();
+
+                        if(result != 0) {
+                            listener.getLogger().println("[Coverity] cov-import-msvsca returned " + result + ", aborting...");
+                            build.setResult(Result.FAILURE);
+                            return false;
+                        }
+
+                    }finally{
+                        CoverityLauncherDecorator.SKIP.set(false);
+                    }
                 }
             }
         }

@@ -23,10 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.tools.ant.types.Commandline;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Logger;
@@ -350,5 +347,45 @@ public class CoverityUtils {
             CoverityUtils.handleException(e.getMessage(), build, listener, e);
         }
         return envVars;
+    }
+
+    public static Collection<File> listFiles(
+            File directory,
+            FilenameFilter filter,
+            boolean recurse) {
+        Vector<File> files = new Vector<File>();
+        File[] entries = directory.listFiles();
+
+        for(File entry : entries) {
+            if(filter == null || filter.accept(directory, entry.getName())) {
+                files.add(entry);
+            }
+
+            if(recurse && entry.isDirectory()) {
+                files.addAll(listFiles(entry, filter, recurse));
+            }
+        }
+
+        return files;
+    }
+
+    public static File[] listFilesAsArray(
+            File directory,
+            FilenameFilter filter,
+            boolean recurse) {
+        Collection<File> files = listFiles(directory, filter, recurse);
+
+        File[] arr = new File[files.size()];
+        return files.toArray(arr);
+    }
+
+    public File[] findMsvscaOutputFiles(String dirName) {
+        File dir = new File(dirName);
+
+        return CoverityUtils.listFilesAsArray(dir, new FilenameFilter() {
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith("CodeAnalysisLog.xml");
+            }
+        }, true);
     }
 }
