@@ -378,14 +378,4 @@ public class CoverityUtils {
         File[] arr = new File[files.size()];
         return files.toArray(arr);
     }
-
-    public File[] findMsvscaOutputFiles(String dirName) {
-        File dir = new File(dirName);
-
-        return CoverityUtils.listFilesAsArray(dir, new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith("CodeAnalysisLog.xml");
-            }
-        }, true);
-    }
 }

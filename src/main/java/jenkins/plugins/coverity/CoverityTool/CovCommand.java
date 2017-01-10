@@ -49,7 +49,7 @@ public abstract class CovCommand {
             String home,
             @Nonnull EnvVars envVars){
 
-        Validate.notEmpty(command, "Command cannobe null empty or null");
+        Validate.notEmpty(command, "Command cannot be null empty or null");
         Validate.notNull(build, AbstractBuild.class.getName() + " object cannot be null");
         Validate.notNull(launcher, Launcher.class.getName() + " object cannot be null");
         Validate.notNull(listener, TaskListener.class.getName() + " object cannot be null");
