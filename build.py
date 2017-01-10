@@ -31,7 +31,7 @@ if __name__ == "__main__":
 	# Run the typical build for jenkins
 	subprocess.check_call("mvn clean install", shell=True)
 	# write the version output file
-	version_file = open("./target/coverity.hpi.VERSION","w")
+	version_file = open("./target/coverity-{0}.hpi.VERSION".format(version),"w")
 	version_file.write(json_output)
 	# move the .hpi file to a versioned file
 	shutil.move("./target/coverity.hpi", "./target/coverity-{0}.hpi".format(version))
