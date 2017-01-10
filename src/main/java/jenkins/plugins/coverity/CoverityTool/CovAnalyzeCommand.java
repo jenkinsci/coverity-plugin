@@ -46,7 +46,7 @@ public class CovAnalyzeCommand extends CovCommand {
             String misraConfigFile = invocationAssistance.getMisraConfigFile();
             if (!StringUtils.isEmpty(misraConfigFile)){
                 File configFile = new File(misraConfigFile);
-                if (configFile.exists() && configFile.isFile()){
+                if (configFile.isFile()){
                     addArgument(misraConfig);
                     addArgument(misraConfigFile);
                 }else{
@@ -64,7 +64,7 @@ public class CovAnalyzeCommand extends CovCommand {
             String taPolicyFile = taOptionBlock.getPolicyFile();
             if (!StringUtils.isEmpty(taPolicyFile)){
                 File policyFile = new File(taPolicyFile);
-                if (policyFile.exists() && policyFile.isFile()){
+                if (policyFile.isFile()){
                     addArgument(testAdvisor);
                     addArgument(testAdvisorPolicyFile);
                     addArgument(taPolicyFile);
