@@ -42,7 +42,6 @@ public class CovImportScmCommand extends CovCommand{
 
     @Override
     protected void prepareCommand() {
-        addIntermediateDir();
         addScmTool();
         addScmToolArguments();
         addScmCommandArguments();

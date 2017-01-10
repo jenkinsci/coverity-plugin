@@ -24,10 +24,6 @@ public class CovManageHistoryCommand extends CovCommand {
     private static final String portArg = "--port";
     private static final String streamArg = "--stream";
     private static final String userArg = "--user";
-    private static final String useSslArg = "--ssl";
-    private static final String onNewCertArg = "--on-new-cert";
-    private static final String trustArg = "trust";
-    private static final String certArg = "--cert";
     private static final String mergeArg = "--merge";
     private static final String coverity_passphrase = "COVERITY_PASSPHRASE";
 
@@ -47,10 +43,9 @@ public class CovManageHistoryCommand extends CovCommand {
 
     @Override
     protected void prepareCommand() {
-        addIntermediateDir();
         addArgument(downloadArg);
         addCimStreamInfo();
-        addSslConfiguration();
+        addSslConfiguration(cimInstance, version);
         addUserInfo();
         addArgument(mergeArg);
     }
@@ -62,31 +57,6 @@ public class CovManageHistoryCommand extends CovCommand {
         addArgument(Integer.toString(cimInstance.getPort()));
         addArgument(streamArg);
         addArgument(CoverityUtils.doubleQuote(cimStream.getStream(), publisher.getInvocationAssistance().getUseAdvancedParser()));
-    }
-
-    private void addSslConfiguration() {
-        if(cimInstance.isUseSSL()){
-            addArgument(useSslArg);
-
-            if (version.compareTo(CoverityVersion.VERSION_JASPER) >= 0) {
-                boolean isTrustNewSelfSignedCert = false;
-                String certFileName = null;
-                SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
-                if(sslConfigurations != null){
-                    isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
-                    certFileName = sslConfigurations.getCertFileName();
-
-                    if(isTrustNewSelfSignedCert){
-                        addArgument(onNewCertArg);
-                        addArgument(trustArg);
-                    }
-                    if(certFileName != null){
-                        addArgument(certArg);
-                        addArgument(certFileName);
-                    }
-                }
-            }
-        }
     }
 
     private void addUserInfo() {

@@ -33,7 +33,6 @@ public class CovImportMsvscaCommand extends CovCommand {
 
     @Override
     protected void prepareCommand() {
-        addIntermediateDir();
         addOutputFiles();
     }
 

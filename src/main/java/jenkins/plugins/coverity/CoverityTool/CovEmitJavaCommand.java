@@ -37,15 +37,10 @@ public class CovEmitJavaCommand extends CovCommand {
 
     @Override
     protected void prepareCommand() {
-        addIntermediateDir();
         addJavaWarFiles();
     }
 
     private void addJavaWarFiles(){
-        if (publisher == null){
-            return;
-        }
-
         List<String> javaWarFiles = new ArrayList<String>();
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         if(invocationAssistance != null){

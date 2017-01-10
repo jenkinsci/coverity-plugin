@@ -31,15 +31,11 @@ public class CovCaptureCommand extends CovCommand {
 
     @Override
     protected void prepareCommand() {
-        addIntermediateDir();
         addTaCommandArgs();
         addCustomTestCommand();
     }
 
     private void addCustomTestCommand(){
-        if (publisher == null){
-            return;
-        }
         TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
         try{
             if (taOptionBlock != null && !StringUtils.isEmpty(taOptionBlock.getCustomTestCommand())){

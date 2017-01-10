@@ -24,10 +24,6 @@ public class CovCommitDefectsCommand extends CovCommand {
     private static final String dataPort = "--dataport";
     private static final String httpsPort = "--https-port";
     private static final String port = "--port";
-    private static final String useSslArg = "--ssl";
-    private static final String onNewCertArg = "--on-new-cert";
-    private static final String trustArg = "trust";
-    private static final String certArg = "--cert";
     private static final String streamArg = "--stream";
     private static final String userArg = "--user";
     private static final String coverity_passphrase = "COVERITY_PASSPHRASE";
@@ -57,15 +53,14 @@ public class CovCommitDefectsCommand extends CovCommand {
 
     @Override
     protected void prepareCommand() {
-        addIntermediateDir();
         addHost();
 
         if (cimInstance.getDataPort() != 0){
             addDataPort();
-            addSslConfiguration();
+            addSslConfiguration(cimInstance, version);
         } else if (cimInstance.isUseSSL()) {
             addHtppsPort();
-            addSslConfiguration();
+            addSslConfiguration(cimInstance, version);
         } else {
             addPort();
         }
@@ -93,31 +88,6 @@ public class CovCommitDefectsCommand extends CovCommand {
     private void addPort() {
         addArgument(port);
         addArgument(Integer.toString(cimInstance.getPort()));
-    }
-
-    private void addSslConfiguration() {
-        if(cimInstance.isUseSSL()){
-            addArgument(useSslArg);
-
-            if (version.compareTo(CoverityVersion.VERSION_JASPER) >= 0) {
-                boolean isTrustNewSelfSignedCert = false;
-                String certFileName = null;
-                SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
-                if(sslConfigurations != null){
-                    isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
-                    certFileName = sslConfigurations.getCertFileName();
-
-                    if(isTrustNewSelfSignedCert){
-                        addArgument(onNewCertArg);
-                        addArgument(trustArg);
-                    }
-                    if(certFileName != null){
-                        addArgument(certArg);
-                        addArgument(certFileName);
-                    }
-                }
-            }
-        }
     }
 
     private void addStream() {

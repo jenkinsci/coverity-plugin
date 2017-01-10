@@ -35,16 +35,12 @@ public class CovAnalyzeCommand extends CovCommand {
 
     @Override
     protected void prepareCommand() {
-        addIntermediateDir();
         addMisraConfiguration();
         addTaConfiguration();
         addAdditionalAnalysisArguments();
     }
 
     private void addMisraConfiguration(){
-        if (publisher == null){
-            return;
-        }
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         if (invocationAssistance != null && invocationAssistance.getIsUsingMisra()){
             String misraConfigFile = invocationAssistance.getMisraConfigFile();
@@ -63,9 +59,6 @@ public class CovAnalyzeCommand extends CovCommand {
     }
 
     private void addTaConfiguration(){
-        if (publisher == null){
-            return;
-        }
         TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
         if (taOptionBlock != null){
             String taPolicyFile = taOptionBlock.getPolicyFile();
@@ -91,9 +84,6 @@ public class CovAnalyzeCommand extends CovCommand {
     }
 
     private void addAdditionalAnalysisArguments() {
-        if (publisher == null){
-            return;
-        }
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         try{
             if (invocationAssistance != null){

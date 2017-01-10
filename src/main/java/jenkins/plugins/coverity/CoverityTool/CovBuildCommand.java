@@ -24,26 +24,20 @@ public class CovBuildCommand extends CovCommand {
     private static final String command = "cov-build";
     private static final String noCommandArg = "--no-command";
     private static final String fileSystemCapture = "--fs-capture-search";
-    private boolean forCompiledSrc;
 
     public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(command, build, launcher, listener, publisher, home, envVars);
-        this.forCompiledSrc = forCompiledSrc;
         prepareCommand();
     }
 
     @Override
     protected void prepareCommand() {
-        addIntermediateDir();
-
-        if (publisher != null){
-            InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-            if (invocationAssistance != null){
-                if (invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
-                    prepareCovBuildCommandForScriptSources();
-                } else if (invocationAssistance.getIsCompiledSrc()){
-                    prepareCovBuildCommandForCompileSources();
-                }
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        if (invocationAssistance != null){
+            if (invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
+                prepareCovBuildCommandForScriptSources();
+            } else if (invocationAssistance.getIsCompiledSrc()){
+                prepareCovBuildCommandForCompileSources();
             }
         }
     }
@@ -54,10 +48,6 @@ public class CovBuildCommand extends CovCommand {
     }
 
     private void prepareCovBuildCommandForCompileSources() {
-        if (publisher == null) {
-            return;
-        }
-
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
 
         // It is possible for users to run cov-build for compiled sources and script sources at the same time.
