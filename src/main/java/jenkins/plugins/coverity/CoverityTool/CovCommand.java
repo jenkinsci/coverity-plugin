@@ -10,7 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import com.sun.istack.internal.NotNull;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -20,6 +19,7 @@ import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,13 +41,13 @@ public abstract class CovCommand {
     protected EnvVars envVars;
 
     public CovCommand(
-            @NotNull String command,
-            @NotNull AbstractBuild<?, ?> build,
-            @NotNull Launcher launcher,
-            @NotNull TaskListener listener,
-            @NotNull CoverityPublisher publisher,
+            @Nonnull String command,
+            @Nonnull AbstractBuild<?, ?> build,
+            @Nonnull Launcher launcher,
+            @Nonnull TaskListener listener,
+            @Nonnull CoverityPublisher publisher,
             String home,
-            @NotNull EnvVars envVars){
+            @Nonnull EnvVars envVars){
 
         Validate.notEmpty(command, "Command cannobe null empty or null");
         Validate.notNull(build, AbstractBuild.class.getName() + " object cannot be null");
