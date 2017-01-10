@@ -52,7 +52,8 @@ public class CovImportScmCommand extends CovCommand{
             addAccurevProjectRoot();
         }
 
-        if (scmOptionBlock.getScmSystem().equalsIgnoreCase("perforce")) {
+        else if (scmOptionBlock.getScmSystem().equalsIgnoreCase("perforce")
+                || scmOptionBlock.getScmSystem().equalsIgnoreCase("perforce2009")) {
             addP4port();
         }
 
