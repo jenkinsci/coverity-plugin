@@ -53,7 +53,7 @@ public abstract class CommandTestBase {
         mocker.reset();
     }
 
-    public static void checkCommandLineArg(List<String> argList, String arg){
+    protected static void checkCommandLineArg(List<String> argList, String arg){
         assertTrue(argList.contains(arg));
         argList.remove(arg);
     }

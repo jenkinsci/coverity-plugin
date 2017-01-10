@@ -47,14 +47,6 @@ public class JasperToolHandler extends CoverityToolHandler{
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
 
-        boolean isTrustNewSelfSignedCert = false;
-        String certFileName = null;
-        SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
-        if(sslConfigurations != null){
-            isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
-            certFileName = sslConfigurations.getCertFileName();
-        }
-
         boolean useAdvancedParser = false;
         if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
             useAdvancedParser = true;
@@ -286,84 +278,16 @@ public class JasperToolHandler extends CoverityToolHandler{
         //run cov-commit-defects
         for(CIMStream cimStream : publisher.getCimStreams()) {
             CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
-
-            if(invocationAssistance != null || testAnalysis != null) {
-                InvocationAssistance effectiveIA = invocationAssistance;
-                if(invocationAssistance != null){
-                    if(cimStream.getInvocationAssistanceOverride() != null) {
-                        effectiveIA = invocationAssistance.merge(cimStream.getInvocationAssistanceOverride());
-                    }
-                }
+            if(invocationAssistance != null) {
+                CoverityLauncherDecorator.SKIP.set(true);
 
                 try {
-                    String covCommitDefects = "cov-commit-defects";
-
-                    if(home != null) {
-                        covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
-                    }
-
-                    CoverityLauncherDecorator.SKIP.set(true);
-
-                    boolean useDataPort = cim.getDataPort() != 0;
-
-                    List<String> cmd = new ArrayList<String>();
-                    cmd.add(covCommitDefects);
-                    cmd.add("--dir");
-                    cmd.add(temp.getTempDir().getRemote());
-                    cmd.add("--host");
-                    cmd.add(cim.getHost());
-
-                    // For versions greater than gilroy (7.5.0), we want to use the --https-port for https connetions
-                    // since it was added for gilroy and beyond
-                    if(useDataPort){
-                        cmd.add("--dataport");
-                        cmd.add(Integer.toString(cim.getDataPort()));
-                        if(cim.isUseSSL()){
-                            cmd.add("--ssl");
-                            if(isTrustNewSelfSignedCert){
-                                cmd.add("--on-new-cert");
-                                cmd.add("trust");
-                            }
-                            if(certFileName != null){
-                                cmd.add("--certs");
-                                cmd.add(certFileName);
-                            }
-                        }
-                    }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
-                        cmd.add("--https-port");
-                        cmd.add(Integer.toString(cim.getPort()));
-                        cmd.add("--ssl");
-                        if(isTrustNewSelfSignedCert){
-                            cmd.add("--on-new-cert");
-                            cmd.add("trust");
-                        }
-                        if(certFileName != null){
-                            cmd.add("--certs");
-                            cmd.add(certFileName);
-                        }
-                    }else{
-                        cmd.add("--port");
-                        cmd.add(Integer.toString(cim.getPort()));
-                    }
-
-                    cmd.add("--stream");
-                    cmd.add(CoverityUtils.doubleQuote(cimStream.getStream(), useAdvancedParser));
-                    cmd.add("--user");
-                    cmd.add(cim.getUser());
-
-                    if(invocationAssistance != null){
-                        if(effectiveIA.getCommitArguments() != null) {
-                            cmd.addAll(EnvParser.tokenize(effectiveIA.getCommitArguments()));
-                        }
-                    }
-
-                    EnvVars envVarsWithPassphrase = new EnvVars(envVars);
-                    envVarsWithPassphrase.put("COVERITY_PASSPHRASE", cim.getPassword());
-                    int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVarsWithPassphrase, useAdvancedParser);
+                    CovCommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+                    listener.getLogger().println("[Coverity] cov-commit-defects command line arguments: " + covCommitDefectsCommand.getCommandLines());
+                    int result = covCommitDefectsCommand.runCommand();
 
                     if(result != 0) {
                         listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
-
                         build.setResult(Result.FAILURE);
                         return false;
                     }
