@@ -8,53 +8,44 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity.analysis;
+package jenkins.plugins.coverity.CoverityTool;
 
 import com.coverity.ws.v9.*;
 import hudson.EnvVars;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Similar to other handlers, but this one uses v9 ws and has improvement for certificate management.
+ * CoverityToolHandler handles the actual executing of Coverity executables.
  */
-public class JasperToolHandler extends CoverityToolHandler{
-    CoverityVersion version;
+public class CoverityToolHandler {
 
-    public JasperToolHandler(CoverityVersion version){
+    private CoverityVersion version;
+
+    public CoverityToolHandler(CoverityVersion version) {
         this.version = version;
     }
 
-    @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws Exception {
-
         EnvVars envVars = build.getEnvironment(listener);
 
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
-        File workspace = build.getRootDir();
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
-
-        boolean isTrustNewSelfSignedCert = false;
-        String certFileName = null;
-        SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
-        if(sslConfigurations != null){
-            isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
-            certFileName = sslConfigurations.getCertFileName();
-        }
 
         boolean useAdvancedParser = false;
         if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
@@ -80,24 +71,14 @@ public class JasperToolHandler extends CoverityToolHandler{
         //run cov-build for scripting language sources only.
         if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
             try {
-                String covBuild = CoverityUtils.getCovBuild(listener, node);
-
                 CoverityLauncherDecorator.SKIP.set(true);
 
-                List<String> cmd = new ArrayList<String>();
-                cmd.add(covBuild);
-                cmd.add("--dir");
-                cmd.add(temp.getTempDir().getRemote());
-                cmd.add("--no-command");
-                cmd.add("--fs-capture-search");
-                cmd.add("$WORKSPACE");
-
-                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
+                CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, envVars);
+                listener.getLogger().println("[Coverity] cov-build command line arguments: " + covBuildCommand.toString());
+                int result = covBuildCommand.runCommand();
 
                 if(result != 0) {
-                    listener.getLogger().println("[Coverity] " + covBuild + " returned " + result + ", aborting...");
+                    listener.getLogger().println("[Coverity] cov-build returned " + result + ", aborting...");
                     build.setResult(Result.FAILURE);
                     return false;
                 }
@@ -133,27 +114,23 @@ public class JasperToolHandler extends CoverityToolHandler{
             }
         }
 
-        // If WAR files specified, emit them prior to running analysis
-        // Do not check for presence of Java streams or Java in build
-        List<String> warFiles = new ArrayList<String>();
+        // Run Cov-Emit-Java
         if(invocationAssistance != null){
-            List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
-            if(givenWarFiles != null && !givenWarFiles.isEmpty()){
-                for(String givenJar : givenWarFiles){
-                    String javaWarFile = invocationAssistance != null ? CoverityUtils.evaluateEnvVars(givenJar, envVars, useAdvancedParser) : null;
-                    if(javaWarFile != null) {
-                        listener.getLogger().println("[Coverity] Specified WAR file '" + javaWarFile + "' in config");
-                        warFiles.add(javaWarFile);
-                    }
-                }
-            }
-        }
+            if (invocationAssistance.getJavaWarFiles() != null && !invocationAssistance.getJavaWarFiles().isEmpty()){
+                try {
+                    CoverityLauncherDecorator.SKIP.set(true);
+                    CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
+                    listener.getLogger().println("[Coverity] cov-emit-java command line arguments: " + covEmitJavaCommand.toString());
+                    int result = covEmitJavaCommand.runCommand();
 
-        if(warFiles != null && !warFiles.isEmpty()){
-            boolean resultCovEmitWar = covEmitWar(build, launcher, listener, home, temp, warFiles);
-            if(!resultCovEmitWar) {
-                build.setResult(Result.FAILURE);
-                return false;
+                    if(result != 0) {
+                        listener.getLogger().println("[Coverity] cov-emit-java returned " + result + ", aborting...");
+                        build.setResult(Result.FAILURE);
+                        return false;
+                    }
+                } finally {
+                    CoverityLauncherDecorator.SKIP.set(false);
+                }
             }
         }
 
@@ -161,30 +138,13 @@ public class JasperToolHandler extends CoverityToolHandler{
         if(testAnalysis != null){
             if(testAnalysis.getCustomTestCommand() != null){
                 try {
-                    listener.getLogger().println(testAnalysis.getTaCommandArgs().toString());
-
-                    String covCapture = "cov-capture";
-
-                    if(home != null) {
-                        covCapture = new FilePath(launcher.getChannel(), home).child("bin").child(covCapture).getRemote();
-                    }
-
                     CoverityLauncherDecorator.SKIP.set(true);
-
-                    List<String> cmd = new ArrayList<String>();
-                    cmd.add(covCapture);
-                    cmd.add("--dir");
-                    cmd.add(temp.getTempDir().getRemote());
-                    cmd.addAll(testAnalysis.getTaCommandArgs());
-                    cmd.addAll(EnvParser.tokenize(testAnalysis.getCustomTestCommand()));
-
-                    listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                    int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
+                    CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, home, envVars);
+                    listener.getLogger().println("[Coverity] cov-capture command line arguments: " + covCaptureCommand.toString());
+                    int result = covCaptureCommand.runCommand();
 
                     if(result != 0) {
                         listener.getLogger().println("[Coverity] cov-capture returned " + result + ", aborting...");
-
                         build.setResult(Result.FAILURE);
                         return false;
                     }
@@ -200,48 +160,11 @@ public class JasperToolHandler extends CoverityToolHandler{
                 for(CIMStream cimStream : publisher.getCimStreams()) {
                     CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
                     try {
-                        String covManageHistory = "cov-manage-history";
-
-                        if(home != null) {
-                            covManageHistory = new FilePath(launcher.getChannel(), home).child("bin").child(covManageHistory).getRemote();
-                        }
-
                         CoverityLauncherDecorator.SKIP.set(true);
 
-                        boolean useDataPort = cim.getDataPort() != 0;
-
-                        List<String> cmd = new ArrayList<String>();
-                        cmd.add(covManageHistory);
-                        cmd.add("--dir");
-                        cmd.add(temp.getTempDir().getRemote());
-                        cmd.add("download");
-                        cmd.add("--host");
-                        cmd.add(cim.getHost());
-                        cmd.add("--port");
-                        cmd.add(Integer.toString(cim.getPort()));
-                        cmd.add("--stream");
-                        cmd.add(CoverityUtils.doubleQuote(cimStream.getStream(), useAdvancedParser));
-                        if(cim.isUseSSL()){
-                            cmd.add("--ssl");
-                            if(isTrustNewSelfSignedCert){
-                                cmd.add("--on-new-cert");
-                                cmd.add("trust");
-                            }
-                            if(certFileName != null){
-                                cmd.add("--certs");
-                                cmd.add(certFileName);
-                            }
-                        }
-
-                        cmd.add("--user");
-                        cmd.add(cim.getUser());
-                        cmd.add("--merge");
-
-                        listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                        EnvVars envVarsWithPassphrase = new EnvVars(envVars);
-                        envVarsWithPassphrase.put("COVERITY_PASSPHRASE", cim.getPassword());
-                        int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVarsWithPassphrase, useAdvancedParser);
+                        CovCommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+                        listener.getLogger().println("[Coverity] cov-manage-history command line arguments: " + covManageHistoryCommand.toString());
+                        int result = covManageHistoryCommand.runCommand();
 
                         if(result != 0) {
                             listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
@@ -260,64 +183,11 @@ public class JasperToolHandler extends CoverityToolHandler{
         if(scm != null && !scm.getScmSystem().equals("none")){
 
             try {
-                String covImportScm = "cov-import-scm";
-
-                if(home != null) {
-                    covImportScm = new FilePath(launcher.getChannel(), home).child("bin").child(covImportScm).getRemote();
-                }
-
                 CoverityLauncherDecorator.SKIP.set(true);
 
-                List<String> cmd = new ArrayList<String>();
-                cmd.add(covImportScm);
-                cmd.add("--dir");
-                cmd.add(temp.getTempDir().getRemote());
-                cmd.add("--scm");
-                cmd.add(scm.getScmSystem());
-                if(scm.getCustomTestTool() != null){
-                    cmd.add("--tool");
-                    cmd.add(scm.getCustomTestTool());
-                }
-
-                if(scm.getScmToolArguments() != null){
-                    cmd.add("--tool-arg");
-                    cmd.add(CoverityUtils.doubleQuote(scm.getScmToolArguments(), useAdvancedParser));
-                }
-
-                if(scm.getScmCommandArgs() != null){
-                    cmd.add("--command-arg");
-                    cmd.add(CoverityUtils.doubleQuote(scm.getScmCommandArgs(), useAdvancedParser));
-                }
-
-                if(scm.getLogFileLoc() != null){
-                    cmd.add("--log");
-                    cmd.add(scm.getLogFileLoc());
-                }
-
-                if(scm.getFileRegex() != null){
-                    cmd.add("--filename-regex");
-                    cmd.add(scm.getFileRegex());
-                }
-
-                // Adding accurev's root repo, which is optional
-                if(scm.getScmSystem().equals("accurev") && scm.getAccRevRepo() != null){
-                    cmd.add("--project-root");
-                    cmd.add(scm.getAccRevRepo());
-                }
-
-                // Perforce requires p4port to be set when running scm
-                Map<String,String> env = new HashMap<String,String>();;
-                if(scm.getScmSystem().equals("perforce")){
-                    env.put("P4PORT",CoverityUtils.evaluateEnvVars(scm.getP4Port(), envVars, useAdvancedParser));
-                }
-
-                if(scm.getScmAdditionalCmd() != null) {
-                    cmd.addAll(EnvParser.tokenize(scm.getScmAdditionalCmd()));
-                }
-
-                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
+                CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, home, envVars);
+                listener.getLogger().println("[Coverity] cov-import-scm command line arguments: " + covImportScmCommand.toString());
+                int result = covImportScmCommand.runCommand();
 
                 if(result != 0) {
                     listener.getLogger().println("[Coverity] cov-import-scm returned " + result + ", aborting...");
@@ -335,59 +205,13 @@ public class JasperToolHandler extends CoverityToolHandler{
             InvocationAssistance effectiveIA = invocationAssistance;
 
             try {
-                String covAnalyze = "cov-analyze";
-
-                if(home != null) {
-                    covAnalyze = new FilePath(launcher.getChannel(), home).child("bin").child(covAnalyze).getRemote();
-                }
-
                 CoverityLauncherDecorator.SKIP.set(true);
-
-
-                List<String> cmd = new ArrayList<String>();
-                cmd.add(covAnalyze);
-                cmd.add("--dir");
-                cmd.add(temp.getTempDir().getRemote());
-
-                boolean isMisraAnalysis = effectiveIA.getIsUsingMisra();
-
-                if(isMisraAnalysis) {
-                    cmd.add("--cpp");
-                    if(effectiveIA.getMisraConfigFile() != null && !effectiveIA.getMisraConfigFile().isEmpty()){
-                        cmd.add("--misra-config");
-                        cmd.add(effectiveIA.getMisraConfigFile());
-                    } else {
-                        throw new RuntimeException("Couldn't find MISRA configuration file.");
-                    }
-                }
-                // Turning on test analysis and adding required policy file
-                if(testAnalysis != null && !isMisraAnalysis){
-                    cmd.add("--test-advisor");
-                    cmd.add("--test-advisor-policy");
-                    cmd.add(testAnalysis.getPolicyFile());
-                    // Adding in strip paths
-                    cmd.add("--strip-path");
-                    if(testAnalysis.getTaStripPath() == null){
-                        cmd.add(build.getWorkspace().getRemote());
-                    }else{
-                        cmd.add(testAnalysis.getTaStripPath());
-                    }
-
-                    if(effectiveIA == null){
-                        cmd.add("--disable-default");
-                    }
-                }
-
-                if(effectiveIA.getAnalyzeArguments() != null && !isMisraAnalysis) {
-                    cmd.addAll(EnvParser.tokenize(effectiveIA.getAnalyzeArguments()));
-                }
-
-                listener.getLogger().println("[Coverity] cmd so far is: " + cmd.toString());
-
-                int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVars, useAdvancedParser);
+                CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, home, envVars);
+                listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + covAnalyzeCommand.toString());
+                int result = covAnalyzeCommand.runCommand();
 
                 if(result != 0) {
-                    listener.getLogger().println("[Coverity] " + covAnalyze + " returned " + result + ", aborting...");
+                    listener.getLogger().println("[Coverity] cov-analyze returned " + result + ", aborting...");
                     build.setResult(Result.FAILURE);
                     return false;
                 }
@@ -425,12 +249,28 @@ public class JasperToolHandler extends CoverityToolHandler{
 
         // Import Microsoft Visual Studio Code Anaysis results
         if(invocationAssistance != null) {
-            boolean csharpMsvsca = invocationAssistance.getCsharpMsvsca();
-            if(csharpMsvsca) {
-                boolean result = importMsvsca(build, launcher, listener, home, temp, csharpMsvsca);
-                if(!result) {
-                    build.setResult(Result.FAILURE);
-                    return false;
+            if(invocationAssistance.getCsharpMsvsca()) {
+                listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
+                File[] outputFiles = findMsvscaOutputFiles(temp.getTempDir().getRemote());
+                if (outputFiles == null || outputFiles.length == 0){
+                    listener.getLogger().println("[Coverity] MSVSCA No results found, skipping");
+                }else{
+                    try{
+                        CoverityLauncherDecorator.SKIP.set(true);
+                        CovCommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, home, envVars, outputFiles);
+                        listener.getLogger().println("[Coverity] cov-import-msvsca command line arguments: " + covImportMsvscaCommand.getCommandLines());
+
+                        int result = covImportMsvscaCommand.runCommand();
+
+                        if(result != 0) {
+                            listener.getLogger().println("[Coverity] cov-import-msvsca returned " + result + ", aborting...");
+                            build.setResult(Result.FAILURE);
+                            return false;
+                        }
+
+                    }finally{
+                        CoverityLauncherDecorator.SKIP.set(false);
+                    }
                 }
             }
         }
@@ -438,84 +278,16 @@ public class JasperToolHandler extends CoverityToolHandler{
         //run cov-commit-defects
         for(CIMStream cimStream : publisher.getCimStreams()) {
             CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
-
-            if(invocationAssistance != null || testAnalysis != null) {
-                InvocationAssistance effectiveIA = invocationAssistance;
-                if(invocationAssistance != null){
-                    if(cimStream.getInvocationAssistanceOverride() != null) {
-                        effectiveIA = invocationAssistance.merge(cimStream.getInvocationAssistanceOverride());
-                    }
-                }
+            if(invocationAssistance != null) {
+                CoverityLauncherDecorator.SKIP.set(true);
 
                 try {
-                    String covCommitDefects = "cov-commit-defects";
-
-                    if(home != null) {
-                        covCommitDefects = new FilePath(launcher.getChannel(), home).child("bin").child(covCommitDefects).getRemote();
-                    }
-
-                    CoverityLauncherDecorator.SKIP.set(true);
-
-                    boolean useDataPort = cim.getDataPort() != 0;
-
-                    List<String> cmd = new ArrayList<String>();
-                    cmd.add(covCommitDefects);
-                    cmd.add("--dir");
-                    cmd.add(temp.getTempDir().getRemote());
-                    cmd.add("--host");
-                    cmd.add(cim.getHost());
-
-                    // For versions greater than gilroy (7.5.0), we want to use the --https-port for https connetions
-                    // since it was added for gilroy and beyond
-                    if(useDataPort){
-                        cmd.add("--dataport");
-                        cmd.add(Integer.toString(cim.getDataPort()));
-                        if(cim.isUseSSL()){
-                            cmd.add("--ssl");
-                            if(isTrustNewSelfSignedCert){
-                                cmd.add("--on-new-cert");
-                                cmd.add("trust");
-                            }
-                            if(certFileName != null){
-                                cmd.add("--certs");
-                                cmd.add(certFileName);
-                            }
-                        }
-                    }else if(version.compareToAnalysis(new CoverityVersion("gilroy")) && cim.isUseSSL()){
-                        cmd.add("--https-port");
-                        cmd.add(Integer.toString(cim.getPort()));
-                        cmd.add("--ssl");
-                        if(isTrustNewSelfSignedCert){
-                            cmd.add("--on-new-cert");
-                            cmd.add("trust");
-                        }
-                        if(certFileName != null){
-                            cmd.add("--certs");
-                            cmd.add(certFileName);
-                        }
-                    }else{
-                        cmd.add("--port");
-                        cmd.add(Integer.toString(cim.getPort()));
-                    }
-
-                    cmd.add("--stream");
-                    cmd.add(CoverityUtils.doubleQuote(cimStream.getStream(), useAdvancedParser));
-                    cmd.add("--user");
-                    cmd.add(cim.getUser());
-
-                    if(invocationAssistance != null){
-                        if(effectiveIA.getCommitArguments() != null) {
-                            cmd.addAll(EnvParser.tokenize(effectiveIA.getCommitArguments()));
-                        }
-                    }
-
-                    EnvVars envVarsWithPassphrase = new EnvVars(envVars);
-                    envVarsWithPassphrase.put("COVERITY_PASSPHRASE", cim.getPassword());
-                    int result = CoverityUtils.runCmd(cmd, build, launcher, listener, envVarsWithPassphrase, useAdvancedParser);
+                    CovCommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+                    listener.getLogger().println("[Coverity] cov-commit-defects command line arguments: " + covCommitDefectsCommand.getCommandLines());
+                    int result = covCommitDefectsCommand.runCommand();
 
                     if(result != 0) {
                         listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
-
                         build.setResult(Result.FAILURE);
                         return false;
                     }
@@ -627,6 +399,16 @@ public class JasperToolHandler extends CoverityToolHandler{
         }
 
         return true;
+    }
+
+    protected File[] findMsvscaOutputFiles(String dirName) {
+        File dir = new File(dirName);
+
+        return CoverityUtils.listFilesAsArray(dir, new FilenameFilter() {
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith("CodeAnalysisLog.xml");
+            }
+        }, true);
     }
 
     public List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener) throws IOException, CovRemoteServiceException_Exception {

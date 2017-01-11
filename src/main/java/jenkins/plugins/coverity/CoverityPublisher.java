@@ -25,7 +25,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.plugins.coverity.analysis.CoverityToolHandler;
+import jenkins.plugins.coverity.CoverityTool.CoverityToolHandler;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -271,12 +271,7 @@ public class CoverityPublisher extends Recorder {
                 throw new Exception("Coverity Version is null. Please verify the version file under your Coverity Analysis installation.");
             }
 
-            CoverityToolHandler cth = CoverityToolHandler.getHandler(version);
-
-            if(cth == null){
-                throw new Exception("Could not create a CoverityToolHanldler for the given analysis version. Please verify the version file under your Coverity Analysis installation.");
-            }
-
+            CoverityToolHandler cth = new CoverityToolHandler(version);
             cth.perform(build, launcher, listener, this);
             
             if(isUnstableBuild()){
