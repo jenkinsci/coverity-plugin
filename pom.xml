@@ -176,24 +176,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>ui-samples-plugin</artifactId>
-            <version>${jenkins.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>maven-plugin</artifactId>
-            <version>${jenkins.version}</version>
-            <scope>test</scope>
-        </dependency>
-		<dependency>
-			<groupId>org.jenkins-ci.plugins</groupId>
-			<artifactId>mailer</artifactId>
-			<version>1.4</version>
-			<scope>compile</scope>
-		</dependency>
-        <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
@@ -220,9 +202,8 @@
         </dependency>
     </dependencies>
 
-
     <properties>
-        <jenkins.version>1.534</jenkins.version>
+        <jenkins.version>1.554</jenkins.version>
     </properties>
 </project>
 
