@@ -176,13 +176,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-		<dependency>
-			<groupId>org.jenkins-ci.plugins</groupId>
-			<artifactId>mailer</artifactId>
-			<version>1.4</version>
-			<scope>compile</scope>
-		</dependency>
-        <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
