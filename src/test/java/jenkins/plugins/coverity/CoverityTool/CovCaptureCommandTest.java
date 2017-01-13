@@ -39,7 +39,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
         covCaptureCommand.runCommand();
     }
@@ -61,7 +61,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "CustomTestCommand"});
         covCaptureCommand.runCommand();
     }
@@ -83,7 +83,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covCaptureCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");

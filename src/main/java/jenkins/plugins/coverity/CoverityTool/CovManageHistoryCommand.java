@@ -16,7 +16,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 
-public class CovManageHistoryCommand extends CovCommand {
+public class CovManageHistoryCommand extends CommandBase {
 
     private static final String command = "cov-manage-history";
     private static final String downloadArg = "download";

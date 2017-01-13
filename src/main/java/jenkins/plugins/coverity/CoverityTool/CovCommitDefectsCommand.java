@@ -17,7 +17,7 @@ import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 
-public class CovCommitDefectsCommand extends CovCommand {
+public class CovCommitDefectsCommand extends CommandBase {
 
     private static final String command = "cov-commit-defects";
     private static final String hostArg = "--host";

@@ -18,7 +18,7 @@ import jenkins.plugins.coverity.CoverityPublisher;
 
 import java.io.File;
 
-public class CovImportMsvscaCommand extends CovCommand {
+public class CovImportMsvscaCommand extends CommandBase {
 
     private static final String command = "cov-import-msvsca";
     private static final String appendFlag = "--append";

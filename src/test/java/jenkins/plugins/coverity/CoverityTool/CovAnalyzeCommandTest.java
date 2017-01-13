@@ -42,7 +42,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                     null, null, null
             );
 
-            CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+            ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
             setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "--misra-config", misraConfigFile.getPath()});
             covAnalyzeCommand.runCommand();
         }finally {
@@ -64,7 +64,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");
@@ -89,7 +89,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");
@@ -112,7 +112,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "additionalArgs"});
         covAnalyzeCommand.runCommand();
     }
@@ -131,7 +131,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");
@@ -161,7 +161,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                     null, taOptionBlock, null
             );
 
-            CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+            ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
             setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "--test-advisor", "--test-advisor-policy", taPolicyFile.getPath(), "--strip-path", "Path2Strip"});
             covAnalyzeCommand.runCommand();
         }finally {
@@ -186,7 +186,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");
@@ -214,7 +214,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");

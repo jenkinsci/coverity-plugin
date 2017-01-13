@@ -20,7 +20,7 @@ import jenkins.plugins.coverity.ParseException;
 import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
 
-public class CovCaptureCommand extends CovCommand {
+public class CovCaptureCommand extends CommandBase {
 
     private static final String command = "cov-capture";
 

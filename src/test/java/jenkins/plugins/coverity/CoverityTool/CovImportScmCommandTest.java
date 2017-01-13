@@ -37,7 +37,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git"});
         covImportScmCommand.runCommand();
     }
@@ -56,7 +56,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--tool", "TestCustomTestTool"});
         covImportScmCommand.runCommand();
     }
@@ -75,7 +75,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--tool-arg", "TestScmToolArguments"});
         covImportScmCommand.runCommand();
     }
@@ -94,7 +94,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--command-arg", "TestScmCommandArguments"});
         covImportScmCommand.runCommand();
     }
@@ -113,7 +113,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--log", "TestLogFileLocation"});
         covImportScmCommand.runCommand();
     }
@@ -132,7 +132,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--filename-regex", "*.java"});
         covImportScmCommand.runCommand();
     }
@@ -151,7 +151,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "accurev", "--project-root", "TestAccurrevProjectRoot"});
         covImportScmCommand.runCommand();
     }
@@ -170,7 +170,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "perforce"});
         covImportScmCommand.runCommand();
         assertEquals("1234", envVars.get("P4PORT"));
@@ -190,7 +190,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "AdditionalCommand"});
         covImportScmCommand.runCommand();
     }
@@ -209,7 +209,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covImportScmCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");

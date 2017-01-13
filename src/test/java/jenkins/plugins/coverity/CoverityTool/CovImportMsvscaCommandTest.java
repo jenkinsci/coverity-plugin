@@ -32,7 +32,7 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, outputFiles);
+        ICommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, outputFiles);
         setExpectedArguments(new String[] {
                 "cov-import-msvsca", "--dir", "TestDir", "--append", analysisLog1.getAbsolutePath(), analysisLog2.getAbsolutePath()
         });

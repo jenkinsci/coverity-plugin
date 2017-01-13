@@ -38,7 +38,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--no-command", "--fs-capture-search", "$WORKSPACE"});
         covBuildCommand.runCommand();
     }
@@ -57,7 +57,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--fs-capture-search", "$WORKSPACE"});
         covBuildCommand.runCommand();
     }
@@ -86,7 +86,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
         covBuildCommand.runCommand();
     }
@@ -105,7 +105,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "AdditionalBuildArguments"});
         covBuildCommand.runCommand();
     }

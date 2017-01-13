@@ -39,7 +39,7 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
                 null, null, null
         );
 
-        CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
+        ICommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
         setExpectedArguments(new String[] {"cov-emit-java", "--dir", "TestDir", "--webapp-archive", "webapp1.war", "--webapp-archive", "webapp2.war"});
         covEmitJavaCommand.runCommand();
     }

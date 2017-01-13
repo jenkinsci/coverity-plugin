@@ -21,7 +21,7 @@ import jenkins.plugins.coverity.InvocationAssistance;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CovEmitJavaCommand extends CovCommand {
+public class CovEmitJavaCommand extends CommandBase {
 
     private static final String command = "cov-emit-java";
     private static final String webAppArchive = "--webapp-archive";

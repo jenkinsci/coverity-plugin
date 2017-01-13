@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class CovCommand {
+public abstract class CommandBase implements ICommand {
 
     private static final String intermediateDirArguments = "--dir";
     private static final String covIdirEnvVar = "COV_IDIR";
@@ -40,7 +40,7 @@ public abstract class CovCommand {
     protected CoverityPublisher publisher;
     protected EnvVars envVars;
 
-    public CovCommand(
+    public CommandBase(
             @Nonnull String command,
             @Nonnull AbstractBuild<?, ?> build,
             @Nonnull Launcher launcher,

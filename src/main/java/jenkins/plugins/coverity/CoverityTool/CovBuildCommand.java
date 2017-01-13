@@ -19,7 +19,7 @@ import jenkins.plugins.coverity.EnvParser;
 import jenkins.plugins.coverity.InvocationAssistance;
 import org.apache.commons.lang.StringUtils;
 
-public class CovBuildCommand extends CovCommand {
+public class CovBuildCommand extends CommandBase {
 
     private static final String command = "cov-build";
     private static final String noCommandArg = "--no-command";
