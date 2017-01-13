@@ -101,7 +101,7 @@ public abstract class CovCommand {
         if (invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
             useAdvancedParser = true;
         }
-
+        prepareCommand();
         return CoverityUtils.runCmd(commandLine, build, launcher, listener, envVars, useAdvancedParser);
     }
 

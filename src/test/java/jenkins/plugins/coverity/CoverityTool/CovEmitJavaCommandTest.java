@@ -10,22 +10,19 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import hudson.EnvVars;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.InvocationAssistance;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class CovEmitJavaCommandTest extends CommandTestBase {
 
     @Test
-    public void CovEmitJavaCommand_AddJavaWarFilesTest(){
-        mocker.replay();
+    public void CovEmitJavaCommand_AddJavaWarFilesTest() throws IOException, InterruptedException {
         List<String> javaWarFiles = new ArrayList<>();
         javaWarFiles.add("webapp1.war");
         javaWarFiles.add("webapp2.war");
@@ -43,18 +40,7 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
         );
 
         CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
-        List<String> covEmitJavaArguments = covEmitJavaCommand.getCommandLines();
-
-        assertEquals(7, covEmitJavaArguments.size());
-
-        checkCommandLineArg(covEmitJavaArguments, "cov-emit-java");
-        checkCommandLineArg(covEmitJavaArguments, "--dir");
-        checkCommandLineArg(covEmitJavaArguments, "TestDir");
-        checkCommandLineArg(covEmitJavaArguments, "--webapp-archive");
-        checkCommandLineArg(covEmitJavaArguments, "webapp1.war");
-        checkCommandLineArg(covEmitJavaArguments, "--webapp-archive");
-        checkCommandLineArg(covEmitJavaArguments, "webapp2.war");
-
-        assertEquals(0, covEmitJavaArguments.size());
+        setExpectedArguments(new String[] {"cov-emit-java", "--dir", "TestDir", "--webapp-archive", "webapp1.war", "--webapp-archive", "webapp2.war"});
+        covEmitJavaCommand.runCommand();
     }
 }

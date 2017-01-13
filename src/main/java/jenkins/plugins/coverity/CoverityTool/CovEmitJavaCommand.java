@@ -32,7 +32,6 @@ public class CovEmitJavaCommand extends CovCommand {
         super(command, build, launcher, listener, publisher, home, envVars);
         this.envVars = envVars;
         this.useAdvancedParser = useAdvancedParser;
-        prepareCommand();
     }
 
     @Override

@@ -47,8 +47,6 @@ public class CovCommitDefectsCommand extends CovCommand {
                 invocationAssistance = invocationAssistance.merge(cimStream.getInvocationAssistanceOverride());
             }
         }
-
-        prepareCommand();
     }
 
     @Override

@@ -15,15 +15,12 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import java.io.IOException;
 
 public class CovImportMsvscaCommandTest extends CommandTestBase {
 
     @Test
-    public void CovImportMsvscaCommand_AddMsvscaOutputFilesTest(){
-        mocker.replay();
+    public void CovImportMsvscaCommand_AddMsvscaOutputFilesTest() throws IOException, InterruptedException {
 
         File analysisLog1 = new File("CodeAnalysisLog1.xml");
         File analysisLog2 = new File("CodeAnalysisLog2.xml");
@@ -36,17 +33,9 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
         );
 
         CovCommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, outputFiles);
-        List<String> covImportMsvscaArguments = covImportMsvscaCommand.getCommandLines();
-
-        assertEquals(6, covImportMsvscaArguments.size());
-
-        checkCommandLineArg(covImportMsvscaArguments, "cov-import-msvsca");
-        checkCommandLineArg(covImportMsvscaArguments, "--dir");
-        checkCommandLineArg(covImportMsvscaArguments, "TestDir");
-        checkCommandLineArg(covImportMsvscaArguments, "--append");
-        checkCommandLineArg(covImportMsvscaArguments, analysisLog1.getAbsolutePath());
-        checkCommandLineArg(covImportMsvscaArguments, analysisLog2.getAbsolutePath());
-
-        assertEquals(0, covImportMsvscaArguments.size());
+        setExpectedArguments(new String[] {
+                "cov-import-msvsca", "--dir", "TestDir", "--append", analysisLog1.getAbsolutePath(), analysisLog2.getAbsolutePath()
+        });
+        covImportMsvscaCommand.runCommand();
     }
 }

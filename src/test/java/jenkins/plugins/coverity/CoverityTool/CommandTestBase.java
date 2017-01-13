@@ -14,47 +14,126 @@ import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
+import jenkins.plugins.coverity.CoverityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(CoverityUtils.class)
 public abstract class CommandTestBase {
 
+    @Mock
     protected AbstractBuild build;
+
+    @Mock
     protected Launcher launcher;
+
+    @Mock
     protected TaskListener listener;
-    protected IMocksControl mocker;
     protected EnvVars envVars;
+    protected String[] expectedArguments;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() throws IOException, InterruptedException {
-        mocker = EasyMock.createNiceControl();
-        build = mocker.createMock(AbstractBuild.class);
-        launcher = mocker.createMock(Launcher.class);
-        listener = mocker.createMock(TaskListener.class);
+        MockitoAnnotations.initMocks(this);
         envVars = new EnvVars();
         envVars.put("COV_IDIR", "TestDir");
+
+        setUpCoverityUtils();
     }
 
     @After
     public void teardown() {
         expectedException = ExpectedException.none();
-        mocker.reset();
+        expectedArguments = null;
+    }
+
+    protected void setExpectedArguments(String[] args) {
+        expectedArguments = args;
     }
 
     protected static void checkCommandLineArg(List<String> argList, String arg){
         assertTrue(argList.contains(arg));
         argList.remove(arg);
+    }
+
+    private void checkCommandLineArguments(String[] expectedArguments, List<String> actualArguments){
+        assertArrayEquals(expectedArguments, actualArguments.toArray());
+    }
+
+    private void setUpCoverityUtils() throws IOException, InterruptedException {
+        PowerMockito.mockStatic(CoverityUtils.class);
+        setCoverityUtils_runCmd();
+        setCoverityUtils_evaluateEnvVars();
+        setCoverityUtils_doubleQuote();
+    }
+
+    private void setCoverityUtils_runCmd() throws IOException, InterruptedException {
+        Answer<Integer> runCmd = new Answer<Integer>() {
+            public Integer answer(InvocationOnMock mock) throws Throwable {
+                List<String> args = (ArrayList<String>)mock.getArguments()[0];
+                checkCommandLineArguments(expectedArguments, args);
+                return 0;
+            }
+        };
+
+        PowerMockito.when(
+                CoverityUtils.runCmd(
+                        Matchers.anyList(),
+                        Matchers.any(AbstractBuild.class),
+                        Matchers.any(Launcher.class),
+                        Matchers.any(TaskListener.class),
+                        Matchers.any(EnvVars.class),
+                        Matchers.anyBoolean())).thenAnswer(runCmd);
+    }
+
+    private void setCoverityUtils_evaluateEnvVars() {
+        Answer<String> evaluateEnvVars = new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return (String) invocationOnMock.getArguments()[0];
+            }
+        };
+
+        PowerMockito.when(
+                CoverityUtils.evaluateEnvVars(
+                        Matchers.anyString(),
+                        Matchers.any(EnvVars.class),
+                        Matchers.anyBoolean())).thenAnswer(evaluateEnvVars);
+    }
+
+    private void setCoverityUtils_doubleQuote() {
+        Answer<String> doubleQuote = new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return (String) invocationOnMock.getArguments()[0];
+            }
+        };
+
+        PowerMockito.when(
+                CoverityUtils.doubleQuote(
+                        Matchers.anyString(),
+                        Matchers.anyBoolean())).thenAnswer(doubleQuote);
     }
 }

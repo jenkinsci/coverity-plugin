@@ -37,7 +37,6 @@ public class CovImportScmCommand extends CovCommand{
         if (publisher != null && publisher.getInvocationAssistance() != null){
             useAdvancedParser = publisher.getInvocationAssistance().getUseAdvancedParser();
         }
-        prepareCommand();
     }
 
     @Override

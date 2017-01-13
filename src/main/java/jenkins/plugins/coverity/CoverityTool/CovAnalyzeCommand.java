@@ -30,7 +30,6 @@ public class CovAnalyzeCommand extends CovCommand {
 
     public CovAnalyzeCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(command, build, launcher, listener, publisher, home, envVars);
-        prepareCommand();
     }
 
     @Override

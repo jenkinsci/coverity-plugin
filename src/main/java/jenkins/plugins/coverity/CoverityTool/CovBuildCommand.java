@@ -27,7 +27,6 @@ public class CovBuildCommand extends CovCommand {
 
     public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(command, build, launcher, listener, publisher, home, envVars);
-        prepareCommand();
     }
 
     @Override

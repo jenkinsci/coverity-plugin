@@ -38,7 +38,6 @@ public class CovManageHistoryCommand extends CovCommand {
         this.cimStream = cimStream;
         this.cimInstance = cimInstance;
         this.version = version;
-        prepareCommand();
     }
 
     @Override

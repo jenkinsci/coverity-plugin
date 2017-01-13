@@ -13,18 +13,17 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.List;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
 public class CovCaptureCommandTest extends CommandTestBase {
 
     @Test
-    public void CovCaptureCommand_TestAdvisorConfigurationTest() {
-        mocker.replay();
-
+    public void CovCaptureCommand_TestAdvisorConfigurationTest() throws IOException, InterruptedException {
         TaOptionBlock taOptionBlock = new TaOptionBlock(
                 StringUtils.EMPTY, false, false, true,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -41,25 +40,12 @@ public class CovCaptureCommandTest extends CommandTestBase {
         );
 
         CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covCaptureArguments = covCaptureCommand.getCommandLines();
-
-        assertEquals(7, covCaptureArguments.size());
-
-        checkCommandLineArg(covCaptureArguments, "cov-capture");
-        checkCommandLineArg(covCaptureArguments, "--dir");
-        checkCommandLineArg(covCaptureArguments, "TestDir");
-        checkCommandLineArg(covCaptureArguments, "--java-coverage");
-        checkCommandLineArg(covCaptureArguments, "Jacoco");
-        checkCommandLineArg(covCaptureArguments, "--java-test");
-        checkCommandLineArg(covCaptureArguments, "junit");
-
-        assertEquals(0, covCaptureArguments.size());
+        setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
+        covCaptureCommand.runCommand();
     }
 
     @Test
-    public void CovCaptureCommand_CustomTestCommandTest() {
-        mocker.replay();
-
+    public void CovCaptureCommand_CustomTestCommandTest() throws IOException, InterruptedException {
         TaOptionBlock taOptionBlock = new TaOptionBlock(
                 "CustomTestCommand", false, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -76,22 +62,12 @@ public class CovCaptureCommandTest extends CommandTestBase {
         );
 
         CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covCaptureArguments = covCaptureCommand.getCommandLines();
-
-        assertEquals(4, covCaptureArguments.size());
-
-        checkCommandLineArg(covCaptureArguments, "cov-capture");
-        checkCommandLineArg(covCaptureArguments, "--dir");
-        checkCommandLineArg(covCaptureArguments, "TestDir");
-        checkCommandLineArg(covCaptureArguments, "CustomTestCommand");
-
-        assertEquals(0, covCaptureArguments.size());
+        setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "CustomTestCommand"});
+        covCaptureCommand.runCommand();
     }
 
     @Test
-    public void CovCaptureCommand_CustomTestCommandTest_WithParseException() {
-        mocker.replay();
-
+    public void CovCaptureCommand_CustomTestCommandTest_WithParseException() throws IOException, InterruptedException {
         TaOptionBlock taOptionBlock = new TaOptionBlock(
                 "\'", false, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -107,9 +83,12 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 null, taOptionBlock, null
         );
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("ParseException occurred during tokenizing the cov capture custom test command.");
-
         CovCommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        try{
+            covCaptureCommand.runCommand();
+            Assert.fail("RuntimeException should have been thrown");
+        }catch (RuntimeException e) {
+            assertEquals("ParseException occurred during tokenizing the cov capture custom test command.", e.getMessage());
+        }
     }
 }

@@ -28,7 +28,6 @@ public class CovImportMsvscaCommand extends CovCommand {
     public CovImportMsvscaCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars, File[] outputFiles) {
         super(command, build, launcher, listener, publisher, home, envVars);
         this.outputFiles = outputFiles;
-        prepareCommand();
     }
 
     @Override
