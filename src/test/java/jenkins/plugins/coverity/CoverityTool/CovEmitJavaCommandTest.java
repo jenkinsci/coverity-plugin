@@ -38,8 +38,7 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
