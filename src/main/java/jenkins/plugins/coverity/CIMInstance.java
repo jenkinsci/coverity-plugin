@@ -143,16 +143,6 @@ public class CIMInstance {
     }
 
     /**
-     * The root URL for the CIM instance
-     *
-     * @return a url
-     * @throws MalformedURLException should not happen if host is valid
-     */
-    public URL getURL() throws MalformedURLException {
-        return new URL(isUseSSL() ? "https" : "http", host, port, "/");
-    }
-
-    /**
      * Returns a Defect service client using v9 web services.
      */
     public DefectService getDefectService() throws IOException {
