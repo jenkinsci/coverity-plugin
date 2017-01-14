@@ -10,7 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.ws;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -22,6 +24,8 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
 
+import com.coverity.ws.v9.ConfigurationService;
+import com.coverity.ws.v9.ConfigurationServiceService;
 import com.coverity.ws.v9.DefectService;
 import com.coverity.ws.v9.DefectServiceService;
 
@@ -40,21 +44,22 @@ public class WebServiceFactory {
 
     public static final String DEFECT_SERVICE_V9_WSDL = "/ws/v9/defectservice?wsdl";
 
+    public static final String CONFIGURATION_SERVICE_V9_WSDL = "/ws/v9/configurationservice?wsdl";
+
     private Map<CIMInstance, DefectService> defectServiceMap;
 
-    protected WebServiceFactory(Map<CIMInstance, DefectService> defectServiceMap) {
-        this.defectServiceMap = defectServiceMap;
+    private Map<CIMInstance, ConfigurationService> configurationServiceMap;
 
-        if(this.defectServiceMap == null) {
-            this.defectServiceMap = new HashMap<>();
-        }
+    protected WebServiceFactory() {
+        this.defectServiceMap = new HashMap<>();
+        this.configurationServiceMap = new HashMap<>();
     }
 
     public static WebServiceFactory getInstance() {
         if (instance == null) {
             synchronized (WebServiceFactory.class) {
                 if (instance == null) {
-                    instance = new WebServiceFactory(null);
+                    instance = new WebServiceFactory();
                 }
             }
         }
@@ -89,6 +94,39 @@ public class WebServiceFactory {
             attachAuthenticationHandler((BindingProvider) defectService, cimInstance);
 
             return defectService;
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
+        }
+    }
+
+    /**
+     * Returns a Configuration service client using v9 web services.
+     */
+    public ConfigurationService getConfigurationService(CIMInstance cimInstance) throws IOException {
+        ConfigurationService configurationService;
+        synchronized (this){
+            if(!configurationServiceMap.containsKey(cimInstance)) {
+                configurationService = createConfigurationService(cimInstance);
+                configurationServiceMap.put(cimInstance, configurationService);
+            }
+            else {
+                configurationService = configurationServiceMap.get(cimInstance);
+            }
+        }
+        return configurationService;
+    }
+
+    protected ConfigurationService createConfigurationService(CIMInstance cimInstance) throws MalformedURLException {
+        ConfigurationServiceService configurationServiceService = new ConfigurationServiceService(
+            new URL(getURL(cimInstance), CONFIGURATION_SERVICE_V9_WSDL),
+            new QName(COVERITY_V9_NAMESPACE, "ConfigurationServiceService"));
+
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            ConfigurationService configurationService = configurationServiceService.getConfigurationServicePort();
+            attachAuthenticationHandler((BindingProvider) configurationService, cimInstance);
+
+            return configurationService;
         } finally {
             Thread.currentThread().setContextClassLoader(cl);
         }

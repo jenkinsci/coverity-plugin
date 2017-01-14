@@ -14,9 +14,11 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.coverity.ws.v9.ConfigurationService;
 import com.coverity.ws.v9.DefectService;
 
 import jenkins.plugins.coverity.CIMInstance;
+import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestDefectService;
 
 public class WebServiceFactoryTest {
@@ -24,7 +26,7 @@ public class WebServiceFactoryTest {
 
     @Test
     public void getDefectService_returns_DefectService_instance() throws IOException {
-        WebServiceFactory factory = new TestWebServiceFactory(null);
+        WebServiceFactory factory = new TestWebServiceFactory();
 
         DefectService result = factory.getDefectService(cimInstance);
 
@@ -34,7 +36,7 @@ public class WebServiceFactoryTest {
 
     @Test
     public void getDefectService_returns_same_instance() throws IOException {
-        WebServiceFactory factory = new TestWebServiceFactory(null);
+        WebServiceFactory factory = new TestWebServiceFactory();
 
         DefectService result = factory.getDefectService(cimInstance);
 
@@ -46,7 +48,7 @@ public class WebServiceFactoryTest {
 
     @Test
     public void getDefectService_returns_new_instance() throws IOException {
-        WebServiceFactory factory = new TestWebServiceFactory(null);
+        WebServiceFactory factory = new TestWebServiceFactory();
 
         DefectService result = factory.getDefectService(cimInstance);
 
@@ -55,6 +57,43 @@ public class WebServiceFactoryTest {
         cimInstance = new CIMInstance("test instance 2", "other-cim-host", 8080, "test-user", "password", false, 0);
 
         DefectService result2 = factory.getDefectService(cimInstance);
+
+        Assert.assertNotSame(result, result2);
+    }
+
+    @Test
+    public void getConfigurationService_returns_ConfigurationService_instance() throws IOException {
+        WebServiceFactory factory = new TestWebServiceFactory();
+
+        ConfigurationService result = factory.getConfigurationService(cimInstance);
+
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result instanceof TestConfigurationService);
+    }
+
+    @Test
+    public void getConfigurationService_returns_same_instance() throws IOException {
+        WebServiceFactory factory = new TestWebServiceFactory();
+
+        ConfigurationService result = factory.getConfigurationService(cimInstance);
+
+        Assert.assertNotNull(result);
+        ConfigurationService result2 = factory.getConfigurationService(cimInstance);
+
+        Assert.assertSame(result, result2);
+    }
+
+    @Test
+    public void getConfigurationService_returns_new_instance() throws IOException {
+        WebServiceFactory factory = new TestWebServiceFactory();
+
+        ConfigurationService result = factory.getConfigurationService(cimInstance);
+
+        Assert.assertNotNull(result);
+
+        cimInstance = new CIMInstance("test instance 2", "other-cim-host", 8080, "test-user", "password", false, 0);
+
+        ConfigurationService result2 = factory.getConfigurationService(cimInstance);
 
         Assert.assertNotSame(result, result2);
     }
