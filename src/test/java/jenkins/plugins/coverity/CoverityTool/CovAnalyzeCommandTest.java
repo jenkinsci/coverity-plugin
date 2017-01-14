@@ -39,8 +39,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -71,8 +70,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         expectedException.expect(RuntimeException.class);
@@ -95,8 +93,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         expectedException.expect(RuntimeException.class);
@@ -117,8 +114,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -146,8 +142,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         expectedException.expect(RuntimeException.class);
@@ -174,8 +169,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, taOptionBlock, null
+                taOptionBlock, null
         );
 
         CovCommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -212,8 +206,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, taOptionBlock, null
+                taOptionBlock, null
         );
 
         expectedException.expect(RuntimeException.class);
@@ -239,8 +232,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, taOptionBlock, null
+                taOptionBlock, null
         );
 
         expectedException.expect(RuntimeException.class);

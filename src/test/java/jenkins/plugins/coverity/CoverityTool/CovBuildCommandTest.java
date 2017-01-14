@@ -35,8 +35,7 @@ public class CovBuildCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -66,8 +65,7 @@ public class CovBuildCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -106,8 +104,7 @@ public class CovBuildCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, taOptionBlock, null
+                taOptionBlock, null
         );
 
         CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -138,8 +135,7 @@ public class CovBuildCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
