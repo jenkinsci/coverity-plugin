@@ -10,9 +10,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.ws;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -30,10 +28,9 @@ import com.coverity.ws.v9.DefectService;
 import com.coverity.ws.v9.DefectServiceService;
 
 import jenkins.plugins.coverity.CIMInstance;
-import jenkins.plugins.coverity.ClientAuthenticationHandlerWSS;
 
 /**
- * Factory for creating or getting
+ * Factory for creating or getting web services
  */
 public class WebServiceFactory {
     private static final Logger logger = Logger.getLogger(WebServiceFactory.class.getName());
