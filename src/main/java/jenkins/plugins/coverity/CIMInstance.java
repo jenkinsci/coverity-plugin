@@ -12,6 +12,8 @@ package jenkins.plugins.coverity;
 
 import com.coverity.ws.v9.*;
 import hudson.util.FormValidation;
+import jenkins.plugins.coverity.ws.WebServiceFactory;
+
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -45,7 +47,6 @@ public class CIMInstance {
     public static final String COVERITY_V9_NAMESPACE = "http://ws.coverity.com/v9";
 
     public static final String CONFIGURATION_SERVICE_V9_WSDL = "/ws/v9/configurationservice?wsdl";
-    public static final String DEFECT_SERVICE_V9_WSDL = "/ws/v9/defectservice?wsdl";
 
     /**
      * Pattern to ignore streams - this is used to filter out internal DA streams, which are irrelevant to this plugin
@@ -86,11 +87,6 @@ public class CIMInstance {
      * Use SSL
      */
     private final boolean useSSL;
-
-    /**
-     * cached webservice port for Defect service
-     */
-    private transient DefectServiceService defectServiceService;
 
     /**
      * cached webservice port for Configuration service
@@ -150,23 +146,7 @@ public class CIMInstance {
      * Returns a Defect service client using v9 web services.
      */
     public DefectService getDefectService() throws IOException {
-        synchronized(this) {
-            if(defectServiceService == null) {
-                defectServiceService = new DefectServiceService(
-                        new URL(getURL(), DEFECT_SERVICE_V9_WSDL),
-                        new QName(COVERITY_V9_NAMESPACE, "DefectServiceService"));
-            }
-        }
-
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            DefectService defectService = defectServiceService.getDefectServicePort();
-            attachAuthenticationHandler((BindingProvider) defectService);
-
-            return defectService;
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
-        }
+        return WebServiceFactory.getInstance().getDefectService(this);
     }
 
     /**
@@ -430,5 +410,16 @@ public class CIMInstance {
         }
 
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (host != null ? host.hashCode() : 0);
+        result = 31 * result + port;
+        result = 31 * result + dataPort;
+        result = 31 * result + (user != null ? user.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        return result;
     }
 }
