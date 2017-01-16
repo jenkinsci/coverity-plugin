@@ -197,12 +197,6 @@
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-testng</artifactId>
-            <version>1.6.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <version>1.6.6</version>
             <scope>test</scope>

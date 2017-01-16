@@ -13,13 +13,12 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.ScmOptionBlock;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class CovImportScmCommandTest extends CommandTestBase {
 
@@ -211,7 +210,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covImportScmCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch (RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the cov import scm additional command.", e.getMessage());
         }

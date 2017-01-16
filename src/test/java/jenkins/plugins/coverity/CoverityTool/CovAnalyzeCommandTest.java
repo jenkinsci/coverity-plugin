@@ -14,12 +14,12 @@ import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
 public class CovAnalyzeCommandTest extends CommandTestBase {
@@ -66,7 +66,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch(RuntimeException e) {
             assertEquals("Misra configuration file is required to run Misra analysis.", e.getMessage());
         }
@@ -90,7 +90,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch (RuntimeException e) {
             assertEquals("Could not find MISRA configuration file at \"" + misraConfigFile.getAbsolutePath() + "\"", e.getMessage());
         }
@@ -131,7 +131,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch(RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the cov analyze additional arguments.", e.getMessage());
         }
@@ -185,7 +185,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch(RuntimeException e) {
             assertEquals("Test Advisor Policy File is required to run the Test Advisor.", e.getMessage());
         }
@@ -212,7 +212,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covAnalyzeCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch(RuntimeException e) {
             assertEquals("Could not find test policy file at \"" + taPolicyFile.getAbsolutePath() + "\"", e.getMessage());
         }

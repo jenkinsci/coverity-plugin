@@ -14,13 +14,14 @@ import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class CovCommitDefectsCommandTest extends CommandTestBase {
@@ -100,12 +101,11 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
         sslConfigurations.setCertFileName("TestCertFile");
 
-        CoverityPublisher.DescriptorImpl descriptor = Mockito.mock(CoverityPublisher.DescriptorImpl.class);
-        CoverityPublisher publisher = Mockito.mock(CoverityPublisher.class);
+        CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
+        CoverityPublisher publisher = mock(CoverityPublisher.class);
 
         when(publisher.getDescriptor()).thenReturn(descriptor);
         when(publisher.getCimStreams()).thenReturn(cimStreamList);
-        when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
         when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
         when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
 
@@ -137,8 +137,8 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
         sslConfigurations.setCertFileName("TestCertFile");
 
-        CoverityPublisher.DescriptorImpl descriptor = Mockito.mock(CoverityPublisher.DescriptorImpl.class);
-        CoverityPublisher publisher = Mockito.mock(CoverityPublisher.class);
+        CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
+        CoverityPublisher publisher = mock(CoverityPublisher.class);
 
         when(publisher.getDescriptor()).thenReturn(descriptor);
         when(publisher.getCimStreams()).thenReturn(cimStreamList);
@@ -208,7 +208,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         try{
             covCommitDefectsCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch (RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the cov-commit-defect commit arguments.", e.getMessage());
         }

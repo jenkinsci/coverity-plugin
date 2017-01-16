@@ -12,7 +12,6 @@ package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.InvocationAssistance;
-import jnr.ffi.annotations.In;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 

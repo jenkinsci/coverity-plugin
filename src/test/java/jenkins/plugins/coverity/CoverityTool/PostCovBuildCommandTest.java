@@ -19,6 +19,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class PostCovBuildCommandTest extends CommandTestBase {
 
@@ -57,7 +58,7 @@ public class PostCovBuildCommandTest extends CommandTestBase {
         Command postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
         try{
             postCovBuildCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch(RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the post cov-build command.", e.getMessage());
         }

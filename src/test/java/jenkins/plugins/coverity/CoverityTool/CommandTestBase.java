@@ -16,14 +16,10 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.CoverityUtils;
 import jenkins.plugins.coverity.TestableConsoleLogger;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -36,7 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CoverityUtils.class)
@@ -55,23 +52,17 @@ public abstract class CommandTestBase {
     protected List<String> actualArguments;
     protected TestableConsoleLogger consoleLogger;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Before
     public void setup() throws IOException, InterruptedException {
         MockitoAnnotations.initMocks(this);
         envVars = new EnvVars();
         envVars.put("COV_IDIR", "TestDir");
 
+        actualArguments = new ArrayList<String>();
+        expectedArguments = null;
+
         setUpListener();
         setUpCoverityUtils();
-    }
-
-    @After
-    public void teardown() {
-        expectedException = ExpectedException.none();
-        expectedArguments = null;
     }
 
     protected void setExpectedArguments(String[] args) {
@@ -84,7 +75,7 @@ public abstract class CommandTestBase {
 
     private void setUpListener() {
         consoleLogger = new TestableConsoleLogger();
-        Mockito.doReturn(consoleLogger.getPrintStream()).when(listener).getLogger();
+        doReturn(consoleLogger.getPrintStream()).when(listener).getLogger();
     }
 
     private void setUpCoverityUtils() throws IOException, InterruptedException {
@@ -103,13 +94,13 @@ public abstract class CommandTestBase {
             }
         };
 
-        PowerMockito.when(
+        when(
                 CoverityUtils.runCmd(
                         Matchers.anyList(),
                         Matchers.any(AbstractBuild.class),
                         Matchers.any(Launcher.class),
                         Matchers.any(TaskListener.class),
-                        Matchers.any(EnvVars.class),
+                        Matchers.same(envVars),
                         Matchers.anyBoolean())).thenAnswer(runCmd);
     }
 
@@ -121,7 +112,7 @@ public abstract class CommandTestBase {
             }
         };
 
-        PowerMockito.when(
+        when(
                 CoverityUtils.evaluateEnvVars(
                         Matchers.anyString(),
                         Matchers.any(EnvVars.class),
@@ -136,7 +127,7 @@ public abstract class CommandTestBase {
             }
         };
 
-        PowerMockito.when(
+        when(
                 CoverityUtils.doubleQuote(
                         Matchers.anyString(),
                         Matchers.anyBoolean())).thenAnswer(doubleQuote);

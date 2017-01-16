@@ -13,12 +13,12 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.InvocationAssistance;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class PostCovAnalyzeCommandTest extends CommandTestBase {
 
@@ -57,7 +57,7 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
         Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
         try{
             postCovAnalyzeCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch(RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the post cov-analyze command.", e.getMessage());
         }

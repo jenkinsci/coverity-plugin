@@ -16,11 +16,7 @@ import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class CovBuildCommandTest extends CommandTestBase {
 

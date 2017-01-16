@@ -10,15 +10,17 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
+import hudson.EnvVars;
+import hudson.Launcher;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class CovCaptureCommandTest extends CommandTestBase {
 
@@ -85,7 +87,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
         Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covCaptureCommand.runCommand();
-            Assert.fail("RuntimeException should have been thrown");
+            fail("RuntimeException should have been thrown");
         }catch (RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the cov capture custom test command.", e.getMessage());
         }
