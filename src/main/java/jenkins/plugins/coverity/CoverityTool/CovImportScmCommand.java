@@ -17,7 +17,7 @@ import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 
-public class CovImportScmCommand extends CovCommand{
+public class CovImportScmCommand extends CoverityCommand {
 
     private static final String command = "cov-import-scm";
     private static final String scmFlag = "--scm";
@@ -27,6 +27,7 @@ public class CovImportScmCommand extends CovCommand{
     private static final String scmLog = "--log";
     private static final String scmFileRegex = "--filename-regex";
     private static final String projectRootFlag = "--project-root";
+    private static final String noScmTool = "none";
 
     private ScmOptionBlock scmOptionBlock;
     private boolean useAdvancedParser;
@@ -37,7 +38,6 @@ public class CovImportScmCommand extends CovCommand{
         if (publisher != null && publisher.getInvocationAssistance() != null){
             useAdvancedParser = publisher.getInvocationAssistance().getUseAdvancedParser();
         }
-        prepareCommand();
     }
 
     @Override
@@ -58,6 +58,15 @@ public class CovImportScmCommand extends CovCommand{
         }
 
         addScmAdditionalCommand();
+        listener.getLogger().println("[Coverity] cov-import-scm command line arguments: " + commandLine.toString());
+    }
+
+    @Override
+    protected boolean canExecute() {
+        if (scmOptionBlock == null || scmOptionBlock.getScmSystem().equalsIgnoreCase(noScmTool)) {
+            return false;
+        }
+        return true;
     }
 
     private void addScmTool() {

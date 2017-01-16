@@ -11,32 +11,19 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.ScmOptionBlock;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
-import java.util.List;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class CovImportScmCommandTest extends CommandTestBase {
 
-//    public ScmOptionBlock(
-//            String scmSystem,
-//            String customTestTool,
-//            String scmToolArguments,
-//            String scmCommandArgs,
-//            String logFileLoc,
-//            String p4Port,
-//            String accRevRepo,
-//            String scmAdditionalCmd,
-//            String fileRegex){
-
     @Test
-    public void CovImportScmCommand_PrepareCommandTest() {
-        mocker.replay();
-
+    public void prepareCommandTest() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "git", StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -48,24 +35,14 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covImportScmArguments = covImportScmCommand.getCommandLines();
-
-        assertEquals(5, covImportScmArguments.size());
-
-        checkCommandLineArg(covImportScmArguments, "cov-import-scm");
-        checkCommandLineArg(covImportScmArguments, "--dir");
-        checkCommandLineArg(covImportScmArguments, "TestDir");
-        checkCommandLineArg(covImportScmArguments, "--scm");
-        checkCommandLineArg(covImportScmArguments, "git");
-
-        assertEquals(0, covImportScmArguments.size());
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git"});
+        covImportScmCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovImportScmCommand_AddCustomTestToolTest() {
-        mocker.replay();
-
+    public void addCustomTestToolTest() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "git", "TestCustomTestTool", StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -77,26 +54,14 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covImportScmArguments = covImportScmCommand.getCommandLines();
-
-        assertEquals(7, covImportScmArguments.size());
-
-        checkCommandLineArg(covImportScmArguments, "cov-import-scm");
-        checkCommandLineArg(covImportScmArguments, "--dir");
-        checkCommandLineArg(covImportScmArguments, "TestDir");
-        checkCommandLineArg(covImportScmArguments, "--scm");
-        checkCommandLineArg(covImportScmArguments, "git");
-        checkCommandLineArg(covImportScmArguments, "--tool");
-        checkCommandLineArg(covImportScmArguments, "TestCustomTestTool");
-
-        assertEquals(0, covImportScmArguments.size());
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--tool", "TestCustomTestTool"});
+        covImportScmCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovImportScmCommand_AddScmToolArgumentsTest() {
-        mocker.replay();
-
+    public void addScmToolArgumentsTest() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "git", StringUtils.EMPTY, "TestScmToolArguments",
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -108,26 +73,14 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covImportScmArguments = covImportScmCommand.getCommandLines();
-
-        assertEquals(7, covImportScmArguments.size());
-
-        checkCommandLineArg(covImportScmArguments, "cov-import-scm");
-        checkCommandLineArg(covImportScmArguments, "--dir");
-        checkCommandLineArg(covImportScmArguments, "TestDir");
-        checkCommandLineArg(covImportScmArguments, "--scm");
-        checkCommandLineArg(covImportScmArguments, "git");
-        checkCommandLineArg(covImportScmArguments, "--tool-arg");
-        checkCommandLineArg(covImportScmArguments, "TestScmToolArguments");
-
-        assertEquals(0, covImportScmArguments.size());
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--tool-arg", "TestScmToolArguments"});
+        covImportScmCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovImportScmCommand_AddScmCommandArgumentsTest() {
-        mocker.replay();
-
+    public void addScmCommandArgumentsTest() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "git", StringUtils.EMPTY, StringUtils.EMPTY,
                 "TestScmCommandArguments", StringUtils.EMPTY, StringUtils.EMPTY,
@@ -139,26 +92,14 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covImportScmArguments = covImportScmCommand.getCommandLines();
-
-        assertEquals(7, covImportScmArguments.size());
-
-        checkCommandLineArg(covImportScmArguments, "cov-import-scm");
-        checkCommandLineArg(covImportScmArguments, "--dir");
-        checkCommandLineArg(covImportScmArguments, "TestDir");
-        checkCommandLineArg(covImportScmArguments, "--scm");
-        checkCommandLineArg(covImportScmArguments, "git");
-        checkCommandLineArg(covImportScmArguments, "--command-arg");
-        checkCommandLineArg(covImportScmArguments, "TestScmCommandArguments");
-
-        assertEquals(0, covImportScmArguments.size());
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--command-arg", "TestScmCommandArguments"});
+        covImportScmCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovImportScmCommand_AddLogFileLocationTest() {
-        mocker.replay();
-
+    public void addLogFileLocationTest() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "git", StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, "TestLogFileLocation", StringUtils.EMPTY,
@@ -170,26 +111,14 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covImportScmArguments = covImportScmCommand.getCommandLines();
-
-        assertEquals(7, covImportScmArguments.size());
-
-        checkCommandLineArg(covImportScmArguments, "cov-import-scm");
-        checkCommandLineArg(covImportScmArguments, "--dir");
-        checkCommandLineArg(covImportScmArguments, "TestDir");
-        checkCommandLineArg(covImportScmArguments, "--scm");
-        checkCommandLineArg(covImportScmArguments, "git");
-        checkCommandLineArg(covImportScmArguments, "--log");
-        checkCommandLineArg(covImportScmArguments, "TestLogFileLocation");
-
-        assertEquals(0, covImportScmArguments.size());
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--log", "TestLogFileLocation"});
+        covImportScmCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovImportScmCommand_AddFileRegexTest() {
-        mocker.replay();
-
+    public void addFileRegexTest() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "git", StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -201,26 +130,14 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covImportScmArguments = covImportScmCommand.getCommandLines();
-
-        assertEquals(7, covImportScmArguments.size());
-
-        checkCommandLineArg(covImportScmArguments, "cov-import-scm");
-        checkCommandLineArg(covImportScmArguments, "--dir");
-        checkCommandLineArg(covImportScmArguments, "TestDir");
-        checkCommandLineArg(covImportScmArguments, "--scm");
-        checkCommandLineArg(covImportScmArguments, "git");
-        checkCommandLineArg(covImportScmArguments, "--filename-regex");
-        checkCommandLineArg(covImportScmArguments, "*.java");
-
-        assertEquals(0, covImportScmArguments.size());
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--filename-regex", "*.java"});
+        covImportScmCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovImportScmCommand_AddAccurevProjectRootTest() {
-        mocker.replay();
-
+    public void addAccurevProjectRootTest() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "accurev", StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -232,26 +149,14 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covImportScmArguments = covImportScmCommand.getCommandLines();
-
-        assertEquals(7, covImportScmArguments.size());
-
-        checkCommandLineArg(covImportScmArguments, "cov-import-scm");
-        checkCommandLineArg(covImportScmArguments, "--dir");
-        checkCommandLineArg(covImportScmArguments, "TestDir");
-        checkCommandLineArg(covImportScmArguments, "--scm");
-        checkCommandLineArg(covImportScmArguments, "accurev");
-        checkCommandLineArg(covImportScmArguments, "--project-root");
-        checkCommandLineArg(covImportScmArguments, "TestAccurrevProjectRoot");
-
-        assertEquals(0, covImportScmArguments.size());
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "accurev", "--project-root", "TestAccurrevProjectRoot"});
+        covImportScmCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovImportScmCommand_AddP4PortTest() {
-        mocker.replay();
-
+    public void addP4PortTest() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "perforce", StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, "1234",
@@ -263,25 +168,15 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covImportScmArguments = covImportScmCommand.getCommandLines();
-
-        assertEquals(5, covImportScmArguments.size());
-
-        checkCommandLineArg(covImportScmArguments, "cov-import-scm");
-        checkCommandLineArg(covImportScmArguments, "--dir");
-        checkCommandLineArg(covImportScmArguments, "TestDir");
-        checkCommandLineArg(covImportScmArguments, "--scm");
-        checkCommandLineArg(covImportScmArguments, "perforce");
-
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "perforce"});
+        covImportScmCommand.runCommand();
         assertEquals("1234", envVars.get("P4PORT"));
-        assertEquals(0, covImportScmArguments.size());
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovImportScmCommand_AddScmAdditionalCommandTest() {
-        mocker.replay();
-
+    public void addScmAdditionalCommandTest() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "git", StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -293,25 +188,14 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covImportScmArguments = covImportScmCommand.getCommandLines();
-
-        assertEquals(6, covImportScmArguments.size());
-
-        checkCommandLineArg(covImportScmArguments, "cov-import-scm");
-        checkCommandLineArg(covImportScmArguments, "--dir");
-        checkCommandLineArg(covImportScmArguments, "TestDir");
-        checkCommandLineArg(covImportScmArguments, "--scm");
-        checkCommandLineArg(covImportScmArguments, "git");
-        checkCommandLineArg(covImportScmArguments, "AdditionalCommand");
-
-        assertEquals(0, covImportScmArguments.size());
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "AdditionalCommand"});
+        covImportScmCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovImportScmCommand_AddScmAdditionalCommandTest_WithParseException() {
-        mocker.replay();
-
+    public void addScmAdditionalCommandTest_WithParseException() throws IOException, InterruptedException {
         ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
                 "git", StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -323,9 +207,24 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("ParseException occurred during tokenizing the cov import scm additional command.");
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        try{
+            covImportScmCommand.runCommand();
+            fail("RuntimeException should have been thrown");
+        }catch (RuntimeException e) {
+            assertEquals("ParseException occurred during tokenizing the cov import scm additional command.", e.getMessage());
+        }
+    }
 
-        CovCommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+    @Test
+    public void cannotExeucteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                null, null
+        );
+
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covImportScmCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

@@ -19,7 +19,7 @@ import jenkins.plugins.coverity.EnvParser;
 import jenkins.plugins.coverity.InvocationAssistance;
 import org.apache.commons.lang.StringUtils;
 
-public class CovBuildCommand extends CovCommand {
+public class CovBuildCommand extends CoverityCommand {
 
     private static final String command = "cov-build";
     private static final String noCommandArg = "--no-command";
@@ -27,7 +27,6 @@ public class CovBuildCommand extends CovCommand {
 
     public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(command, build, launcher, listener, publisher, home, envVars);
-        prepareCommand();
     }
 
     @Override
@@ -40,6 +39,16 @@ public class CovBuildCommand extends CovCommand {
                 prepareCovBuildCommandForCompileSources();
             }
         }
+        listener.getLogger().println("[Coverity] cov-build command line arguments: " + commandLine.toString());
+    }
+
+    @Override
+    protected boolean canExecute() {
+        if (publisher.getInvocationAssistance() == null) {
+            return false;
+        }
+
+        return true;
     }
 
     private void prepareCovBuildCommandForScriptSources() {
@@ -51,7 +60,7 @@ public class CovBuildCommand extends CovCommand {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
 
         // It is possible for users to run cov-build for compiled sources and script sources at the same time.
-        if (invocationAssistance != null && invocationAssistance.getIsScriptSrc()) {
+        if (invocationAssistance.getIsScriptSrc()) {
             addScriptSourcesArgs();
         }
 
@@ -66,11 +75,9 @@ public class CovBuildCommand extends CovCommand {
 
     private void addAdditionalBuildArguments() {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        if (invocationAssistance != null){
-            String buildArgs = invocationAssistance.getBuildArguments();
-            if (!StringUtils.isEmpty(buildArgs)){
-                addArguments(EnvParser.tokenizeWithRuntimeException(buildArgs));
-            }
+        String buildArgs = invocationAssistance.getBuildArguments();
+        if (!StringUtils.isEmpty(buildArgs)){
+            addArguments(EnvParser.tokenizeWithRuntimeException(buildArgs));
         }
     }
 }

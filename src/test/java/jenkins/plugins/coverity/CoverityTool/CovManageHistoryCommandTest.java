@@ -10,32 +10,36 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import hudson.XmlFile;
-import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
-    public void CovManageHistoryCommand_PrepareCommandTest() throws IOException {
-        mocker.replay();
-
+    public void prepareCommandTest() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
 
+        TaOptionBlock taOptionBlock = new TaOptionBlock(
+                StringUtils.EMPTY, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, true
+        );
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -44,43 +48,35 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 cimStreamList, invocationAssistance, false, false, false, false, false,
-                null, null
+                taOptionBlock, null
         );
 
-        CovCommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
-        List<String> covManageHistoryArguments = covManageHistoryCommand.getCommandLines();
-
-        assertEquals(13, covManageHistoryArguments.size());
-
-        checkCommandLineArg(covManageHistoryArguments, "cov-manage-history");
-        checkCommandLineArg(covManageHistoryArguments, "--dir");
-        checkCommandLineArg(covManageHistoryArguments, "TestDir");
-        checkCommandLineArg(covManageHistoryArguments, "download");
-        checkCommandLineArg(covManageHistoryArguments, "--host");
-        checkCommandLineArg(covManageHistoryArguments, "Localhost");
-        checkCommandLineArg(covManageHistoryArguments, "--port");
-        checkCommandLineArg(covManageHistoryArguments, "8080");
-        checkCommandLineArg(covManageHistoryArguments, "--stream");
-        checkCommandLineArg(covManageHistoryArguments, "TestStream");
-        checkCommandLineArg(covManageHistoryArguments, "--user");
-        checkCommandLineArg(covManageHistoryArguments, "TestUser");
-        checkCommandLineArg(covManageHistoryArguments, "--merge");
-
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        setExpectedArguments(new String[] {
+                "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
+                "--port", "8080", "--stream", "TestStream", "--user", "TestUser", "--merge"
+        });
+        covManageHistoryCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
-
-        assertEquals(0, covManageHistoryArguments.size());
+        consoleLogger.verifyLastMessage("[Coverity] cov-manage-history command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovManageHistoryCommand_PrepareCommandTest_WithSslConfiguration_ForIndio() throws IOException {
-        mocker.replay();
-
+    public void prepareCommandTest_WithSslConfiguration_ForIndio() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 0);
 
+        TaOptionBlock taOptionBlock = new TaOptionBlock(
+                StringUtils.EMPTY, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, true
+        );
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -89,42 +85,35 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 cimStreamList, invocationAssistance, false, false, false, false, false,
-                null, null
+                taOptionBlock, null
         );
 
-        CovCommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_INDIO);
-        List<String> covManageHistoryArguments = covManageHistoryCommand.getCommandLines();
-
-        assertEquals(14, covManageHistoryArguments.size());
-
-        checkCommandLineArg(covManageHistoryArguments, "cov-manage-history");
-        checkCommandLineArg(covManageHistoryArguments, "--dir");
-        checkCommandLineArg(covManageHistoryArguments, "TestDir");
-        checkCommandLineArg(covManageHistoryArguments, "download");
-        checkCommandLineArg(covManageHistoryArguments, "--host");
-        checkCommandLineArg(covManageHistoryArguments, "Localhost");
-        checkCommandLineArg(covManageHistoryArguments, "--port");
-        checkCommandLineArg(covManageHistoryArguments, "8080");
-        checkCommandLineArg(covManageHistoryArguments, "--stream");
-        checkCommandLineArg(covManageHistoryArguments, "TestStream");
-        checkCommandLineArg(covManageHistoryArguments, "--ssl");
-        checkCommandLineArg(covManageHistoryArguments, "--user");
-        checkCommandLineArg(covManageHistoryArguments, "TestUser");
-        checkCommandLineArg(covManageHistoryArguments, "--merge");
-
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_INDIO);
+        setExpectedArguments(new String[] {
+                "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
+                "--port", "8080", "--stream", "TestStream", "--ssl", "--user", "TestUser", "--merge"
+        });
+        covManageHistoryCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
-
-        assertEquals(0, covManageHistoryArguments.size());
+        consoleLogger.verifyLastMessage("[Coverity] cov-manage-history command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovManageHistoryCommand_PrepareCommandTest_WithSslConfiguration_ForJasperOrHigher() throws IOException {
+    public void prepareCommandTest_WithSslConfiguration_ForJasperOrHigher() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 0);
 
+        TaOptionBlock taOptionBlock = new TaOptionBlock(
+                StringUtils.EMPTY, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, true
+        );
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -134,41 +123,39 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
         sslConfigurations.setCertFileName("TestCertFile");
 
-        CoverityPublisher.DescriptorImpl descriptor = mocker.createMock(CoverityPublisher.DescriptorImpl.class);
-        expect(descriptor.getSslConfigurations()).andReturn(sslConfigurations);
+        CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
+        CoverityPublisher publisher = mock(CoverityPublisher.class);
 
-        CoverityPublisher publisher = mocker.createMock(CoverityPublisher.class);
-        expect(publisher.getDescriptor()).andReturn(descriptor);
-        expect(publisher.getInvocationAssistance()).andReturn(invocationAssistance);
-        expect(publisher.getCimStreams()).andReturn(cimStreamList);
-        mocker.replay();
+        when(publisher.getTaOptionBlock()).thenReturn(taOptionBlock);
+        when(publisher.getDescriptor()).thenReturn(descriptor);
+        when(publisher.getCimStreams()).thenReturn(cimStreamList);
+        when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
+        when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
 
-        CovCommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
-        List<String> covManageHistoryArguments = covManageHistoryCommand.getCommandLines();
-
-        assertEquals(18, covManageHistoryArguments.size());
-
-        checkCommandLineArg(covManageHistoryArguments, "cov-manage-history");
-        checkCommandLineArg(covManageHistoryArguments, "--dir");
-        checkCommandLineArg(covManageHistoryArguments, "TestDir");
-        checkCommandLineArg(covManageHistoryArguments, "download");
-        checkCommandLineArg(covManageHistoryArguments, "--host");
-        checkCommandLineArg(covManageHistoryArguments, "Localhost");
-        checkCommandLineArg(covManageHistoryArguments, "--port");
-        checkCommandLineArg(covManageHistoryArguments, "8080");
-        checkCommandLineArg(covManageHistoryArguments, "--stream");
-        checkCommandLineArg(covManageHistoryArguments, "TestStream");
-        checkCommandLineArg(covManageHistoryArguments, "--ssl");
-        checkCommandLineArg(covManageHistoryArguments, "--on-new-cert");
-        checkCommandLineArg(covManageHistoryArguments, "trust");
-        checkCommandLineArg(covManageHistoryArguments, "--cert");
-        checkCommandLineArg(covManageHistoryArguments, "TestCertFile");
-        checkCommandLineArg(covManageHistoryArguments, "--user");
-        checkCommandLineArg(covManageHistoryArguments, "TestUser");
-        checkCommandLineArg(covManageHistoryArguments, "--merge");
-
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        setExpectedArguments(new String[] {
+                "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
+                "--port", "8080", "--stream", "TestStream", "--ssl", "--on-new-cert", "trust",
+                "--cert", "TestCertFile", "--user", "TestUser", "--merge"
+        });
+        covManageHistoryCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-manage-history command line arguments: " + actualArguments.toString());
+    }
 
-        assertEquals(0, covManageHistoryArguments.size());
+    @Test
+    public void cannotExecuteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                null, null
+        );
+
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_INDIO);
+        setExpectedArguments(new String[] {
+                "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
+                "--port", "8080", "--stream", "TestStream", "--ssl", "--user", "TestUser", "--merge"
+        });
+        covManageHistoryCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

@@ -10,22 +10,19 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import hudson.EnvVars;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.InvocationAssistance;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class CovEmitJavaCommandTest extends CommandTestBase {
 
     @Test
-    public void CovEmitJavaCommand_AddJavaWarFilesTest(){
-        mocker.replay();
+    public void addJavaWarFilesTest() throws IOException, InterruptedException {
         List<String> javaWarFiles = new ArrayList<>();
         javaWarFiles.add("webapp1.war");
         javaWarFiles.add("webapp2.war");
@@ -41,19 +38,21 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
                 null, null
         );
 
-        CovCommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
-        List<String> covEmitJavaArguments = covEmitJavaCommand.getCommandLines();
+        Command covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
+        setExpectedArguments(new String[] {"cov-emit-java", "--dir", "TestDir", "--webapp-archive", "webapp1.war", "--webapp-archive", "webapp2.war"});
+        covEmitJavaCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-emit-java command line arguments: " + actualArguments.toString());
+    }
 
-        assertEquals(7, covEmitJavaArguments.size());
+    @Test
+    public void cannotExecuteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                null, null
+        );
 
-        checkCommandLineArg(covEmitJavaArguments, "cov-emit-java");
-        checkCommandLineArg(covEmitJavaArguments, "--dir");
-        checkCommandLineArg(covEmitJavaArguments, "TestDir");
-        checkCommandLineArg(covEmitJavaArguments, "--webapp-archive");
-        checkCommandLineArg(covEmitJavaArguments, "webapp1.war");
-        checkCommandLineArg(covEmitJavaArguments, "--webapp-archive");
-        checkCommandLineArg(covEmitJavaArguments, "webapp2.war");
-
-        assertEquals(0, covEmitJavaArguments.size());
+        Command covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
+        covEmitJavaCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

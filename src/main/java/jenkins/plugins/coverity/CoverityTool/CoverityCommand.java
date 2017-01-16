@@ -20,11 +20,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-public abstract class CovCommand {
+public abstract class CoverityCommand extends Command {
 
     private static final String intermediateDirArguments = "--dir";
     private static final String covIdirEnvVar = "COV_IDIR";
@@ -33,36 +30,11 @@ public abstract class CovCommand {
     private static final String trustArg = "trust";
     private static final String certArg = "--cert";
 
-    protected List<String> commandLine;
-    protected AbstractBuild build;
-    private Launcher launcher;
-    protected TaskListener listener;
-    protected CoverityPublisher publisher;
-    protected EnvVars envVars;
-
-    public CovCommand(
-            @Nonnull String command,
-            @Nonnull AbstractBuild<?, ?> build,
-            @Nonnull Launcher launcher,
-            @Nonnull TaskListener listener,
-            @Nonnull CoverityPublisher publisher,
-            String home,
-            @Nonnull EnvVars envVars){
+    public CoverityCommand(@Nonnull String command, AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
+        super(build, launcher, listener, publisher, envVars);
 
         Validate.notEmpty(command, "Command cannot be null empty or null");
-        Validate.notNull(build, AbstractBuild.class.getName() + " object cannot be null");
-        Validate.notNull(launcher, Launcher.class.getName() + " object cannot be null");
-        Validate.notNull(listener, TaskListener.class.getName() + " object cannot be null");
-        Validate.notNull(publisher, CoverityPublisher.class.getName() + " object cannot be null");
-        Validate.notNull(envVars, EnvVars.class.getName() + " object cannot be null");
 
-        this.build = build;
-        this.launcher = launcher;
-        this.listener = listener;
-        this.publisher = publisher;
-        this.envVars = envVars;
-
-        commandLine = new ArrayList<>();
         addCommand(command, home);
         addIntermediateDir();
     }
@@ -85,28 +57,6 @@ public abstract class CovCommand {
             CoverityTempDir tempDir = build.getAction(CoverityTempDir.class);
             commandLine.add(tempDir.getTempDir().getRemote());
         }
-    }
-
-    protected void addArgument(String args){
-        commandLine.add(args);
-    }
-
-    protected void addArguments(List<String> args){
-        commandLine.addAll(args);
-    }
-
-    public int runCommand() throws IOException, InterruptedException {
-        boolean useAdvancedParser = false;
-        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        if (invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
-            useAdvancedParser = true;
-        }
-
-        return CoverityUtils.runCmd(commandLine, build, launcher, listener, envVars, useAdvancedParser);
-    }
-
-    public List<String> getCommandLines() {
-        return commandLine;
     }
 
     protected void addTaCommandArgs(){
@@ -143,6 +93,4 @@ public abstract class CovCommand {
             }
         }
     }
-
-    protected abstract void prepareCommand();
 }

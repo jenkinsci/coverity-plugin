@@ -19,7 +19,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 
-public class CovAnalyzeCommand extends CovCommand {
+public class CovAnalyzeCommand extends CoverityCommand {
 
     private static final String command = "cov-analyze";
     private static final String misraConfig = "--misra-config";
@@ -30,7 +30,6 @@ public class CovAnalyzeCommand extends CovCommand {
 
     public CovAnalyzeCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(command, build, launcher, listener, publisher, home, envVars);
-        prepareCommand();
     }
 
     @Override
@@ -38,6 +37,17 @@ public class CovAnalyzeCommand extends CovCommand {
         addMisraConfiguration();
         addTaConfiguration();
         addAdditionalAnalysisArguments();
+        listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + commandLine.toString());
+    }
+
+    @Override
+    protected boolean canExecute() {
+        if (publisher.getInvocationAssistance() != null ||
+                publisher.getTaOptionBlock() != null) {
+            return true;
+        }
+
+        return false;
     }
 
     private void addMisraConfiguration(){

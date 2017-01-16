@@ -16,17 +16,12 @@ import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import java.io.IOException;
 
 public class CovBuildCommandTest extends CommandTestBase {
 
     @Test
-    public void CovBuildCommand_CommandForScriptSourcesTest() {
-        mocker.replay();
-
+    public void commandForScriptSourcesTest() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, true,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -38,25 +33,14 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, null
         );
 
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covBuildArguments = covBuildCommand.getCommandLines();
-
-        assertEquals(6, covBuildArguments.size());
-
-        checkCommandLineArg(covBuildArguments, "cov-build");
-        checkCommandLineArg(covBuildArguments, "--dir");
-        checkCommandLineArg(covBuildArguments, "TestDir");
-        checkCommandLineArg(covBuildArguments, "--no-command");
-        checkCommandLineArg(covBuildArguments, "--fs-capture-search");
-        checkCommandLineArg(covBuildArguments, "$WORKSPACE");
-
-        assertEquals(0, covBuildArguments.size());
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--no-command", "--fs-capture-search", "$WORKSPACE"});
+        covBuildCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovBuildCommand_CommandForCompileSourcesTest_WithCaptureScriptSources() {
-        mocker.replay();
-
+    public void commandForCompileSourcesTest_WithCaptureScriptSources() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, true,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -67,25 +51,14 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, invocationAssistance, false, false, false, false, false,
                 null, null
         );
-
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covBuildArguments = covBuildCommand.getCommandLines();
-
-        assertEquals(5, covBuildArguments.size());
-
-        checkCommandLineArg(covBuildArguments, "cov-build");
-        checkCommandLineArg(covBuildArguments, "--dir");
-        checkCommandLineArg(covBuildArguments, "TestDir");
-        checkCommandLineArg(covBuildArguments, "--fs-capture-search");
-        checkCommandLineArg(covBuildArguments, "$WORKSPACE");
-
-        assertEquals(0, covBuildArguments.size());
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--fs-capture-search", "$WORKSPACE"});
+        covBuildCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovBuildCommand_CommandForCompileSourcesTest_WithTaOptions() {
-        mocker.replay();
-
+    public void commandForCompileSourcesTest_WithTaOptions() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -107,26 +80,14 @@ public class CovBuildCommandTest extends CommandTestBase {
                 taOptionBlock, null
         );
 
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covBuildArguments = covBuildCommand.getCommandLines();
-
-        assertEquals(7, covBuildArguments.size());
-
-        checkCommandLineArg(covBuildArguments, "cov-build");
-        checkCommandLineArg(covBuildArguments, "--dir");
-        checkCommandLineArg(covBuildArguments, "TestDir");
-        checkCommandLineArg(covBuildArguments, "--java-coverage");
-        checkCommandLineArg(covBuildArguments, "Jacoco");
-        checkCommandLineArg(covBuildArguments, "--java-test");
-        checkCommandLineArg(covBuildArguments, "junit");
-
-        assertEquals(0, covBuildArguments.size());
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
+        covBuildCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
     }
 
     @Test
-    public void CovBuildCommand_CommandForCompileSourcesTest_WithAdditionalBuildArguments() {
-        mocker.replay();
-
+    public void commandForCompileSourcesTest_WithAdditionalBuildArguments() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, false,
                 "AdditionalBuildArguments", StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -138,16 +99,21 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, null
         );
 
-        CovCommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        List<String> covBuildArguments = covBuildCommand.getCommandLines();
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "AdditionalBuildArguments"});
+        covBuildCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
+    }
 
-        assertEquals(4, covBuildArguments.size());
+    @Test
+    public void cannotExecuteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                null, null
+        );
 
-        checkCommandLineArg(covBuildArguments, "cov-build");
-        checkCommandLineArg(covBuildArguments, "--dir");
-        checkCommandLineArg(covBuildArguments, "TestDir");
-        checkCommandLineArg(covBuildArguments, "AdditionalBuildArguments");
-
-        assertEquals(0, covBuildArguments.size());
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covBuildCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

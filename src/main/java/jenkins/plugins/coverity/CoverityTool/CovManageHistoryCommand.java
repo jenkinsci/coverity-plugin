@@ -16,7 +16,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 
-public class CovManageHistoryCommand extends CovCommand {
+public class CovManageHistoryCommand extends CoverityCommand {
 
     private static final String command = "cov-manage-history";
     private static final String downloadArg = "download";
@@ -38,7 +38,6 @@ public class CovManageHistoryCommand extends CovCommand {
         this.cimStream = cimStream;
         this.cimInstance = cimInstance;
         this.version = version;
-        prepareCommand();
     }
 
     @Override
@@ -48,6 +47,17 @@ public class CovManageHistoryCommand extends CovCommand {
         addSslConfiguration(cimInstance, version);
         addUserInfo();
         addArgument(mergeArg);
+        listener.getLogger().println("[Coverity] cov-manage-history command line arguments: " + commandLine.toString());
+    }
+
+    @Override
+    protected boolean canExecute() {
+        TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
+
+        if (taOptionBlock == null || !taOptionBlock.getCovHistoryCheckbox()) {
+            return false;
+        }
+        return true;
     }
 
     private void addCimStreamInfo(){

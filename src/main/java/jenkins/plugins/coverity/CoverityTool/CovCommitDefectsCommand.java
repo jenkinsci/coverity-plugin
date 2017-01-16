@@ -17,7 +17,7 @@ import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 
-public class CovCommitDefectsCommand extends CovCommand {
+public class CovCommitDefectsCommand extends CoverityCommand {
 
     private static final String command = "cov-commit-defects";
     private static final String hostArg = "--host";
@@ -47,8 +47,6 @@ public class CovCommitDefectsCommand extends CovCommand {
                 invocationAssistance = invocationAssistance.merge(cimStream.getInvocationAssistanceOverride());
             }
         }
-
-        prepareCommand();
     }
 
     @Override
@@ -68,6 +66,15 @@ public class CovCommitDefectsCommand extends CovCommand {
         addStream();
         addUserInfo();
         addCommitArguments();
+        listener.getLogger().println("[Coverity] cov-commit-defects command line arguments: " + commandLine.toString());
+    }
+
+    @Override
+    protected boolean canExecute() {
+        if (publisher.getInvocationAssistance() == null) {
+            return false;
+        }
+        return true;
     }
 
     private void addHost() {
