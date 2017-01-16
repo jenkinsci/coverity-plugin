@@ -17,7 +17,7 @@ import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 
-public class CovImportScmCommand extends CommandBase {
+public class CovImportScmCommand extends CoverityCommand {
 
     private static final String command = "cov-import-scm";
     private static final String scmFlag = "--scm";

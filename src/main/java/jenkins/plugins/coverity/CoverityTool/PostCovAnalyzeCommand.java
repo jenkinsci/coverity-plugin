@@ -16,32 +16,28 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.EnvParser;
+import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.ParseException;
-import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
 
-public class CovCaptureCommand extends CoverityCommand {
+public class PostCovAnalyzeCommand extends CommandBase {
 
-    private static final String command = "cov-capture";
-
-    public CovCaptureCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
-        super(command, build, launcher, listener, publisher, home, envVars);
+    public PostCovAnalyzeCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, EnvVars envVars) {
+        super(build, launcher, listener, publisher, envVars);
     }
 
     @Override
     protected void prepareCommand() {
-        addTaCommandArgs();
-        addCustomTestCommand();
-    }
-
-    private void addCustomTestCommand(){
-        TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         try{
-            if (taOptionBlock != null && !StringUtils.isEmpty(taOptionBlock.getCustomTestCommand())){
-                addArguments(EnvParser.tokenize(taOptionBlock.getCustomTestCommand()));
+            if (invocationAssistance != null) {
+                String postCovAnalyzeCmd = invocationAssistance.getPostCovAnalyzeCmd();
+                if (!StringUtils.isEmpty(postCovAnalyzeCmd)) {
+                    addArguments(EnvParser.tokenize(postCovAnalyzeCmd));
+                }
             }
-        }catch(ParseException parseException){
-            throw new RuntimeException("ParseException occurred during tokenizing the cov capture custom test command.");
+        } catch(ParseException e) {
+            throw new RuntimeException("ParseException occurred during tokenizing the post cov-analyze command.");
         }
     }
 }

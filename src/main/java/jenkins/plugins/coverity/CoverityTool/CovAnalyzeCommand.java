@@ -19,7 +19,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 
-public class CovAnalyzeCommand extends CommandBase {
+public class CovAnalyzeCommand extends CoverityCommand {
 
     private static final String command = "cov-analyze";
     private static final String misraConfig = "--misra-config";
