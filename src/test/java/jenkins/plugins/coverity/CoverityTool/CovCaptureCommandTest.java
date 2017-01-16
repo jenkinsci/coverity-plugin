@@ -42,6 +42,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
         ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
         covCaptureCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-capture command line arguments: " + actualArguments.toString());
     }
 
     @Test
@@ -64,6 +65,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
         ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "CustomTestCommand"});
         covCaptureCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-capture command line arguments: " + actualArguments.toString());
     }
 
     @Test

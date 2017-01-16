@@ -32,6 +32,7 @@ public class PostCovBuildCommand extends CommandBase {
                 if (!StringUtils.isEmpty(postCovBuildCmd)) {
                     addArguments(EnvParser.tokenize(postCovBuildCmd));
                 }
+                listener.getLogger().println("[Coverity] post cov-build command: " + commandLine.toString());
             }
         } catch(ParseException e) {
             throw new RuntimeException("ParseException occurred during tokenizing the post cov-build command.");

@@ -39,6 +39,7 @@ public class PostCovBuildCommandTest extends CommandTestBase {
         ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
         setExpectedArguments(new String[] {"TestPostBuildCommand"});
         postCovBuildCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] post cov-build command: " + actualArguments.toString());
     }
 
     @Test

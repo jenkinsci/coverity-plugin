@@ -33,6 +33,7 @@ public class CovImportMsvscaCommand extends CoverityCommand {
     @Override
     protected void prepareCommand() {
         addOutputFiles();
+        listener.getLogger().println("[Coverity] cov-import-msvsca command line arguments: " + commandLine.toString());
     }
 
     private void addOutputFiles() {

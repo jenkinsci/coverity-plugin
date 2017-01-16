@@ -52,6 +52,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         });
         covCommitDefectsCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
     }
 
     @Test
@@ -81,6 +82,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         });
         covCommitDefectsCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
     }
 
     @Test
@@ -117,6 +119,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         });
         covCommitDefectsCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
     }
 
     @Test
@@ -153,6 +156,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         });
         covCommitDefectsCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
     }
 
     @Test
@@ -182,6 +186,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         });
         covCommitDefectsCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
     }
 
     @Test

@@ -47,6 +47,7 @@ public class CovManageHistoryCommand extends CoverityCommand {
         addSslConfiguration(cimInstance, version);
         addUserInfo();
         addArgument(mergeArg);
+        listener.getLogger().println("[Coverity] cov-manage-history command line arguments: " + commandLine.toString());
     }
 
     private void addCimStreamInfo(){

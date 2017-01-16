@@ -37,6 +37,7 @@ public class CovAnalyzeCommand extends CoverityCommand {
         addMisraConfiguration();
         addTaConfiguration();
         addAdditionalAnalysisArguments();
+        listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + commandLine.toString());
     }
 
     private void addMisraConfiguration(){

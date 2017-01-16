@@ -52,6 +52,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         });
         covManageHistoryCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-manage-history command line arguments: " + actualArguments.toString());
     }
 
     @Test
@@ -81,6 +82,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         });
         covManageHistoryCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-manage-history command line arguments: " + actualArguments.toString());
     }
 
     @Test
@@ -117,5 +119,6 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         });
         covManageHistoryCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-manage-history command line arguments: " + actualArguments.toString());
     }
 }

@@ -15,6 +15,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.CoverityUtils;
+import jenkins.plugins.coverity.TestableConsoleLogger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,6 +23,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -50,6 +52,8 @@ public abstract class CommandTestBase {
     protected TaskListener listener;
     protected EnvVars envVars;
     protected String[] expectedArguments;
+    protected List<String> actualArguments;
+    protected TestableConsoleLogger consoleLogger;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -60,6 +64,7 @@ public abstract class CommandTestBase {
         envVars = new EnvVars();
         envVars.put("COV_IDIR", "TestDir");
 
+        setUpListener();
         setUpCoverityUtils();
     }
 
@@ -73,13 +78,13 @@ public abstract class CommandTestBase {
         expectedArguments = args;
     }
 
-    protected static void checkCommandLineArg(List<String> argList, String arg){
-        assertTrue(argList.contains(arg));
-        argList.remove(arg);
+    private void checkCommandLineArguments() {
+        assertArrayEquals(expectedArguments, actualArguments.toArray());
     }
 
-    private void checkCommandLineArguments(String[] expectedArguments, List<String> actualArguments){
-        assertArrayEquals(expectedArguments, actualArguments.toArray());
+    private void setUpListener() {
+        consoleLogger = new TestableConsoleLogger();
+        Mockito.doReturn(consoleLogger.getPrintStream()).when(listener).getLogger();
     }
 
     private void setUpCoverityUtils() throws IOException, InterruptedException {
@@ -92,8 +97,8 @@ public abstract class CommandTestBase {
     private void setCoverityUtils_runCmd() throws IOException, InterruptedException {
         Answer<Integer> runCmd = new Answer<Integer>() {
             public Integer answer(InvocationOnMock mock) throws Throwable {
-                List<String> args = (ArrayList<String>)mock.getArguments()[0];
-                checkCommandLineArguments(expectedArguments, args);
+                actualArguments = (ArrayList<String>)mock.getArguments()[0];
+                checkCommandLineArguments();
                 return 0;
             }
         };

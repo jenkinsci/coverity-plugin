@@ -57,6 +57,7 @@ public class CovImportScmCommand extends CoverityCommand {
         }
 
         addScmAdditionalCommand();
+        listener.getLogger().println("[Coverity] cov-import-scm command line arguments: " + commandLine.toString());
     }
 
     private void addScmTool() {

@@ -39,6 +39,7 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
         ICommand postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
         setExpectedArguments(new String[] {"TestPostAnalyzeCommand"});
         postCovAnalyzeCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] post cov-analyze command line arguments: " + actualArguments.toString());
     }
 
     @Test

@@ -45,6 +45,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
             ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
             setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "--misra-config", misraConfigFile.getPath()});
             covAnalyzeCommand.runCommand();
+            consoleLogger.verifyLastMessage("[Coverity] cov-analyze command line arguments: " + actualArguments.toString());
         }finally {
             misraConfigFile.delete();
         }
@@ -115,6 +116,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "additionalArgs"});
         covAnalyzeCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-analyze command line arguments: " + actualArguments.toString());
     }
 
     @Test
@@ -164,6 +166,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
             ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
             setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "--test-advisor", "--test-advisor-policy", taPolicyFile.getPath(), "--strip-path", "Path2Strip"});
             covAnalyzeCommand.runCommand();
+            consoleLogger.verifyLastMessage("[Coverity] cov-analyze command line arguments: " + actualArguments.toString());
         }finally {
             taPolicyFile.delete();
         }

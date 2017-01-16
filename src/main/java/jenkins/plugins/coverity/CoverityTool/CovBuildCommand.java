@@ -39,6 +39,7 @@ public class CovBuildCommand extends CoverityCommand {
                 prepareCovBuildCommandForCompileSources();
             }
         }
+        listener.getLogger().println("[Coverity] cov-build command line arguments: " + commandLine.toString());
     }
 
     private void prepareCovBuildCommandForScriptSources() {

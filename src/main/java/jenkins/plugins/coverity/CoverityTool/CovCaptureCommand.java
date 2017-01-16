@@ -32,6 +32,7 @@ public class CovCaptureCommand extends CoverityCommand {
     protected void prepareCommand() {
         addTaCommandArgs();
         addCustomTestCommand();
+        listener.getLogger().println("[Coverity] cov-capture command line arguments: " + commandLine.toString());
     }
 
     private void addCustomTestCommand(){

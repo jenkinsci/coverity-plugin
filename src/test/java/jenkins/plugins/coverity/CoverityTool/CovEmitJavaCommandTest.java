@@ -42,5 +42,6 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
         ICommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
         setExpectedArguments(new String[] {"cov-emit-java", "--dir", "TestDir", "--webapp-archive", "webapp1.war", "--webapp-archive", "webapp2.war"});
         covEmitJavaCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-emit-java command line arguments: " + actualArguments.toString());
     }
 }

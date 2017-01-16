@@ -37,5 +37,6 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
                 "cov-import-msvsca", "--dir", "TestDir", "--append", analysisLog1.getAbsolutePath(), analysisLog2.getAbsolutePath()
         });
         covImportMsvscaCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-import-msvsca command line arguments: " + actualArguments.toString());
     }
 }

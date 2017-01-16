@@ -37,6 +37,7 @@ public class CovEmitJavaCommand extends CoverityCommand {
     @Override
     protected void prepareCommand() {
         addJavaWarFiles();
+        listener.getLogger().println("[Coverity] cov-emit-java command line arguments: " + commandLine.toString());
     }
 
     private void addJavaWarFiles(){

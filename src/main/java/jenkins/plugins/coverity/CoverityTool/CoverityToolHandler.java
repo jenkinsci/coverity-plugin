@@ -74,7 +74,6 @@ public class CoverityToolHandler {
                 CoverityLauncherDecorator.SKIP.set(true);
 
                 ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, envVars);
-                listener.getLogger().println("[Coverity] cov-build command line arguments: " + covBuildCommand.toString());
                 int result = covBuildCommand.runCommand();
 
                 if(result != 0) {
@@ -94,7 +93,6 @@ public class CoverityToolHandler {
             try {
                 CoverityLauncherDecorator.SKIP.set(true);
                 ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
-                listener.getLogger().println("[Coverity] post cov-build command: " + postCovBuildCommand.getCommandLines());
                 int result = postCovBuildCommand.runCommand();
 
                 if(result != 0) {
@@ -114,7 +112,6 @@ public class CoverityToolHandler {
                 try {
                     CoverityLauncherDecorator.SKIP.set(true);
                     ICommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
-                    listener.getLogger().println("[Coverity] cov-emit-java command line arguments: " + covEmitJavaCommand.toString());
                     int result = covEmitJavaCommand.runCommand();
 
                     if(result != 0) {
@@ -134,7 +131,6 @@ public class CoverityToolHandler {
                 try {
                     CoverityLauncherDecorator.SKIP.set(true);
                     ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, home, envVars);
-                    listener.getLogger().println("[Coverity] cov-capture command line arguments: " + covCaptureCommand.toString());
                     int result = covCaptureCommand.runCommand();
 
                     if(result != 0) {
@@ -157,7 +153,6 @@ public class CoverityToolHandler {
                         CoverityLauncherDecorator.SKIP.set(true);
 
                         ICommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
-                        listener.getLogger().println("[Coverity] cov-manage-history command line arguments: " + covManageHistoryCommand.toString());
                         int result = covManageHistoryCommand.runCommand();
 
                         if(result != 0) {
@@ -180,7 +175,6 @@ public class CoverityToolHandler {
                 CoverityLauncherDecorator.SKIP.set(true);
 
                 ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, home, envVars);
-                listener.getLogger().println("[Coverity] cov-import-scm command line arguments: " + covImportScmCommand.toString());
                 int result = covImportScmCommand.runCommand();
 
                 if(result != 0) {
@@ -201,7 +195,6 @@ public class CoverityToolHandler {
             try {
                 CoverityLauncherDecorator.SKIP.set(true);
                 ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, home, envVars);
-                listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + covAnalyzeCommand.toString());
                 int result = covAnalyzeCommand.runCommand();
 
                 if(result != 0) {
@@ -221,7 +214,6 @@ public class CoverityToolHandler {
             try {
                 CoverityLauncherDecorator.SKIP.set(true);
                 ICommand postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
-                listener.getLogger().println("[Coverity] post cov-analyze command line arguments: " + postCovAnalyzeCommand.getCommandLines());
                 int result = postCovAnalyzeCommand.runCommand();
 
                 if(result != 0) {
@@ -246,8 +238,6 @@ public class CoverityToolHandler {
                     try{
                         CoverityLauncherDecorator.SKIP.set(true);
                         ICommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, home, envVars, outputFiles);
-                        listener.getLogger().println("[Coverity] cov-import-msvsca command line arguments: " + covImportMsvscaCommand.getCommandLines());
-
                         int result = covImportMsvscaCommand.runCommand();
 
                         if(result != 0) {
@@ -271,7 +261,6 @@ public class CoverityToolHandler {
 
                 try {
                     ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
-                    listener.getLogger().println("[Coverity] cov-commit-defects command line arguments: " + covCommitDefectsCommand.getCommandLines());
                     int result = covCommitDefectsCommand.runCommand();
 
                     if(result != 0) {

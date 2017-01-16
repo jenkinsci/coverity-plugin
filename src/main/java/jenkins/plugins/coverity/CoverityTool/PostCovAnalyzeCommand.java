@@ -34,6 +34,7 @@ public class PostCovAnalyzeCommand extends CommandBase {
                 String postCovAnalyzeCmd = invocationAssistance.getPostCovAnalyzeCmd();
                 if (!StringUtils.isEmpty(postCovAnalyzeCmd)) {
                     addArguments(EnvParser.tokenize(postCovAnalyzeCmd));
+                    listener.getLogger().println("[Coverity] post cov-analyze command line arguments: " + commandLine.toString());
                 }
             }
         } catch(ParseException e) {
