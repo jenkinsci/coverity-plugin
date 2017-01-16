@@ -33,8 +33,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -53,8 +52,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -73,8 +71,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -93,8 +90,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -113,8 +109,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -133,8 +128,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -153,8 +147,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -173,8 +166,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -194,8 +186,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -214,8 +205,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, scmOptionBlock
+                null, scmOptionBlock
         );
 
         ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);

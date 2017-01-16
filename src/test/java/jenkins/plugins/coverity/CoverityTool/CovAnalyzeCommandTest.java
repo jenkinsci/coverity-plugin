@@ -38,8 +38,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
             );
             CoverityPublisher publisher = new CoverityPublisher(
                     null, invocationAssistance, false, false, false, false, false,
-                    StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                    null, null, null
+                    null, null
             );
 
             ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -61,8 +60,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -86,8 +84,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -109,8 +106,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -129,8 +125,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -159,8 +154,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
             CoverityPublisher publisher = new CoverityPublisher(
                     null, null, false, false, false, false, false,
-                    StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                    null, taOptionBlock, null
+                    taOptionBlock, null
             );
 
             ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -185,8 +179,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, taOptionBlock, null
+                taOptionBlock, null
         );
 
         ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -213,8 +206,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, taOptionBlock, null
+                taOptionBlock, null
         );
 
         ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -230,8 +222,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     public void cannotExecuteTest() throws IOException, InterruptedException {
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);

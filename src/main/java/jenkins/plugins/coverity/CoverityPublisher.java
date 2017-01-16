@@ -52,11 +52,12 @@ public class CoverityPublisher extends Recorder {
 
     private static final Logger logger = Logger.getLogger(CoverityPublisher.class.getName());
 
-    //deprecated fields
+    // deprecated fields which were removed in plugin version 1.2
     private transient String cimInstance;
     private transient String project;
     private transient String stream;
     private transient DefectFilters defectFilters;
+
     /**
      * List of CIM streams configured
      */
@@ -106,10 +107,6 @@ public class CoverityPublisher extends Recorder {
                              boolean keepIntDir,
                              boolean skipFetchingDefects,
                              boolean hideChart,
-                             String cimInstance,
-                             String project,
-                             String stream,
-                             DefectFilters defectFilters,
                              TaOptionBlock taOptionBlock,
                              ScmOptionBlock scmOptionBlock) {
         this.cimStreams = cimStreams;
@@ -119,17 +116,23 @@ public class CoverityPublisher extends Recorder {
         this.keepIntDir = keepIntDir;
         this.skipFetchingDefects = skipFetchingDefects;
         this.hideChart = hideChart;
-        this.cimInstance = cimInstance;
-        this.project = project;
-        this.stream = stream;
-        this.defectFilters = defectFilters;
         this.taOptionBlock = taOptionBlock;
         this.scmOptionBlock = scmOptionBlock;
         this.unstableBuild = false;
-        if(isOldDataPresent()) {
+    }
+
+    /**
+     * Implement readResolve to update the de-serialized object in the case transient data was found. Transient fields
+     * will be read during de-serialization and readResolve allow updating the Publisher object after being created.
+     */
+    protected Object readResolve() {
+        // Check for old data values cimInstance, project, stream, defectFilters being set
+        if(cimInstance != null || project != null || stream != null || defectFilters != null) {
             logger.info("Old data format detected. Converting to new format.");
-            convertOldData();
+            convertTransientDataFields();
         }
+
+        return this;
     }
 
     /**
@@ -137,7 +140,7 @@ public class CoverityPublisher extends Recorder {
      * and adds to the configured streams. Then trims any configured streams which are not valid (when a stream
      * is missing a instance, project or stream name it is not valid).
      */
-    private void convertOldData() {
+    private void convertTransientDataFields() {
         CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null, null);
 
         cimInstance = null;
@@ -150,13 +153,6 @@ public class CoverityPublisher extends Recorder {
         }
         cimStreams.add(newcs);
         trimInvalidStreams();
-    }
-
-    /**
-     * Checks for old data values cimInstance, project, stream, defectFilters being set
-     */
-    private boolean isOldDataPresent() {
-        return cimInstance != null || project != null || stream != null || defectFilters != null;
     }
 
     /**
@@ -256,11 +252,6 @@ public class CoverityPublisher extends Recorder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         // set initial state for unstable build to false
         this.unstableBuild = false;
-
-        if(isOldDataPresent()) {
-            logger.info("Old data format detected. Converting to new format.");
-            convertOldData();
-        }
 
         if(build.getResult().isWorseOrEqualTo(Result.FAILURE)) return true;
 
