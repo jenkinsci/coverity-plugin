@@ -50,6 +50,16 @@ public class CovManageHistoryCommand extends CoverityCommand {
         listener.getLogger().println("[Coverity] cov-manage-history command line arguments: " + commandLine.toString());
     }
 
+    @Override
+    protected boolean canExecute() {
+        TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
+
+        if (taOptionBlock == null || !taOptionBlock.getCovHistoryCheckbox()) {
+            return false;
+        }
+        return true;
+    }
+
     private void addCimStreamInfo(){
         addArgument(hostArg);
         addArgument(cimInstance.getHost());

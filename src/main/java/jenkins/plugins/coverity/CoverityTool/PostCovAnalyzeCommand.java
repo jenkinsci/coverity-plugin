@@ -30,15 +30,22 @@ public class PostCovAnalyzeCommand extends CommandBase {
     protected void prepareCommand() {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         try{
-            if (invocationAssistance != null) {
-                String postCovAnalyzeCmd = invocationAssistance.getPostCovAnalyzeCmd();
-                if (!StringUtils.isEmpty(postCovAnalyzeCmd)) {
-                    addArguments(EnvParser.tokenize(postCovAnalyzeCmd));
-                    listener.getLogger().println("[Coverity] post cov-analyze command line arguments: " + commandLine.toString());
-                }
+            String postCovAnalyzeCmd = invocationAssistance.getPostCovAnalyzeCmd();
+            if (!StringUtils.isEmpty(postCovAnalyzeCmd)) {
+                addArguments(EnvParser.tokenize(postCovAnalyzeCmd));
+                listener.getLogger().println("[Coverity] post cov-analyze command line arguments: " + commandLine.toString());
             }
         } catch(ParseException e) {
             throw new RuntimeException("ParseException occurred during tokenizing the post cov-analyze command.");
         }
+    }
+
+    @Override
+    protected boolean canExecute() {
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        if (invocationAssistance == null || !invocationAssistance.getIsUsingPostCovAnalyzeCmd()) {
+            return false;
+        }
+        return true;
     }
 }

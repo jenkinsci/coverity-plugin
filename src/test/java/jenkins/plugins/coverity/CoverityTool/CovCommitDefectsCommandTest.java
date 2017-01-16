@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
-    public void CovCommitDefectsCommand_PrepareCommandTest() throws IOException, InterruptedException {
+    public void prepareCommandTest() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
@@ -56,7 +56,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovCommitDefectsCommand_AddDataPortTest() throws IOException, InterruptedException {
+    public void addDataPortTest() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
@@ -86,7 +86,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovCommitDefectsCommand_AddDataPortTest_WithSslConfiguration() throws IOException, InterruptedException {
+    public void addDataPortTest_WithSslConfiguration() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
@@ -123,7 +123,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovCommitDefectsCommand_AddHttpsPortTest() throws IOException, InterruptedException {
+    public void addHttpsPortTest() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
@@ -160,7 +160,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovCommitDefectsCommand_AddCommitArgumentsTest() throws IOException, InterruptedException {
+    public void addCommitArgumentsTest() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
@@ -190,7 +190,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovCommitDefectsCommand_AddCommitArgumentsTest_WithParseException() throws IOException, InterruptedException {
+    public void addCommitArgumentsTest_WithParseException() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
@@ -216,5 +216,18 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         }catch (RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the cov-commit-defect commit arguments.", e.getMessage());
         }
+    }
+
+    @Test
+    public void cannotExecute() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                null, null, null
+        );
+
+        ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_JASPER);
+        covCommitDefectsCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

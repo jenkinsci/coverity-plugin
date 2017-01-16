@@ -35,10 +35,18 @@ public class CovCaptureCommand extends CoverityCommand {
         listener.getLogger().println("[Coverity] cov-capture command line arguments: " + commandLine.toString());
     }
 
+    @Override
+    protected boolean canExecute() {
+        if (publisher.getTaOptionBlock() == null) {
+            return false;
+        }
+        return true;
+    }
+
     private void addCustomTestCommand(){
         TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
         try{
-            if (taOptionBlock != null && !StringUtils.isEmpty(taOptionBlock.getCustomTestCommand())){
+            if (!StringUtils.isEmpty(taOptionBlock.getCustomTestCommand())){
                 addArguments(EnvParser.tokenize(taOptionBlock.getCustomTestCommand()));
             }
         }catch(ParseException parseException){

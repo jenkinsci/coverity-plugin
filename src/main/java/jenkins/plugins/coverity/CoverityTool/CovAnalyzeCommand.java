@@ -40,6 +40,16 @@ public class CovAnalyzeCommand extends CoverityCommand {
         listener.getLogger().println("[Coverity] cov-analyze command line arguments: " + commandLine.toString());
     }
 
+    @Override
+    protected boolean canExecute() {
+        if (publisher.getInvocationAssistance() != null ||
+                publisher.getTaOptionBlock() != null) {
+            return true;
+        }
+
+        return false;
+    }
+
     private void addMisraConfiguration(){
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         if (invocationAssistance != null && invocationAssistance.getIsUsingMisra()){

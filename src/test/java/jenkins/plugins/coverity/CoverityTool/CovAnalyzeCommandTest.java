@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 public class CovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
-    public void CovAnalyzeCommand_MisraConfigurationTest() throws IOException, InterruptedException {
+    public void addMisraConfigurationTest() throws IOException, InterruptedException {
         File misraConfigFile = new File("misraConfigFile");
         try{
             misraConfigFile.createNewFile();
@@ -52,7 +52,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovAnalyzeCommand_MisraConfigurationTest_WithEmptyMisraConfigFilePath() throws IOException, InterruptedException {
+    public void addMisraConfigurationTest_WithEmptyMisraConfigFilePath() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -75,7 +75,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovAnalyzeCommand_MisraConfigurationTest_WithInvalidMisraConfigFilePath() throws IOException, InterruptedException {
+    public void addMisraConfigurationTest_WithInvalidMisraConfigFilePath() throws IOException, InterruptedException {
         File misraConfigFile = new File("misraConfigFile");
 
         InvocationAssistance invocationAssistance = new InvocationAssistance(
@@ -100,7 +100,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovAnalyzeCommand_AdditionalArgumentsTest() throws IOException, InterruptedException {
+    public void additionalArgumentsTest() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
                 StringUtils.EMPTY, "additionalArgs", StringUtils.EMPTY, StringUtils.EMPTY,
@@ -120,7 +120,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovAnalyzeCommand_AdditionalArgumentsTest_WithParseException() throws IOException, InterruptedException {
+    public void additionalArgumentsTest_WithParseException() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
                 false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
                 StringUtils.EMPTY, "\'", StringUtils.EMPTY, StringUtils.EMPTY,
@@ -143,7 +143,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovAnalyzeCommand_TestAdvisorConfigurationTest_WithEmptyStripPath() throws IOException, InterruptedException {
+    public void addTestAdvisorConfigurationTest_WithEmptyStripPath() throws IOException, InterruptedException {
         File taPolicyFile = new File("taPolicyFile");
         try{
             taPolicyFile.createNewFile();
@@ -173,7 +173,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovAnalyzeCommand_TestAdvisorConfigurationTest_WithEmptyTaPolicyFilePath() throws IOException, InterruptedException {
+    public void addTestAdvisorConfigurationTest_WithEmptyTaPolicyFilePath() throws IOException, InterruptedException {
         TaOptionBlock taOptionBlock = new TaOptionBlock(
                 StringUtils.EMPTY, false, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -199,7 +199,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovAnalyzeCommand_TestAdvisorConfigurationTest_WithInvalidTaPolicyFilePath() throws IOException, InterruptedException {
+    public void addTestAdvisorConfigurationTest_WithInvalidTaPolicyFilePath() throws IOException, InterruptedException {
         File taPolicyFile = new File("taPolicyFile");
 
         TaOptionBlock taOptionBlock = new TaOptionBlock(
@@ -224,5 +224,18 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         }catch(RuntimeException e) {
             assertEquals("Could not find test policy file at \"" + taPolicyFile.getAbsolutePath() + "\"", e.getMessage());
         }
+    }
+
+    @Test
+    public void cannotExecuteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                null, null, null
+        );
+
+        ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covAnalyzeCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

@@ -40,17 +40,24 @@ public class CovEmitJavaCommand extends CoverityCommand {
         listener.getLogger().println("[Coverity] cov-emit-java command line arguments: " + commandLine.toString());
     }
 
+    @Override
+    protected boolean canExecute() {
+        if (publisher.getInvocationAssistance() == null) {
+            return false;
+        }
+
+        return true;
+    }
+
     private void addJavaWarFiles(){
         List<String> javaWarFiles = new ArrayList<String>();
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        if(invocationAssistance != null){
-            List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
-            if(givenWarFiles != null && !givenWarFiles.isEmpty()){
-                for(String givenJar : givenWarFiles){
-                    String javaWarFile = CoverityUtils.evaluateEnvVars(givenJar, envVars, useAdvancedParser);
-                    if(javaWarFile != null) {
-                        javaWarFiles.add(javaWarFile);
-                    }
+        List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
+        if(givenWarFiles != null && !givenWarFiles.isEmpty()){
+            for(String givenJar : givenWarFiles){
+                String javaWarFile = CoverityUtils.evaluateEnvVars(givenJar, envVars, useAdvancedParser);
+                if(javaWarFile != null) {
+                    javaWarFiles.add(javaWarFile);
                 }
             }
         }

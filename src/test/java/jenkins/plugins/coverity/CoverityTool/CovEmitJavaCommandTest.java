@@ -22,7 +22,7 @@ import java.util.List;
 public class CovEmitJavaCommandTest extends CommandTestBase {
 
     @Test
-    public void CovEmitJavaCommand_AddJavaWarFilesTest() throws IOException, InterruptedException {
+    public void addJavaWarFilesTest() throws IOException, InterruptedException {
         List<String> javaWarFiles = new ArrayList<>();
         javaWarFiles.add("webapp1.war");
         javaWarFiles.add("webapp2.war");
@@ -43,5 +43,18 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
         setExpectedArguments(new String[] {"cov-emit-java", "--dir", "TestDir", "--webapp-archive", "webapp1.war", "--webapp-archive", "webapp2.war"});
         covEmitJavaCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-emit-java command line arguments: " + actualArguments.toString());
+    }
+
+    @Test
+    public void cannotExecuteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                null, null, null
+        );
+
+        ICommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
+        covEmitJavaCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

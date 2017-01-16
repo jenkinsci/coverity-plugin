@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 public class CovCaptureCommandTest extends CommandTestBase {
 
     @Test
-    public void CovCaptureCommand_TestAdvisorConfigurationTest() throws IOException, InterruptedException {
+    public void addTAdvisorConfigurationTest() throws IOException, InterruptedException {
         TaOptionBlock taOptionBlock = new TaOptionBlock(
                 StringUtils.EMPTY, false, false, true,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -46,7 +46,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovCaptureCommand_CustomTestCommandTest() throws IOException, InterruptedException {
+    public void customTestCommandTest() throws IOException, InterruptedException {
         TaOptionBlock taOptionBlock = new TaOptionBlock(
                 "CustomTestCommand", false, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -69,7 +69,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void CovCaptureCommand_CustomTestCommandTest_WithParseException() throws IOException, InterruptedException {
+    public void customTestCommandTest_WithParseException() throws IOException, InterruptedException {
         TaOptionBlock taOptionBlock = new TaOptionBlock(
                 "\'", false, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
@@ -92,5 +92,18 @@ public class CovCaptureCommandTest extends CommandTestBase {
         }catch (RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the cov capture custom test command.", e.getMessage());
         }
+    }
+
+    @Test
+    public void cannotExecuteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                null, null, null
+        );
+
+        ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covCaptureCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

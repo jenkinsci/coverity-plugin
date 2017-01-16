@@ -27,6 +27,7 @@ public class CovImportScmCommand extends CoverityCommand {
     private static final String scmLog = "--log";
     private static final String scmFileRegex = "--filename-regex";
     private static final String projectRootFlag = "--project-root";
+    private static final String noScmTool = "none";
 
     private ScmOptionBlock scmOptionBlock;
     private boolean useAdvancedParser;
@@ -58,6 +59,14 @@ public class CovImportScmCommand extends CoverityCommand {
 
         addScmAdditionalCommand();
         listener.getLogger().println("[Coverity] cov-import-scm command line arguments: " + commandLine.toString());
+    }
+
+    @Override
+    protected boolean canExecute() {
+        if (scmOptionBlock == null || scmOptionBlock.getScmSystem().equalsIgnoreCase(noScmTool)) {
+            return false;
+        }
+        return true;
     }
 
     private void addScmTool() {

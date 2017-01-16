@@ -69,6 +69,14 @@ public class CovCommitDefectsCommand extends CoverityCommand {
         listener.getLogger().println("[Coverity] cov-commit-defects command line arguments: " + commandLine.toString());
     }
 
+    @Override
+    protected boolean canExecute() {
+        if (publisher.getInvocationAssistance() == null) {
+            return false;
+        }
+        return true;
+    }
+
     private void addHost() {
         addArgument(hostArg);
         addArgument(cimInstance.getHost());

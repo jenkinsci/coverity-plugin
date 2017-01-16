@@ -27,15 +27,23 @@ public class PostCovBuildCommand extends CommandBase {
     protected void prepareCommand() {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         try{
-            if (invocationAssistance != null) {
-                String postCovBuildCmd = invocationAssistance.getPostCovBuildCmd();
-                if (!StringUtils.isEmpty(postCovBuildCmd)) {
-                    addArguments(EnvParser.tokenize(postCovBuildCmd));
-                }
-                listener.getLogger().println("[Coverity] post cov-build command: " + commandLine.toString());
+            String postCovBuildCmd = invocationAssistance.getPostCovBuildCmd();
+            if (!StringUtils.isEmpty(postCovBuildCmd)) {
+                addArguments(EnvParser.tokenize(postCovBuildCmd));
             }
+            listener.getLogger().println("[Coverity] post cov-build command: " + commandLine.toString());
         } catch(ParseException e) {
             throw new RuntimeException("ParseException occurred during tokenizing the post cov-build command.");
         }
+    }
+
+    @Override
+    protected boolean canExecute() {
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        if (invocationAssistance == null || !invocationAssistance.getIsUsingPostCovBuildCmd()) {
+            return false;
+        }
+
+        return true;
     }
 }

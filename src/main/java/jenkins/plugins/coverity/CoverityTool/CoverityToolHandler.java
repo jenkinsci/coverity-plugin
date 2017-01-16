@@ -69,208 +69,175 @@ public class CoverityToolHandler {
         }
 
         //run cov-build for scripting language sources only.
-        if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
-            try {
-                CoverityLauncherDecorator.SKIP.set(true);
+        try {
+            CoverityLauncherDecorator.SKIP.set(true);
 
-                ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, envVars);
-                int result = covBuildCommand.runCommand();
+            ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, envVars);
+            int result = covBuildCommand.runCommand();
 
-                if(result != 0) {
-                    listener.getLogger().println("[Coverity] cov-build returned " + result + ", aborting...");
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-
-            } finally {
-                CoverityLauncherDecorator.SKIP.set(false);
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] cov-build returned " + result + ", aborting...");
+                build.setResult(Result.FAILURE);
+                return false;
             }
+
+        } finally {
+            CoverityLauncherDecorator.SKIP.set(false);
         }
 
         //run post cov-build command.
-        if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovBuildCmd() &&
-                invocationAssistance.getPostCovBuildCmd() != null && !invocationAssistance.getPostCovBuildCmd().isEmpty()){
-            try {
-                CoverityLauncherDecorator.SKIP.set(true);
-                ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
-                int result = postCovBuildCommand.runCommand();
+        try {
+            CoverityLauncherDecorator.SKIP.set(true);
+            ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
+            int result = postCovBuildCommand.runCommand();
 
-                if(result != 0) {
-                    listener.getLogger().println("[Coverity] post cov-build command returned " + result + ", aborting...");
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-
-            } finally {
-                CoverityLauncherDecorator.SKIP.set(false);
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] post cov-build command returned " + result + ", aborting...");
+                build.setResult(Result.FAILURE);
+                return false;
             }
+
+        } finally {
+            CoverityLauncherDecorator.SKIP.set(false);
         }
 
         // Run Cov-Emit-Java
-        if(invocationAssistance != null){
-            if (invocationAssistance.getJavaWarFiles() != null && !invocationAssistance.getJavaWarFiles().isEmpty()){
-                try {
-                    CoverityLauncherDecorator.SKIP.set(true);
-                    ICommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
-                    int result = covEmitJavaCommand.runCommand();
+        try {
+            CoverityLauncherDecorator.SKIP.set(true);
+            ICommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
+            int result = covEmitJavaCommand.runCommand();
 
-                    if(result != 0) {
-                        listener.getLogger().println("[Coverity] cov-emit-java returned " + result + ", aborting...");
-                        build.setResult(Result.FAILURE);
-                        return false;
-                    }
-                } finally {
-                    CoverityLauncherDecorator.SKIP.set(false);
-                }
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] cov-emit-java returned " + result + ", aborting...");
+                build.setResult(Result.FAILURE);
+                return false;
             }
+        } finally {
+            CoverityLauncherDecorator.SKIP.set(false);
         }
 
         // Run Cov-Capture
-        if(testAnalysis != null){
-            if(testAnalysis.getCustomTestCommand() != null){
-                try {
-                    CoverityLauncherDecorator.SKIP.set(true);
-                    ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, home, envVars);
-                    int result = covCaptureCommand.runCommand();
+        try {
+            CoverityLauncherDecorator.SKIP.set(true);
+            ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, home, envVars);
+            int result = covCaptureCommand.runCommand();
 
-                    if(result != 0) {
-                        listener.getLogger().println("[Coverity] cov-capture returned " + result + ", aborting...");
-                        build.setResult(Result.FAILURE);
-                        return false;
-                    }
-                } finally {
-                    CoverityLauncherDecorator.SKIP.set(false);
-                }
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] cov-capture returned " + result + ", aborting...");
+                build.setResult(Result.FAILURE);
+                return false;
             }
+        } finally {
+            CoverityLauncherDecorator.SKIP.set(false);
         }
 
         // Run Cov Manage History
-        if(testAnalysis != null){
-            if(testAnalysis.getCovHistoryCheckbox()){
-                for(CIMStream cimStream : publisher.getCimStreams()) {
-                    CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
-                    try {
-                        CoverityLauncherDecorator.SKIP.set(true);
+        for(CIMStream cimStream : publisher.getCimStreams()) {
+            CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
+            try {
+                CoverityLauncherDecorator.SKIP.set(true);
 
-                        ICommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
-                        int result = covManageHistoryCommand.runCommand();
+                ICommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+                int result = covManageHistoryCommand.runCommand();
 
-                        if(result != 0) {
-                            listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
+                if(result != 0) {
+                    listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
 
-                            build.setResult(Result.FAILURE);
-                            return false;
-                        }
-                    } finally {
-                        CoverityLauncherDecorator.SKIP.set(false);
-                    }
+                    build.setResult(Result.FAILURE);
+                    return false;
                 }
+            } finally {
+                CoverityLauncherDecorator.SKIP.set(false);
             }
         }
 
         // Run Cov Import Scm
-        if(scm != null && !scm.getScmSystem().equals("none")){
+        try {
+            CoverityLauncherDecorator.SKIP.set(true);
 
-            try {
-                CoverityLauncherDecorator.SKIP.set(true);
+            ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, home, envVars);
+            int result = covImportScmCommand.runCommand();
 
-                ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, home, envVars);
-                int result = covImportScmCommand.runCommand();
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] cov-import-scm returned " + result + ", aborting...");
 
-                if(result != 0) {
-                    listener.getLogger().println("[Coverity] cov-import-scm returned " + result + ", aborting...");
-
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-            } finally {
-                CoverityLauncherDecorator.SKIP.set(false);
+                build.setResult(Result.FAILURE);
+                return false;
             }
+        } finally {
+            CoverityLauncherDecorator.SKIP.set(false);
         }
 
         //run cov-analyze
-        if(invocationAssistance != null || testAnalysis != null){
-            InvocationAssistance effectiveIA = invocationAssistance;
+        try {
+            CoverityLauncherDecorator.SKIP.set(true);
+            ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, home, envVars);
+            int result = covAnalyzeCommand.runCommand();
 
-            try {
-                CoverityLauncherDecorator.SKIP.set(true);
-                ICommand covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, home, envVars);
-                int result = covAnalyzeCommand.runCommand();
-
-                if(result != 0) {
-                    listener.getLogger().println("[Coverity] cov-analyze returned " + result + ", aborting...");
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-
-            } finally {
-                CoverityLauncherDecorator.SKIP.set(false);
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] cov-analyze returned " + result + ", aborting...");
+                build.setResult(Result.FAILURE);
+                return false;
             }
+
+        } finally {
+            CoverityLauncherDecorator.SKIP.set(false);
         }
 
         //run post cov-analyze command.
-        if(invocationAssistance != null && invocationAssistance.getIsUsingPostCovAnalyzeCmd() &&
-                invocationAssistance.getPostCovAnalyzeCmd() != null && !invocationAssistance.getPostCovAnalyzeCmd().isEmpty()){
-            try {
+        try {
+            CoverityLauncherDecorator.SKIP.set(true);
+            ICommand postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
+            int result = postCovAnalyzeCommand.runCommand();
+
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] post cov-analyze command returned " + result + ", aborting...");
+                build.setResult(Result.FAILURE);
+                return false;
+            }
+
+        } finally {
+            CoverityLauncherDecorator.SKIP.set(false);
+        }
+
+        // Import Microsoft Visual Studio Code Anaysis results
+        listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
+        File[] outputFiles = findMsvscaOutputFiles(temp.getTempDir().getRemote());
+        if (outputFiles == null || outputFiles.length == 0){
+            listener.getLogger().println("[Coverity] MSVSCA No results found, skipping");
+        }else{
+            try{
                 CoverityLauncherDecorator.SKIP.set(true);
-                ICommand postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
-                int result = postCovAnalyzeCommand.runCommand();
+                ICommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, home, envVars, outputFiles);
+                int result = covImportMsvscaCommand.runCommand();
 
                 if(result != 0) {
-                    listener.getLogger().println("[Coverity] post cov-analyze command returned " + result + ", aborting...");
+                    listener.getLogger().println("[Coverity] cov-import-msvsca returned " + result + ", aborting...");
                     build.setResult(Result.FAILURE);
                     return false;
                 }
 
-            } finally {
+            }finally{
                 CoverityLauncherDecorator.SKIP.set(false);
-            }
-        }
-
-        // Import Microsoft Visual Studio Code Anaysis results
-        if(invocationAssistance != null) {
-            if(invocationAssistance.getCsharpMsvsca()) {
-                listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
-                File[] outputFiles = findMsvscaOutputFiles(temp.getTempDir().getRemote());
-                if (outputFiles == null || outputFiles.length == 0){
-                    listener.getLogger().println("[Coverity] MSVSCA No results found, skipping");
-                }else{
-                    try{
-                        CoverityLauncherDecorator.SKIP.set(true);
-                        ICommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, home, envVars, outputFiles);
-                        int result = covImportMsvscaCommand.runCommand();
-
-                        if(result != 0) {
-                            listener.getLogger().println("[Coverity] cov-import-msvsca returned " + result + ", aborting...");
-                            build.setResult(Result.FAILURE);
-                            return false;
-                        }
-
-                    }finally{
-                        CoverityLauncherDecorator.SKIP.set(false);
-                    }
-                }
             }
         }
 
         //run cov-commit-defects
         for(CIMStream cimStream : publisher.getCimStreams()) {
             CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
-            if(invocationAssistance != null) {
-                CoverityLauncherDecorator.SKIP.set(true);
+            CoverityLauncherDecorator.SKIP.set(true);
 
-                try {
-                    ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
-                    int result = covCommitDefectsCommand.runCommand();
+            try {
+                ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+                int result = covCommitDefectsCommand.runCommand();
 
-                    if(result != 0) {
-                        listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
-                        build.setResult(Result.FAILURE);
-                        return false;
-                    }
-                } finally {
-                    CoverityLauncherDecorator.SKIP.set(false);
+                if(result != 0) {
+                    listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
+                    build.setResult(Result.FAILURE);
+                    return false;
                 }
+            } finally {
+                CoverityLauncherDecorator.SKIP.set(false);
             }
         }
 

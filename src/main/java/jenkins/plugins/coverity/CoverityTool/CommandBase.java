@@ -66,8 +66,15 @@ public abstract class CommandBase implements ICommand {
         if (invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
             useAdvancedParser = true;
         }
-        prepareCommand();
-        return CoverityUtils.runCmd(commandLine, build, launcher, listener, envVars, useAdvancedParser);
+
+        if (canExecute()){
+            prepareCommand();
+            return CoverityUtils.runCmd(commandLine, build, launcher, listener, envVars, useAdvancedParser);
+        }
+
+        listener.getLogger().println("[Coverity] Skipping command because it can't be executed");
+        // Need to return 0 to move onto different commands, rather than marking the build to fail.
+        return 0;
     }
 
     public List<String> getCommandLines() {
@@ -75,4 +82,6 @@ public abstract class CommandBase implements ICommand {
     }
 
     protected abstract void prepareCommand();
+
+    protected abstract boolean canExecute();
 }

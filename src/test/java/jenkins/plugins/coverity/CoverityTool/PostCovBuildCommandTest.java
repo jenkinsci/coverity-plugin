@@ -23,9 +23,9 @@ import static org.junit.Assert.assertEquals;
 public class PostCovBuildCommandTest extends CommandTestBase {
 
     @Test
-    public void postCovBuildCommand_PrepareCommandTest() throws IOException, InterruptedException {
+    public void prepareCommandTest() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, "TestPostBuildCommand", false, StringUtils.EMPTY, false, false,
+                true, "TestPostBuildCommand", false, StringUtils.EMPTY, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
@@ -43,9 +43,9 @@ public class PostCovBuildCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void postCovBuildCommand_PrepareCommandTest_WithParseException() throws IOException, InterruptedException {
+    public void prepareCommandTest_WithParseException() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, "\'", false, StringUtils.EMPTY, false, false,
+                true, "\'", false, StringUtils.EMPTY, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
@@ -63,5 +63,18 @@ public class PostCovBuildCommandTest extends CommandTestBase {
         }catch(RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the post cov-build command.", e.getMessage());
         }
+    }
+
+    @Test
+    public void cannotExeucteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                null, null, null
+        );
+
+        ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
+        postCovBuildCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

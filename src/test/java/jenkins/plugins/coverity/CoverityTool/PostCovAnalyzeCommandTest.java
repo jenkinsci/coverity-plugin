@@ -23,9 +23,9 @@ import static org.junit.Assert.assertEquals;
 public class PostCovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
-    public void postCovAnalyzeCommand_PrepareCommandTest() throws IOException, InterruptedException {
+    public void prepareCommandTest() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, "TestPostAnalyzeCommand", false, false,
+                false, StringUtils.EMPTY, true, "TestPostAnalyzeCommand", false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
@@ -43,9 +43,9 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void postCovAnalyzeCommand_PrepareCommandTest_WithParseException() throws IOException, InterruptedException {
+    public void prepareCommandTest_WithParseException() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, "\'", false, false,
+                false, StringUtils.EMPTY, true, "\'", false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
@@ -63,5 +63,18 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
         }catch(RuntimeException e) {
             assertEquals("ParseException occurred during tokenizing the post cov-analyze command.", e.getMessage());
         }
+    }
+
+    @Test
+    public void cannotExeucteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisher(
+                null, null, false, false, false, false, false,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                null, null, null
+        );
+
+        ICommand postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
+        postCovAnalyzeCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }

@@ -42,6 +42,15 @@ public class CovBuildCommand extends CoverityCommand {
         listener.getLogger().println("[Coverity] cov-build command line arguments: " + commandLine.toString());
     }
 
+    @Override
+    protected boolean canExecute() {
+        if (publisher.getInvocationAssistance() == null) {
+            return false;
+        }
+
+        return true;
+    }
+
     private void prepareCovBuildCommandForScriptSources() {
         addArgument(noCommandArg);
         addScriptSourcesArgs();
@@ -51,7 +60,7 @@ public class CovBuildCommand extends CoverityCommand {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
 
         // It is possible for users to run cov-build for compiled sources and script sources at the same time.
-        if (invocationAssistance != null && invocationAssistance.getIsScriptSrc()) {
+        if (invocationAssistance.getIsScriptSrc()) {
             addScriptSourcesArgs();
         }
 
@@ -66,11 +75,9 @@ public class CovBuildCommand extends CoverityCommand {
 
     private void addAdditionalBuildArguments() {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        if (invocationAssistance != null){
-            String buildArgs = invocationAssistance.getBuildArguments();
-            if (!StringUtils.isEmpty(buildArgs)){
-                addArguments(EnvParser.tokenizeWithRuntimeException(buildArgs));
-            }
+        String buildArgs = invocationAssistance.getBuildArguments();
+        if (!StringUtils.isEmpty(buildArgs)){
+            addArguments(EnvParser.tokenizeWithRuntimeException(buildArgs));
         }
     }
 }

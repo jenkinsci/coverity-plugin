@@ -15,6 +15,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.InvocationAssistance;
 
 import java.io.File;
 
@@ -34,6 +35,15 @@ public class CovImportMsvscaCommand extends CoverityCommand {
     protected void prepareCommand() {
         addOutputFiles();
         listener.getLogger().println("[Coverity] cov-import-msvsca command line arguments: " + commandLine.toString());
+    }
+
+    @Override
+    protected boolean canExecute() {
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        if (invocationAssistance == null || !invocationAssistance.getCsharpMsvsca()) {
+            return false;
+        }
+        return true;
     }
 
     private void addOutputFiles() {
