@@ -37,7 +37,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--no-command", "--fs-capture-search", "$WORKSPACE"});
         covBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
@@ -55,8 +55,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, invocationAssistance, false, false, false, false, false,
                 null, null
         );
-
-        ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--fs-capture-search", "$WORKSPACE"});
         covBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
@@ -85,7 +84,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 taOptionBlock, null
         );
 
-        ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
         covBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
@@ -104,7 +103,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "AdditionalBuildArguments"});
         covBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
@@ -117,7 +116,7 @@ public class CovBuildCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         covBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }

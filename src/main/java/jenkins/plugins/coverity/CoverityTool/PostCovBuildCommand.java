@@ -17,7 +17,7 @@ import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 
-public class PostCovBuildCommand extends CommandBase {
+public class PostCovBuildCommand extends Command {
 
     public PostCovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, EnvVars envVars) {
         super(build, launcher, listener, publisher, envVars);

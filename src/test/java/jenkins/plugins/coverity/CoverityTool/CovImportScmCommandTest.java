@@ -36,7 +36,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git"});
         covImportScmCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
@@ -55,7 +55,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--tool", "TestCustomTestTool"});
         covImportScmCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
@@ -74,7 +74,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--tool-arg", "TestScmToolArguments"});
         covImportScmCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
@@ -93,7 +93,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--command-arg", "TestScmCommandArguments"});
         covImportScmCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
@@ -112,7 +112,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--log", "TestLogFileLocation"});
         covImportScmCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
@@ -131,7 +131,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--filename-regex", "*.java"});
         covImportScmCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
@@ -150,7 +150,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "accurev", "--project-root", "TestAccurrevProjectRoot"});
         covImportScmCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
@@ -169,7 +169,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "perforce"});
         covImportScmCommand.runCommand();
         assertEquals("1234", envVars.get("P4PORT"));
@@ -189,7 +189,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "AdditionalCommand"});
         covImportScmCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-scm command line arguments: " + actualArguments.toString());
@@ -208,7 +208,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, scmOptionBlock
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covImportScmCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");
@@ -224,7 +224,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         covImportScmCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }

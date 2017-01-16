@@ -52,7 +52,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
                 taOptionBlock, null
         );
 
-        ICommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
                 "--port", "8080", "--stream", "TestStream", "--user", "TestUser", "--merge"
@@ -89,7 +89,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
                 taOptionBlock, null
         );
 
-        ICommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_INDIO);
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_INDIO);
         setExpectedArguments(new String[] {
                 "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
                 "--port", "8080", "--stream", "TestStream", "--ssl", "--user", "TestUser", "--merge"
@@ -134,7 +134,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
         when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
 
-        ICommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
                 "--port", "8080", "--stream", "TestStream", "--ssl", "--on-new-cert", "trust",
@@ -152,7 +152,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_INDIO);
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_INDIO);
         setExpectedArguments(new String[] {
                 "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
                 "--port", "8080", "--stream", "TestStream", "--ssl", "--user", "TestUser", "--merge"

@@ -21,7 +21,7 @@ import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
 
-public abstract class CoverityCommand extends CommandBase {
+public abstract class CoverityCommand extends Command {
 
     private static final String intermediateDirArguments = "--dir";
     private static final String covIdirEnvVar = "COV_IDIR";

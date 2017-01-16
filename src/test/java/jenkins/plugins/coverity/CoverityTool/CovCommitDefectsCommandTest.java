@@ -44,7 +44,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--port", "8080", "--stream", "TestStream", "--user", "TestUser"
@@ -73,7 +73,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--dataport", "1234", "--stream", "TestStream", "--user", "TestUser"
@@ -109,7 +109,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
         when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
 
-        ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--dataport", "1234", "--ssl", "--on-new-cert", "trust", "--cert", "TestCertFile",
@@ -146,7 +146,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
         when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
 
-        ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--https-port", "8080", "--ssl", "--on-new-cert", "trust", "--cert", "TestCertFile",
@@ -176,7 +176,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--port", "8080", "--stream", "TestStream", "--user", "TestUser", "AdditionalCommitArguments"
@@ -205,7 +205,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         try{
             covCommitDefectsCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");
@@ -221,7 +221,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_JASPER);
         covCommitDefectsCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }

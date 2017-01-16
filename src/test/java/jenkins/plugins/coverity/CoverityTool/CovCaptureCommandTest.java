@@ -38,7 +38,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 taOptionBlock, null
         );
 
-        ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
         covCaptureCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-capture command line arguments: " + actualArguments.toString());
@@ -60,7 +60,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 taOptionBlock, null
         );
 
-        ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "CustomTestCommand"});
         covCaptureCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-capture command line arguments: " + actualArguments.toString());
@@ -82,7 +82,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 taOptionBlock, null
         );
 
-        ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
             covCaptureCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");
@@ -98,7 +98,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         covCaptureCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }

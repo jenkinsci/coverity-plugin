@@ -40,7 +40,7 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, outputFiles);
+        Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, outputFiles);
         setExpectedArguments(new String[] {
                 "cov-import-msvsca", "--dir", "TestDir", "--append", analysisLog1.getAbsolutePath(), analysisLog2.getAbsolutePath()
         });
@@ -55,7 +55,7 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null);
+        Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null);
         covImportMsvscaCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }

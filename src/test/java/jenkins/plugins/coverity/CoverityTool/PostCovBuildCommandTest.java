@@ -35,7 +35,7 @@ public class PostCovBuildCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
+        Command postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
         setExpectedArguments(new String[] {"TestPostBuildCommand"});
         postCovBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] post cov-build command: " + actualArguments.toString());
@@ -54,7 +54,7 @@ public class PostCovBuildCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
+        Command postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
         try{
             postCovBuildCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");
@@ -70,7 +70,7 @@ public class PostCovBuildCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
+        Command postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
         postCovBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }

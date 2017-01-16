@@ -35,7 +35,7 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
+        Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
         setExpectedArguments(new String[] {"TestPostAnalyzeCommand"});
         postCovAnalyzeCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] post cov-analyze command line arguments: " + actualArguments.toString());
@@ -54,7 +54,7 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
+        Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
         try{
             postCovAnalyzeCommand.runCommand();
             Assert.fail("RuntimeException should have been thrown");
@@ -70,7 +70,7 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
                 null, null
         );
 
-        ICommand postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
+        Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
         postCovAnalyzeCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }

@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class CommandBase implements ICommand {
+public abstract class Command {
 
     protected List<String> commandLine;
     protected AbstractBuild build;
@@ -31,7 +31,7 @@ public abstract class CommandBase implements ICommand {
     protected CoverityPublisher publisher;
     protected EnvVars envVars;
 
-    public CommandBase(
+    public Command(
             @Nonnull AbstractBuild<?, ?> build,
             @Nonnull Launcher launcher,
             @Nonnull TaskListener listener,

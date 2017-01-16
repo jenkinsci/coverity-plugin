@@ -20,7 +20,7 @@ import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.ParseException;
 import org.apache.commons.lang.StringUtils;
 
-public class PostCovAnalyzeCommand extends CommandBase {
+public class PostCovAnalyzeCommand extends Command {
 
     public PostCovAnalyzeCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, EnvVars envVars) {
         super(build, launcher, listener, publisher, envVars);
