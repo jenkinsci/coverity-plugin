@@ -10,15 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v9.*;
-import hudson.util.FormValidation;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import javax.xml.namespace.QName;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.soap.SOAPFaultException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -28,24 +19,44 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.ws.soap.SOAPFaultException;
+
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import com.coverity.ws.v9.ConfigurationService;
+import com.coverity.ws.v9.ConfigurationServiceService;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.DefectService;
+import com.coverity.ws.v9.MergedDefectDataObj;
+import com.coverity.ws.v9.MergedDefectFilterSpecDataObj;
+import com.coverity.ws.v9.MergedDefectsPageDataObj;
+import com.coverity.ws.v9.PageSpecDataObj;
+import com.coverity.ws.v9.PermissionDataObj;
+import com.coverity.ws.v9.ProjectDataObj;
+import com.coverity.ws.v9.ProjectFilterSpecDataObj;
+import com.coverity.ws.v9.RoleAssignmentDataObj;
+import com.coverity.ws.v9.RoleDataObj;
+import com.coverity.ws.v9.SnapshotScopeSpecDataObj;
+import com.coverity.ws.v9.StreamDataObj;
+import com.coverity.ws.v9.StreamFilterSpecDataObj;
+import com.coverity.ws.v9.StreamIdDataObj;
+import com.coverity.ws.v9.UserDataObj;
+
+import hudson.util.FormValidation;
+import jenkins.plugins.coverity.ws.WebServiceFactory;
 
 /**
  * Represents one Coverity Integrity Manager server. Abstracts functions like getting streams and defects.
  */
 public class CIMInstance {
     private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
-
-    public static final String COVERITY_V9_NAMESPACE = "http://ws.coverity.com/v9";
-
-    public static final String CONFIGURATION_SERVICE_V9_WSDL = "/ws/v9/configurationservice?wsdl";
-    public static final String DEFECT_SERVICE_V9_WSDL = "/ws/v9/defectservice?wsdl";
 
     /**
      * Pattern to ignore streams - this is used to filter out internal DA streams, which are irrelevant to this plugin
@@ -86,11 +97,6 @@ public class CIMInstance {
      * Use SSL
      */
     private final boolean useSSL;
-
-    /**
-     * cached webservice port for Defect service
-     */
-    private transient DefectServiceService defectServiceService;
 
     /**
      * cached webservice port for Configuration service
@@ -137,67 +143,17 @@ public class CIMInstance {
     }
 
     /**
-     * The root URL for the CIM instance
-     *
-     * @return a url
-     * @throws MalformedURLException should not happen if host is valid
-     */
-    public URL getURL() throws MalformedURLException {
-        return new URL(isUseSSL() ? "https" : "http", host, port, "/");
-    }
-
-    /**
      * Returns a Defect service client using v9 web services.
      */
     public DefectService getDefectService() throws IOException {
-        synchronized(this) {
-            if(defectServiceService == null) {
-                defectServiceService = new DefectServiceService(
-                        new URL(getURL(), DEFECT_SERVICE_V9_WSDL),
-                        new QName(COVERITY_V9_NAMESPACE, "DefectServiceService"));
-            }
-        }
-
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            DefectService defectService = defectServiceService.getDefectServicePort();
-            attachAuthenticationHandler((BindingProvider) defectService);
-
-            return defectService;
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
-        }
-    }
-
-    /**
-     * Attach an authentication handler to the web service, that uses the configured user and password
-     */
-    private void attachAuthenticationHandler(BindingProvider service) {
-        service.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(user, password)));
+        return WebServiceFactory.getInstance().getDefectService(this);
     }
 
     /**
      * Returns a Configuration service client using v9 web services.
      */
     public ConfigurationService getConfigurationService() throws IOException {
-        synchronized(this) {
-            if(configurationServiceService == null) {
-                // Create a Web Services port to the server
-                configurationServiceService = new ConfigurationServiceService(
-                        new URL(getURL(), CONFIGURATION_SERVICE_V9_WSDL),
-                        new QName(COVERITY_V9_NAMESPACE, "ConfigurationServiceService"));
-            }
-        }
-
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            ConfigurationService configurationService = configurationServiceService.getConfigurationServicePort();
-            attachAuthenticationHandler((BindingProvider) configurationService);
-
-            return configurationService;
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
-        }
+        return WebServiceFactory.getInstance().getConfigurationService(this);
     }
 
     public List<MergedDefectDataObj> getDefects(String streamId, List<Long> defectIds) throws IOException, CovRemoteServiceException_Exception {
@@ -320,8 +276,8 @@ public class CIMInstance {
 
     public FormValidation doCheck() throws IOException {
         try {
-            URL url = getURL();
-            int responseCode = getURLResponseCode(new URL(url, CONFIGURATION_SERVICE_V9_WSDL));
+            URL url = WebServiceFactory.getInstance().getURL(this);
+            int responseCode = getURLResponseCode(new URL(url, WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL));
             if(responseCode != 200) {
                 return FormValidation.error("Coverity web services were not detected. Connection attempt responded with " +
                     responseCode + ", check Coverity Connect version (minimum supported version is " +
@@ -372,7 +328,6 @@ public class CIMInstance {
         } catch(FileNotFoundException e) {
             return 404;
         }
-
     }
 
     public String getCimInstanceCheckers() {
@@ -430,5 +385,16 @@ public class CIMInstance {
         }
 
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (host != null ? host.hashCode() : 0);
+        result = 31 * result + port;
+        result = 31 * result + dataPort;
+        result = 31 * result + (user != null ? user.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        return result;
     }
 }

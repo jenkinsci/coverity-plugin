@@ -8,7 +8,7 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity;
+package jenkins.plugins.coverity.ws;
 
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSProcessor;
