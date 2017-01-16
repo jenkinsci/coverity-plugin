@@ -15,7 +15,8 @@ import com.coverity.ws.v9.DefectStateAttributeValueDataObj;
 import hudson.Util;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.xml.datatype.DatatypeFactory;
@@ -234,7 +235,7 @@ public class DefectFilters {
     }
 
     public CoverityPublisher.DescriptorImpl getPublisherDescriptor() {
-        return Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
+        return Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
     }
 
     /**

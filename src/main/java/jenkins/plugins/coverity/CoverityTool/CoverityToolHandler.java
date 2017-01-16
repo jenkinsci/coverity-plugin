@@ -14,6 +14,7 @@ import com.coverity.ws.v9.*;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.*;
+import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.*;
 
 import java.io.BufferedReader;
@@ -385,9 +386,9 @@ public class CoverityToolHandler {
                     CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
                     build.addAction(action);
 
-                    String rootUrl = Hudson.getInstance().getRootUrl();
+                    String rootUrl = Jenkins.getInstance().getRootUrl();
                     if(rootUrl != null) {
-                        listener.getLogger().println("Coverity details: " + Hudson.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
+                        listener.getLogger().println("Coverity details: " + Jenkins.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
                     }
 
                 } catch(CovRemoteServiceException_Exception e) {

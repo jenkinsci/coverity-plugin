@@ -14,7 +14,7 @@ import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.MergedDefectDataObj;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.util.List;
@@ -59,7 +59,7 @@ public class CoverityBuildAction implements Action {
      * The data for the defects that were captured for this build. This will perform a call to the web service.
      */
     public List<MergedDefectDataObj> getDefects() throws IOException, CovRemoteServiceException_Exception {
-        CIMInstance cim = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
+        CIMInstance cim = Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
         return cim.getDefects(streamId, defectIds);
     }
 
@@ -67,7 +67,7 @@ public class CoverityBuildAction implements Action {
      * Returns the URL to the page for this defect in the CIM instance.
      */
     public String getURL(MergedDefectDataObj defect) throws IOException, CovRemoteServiceException_Exception {
-        CIMInstance instance = Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
+        CIMInstance instance = Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
         String header = "http";
 
         if(instance.isUseSSL()){

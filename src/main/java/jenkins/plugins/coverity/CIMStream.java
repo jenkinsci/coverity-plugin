@@ -17,9 +17,10 @@ import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
+
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -120,7 +121,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         }
 
         public CoverityPublisher.DescriptorImpl getPublisherDescriptor() {
-            return Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
+            return Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
         }
 
         public List<CIMInstance> getInstances() {
