@@ -114,8 +114,7 @@ public class CovBuildCommandTest extends CommandTestBase {
     public void cannotExecuteTest() throws IOException, InterruptedException {
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);

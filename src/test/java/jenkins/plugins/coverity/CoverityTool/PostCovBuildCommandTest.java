@@ -32,8 +32,7 @@ public class PostCovBuildCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
@@ -52,8 +51,7 @@ public class PostCovBuildCommandTest extends CommandTestBase {
         );
         CoverityPublisher publisher = new CoverityPublisher(
                 null, invocationAssistance, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
@@ -69,8 +67,7 @@ public class PostCovBuildCommandTest extends CommandTestBase {
     public void cannotExeucteTest() throws IOException, InterruptedException {
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);

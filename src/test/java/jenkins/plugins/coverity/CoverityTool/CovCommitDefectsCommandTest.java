@@ -218,8 +218,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     public void cannotExecute() throws IOException, InterruptedException {
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_JASPER);

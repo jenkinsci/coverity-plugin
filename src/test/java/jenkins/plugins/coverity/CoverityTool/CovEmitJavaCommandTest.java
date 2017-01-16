@@ -48,8 +48,7 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
     public void cannotExecuteTest() throws IOException, InterruptedException {
         CoverityPublisher publisher = new CoverityPublisher(
                 null, null, false, false, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                null, null, null
+                null, null
         );
 
         ICommand covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
