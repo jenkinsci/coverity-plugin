@@ -13,12 +13,13 @@ package jenkins.plugins.coverity;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.Hudson;
 import hudson.util.ChartUtil;
 import hudson.util.DataSetBuilder;
 import hudson.util.Graph;
 import hudson.util.ShiftedCategoryAxis;
 import hudson.util.StackedAreaRenderer2;
+import jenkins.model.Jenkins;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -179,7 +180,7 @@ public class CoverityProjectAction implements Action {
         }
 
         public String getUrl() {
-            return Hudson.getInstance().getRootUrl() + build.getUrl();
+            return Jenkins.getInstance().getRootUrl() + build.getUrl();
         }
 
         public int compareTo(ChartLabel that) {
