@@ -13,6 +13,7 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.ScmOptionBlock;
+import jenkins.plugins.coverity.Utils.ScmOptionBlockBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -25,11 +26,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "git", StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("git").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -40,11 +37,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void addCustomTestToolTest() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "git", "TestCustomTestTool", StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("git").withCustomTestTool("TestCustomTestTool").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -55,11 +48,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void addScmToolArgumentsTest() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "git", StringUtils.EMPTY, "TestScmToolArguments",
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("git").withScmToolArguments("TestScmToolArguments").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -70,11 +59,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void addScmCommandArgumentsTest() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "git", StringUtils.EMPTY, StringUtils.EMPTY,
-                "TestScmCommandArguments", StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("git").withScmCommandArgs("TestScmCommandArguments").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -85,11 +70,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void addLogFileLocationTest() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "git", StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, "TestLogFileLocation", StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("git").withLogFileLoc("TestLogFileLocation").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -100,11 +81,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void addFileRegexTest() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "git", StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, "*.java"
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("git").withFileRegex("*.java").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -115,11 +92,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void addAccurevProjectRootTest() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "accurev", StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                "TestAccurrevProjectRoot", StringUtils.EMPTY, StringUtils.EMPTY
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("accurev").withAccRevRepo("TestAccurrevProjectRoot").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -130,11 +103,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void addP4PortTest() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "perforce", StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, "1234",
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("perforce").withP4Port("1234").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -146,11 +115,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void addScmAdditionalCommandTest() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "git", StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, "AdditionalCommand", StringUtils.EMPTY
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("git").withScmAdditionalCmd("AdditionalCommand").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -161,11 +126,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void addScmAdditionalCommandTest_WithParseException() throws IOException, InterruptedException {
-        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(
-                "git", StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, "\'", StringUtils.EMPTY
-        );
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("git").withScmAdditionalCmd("\'").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
