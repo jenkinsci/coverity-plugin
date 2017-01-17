@@ -137,7 +137,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         setupIntermediateDirectory(build, launcher.getListener(), node, env);
-        List<String> args = new CovBuildCommand(build, launcher, launcher.getListener(), publisher, home, env).getCommandLines();
+        List<String> args = new CovBuildCommand(build, launcher, launcher.getListener(), publisher, home, env, true).getCommandLines();
 
         String[] blacklist;
         if(invocationAssistance != null) {
