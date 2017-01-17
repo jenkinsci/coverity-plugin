@@ -35,7 +35,7 @@ public class CovBuildCommand extends CoverityCommand {
     protected void prepareCommand() {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         if (invocationAssistance != null){
-            if (!catpureCompileSrc && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
+            if (!catpureCompileSrc && invocationAssistance.getIsScriptSrc()){
                 prepareCovBuildCommandForScriptSources();
             } else if (catpureCompileSrc && invocationAssistance.getIsCompiledSrc()){
                 prepareCovBuildCommandForCompileSources();
@@ -51,7 +51,7 @@ public class CovBuildCommand extends CoverityCommand {
             return false;
         }
 
-        if (!catpureCompileSrc && !invocationAssistance.getIsScriptSrc() && invocationAssistance.getIsCompiledSrc()) {
+        if (!catpureCompileSrc && !invocationAssistance.getIsScriptSrc()) {
             return false;
         }
 
