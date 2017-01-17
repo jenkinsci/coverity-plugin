@@ -12,8 +12,13 @@ package jenkins.plugins.coverity.ws;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.GregorianCalendar;
 import java.util.List;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -21,6 +26,7 @@ import org.apache.commons.lang.NotImplementedException;
 import com.coverity.ws.v9.AttributeDefinitionDataObj;
 import com.coverity.ws.v9.AttributeDefinitionIdDataObj;
 import com.coverity.ws.v9.AttributeDefinitionSpecDataObj;
+import com.coverity.ws.v9.AttributeValueIdDataObj;
 import com.coverity.ws.v9.BackupConfigurationDataObj;
 import com.coverity.ws.v9.CommitStateDataObj;
 import com.coverity.ws.v9.ComponentDataObj;
@@ -37,6 +43,7 @@ import com.coverity.ws.v9.DefectChangeDataObj;
 import com.coverity.ws.v9.DefectDetectionHistoryDataObj;
 import com.coverity.ws.v9.DefectInstanceIdDataObj;
 import com.coverity.ws.v9.DefectService;
+import com.coverity.ws.v9.DefectStateAttributeValueDataObj;
 import com.coverity.ws.v9.DefectStateSpecDataObj;
 import com.coverity.ws.v9.DeleteSnapshotJobInfoDataObj;
 import com.coverity.ws.v9.FeatureUpdateTimeDataObj;
@@ -54,6 +61,7 @@ import com.coverity.ws.v9.LicenseSpecDataObj;
 import com.coverity.ws.v9.LicenseStateDataObj;
 import com.coverity.ws.v9.LocalizedValueDataObj;
 import com.coverity.ws.v9.LoggingConfigurationDataObj;
+import com.coverity.ws.v9.MergedDefectDataObj;
 import com.coverity.ws.v9.MergedDefectFilterSpecDataObj;
 import com.coverity.ws.v9.MergedDefectIdDataObj;
 import com.coverity.ws.v9.MergedDefectsPageDataObj;
@@ -528,9 +536,57 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
     public class TestDefectService implements DefectService {
         private URL url;
+        private MergedDefectsPageDataObj mergedDefectsPageDataObj = new MergedDefectsPageDataObj();
 
         public TestDefectService(URL url) {
             this.url = url;
+        }
+
+        public void setupMergedDefects(int defectCount) throws ParseException, DatatypeConfigurationException {
+            for (long i = 0; i < defectCount; i++) {
+                MergedDefectIdDataObj idDataObj = new MergedDefectIdDataObj();
+                idDataObj.setCid(i);
+                idDataObj.setMergeKey("MK_" + i);
+                mergedDefectsPageDataObj.getMergedDefectIds().add(idDataObj);
+
+                MergedDefectDataObj defectDataObj = new MergedDefectDataObj();
+                defectDataObj.setCid(i);
+                defectDataObj.setMergeKey("MK_" + i);
+                defectDataObj.setCheckerName("TEST_CHECKER");
+                defectDataObj.setFilePathname("/defect/file/test." + i + ".java");
+                defectDataObj.setFunctionDisplayName("defect_function_" + i + "()");
+
+                // set default attribute values for filtering
+                defectDataObj.getDefectStateAttributeValues().add(newAttribute("Action", "Undecided"));
+                defectDataObj.getDefectStateAttributeValues().add(newAttribute("Classification", "Unclassified"));
+                defectDataObj.getDefectStateAttributeValues().add(newAttribute("Severity", "Unspecified"));
+                defectDataObj.setDisplayImpact("Low");
+                defectDataObj.setComponentName("Default.Other");
+
+
+                GregorianCalendar calender = new GregorianCalendar();
+                calender.setTime(new SimpleDateFormat("yyyy-MM-dd").parse("2017-02-01"));
+                defectDataObj.setFirstDetected(DatatypeFactory.newInstance().newXMLGregorianCalendar(calender));
+
+
+                mergedDefectsPageDataObj.getMergedDefects().add(defectDataObj);
+            }
+
+            mergedDefectsPageDataObj.setTotalNumberOfRecords(defectCount);
+        }
+
+        private DefectStateAttributeValueDataObj newAttribute(String name, String value){
+            DefectStateAttributeValueDataObj attributeValueDataObj = new DefectStateAttributeValueDataObj();
+
+            AttributeDefinitionIdDataObj attributeDefinitionId = new AttributeDefinitionIdDataObj();
+            attributeDefinitionId.setName(name);
+            attributeValueDataObj.setAttributeDefinitionId(attributeDefinitionId);
+
+            AttributeValueIdDataObj attributeValueId = new AttributeValueIdDataObj();
+            attributeValueId.setName(value);
+            attributeValueDataObj.setAttributeValueId(attributeValueId);
+
+            return attributeValueDataObj;
         }
 
         @Override
@@ -555,7 +611,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public MergedDefectsPageDataObj getMergedDefectsForStreams(List<StreamIdDataObj> streamIds, MergedDefectFilterSpecDataObj filterSpec, PageSpecDataObj pageSpec, SnapshotScopeSpecDataObj snapshotScope) throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            return mergedDefectsPageDataObj;
         }
 
         @Override
