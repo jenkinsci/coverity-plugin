@@ -8,7 +8,10 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity;
+package jenkins.plugins.coverity.Utils;
+
+import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.JavaWarFile;
 
 import java.util.List;
 

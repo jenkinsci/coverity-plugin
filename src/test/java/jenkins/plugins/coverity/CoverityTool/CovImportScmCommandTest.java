@@ -11,7 +11,7 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.CoverityPublisherBuilder;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.ScmOptionBlock;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;

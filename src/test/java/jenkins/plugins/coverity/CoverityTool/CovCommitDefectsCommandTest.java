@@ -11,8 +11,9 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.*;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
+import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
