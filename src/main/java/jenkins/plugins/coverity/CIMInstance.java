@@ -275,6 +275,9 @@ public class CIMInstance {
     }
 
     public FormValidation doCheck() throws IOException {
+        StringBuilder errorMessage = new StringBuilder();
+        errorMessage.append("\"" + user + "\" does not have following permission(s): ");
+
         try {
             URL url = WebServiceFactory.getInstance().getURL(this);
             int responseCode = getURLResponseCode(new URL(url, WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL));
@@ -286,8 +289,6 @@ public class CIMInstance {
 
             List<String> missingPermission = new ArrayList<String>();;
             if (!checkUserPermission(missingPermission) && !missingPermission.isEmpty()){
-                StringBuilder errorMessage = new StringBuilder();
-                errorMessage.append("\"" + user + "\" does not have following permission(s): ");
                 for (String permission : missingPermission){
                     errorMessage.append("\"" + permission + "\" ");
                 }
@@ -303,6 +304,9 @@ public class CIMInstance {
             return FormValidation.error("Error connecting to CIM. Please check your connection settings.");
         } catch(SOAPFaultException e){
             if (StringUtils.isNotEmpty(e.getMessage())){
+                if (e.getMessage().contains("User " + user + " Doesn't have permissions to perform {invokeWS}")) {
+                    return FormValidation.error(errorMessage.append("\"Access web services\"").toString());
+                }
                 return FormValidation.error(e.getMessage());
             }
             return FormValidation.error(e, "An unexpected error occurred.");
