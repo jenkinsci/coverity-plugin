@@ -10,21 +10,28 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import com.coverity.ws.v9.*;
-import hudson.EnvVars;
-import hudson.Launcher;
-import hudson.model.*;
-import jenkins.model.Jenkins;
-import jenkins.plugins.coverity.*;
-
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import hudson.EnvVars;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.Executor;
+import hudson.model.Node;
+import hudson.model.Result;
+import jenkins.plugins.coverity.CIMInstance;
+import jenkins.plugins.coverity.CIMStream;
+import jenkins.plugins.coverity.CoverityInstallation;
+import jenkins.plugins.coverity.CoverityLauncherDecorator;
+import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.CoverityTempDir;
+import jenkins.plugins.coverity.CoverityUtils;
+import jenkins.plugins.coverity.CoverityVersion;
+import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.ScmOptionBlock;
+import jenkins.plugins.coverity.TaOptionBlock;
+import jenkins.plugins.coverity.ws.DefectReader;
 
 /**
  * CoverityToolHandler handles the actual executing of Coverity executables.
@@ -255,92 +262,11 @@ public class CoverityToolHandler {
         }
 
         if(!publisher.isSkipFetchingDefects()) {
-            Pattern snapshotPattern = Pattern.compile(".*New snapshot ID (\\d*) added.");
-            BufferedReader reader = new BufferedReader(build.getLogReader());
-            String line = null;
-            List<Long> snapshotIds = new ArrayList<Long>();
-            try {
-                while((line = reader.readLine()) != null) {
-                    Matcher m = snapshotPattern.matcher(line);
-                    if(m.matches()) {
-                        snapshotIds.add(Long.parseLong(m.group(1)));
-                    }
-                }
-            } finally {
-                reader.close();
-            }
-            listener.getLogger().println("Cim Streams: " + publisher.getCimStreams().size());
-            listener.getLogger().println("Snapshot Size: " + snapshotIds.size());
-            if(snapshotIds.size() != publisher.getCimStreams().size()) {
-                listener.getLogger().println("[Coverity] Wrong number of snapshot IDs found in build log");
-                build.setResult(Result.FAILURE);
+            DefectReader defectReader = new DefectReader(build, launcher, listener, publisher);
+            Boolean result = defectReader.getLatestDefectsForBuild();
+
+            if (!result)
                 return false;
-            }
-
-            listener.getLogger().println("[Coverity] Found snapshot IDs " + snapshotIds);
-
-            for(int i = 0; i < publisher.getCimStreams().size(); i++) {
-                CIMStream cimStream = publisher.getCimStreams().get(i);
-                long snapshotId = snapshotIds.get(i);
-                try {
-                    CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
-
-                    listener.getLogger().println("[Coverity] Fetching defects for stream " + cimStream.getStream());
-
-                    List<MergedDefectDataObj> defects = getDefectsForSnapshot(cim, cimStream, snapshotId,listener);
-
-                    listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
-
-                    List<Long> matchingDefects = new ArrayList<Long>();
-                    // Loop through all defects
-                    for(MergedDefectDataObj defect : defects) {
-                        //matchingDefects.add(defect.getCid()); All the code needed when trying to get cim checkers
-                        //When there is no defect filter, we just add it to the matching defects
-                        if(cimStream.getDefectFilters() == null) {
-                            matchingDefects.add(defect.getCid());
-                        } else {
-
-                            // Check to see if defectFilter matches the defect
-                            boolean match = cimStream.getDefectFilters().matches(defect,listener);
-                            if(match) {
-                                matchingDefects.add(defect.getCid());
-                            }
-                        }
-                    }
-
-                    if(!matchingDefects.isEmpty()) {
-                        listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters: " + matchingDefects);
-                        if(publisher.isFailBuild()) {
-                            if(build.getResult().isBetterThan(Result.FAILURE)) {
-                                build.setResult(Result.FAILURE);
-                            }
-                        }
-
-                        // if the user wants to mark the build as unstable when defects are found, then we
-                        // notify the publisher to do so.
-                        if(publisher.isUnstable()){
-                            publisher.setUnstableBuild(true);
-
-                        }
-
-                    } else {
-                        listener.getLogger().println("[Coverity] No defects matched all filters.");
-                    }
-
-                    CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
-                    build.addAction(action);
-
-                    String rootUrl = Jenkins.getInstance().getRootUrl();
-                    if(rootUrl != null) {
-                        listener.getLogger().println("Coverity details: " + Jenkins.getInstance().getRootUrl() + build.getUrl() + action.getUrlName());
-                    }
-
-                } catch(CovRemoteServiceException_Exception e) {
-                    e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-            }
         }
 
         return true;
@@ -354,34 +280,5 @@ public class CoverityToolHandler {
                 return filename.endsWith("CodeAnalysisLog.xml");
             }
         }, true);
-    }
-
-    public List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, long snapshotId, BuildListener listener) throws IOException, CovRemoteServiceException_Exception {
-        int defectSize = 3000; // Maximum amount of defect to pull
-        int pageSize = 1000; // Size of page to be pulled
-        List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
-
-        DefectService ds = cim.getDefectService();
-
-        StreamIdDataObj streamId = new StreamIdDataObj();
-        streamId.setName(cimStream.getStream());
-        List<StreamIdDataObj> streamIds = new ArrayList<StreamIdDataObj>();
-        streamIds.add(streamId);
-
-        MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
-
-        PageSpecDataObj pageSpec = new PageSpecDataObj();
-
-        SnapshotScopeSpecDataObj snapshotScope = new SnapshotScopeSpecDataObj();
-        snapshotScope.setShowSelector(Long.toString(snapshotId));
-
-        // The loop will pull up to the maximum amount of defect, doing per page size
-        for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
-            pageSpec.setPageSize(pageSize);
-            pageSpec.setStartIndex(pageStart);
-            pageSpec.setSortAscending(true);
-            mergeList.addAll(ds.getMergedDefectsForStreams(streamIds, filter, pageSpec, snapshotScope).getMergedDefects());
-        }
-        return mergeList;
     }
 }
