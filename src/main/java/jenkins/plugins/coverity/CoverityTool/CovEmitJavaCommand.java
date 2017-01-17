@@ -42,7 +42,13 @@ public class CovEmitJavaCommand extends CoverityCommand {
 
     @Override
     protected boolean canExecute() {
-        if (publisher.getInvocationAssistance() == null) {
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        if (invocationAssistance == null) {
+            return false;
+        }
+
+        List<String> givenWarFiles = invocationAssistance.getJavaWarFilesNames();
+        if (givenWarFiles == null || givenWarFiles.isEmpty()) {
             return false;
         }
 
