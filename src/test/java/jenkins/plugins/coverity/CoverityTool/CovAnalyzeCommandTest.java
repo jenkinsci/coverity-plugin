@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
@@ -36,10 +37,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                     true, misraConfigFile.getPath(), StringUtils.EMPTY, null, false, false,
                     StringUtils.EMPTY, StringUtils.EMPTY, null, false
             );
-            CoverityPublisher publisher = new CoverityPublisher(
-                    null, invocationAssistance, false, false, false, false, false,
-                    null, null
-            );
+            CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
             Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
             setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "--misra-config", misraConfigFile.getPath()});
@@ -58,10 +56,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
         );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
@@ -82,10 +77,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 true, misraConfigFile.getPath(), StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
         );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
@@ -104,10 +96,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
         );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "additionalArgs"});
@@ -123,10 +112,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
         );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
@@ -151,11 +137,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                     taPolicyFile.getPath(), "Path2Strip",
                     StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false
             );
-
-            CoverityPublisher publisher = new CoverityPublisher(
-                    null, null, false, false, false, false, false,
-                    taOptionBlock, null
-            );
+            CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
             Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
             setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "--test-advisor", "--test-advisor-policy", taPolicyFile.getPath(), "--strip-path", "Path2Strip"});
@@ -176,11 +158,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                taOptionBlock, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
@@ -203,11 +181,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
                 taPolicyFile.getPath(), "Path2Strip",
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                taOptionBlock, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
@@ -220,10 +194,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
     public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         covAnalyzeCommand.runCommand();

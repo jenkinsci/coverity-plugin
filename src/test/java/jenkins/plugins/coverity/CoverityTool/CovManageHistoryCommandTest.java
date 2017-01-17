@@ -46,10 +46,11 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
                 false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
         );
-        CoverityPublisher publisher = new CoverityPublisher(
-                cimStreamList, invocationAssistance, false, false, false, false, false,
-                taOptionBlock, null
-        );
+        CoverityPublisher publisher =
+                new CoverityPublisherBuilder().
+                        withCimStreams(cimStreamList).
+                        withInvocationAssistance(invocationAssistance).
+                        withTaOptionBlock(taOptionBlock).build();
 
         Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
@@ -83,10 +84,11 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
                 false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
                 StringUtils.EMPTY, StringUtils.EMPTY, null, false
         );
-        CoverityPublisher publisher = new CoverityPublisher(
-                cimStreamList, invocationAssistance, false, false, false, false, false,
-                taOptionBlock, null
-        );
+        CoverityPublisher publisher =
+                new CoverityPublisherBuilder().
+                        withCimStreams(cimStreamList).
+                        withInvocationAssistance(invocationAssistance).
+                        withTaOptionBlock(taOptionBlock).build();
 
         Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_INDIO);
         setExpectedArguments(new String[] {
@@ -145,10 +147,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_INDIO);
         setExpectedArguments(new String[] {

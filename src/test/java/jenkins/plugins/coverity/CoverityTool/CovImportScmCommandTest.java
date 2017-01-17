@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.ScmOptionBlock;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
@@ -29,11 +30,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git"});
@@ -48,11 +45,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--tool", "TestCustomTestTool"});
@@ -67,11 +60,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--tool-arg", "TestScmToolArguments"});
@@ -86,11 +75,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 "TestScmCommandArguments", StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--command-arg", "TestScmCommandArguments"});
@@ -105,11 +90,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, "TestLogFileLocation", StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--log", "TestLogFileLocation"});
@@ -124,11 +105,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, "*.java"
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "--filename-regex", "*.java"});
@@ -143,11 +120,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 "TestAccurrevProjectRoot", StringUtils.EMPTY, StringUtils.EMPTY
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "accurev", "--project-root", "TestAccurrevProjectRoot"});
@@ -162,11 +135,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY, "1234",
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "perforce"});
@@ -182,11 +151,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, "AdditionalCommand", StringUtils.EMPTY
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         setExpectedArguments(new String[] {"cov-import-scm", "--dir", "TestDir", "--scm", "git", "AdditionalCommand"});
@@ -201,11 +166,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, "\'", StringUtils.EMPTY
         );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, scmOptionBlock
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         try{
@@ -218,10 +179,7 @@ public class CovImportScmCommandTest extends CommandTestBase {
 
     @Test
     public void cannotExeucteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         covImportScmCommand.runCommand();
