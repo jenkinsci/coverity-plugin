@@ -13,6 +13,7 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.InvocationAssistanceBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -28,12 +29,7 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
         File analysisLog2 = new File("CodeAnalysisLog2.xml");
         File[] outputFiles = new File[] {analysisLog1, analysisLog2};
 
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, true,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCSharpMsvsca(true).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, outputFiles);

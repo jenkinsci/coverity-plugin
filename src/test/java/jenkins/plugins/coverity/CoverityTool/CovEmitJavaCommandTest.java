@@ -13,6 +13,7 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.InvocationAssistanceBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -28,12 +29,7 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
         javaWarFiles.add("webapp1.war");
         javaWarFiles.add("webapp2.war");
 
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, javaWarFiles, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withJavaWarFilesNames(javaWarFiles).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);

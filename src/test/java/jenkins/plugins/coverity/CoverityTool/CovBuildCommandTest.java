@@ -10,10 +10,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.CoverityPublisherBuilder;
-import jenkins.plugins.coverity.InvocationAssistance;
-import jenkins.plugins.coverity.TaOptionBlock;
+import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -23,12 +20,7 @@ public class CovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void commandForScriptSourcesTest() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, true,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withIsScriptSrc(true).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -39,12 +31,7 @@ public class CovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void commandForCompileSourcesTest_WithCaptureScriptSources() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, true,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withIsScriptSrc(true).withIsCompiledSrc(true).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -55,12 +42,7 @@ public class CovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void commandForCompileSourcesTest_WithTaOptions() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withIsCompiledSrc(true).build();
 
         TaOptionBlock taOptionBlock = new TaOptionBlock(
                 StringUtils.EMPTY, false, false, true,
@@ -81,12 +63,8 @@ public class CovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void commandForCompileSourcesTest_WithAdditionalBuildArguments() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, false,
-                "AdditionalBuildArguments", StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withIsCompiledSrc(true)
+                .withBuildArguments("AdditionalBuildArguments").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);

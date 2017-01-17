@@ -13,6 +13,7 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.InvocationAssistanceBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,12 +27,9 @@ public class PostCovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                true, "TestPostBuildCommand", false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().
+                withUsingPostCovBuildCmd(true).
+                withPostCovBuildCmd("TestPostBuildCommand").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
@@ -42,12 +40,9 @@ public class PostCovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest_WithParseException() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                true, "\'", false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().
+                withUsingPostCovBuildCmd(true).
+                withPostCovBuildCmd("\'").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);

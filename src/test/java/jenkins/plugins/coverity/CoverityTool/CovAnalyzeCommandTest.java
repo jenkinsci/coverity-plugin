@@ -10,10 +10,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.CoverityPublisherBuilder;
-import jenkins.plugins.coverity.InvocationAssistance;
-import jenkins.plugins.coverity.TaOptionBlock;
+import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -31,12 +28,10 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         try{
             misraConfigFile.createNewFile();
 
-            InvocationAssistance invocationAssistance = new InvocationAssistance(
-                    false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                    StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                    true, misraConfigFile.getPath(), StringUtils.EMPTY, null, false, false,
-                    StringUtils.EMPTY, StringUtils.EMPTY, null, false
-            );
+            InvocationAssistance invocationAssistance =
+                    new InvocationAssistanceBuilder().
+                            withUsingMisra(true).
+                            withMisraConfigFile(misraConfigFile.getPath()).build();
             CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
             Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -50,12 +45,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
     public void addMisraConfigurationTest_WithEmptyMisraConfigFilePath() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withUsingMisra(true).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -71,12 +61,10 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     public void addMisraConfigurationTest_WithInvalidMisraConfigFilePath() throws IOException, InterruptedException {
         File misraConfigFile = new File("misraConfigFile");
 
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                true, misraConfigFile.getPath(), StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance =
+                new InvocationAssistanceBuilder().
+                        withUsingMisra(true).
+                        withMisraConfigFile(misraConfigFile.getPath()).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -90,12 +78,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
     public void additionalArgumentsTest() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, "additionalArgs", StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withAnalyzeArguments("additionalArgs").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -106,12 +89,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
     public void additionalArgumentsTest_WithParseException() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, "\'", StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withAnalyzeArguments("\'").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);

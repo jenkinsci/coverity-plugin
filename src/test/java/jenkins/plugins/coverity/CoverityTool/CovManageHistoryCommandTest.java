@@ -40,12 +40,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, true
         );
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().
                         withCimStreams(cimStreamList).
@@ -78,12 +73,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, true
         );
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().
                         withCimStreams(cimStreamList).
@@ -116,12 +106,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
                 StringUtils.EMPTY, StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, true
         );
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
         sslConfigurations.setCertFileName("TestCertFile");
 

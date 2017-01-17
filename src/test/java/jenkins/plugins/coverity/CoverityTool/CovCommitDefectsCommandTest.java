@@ -34,12 +34,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
 
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().withCimStreams(cimStreamList).
                         withInvocationAssistance(invocationAssistance).build();
@@ -61,13 +56,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         cimStreamList.add(cimStream);
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 1234);
-
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().withCimStreams(cimStreamList).
                         withInvocationAssistance(invocationAssistance).build();
@@ -90,12 +79,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 1234);
 
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
         sslConfigurations.setCertFileName("TestCertFile");
 
@@ -126,12 +110,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 0);
 
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
         sslConfigurations.setCertFileName("TestCertFile");
 
@@ -163,12 +142,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
 
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, "AdditionalCommitArguments", StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCommitArguments("AdditionalCommitArguments").build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().withCimStreams(cimStreamList).
                         withInvocationAssistance(invocationAssistance).build();
@@ -190,13 +164,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         cimStreamList.add(cimStream);
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
-
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, "\'", StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCommitArguments("\'").build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().withCimStreams(cimStreamList).
                         withInvocationAssistance(invocationAssistance).build();
