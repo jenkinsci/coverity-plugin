@@ -11,7 +11,9 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -27,17 +29,8 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
         File analysisLog2 = new File("CodeAnalysisLog2.xml");
         File[] outputFiles = new File[] {analysisLog1, analysisLog2};
 
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, true,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCSharpMsvsca(true).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, outputFiles);
         setExpectedArguments(new String[] {
@@ -49,10 +42,7 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
 
     @Test
     public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null);
         covImportMsvscaCommand.runCommand();

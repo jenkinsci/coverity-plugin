@@ -10,9 +10,10 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.InvocationAssistance;
-import jenkins.plugins.coverity.TaOptionBlock;
+import jenkins.plugins.coverity.*;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
+import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
+import jenkins.plugins.coverity.Utils.TaOptionBlockBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -22,16 +23,8 @@ public class CovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void commandForScriptSourcesTest() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, true,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withIsScriptSrc(true).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--no-command", "--fs-capture-search", "$WORKSPACE"});
@@ -41,44 +34,21 @@ public class CovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void commandForCompileSourcesTest_WithCaptureScriptSources() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, true,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withIsScriptSrc(true).withIsCompiledSrc(true).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
         Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, true);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--fs-capture-search", "$WORKSPACE"});
+
         covBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
     }
 
     @Test
     public void commandForCompileSourcesTest_WithTaOptions() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
-
-        TaOptionBlock taOptionBlock = new TaOptionBlock(
-                StringUtils.EMPTY, false, false, true,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, "Jacoco",
-                true, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false
-        );
-
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                taOptionBlock, null
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withIsCompiledSrc(true).build();
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withJavaOptionBlock(true).withJavaCoverageTool("Jacoco").withJunitFramework(true).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).
+                withTaOptionBlock(taOptionBlock).build();
 
         Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, true);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
@@ -88,16 +58,9 @@ public class CovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void commandForCompileSourcesTest_WithAdditionalBuildArguments() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, true, false,
-                "AdditionalBuildArguments", StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withIsCompiledSrc(true)
+                .withBuildArguments("AdditionalBuildArguments").build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, true);
         setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "AdditionalBuildArguments"});
@@ -107,10 +70,7 @@ public class CovBuildCommandTest extends CommandTestBase {
 
     @Test
     public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, true);
         covBuildCommand.runCommand();

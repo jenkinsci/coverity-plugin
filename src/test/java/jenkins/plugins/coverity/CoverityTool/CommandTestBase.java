@@ -15,7 +15,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.CoverityUtils;
-import jenkins.plugins.coverity.TestableConsoleLogger;
+import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;

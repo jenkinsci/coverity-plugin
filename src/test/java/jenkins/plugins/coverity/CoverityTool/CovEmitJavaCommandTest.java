@@ -11,7 +11,9 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -27,16 +29,8 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
         javaWarFiles.add("webapp1.war");
         javaWarFiles.add("webapp2.war");
 
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, false, StringUtils.EMPTY, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, StringUtils.EMPTY, StringUtils.EMPTY, javaWarFiles, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withJavaWarFilesNames(javaWarFiles).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
         setExpectedArguments(new String[] {"cov-emit-java", "--dir", "TestDir", "--webapp-archive", "webapp1.war", "--webapp-archive", "webapp2.war"});
@@ -46,10 +40,7 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
 
     @Test
     public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         Command covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
         covEmitJavaCommand.runCommand();
