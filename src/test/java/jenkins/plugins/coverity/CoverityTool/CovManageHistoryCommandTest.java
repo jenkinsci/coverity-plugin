@@ -14,6 +14,7 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.*;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
+import jenkins.plugins.coverity.Utils.TaOptionBlockBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -34,15 +35,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         cimStreamList.add(cimStream);
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
-
-        TaOptionBlock taOptionBlock = new TaOptionBlock(
-                StringUtils.EMPTY, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, true
-        );
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().
@@ -67,15 +60,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         cimStreamList.add(cimStream);
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 0);
-
-        TaOptionBlock taOptionBlock = new TaOptionBlock(
-                StringUtils.EMPTY, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, true
-        );
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().
@@ -100,15 +85,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         cimStreamList.add(cimStream);
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 0);
-
-        TaOptionBlock taOptionBlock = new TaOptionBlock(
-                StringUtils.EMPTY, false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, true
-        );
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
         sslConfigurations.setCertFileName("TestCertFile");

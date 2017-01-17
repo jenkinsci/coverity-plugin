@@ -13,6 +13,7 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.*;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
+import jenkins.plugins.coverity.Utils.TaOptionBlockBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -45,15 +46,7 @@ public class CovBuildCommandTest extends CommandTestBase {
     @Test
     public void commandForCompileSourcesTest_WithTaOptions() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withIsCompiledSrc(true).build();
-
-        TaOptionBlock taOptionBlock = new TaOptionBlock(
-                StringUtils.EMPTY, false, false, true,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, "Jacoco",
-                true, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false
-        );
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withJavaOptionBlock(true).withJavaCoverageTool("Jacoco").withJunitFramework(true).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).
                 withTaOptionBlock(taOptionBlock).build();
 

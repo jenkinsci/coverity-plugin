@@ -13,6 +13,7 @@ package jenkins.plugins.coverity.CoverityTool;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.TaOptionBlock;
+import jenkins.plugins.coverity.Utils.TaOptionBlockBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -25,14 +26,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
 
     @Test
     public void addTAdvisorConfigurationTest() throws IOException, InterruptedException {
-        TaOptionBlock taOptionBlock = new TaOptionBlock(
-                StringUtils.EMPTY, false, false, true,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, "Jacoco",
-                true, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false
-        );
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withJavaOptionBlock(true).withJavaCoverageTool("Jacoco").withJunitFramework(true).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
         Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -43,14 +37,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
 
     @Test
     public void customTestCommandTest() throws IOException, InterruptedException {
-        TaOptionBlock taOptionBlock = new TaOptionBlock(
-                "CustomTestCommand", false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false
-        );
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCustomTestCommand("CustomTestCommand").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
         Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
@@ -61,14 +48,7 @@ public class CovCaptureCommandTest extends CommandTestBase {
 
     @Test
     public void customTestCommandTest_WithParseException() throws IOException, InterruptedException {
-        TaOptionBlock taOptionBlock = new TaOptionBlock(
-                "\'", false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                false, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false
-        );
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCustomTestCommand("\'").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
         Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
