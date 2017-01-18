@@ -137,13 +137,4 @@ public class CovImportScmCommandTest extends CommandTestBase {
             assertEquals("ParseException occurred during tokenizing the cov import scm additional command.", e.getMessage());
         }
     }
-
-    @Test
-    public void cannotExeucteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-
-        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        covImportScmCommand.runCommand();
-        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
-    }
 }

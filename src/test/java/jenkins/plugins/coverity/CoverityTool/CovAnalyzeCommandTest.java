@@ -16,12 +16,14 @@ import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import jenkins.plugins.coverity.Utils.TaOptionBlockBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
 
 import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
 
 public class CovAnalyzeCommandTest extends CommandTestBase {
 
@@ -148,14 +150,5 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
         }catch(RuntimeException e) {
             assertEquals("Could not find test policy file at \"" + taPolicyFile.getAbsolutePath() + "\"", e.getMessage());
         }
-    }
-
-    @Test
-    public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-
-        Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        covAnalyzeCommand.runCommand();
-        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
     }
 }
