@@ -43,6 +43,11 @@ public class CovImportMsvscaCommand extends CoverityCommand {
         if (invocationAssistance == null || !invocationAssistance.getCsharpMsvsca()) {
             return false;
         }
+
+        if (outputFiles == null || outputFiles.length == 0) {
+            return false;
+        }
+
         return true;
     }
 

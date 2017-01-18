@@ -11,10 +11,8 @@
 package jenkins.plugins.coverity;
 
 import hudson.Util;
-import hudson.EnvVars;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.File;
 import java.util.*;
 
 public class TaOptionBlock {
@@ -40,9 +38,6 @@ public class TaOptionBlock {
     private final String bullsEyeDir;
     private final String customWorkDir;
     private final boolean covHistoryCheckbox;
-    private EnvVars envVars;
-
-
     private final boolean javaOptionBlock;
     /*
         Generic Contructor that will hold all the elements we need for Test Advisor. All of these variables 

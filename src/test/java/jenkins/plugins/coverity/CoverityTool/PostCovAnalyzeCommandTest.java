@@ -11,8 +11,9 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
-import org.apache.commons.lang.StringUtils;
+import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -24,16 +25,10 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, true, "TestPostAnalyzeCommand", false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().
+                withUsingPostAnalyzeCmnd(true).
+                withPostAnalyzeCmd("TestPostAnalyzeCommand").build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
         setExpectedArguments(new String[] {"TestPostAnalyzeCommand"});
@@ -43,16 +38,10 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest_WithParseException() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistance(
-                false, StringUtils.EMPTY, true, "\'", false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                true, StringUtils.EMPTY, StringUtils.EMPTY, null, false, false,
-                StringUtils.EMPTY, StringUtils.EMPTY, null, false
-        );
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, invocationAssistance, false, false, false, false, false,
-                null, null
-        );
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().
+                withUsingPostAnalyzeCmnd(true).
+                withPostAnalyzeCmd("\'").build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
         try{
@@ -65,10 +54,7 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
     public void cannotExeucteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisher(
-                null, null, false, false, false, false, false,
-                null, null
-        );
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
         postCovAnalyzeCommand.runCommand();

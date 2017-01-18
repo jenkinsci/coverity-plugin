@@ -24,18 +24,20 @@ public class CovBuildCommand extends CoverityCommand {
     private static final String command = "cov-build";
     private static final String noCommandArg = "--no-command";
     private static final String fileSystemCapture = "--fs-capture-search";
+    private boolean catpureCompileSrc;
 
-    public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
+    public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars, boolean catpureCompileSrc) {
         super(command, build, launcher, listener, publisher, home, envVars);
+        this.catpureCompileSrc = catpureCompileSrc;
     }
 
     @Override
     protected void prepareCommand() {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         if (invocationAssistance != null){
-            if (invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
+            if (!catpureCompileSrc && invocationAssistance.getIsScriptSrc()){
                 prepareCovBuildCommandForScriptSources();
-            } else if (invocationAssistance.getIsCompiledSrc()){
+            } else if (catpureCompileSrc && invocationAssistance.getIsCompiledSrc()){
                 prepareCovBuildCommandForCompileSources();
             }
         }
@@ -44,7 +46,16 @@ public class CovBuildCommand extends CoverityCommand {
 
     @Override
     protected boolean canExecute() {
-        if (publisher.getInvocationAssistance() == null) {
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        if (invocationAssistance == null) {
+            return false;
+        }
+
+        if (!catpureCompileSrc && !invocationAssistance.getIsScriptSrc()) {
+            return false;
+        }
+
+        if (catpureCompileSrc && !invocationAssistance.getIsCompiledSrc()) {
             return false;
         }
 

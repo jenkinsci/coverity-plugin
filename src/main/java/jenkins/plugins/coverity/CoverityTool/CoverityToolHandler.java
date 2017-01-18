@@ -80,7 +80,7 @@ public class CoverityToolHandler {
         try {
             CoverityLauncherDecorator.SKIP.set(true);
 
-            Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, envVars);
+            Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, envVars, false);
             int result = covBuildCommand.runCommand();
 
             if(result != 0) {

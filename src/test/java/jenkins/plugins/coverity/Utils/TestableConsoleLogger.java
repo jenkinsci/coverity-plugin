@@ -8,7 +8,7 @@
  * Contributors:
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
-package jenkins.plugins.coverity;
+package jenkins.plugins.coverity.Utils;
 
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
