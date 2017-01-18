@@ -44,7 +44,7 @@ import jenkins.plugins.coverity.CoverityBuildAction;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
 import jenkins.plugins.coverity.DefectFilters;
-import jenkins.plugins.coverity.TestableConsoleLogger;
+import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestDefectService;
 
 @RunWith(PowerMockRunner.class)
