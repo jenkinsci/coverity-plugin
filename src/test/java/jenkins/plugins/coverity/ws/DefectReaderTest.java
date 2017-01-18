@@ -44,6 +44,7 @@ import jenkins.plugins.coverity.CoverityBuildAction;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
 import jenkins.plugins.coverity.DefectFilters;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestDefectService;
 
@@ -84,6 +85,7 @@ public class DefectReaderTest {
         defectService = (TestDefectService)new TestWebServiceFactory().getDefectService(cimInstance);
         when(cimInstance.getDefectService()).thenReturn(defectService);
         when(descriptor.getInstance(cimInstanceName)).thenReturn(cimInstance);
+        when(jenkins.getDescriptorOrDie(CoverityPublisher.class)).thenReturn(descriptor);
     }
 
     @Test
@@ -95,9 +97,7 @@ public class DefectReaderTest {
         List<CIMStream> cimStreams  = new ArrayList<>();
         cimStreams.add(new CIMStream(cimInstanceName, "test-project", "test-stream", null, "stream1", null));
 
-        CoverityPublisher publisher = mock(CoverityPublisher.class);
-        when(publisher.getCimStreams()).thenReturn(cimStreams);
-        when(publisher.getDescriptor()).thenReturn(descriptor);
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStreams(cimStreams).build();
 
         defectService.setupMergedDefects(10);
 
@@ -136,9 +136,7 @@ public class DefectReaderTest {
             "2017-01-01");
         cimStreams.add(new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters, "stream1", null));
 
-        CoverityPublisher publisher = mock(CoverityPublisher.class);
-        when(publisher.getCimStreams()).thenReturn(cimStreams);
-        when(publisher.getDescriptor()).thenReturn(descriptor);
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStreams(cimStreams).build();
 
         defectService.setupMergedDefects(3);
 
