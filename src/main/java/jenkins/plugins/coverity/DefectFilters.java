@@ -10,21 +10,31 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v9.*;
-import com.coverity.ws.v9.DefectStateAttributeValueDataObj;
-import hudson.Util;
-import hudson.model.BuildListener;
-import hudson.model.Descriptor;
-import jenkins.model.Jenkins;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import com.coverity.ws.v9.ComponentIdDataObj;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.MergedDefectFilterSpecDataObj;
+import com.coverity.ws.v9.StreamDataObj;
+import com.coverity.ws.v9.StreamFilterSpecDataObj;
+
+import hudson.Util;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 
 /**
  * Responsible for filtering the full list of defects to determine if a build should fail or not. Filters are inclusive:
@@ -92,55 +102,8 @@ public class DefectFilters {
         return true;
     }
 
-    public boolean isClassificationSelected(String action) {
-        return classifications.contains(action);
-    }
-
     public List<String> getCheckersList(){
         return checkers;
-    }
-
-    public boolean isActionSelected(String action) {
-        return actions.contains(action);
-    }
-
-    public boolean isImpactsSelected(String impact){
-        Map<String, String> mapWithJapaneseTranslations;
-        mapWithJapaneseTranslations = new HashMap<String, String>();
-        mapWithJapaneseTranslations.put("High", "高");
-        mapWithJapaneseTranslations.put("Medium", "中");
-        mapWithJapaneseTranslations.put("Low", "低");
-        List<String> initialImpacts = new ArrayList<String>(this.impacts);
-        if(initialImpacts != null && !initialImpacts.isEmpty()){
-            for(String specificImpact : initialImpacts){
-                if(mapWithJapaneseTranslations.containsKey(specificImpact)){
-                    this.impacts.add(mapWithJapaneseTranslations.get(specificImpact));
-                }
-            }
-        }
-        return impacts.contains(impact);
-    }
-
-    public boolean isSeveritySelected(String severity) {
-        return severities.contains(severity);
-    }
-
-    public boolean isComponentSelected(String component) {
-        return components.contains(component);
-    }
-
-    public boolean isCheckerSelected(String checker) {
-        if(ignoredCheckers == null) {
-            return false;
-        }
-        return !ignoredCheckers.contains(checker);
-    }
-
-
-
-    public String getCutOffDate() {
-        if(cutOffDate == null) return null;
-        return new SimpleDateFormat("yyyy-MM-dd").format(cutOffDate);
     }
 
     public List<String> getClassifications(){return classifications;}
@@ -174,35 +137,20 @@ public class DefectFilters {
         return null;
     }
 
-    public boolean matches(MergedDefectDataObj defect, BuildListener listener) {
-        String status = "";
-        String action = "";
-        String classification = "";
-        String severity = "";
-
-        List<DefectStateAttributeValueDataObj> listOfAttributes = defect.getDefectStateAttributeValues();
-        for(DefectStateAttributeValueDataObj defectAttribute : listOfAttributes){
-            if(defectAttribute.getAttributeDefinitionId().getName().equals("DefectStatus")){
-                status = defectAttribute.getAttributeValueId().getName();
-            }
-            if(defectAttribute.getAttributeDefinitionId().getName().equals("Action")){
-                action = defectAttribute.getAttributeValueId().getName();
-            }
-            if(defectAttribute.getAttributeDefinitionId().getName().equals("Classification")){
-                classification = defectAttribute.getAttributeValueId().getName();
-            }
-            if(defectAttribute.getAttributeDefinitionId().getName().equals("Severity")){
-                severity = defectAttribute.getAttributeValueId().getName();
-            }
+    public MergedDefectFilterSpecDataObj ToFilterSpecDataObj(){
+        MergedDefectFilterSpecDataObj filterSpecDataObj = new MergedDefectFilterSpecDataObj();
+        filterSpecDataObj.getActionNameList().addAll(actions);
+        filterSpecDataObj.getClassificationNameList().addAll(classifications);
+        filterSpecDataObj.getSeverityNameList().addAll(severities);
+        filterSpecDataObj.getImpactList().addAll(impacts);
+        for (String component : components) {
+            ComponentIdDataObj componentIdDataObj = new ComponentIdDataObj();
+            componentIdDataObj.setName(component);
+            filterSpecDataObj.getComponentIdList().add(componentIdDataObj);
         }
-
-        return isActionSelected(action) &&
-                isClassificationSelected(classification) &&
-                isSeveritySelected(severity) &&
-                isComponentSelected(defect.getComponentName()) &&
-                isCheckerSelected(defect.getCheckerName()) &&
-                isImpactsSelected(defect.getDisplayImpact()) &&
-                (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
+        filterSpecDataObj.getCheckerList().addAll(checkers);
+        filterSpecDataObj.setFirstDetectedStartDate(getXMLCutOffDate());
+        return filterSpecDataObj;
     }
 
     @Override

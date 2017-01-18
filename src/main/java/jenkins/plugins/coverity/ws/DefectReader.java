@@ -35,6 +35,7 @@ import jenkins.plugins.coverity.CIMInstance;
 import jenkins.plugins.coverity.CIMStream;
 import jenkins.plugins.coverity.CoverityBuildAction;
 import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.DefectFilters;
 
 /**
  * Class responsible for reading defects from Coverity after the commit process has been completed. The defects
@@ -75,20 +76,10 @@ public class DefectReader {
                 listener.getLogger().println("[Coverity] Found " + defects.size() + " defects");
 
                 List<Long> matchingDefects = new ArrayList<Long>();
-                // Loop through all defects
-                for(MergedDefectDataObj defect : defects) {
-                    //matchingDefects.add(defect.getCid()); All the code needed when trying to get cim checkers
-                    //When there is no defect filter, we just add it to the matching defects
-                    if(cimStream.getDefectFilters() == null) {
-                        matchingDefects.add(defect.getCid());
-                    } else {
 
-                        // Check to see if defectFilter matches the defect
-                        boolean match = cimStream.getDefectFilters().matches(defect,listener);
-                        if(match) {
-                            matchingDefects.add(defect.getCid());
-                        }
-                    }
+                // Loop through all defects to get ids
+                for(MergedDefectDataObj defect : defects) {
+                    matchingDefects.add(defect.getCid());
                 }
 
                 if(!matchingDefects.isEmpty()) {
@@ -143,7 +134,8 @@ public class DefectReader {
         List<StreamIdDataObj> streamIds = new ArrayList<StreamIdDataObj>();
         streamIds.add(streamId);
 
-        MergedDefectFilterSpecDataObj filter = new MergedDefectFilterSpecDataObj();
+        DefectFilters defectFilters = cimStream.getDefectFilters();
+        MergedDefectFilterSpecDataObj filter = defectFilters != null ?  defectFilters.ToFilterSpecDataObj() : new MergedDefectFilterSpecDataObj();
 
         PageSpecDataObj pageSpec = new PageSpecDataObj();
 
