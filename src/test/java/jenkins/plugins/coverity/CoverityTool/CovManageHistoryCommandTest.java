@@ -109,17 +109,4 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
         consoleLogger.verifyLastMessage("[Coverity] cov-manage-history command line arguments: " + actualArguments.toString());
     }
-
-    @Test
-    public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-
-        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_INDIO);
-        setExpectedArguments(new String[] {
-                "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
-                "--port", "8080", "--stream", "TestStream", "--ssl", "--user", "TestUser", "--merge"
-        });
-        covManageHistoryCommand.runCommand();
-        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
-    }
 }

@@ -51,13 +51,4 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
             assertEquals("ParseException occurred during tokenizing the post cov-analyze command.", e.getMessage());
         }
     }
-
-    @Test
-    public void cannotExeucteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-
-        Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
-        postCovAnalyzeCommand.runCommand();
-        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
-    }
 }

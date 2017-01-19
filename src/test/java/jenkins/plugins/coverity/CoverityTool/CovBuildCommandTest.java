@@ -67,13 +67,4 @@ public class CovBuildCommandTest extends CommandTestBase {
         covBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments: " + actualArguments.toString());
     }
-
-    @Test
-    public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-
-        Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, true);
-        covBuildCommand.runCommand();
-        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
-    }
 }

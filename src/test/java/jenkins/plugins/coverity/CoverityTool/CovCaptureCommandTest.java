@@ -59,13 +59,4 @@ public class CovCaptureCommandTest extends CommandTestBase {
             assertEquals("ParseException occurred during tokenizing the cov capture custom test command.", e.getMessage());
         }
     }
-
-    @Test
-    public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-
-        Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        covCaptureCommand.runCommand();
-        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
-    }
 }

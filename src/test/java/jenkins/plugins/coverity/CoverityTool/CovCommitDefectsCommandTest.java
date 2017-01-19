@@ -178,13 +178,4 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
             assertEquals("ParseException occurred during tokenizing the cov-commit-defect commit arguments.", e.getMessage());
         }
     }
-
-    @Test
-    public void cannotExecute() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null, null, CoverityVersion.VERSION_JASPER);
-        covCommitDefectsCommand.runCommand();
-        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
-    }
 }

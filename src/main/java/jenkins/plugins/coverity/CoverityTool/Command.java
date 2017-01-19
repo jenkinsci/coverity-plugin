@@ -72,7 +72,6 @@ public abstract class Command {
             return CoverityUtils.runCmd(commandLine, build, launcher, listener, envVars, useAdvancedParser);
         }
 
-        listener.getLogger().println("[Coverity] Skipping command because it can't be executed");
         // Need to return 0 to move onto different commands, rather than marking the build to fail.
         return 0;
     }

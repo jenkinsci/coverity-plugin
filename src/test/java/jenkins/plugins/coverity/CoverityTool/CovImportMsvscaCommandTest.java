@@ -39,13 +39,4 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
         covImportMsvscaCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-msvsca command line arguments: " + actualArguments.toString());
     }
-
-    @Test
-    public void cannotExecuteTest() throws IOException, InterruptedException {
-        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-
-        Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, null);
-        covImportMsvscaCommand.runCommand();
-        consoleLogger.verifyLastMessage("[Coverity] Skipping command because it can't be executed");
-    }
 }
