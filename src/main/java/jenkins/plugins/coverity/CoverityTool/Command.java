@@ -76,10 +76,6 @@ public abstract class Command {
         return 0;
     }
 
-    public List<String> getCommandLines() {
-        return commandLine;
-    }
-
     protected abstract void prepareCommand();
 
     protected abstract boolean canExecute();
