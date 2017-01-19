@@ -26,11 +26,17 @@ public class CovCaptureCommandTest extends CommandTestBase {
 
     @Test
     public void addTAdvisorConfigurationTest() throws IOException, InterruptedException {
-        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withJavaOptionBlock(true).withJavaCoverageTool("Jacoco").withJunitFramework(true).build();
+        TaOptionBlock taOptionBlock =
+                new TaOptionBlockBuilder().
+                        withJavaOptionBlock(true).
+                        withJavaCoverageTool("Jacoco").
+                        withJunitFramework(true).
+                        withCustomTestCommand("CustomTestCommand").
+                        build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
         Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
+        setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit", "CustomTestCommand"});
         covCaptureCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-capture command line arguments: " + actualArguments.toString());
     }

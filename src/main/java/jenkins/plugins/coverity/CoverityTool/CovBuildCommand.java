@@ -19,6 +19,8 @@ import jenkins.plugins.coverity.EnvParser;
 import jenkins.plugins.coverity.InvocationAssistance;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.List;
+
 public class CovBuildCommand extends CoverityCommand {
 
     private static final String command = "cov-build";
@@ -90,5 +92,11 @@ public class CovBuildCommand extends CoverityCommand {
         if (!StringUtils.isEmpty(buildArgs)){
             addArguments(EnvParser.tokenizeWithRuntimeException(buildArgs));
         }
+    }
+
+    // This method is only used by cov-build to wrap any build steps
+    public List<String> constructArguments() {
+        prepareCommand();
+        return commandLine;
     }
 }

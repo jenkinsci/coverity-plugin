@@ -40,6 +40,11 @@ public class CovCaptureCommand extends CoverityCommand {
         if (publisher.getTaOptionBlock() == null) {
             return false;
         }
+
+        if (StringUtils.isEmpty(publisher.getTaOptionBlock().getCustomTestCommand())) {
+            return false;
+        }
+
         return true;
     }
 
