@@ -94,7 +94,9 @@ public class CovBuildCommand extends CoverityCommand {
         }
     }
 
-    // This method is only used by cov-build to wrap any build steps
+    /*
+    This method is only used by cov-build to wrap any build steps
+     */
     public List<String> constructArguments() {
         prepareCommand();
         return commandLine;
