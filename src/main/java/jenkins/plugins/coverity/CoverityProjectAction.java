@@ -78,8 +78,8 @@ public class CoverityProjectAction implements Action {
                 final List<CoverityBuildAction> actions = build.getActions(CoverityBuildAction.class);
 
                 for(CoverityBuildAction action : actions) {
-                    if(action != null && action.getDefectIds() != null && action.getId() != null) {
-                        data.add(action.getDefectIds().size(), action.getId(), new ChartLabel(build));
+                    if(action != null && action.getDefects() != null && action.getId() != null) {
+                        data.add(action.getDefects().size(), action.getId(), new ChartLabel(build));
                     }
                 }
                 build = build.getPreviousBuild();
@@ -157,7 +157,7 @@ public class CoverityProjectAction implements Action {
                     ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
                     int defects = 0;
                     for(CoverityBuildAction a : label.build.getActions(CoverityBuildAction.class)) {
-                        defects += a.getDefectIds().size();
+                        defects += a.getDefects().size();
                     }
                     return label.build.getDisplayName() + " has " + defects + " total defects";
                 }

@@ -127,13 +127,16 @@ public class DefectFilters {
     public List<String> getIgnoredChecker(){return ignoredCheckers;}
 
     public XMLGregorianCalendar getXMLCutOffDate(){
-        GregorianCalendar calender = new GregorianCalendar();
-        calender.setTime(cutOffDate);
-        try{
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(calender);
-        }catch(Exception e){
+        if (cutOffDate != null) {
+            GregorianCalendar calender = new GregorianCalendar();
+            calender.setTime(cutOffDate);
+            try{
+                return DatatypeFactory.newInstance().newXMLGregorianCalendar(calender);
+            }catch(Exception e){
 
+            }
         }
+
         return null;
     }
 
@@ -149,7 +152,10 @@ public class DefectFilters {
             filterSpecDataObj.getComponentIdList().add(componentIdDataObj);
         }
         filterSpecDataObj.getCheckerList().addAll(checkers);
-        filterSpecDataObj.setFirstDetectedStartDate(getXMLCutOffDate());
+        XMLGregorianCalendar xmlCutOffDate = getXMLCutOffDate();
+        if (xmlCutOffDate != null) {
+            filterSpecDataObj.setFirstDetectedStartDate(xmlCutOffDate);
+        }
         return filterSpecDataObj;
     }
 

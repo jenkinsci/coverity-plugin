@@ -33,6 +33,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -89,7 +91,7 @@ public class DefectReaderTest {
     }
 
     @Test
-    public void getLatestDefectsForBuild_withNoDefectFilters_addDefectsToBuildAction() throws Descriptor.FormException, ParseException, DatatypeConfigurationException {
+    public void getLatestDefectsForBuild_withNoDefectFilters_addDefectsToBuildAction() throws Descriptor.FormException, ParseException, DatatypeConfigurationException, IOException, CovRemoteServiceException_Exception {
 
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
@@ -110,18 +112,17 @@ public class DefectReaderTest {
         // assert build action added to build with expected defect count
         ArgumentCaptor<CoverityBuildAction> buildAction = ArgumentCaptor.forClass(CoverityBuildAction.class);
         verify(build).addAction(buildAction.capture());
-        assertEquals(10, buildAction.getValue().getDefectIds().size());
+        assertEquals(10, buildAction.getValue().getDefects().size());
 
         // verify all expected log messages were written
         consoleLogger.verifyMessages(
             "[Coverity] Fetching defects for stream test-stream",
-            "[Coverity] Found 10 defects",
-            "[Coverity] Found 10 defects matching all filters: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]",
+            "[Coverity] Found 10 defects matching all filters",
             "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
     }
 
     @Test
-    public void getLatestDefectsForBuild_withMatchingDefectFilters_addDefectsToBuildAction() throws Descriptor.FormException, ParseException, DatatypeConfigurationException {
+    public void getLatestDefectsForBuild_withMatchingDefectFilters_addDefectsToBuildAction() throws Descriptor.FormException, ParseException, DatatypeConfigurationException, IOException, CovRemoteServiceException_Exception {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
@@ -149,13 +150,12 @@ public class DefectReaderTest {
         // assert build action added to build with expected defect count
         ArgumentCaptor<CoverityBuildAction> buildAction = ArgumentCaptor.forClass(CoverityBuildAction.class);
         verify(build).addAction(buildAction.capture());
-        assertEquals(3, buildAction.getValue().getDefectIds().size());
+        assertEquals(3, buildAction.getValue().getDefects().size());
 
         // verify all expected log messages were written
         consoleLogger.verifyMessages(
             "[Coverity] Fetching defects for stream test-stream",
-            "[Coverity] Found 3 defects",
-            "[Coverity] Found 3 defects matching all filters: [0, 1, 2]",
+            "[Coverity] Found 3 defects matching all filters",
             "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
     }
 }
