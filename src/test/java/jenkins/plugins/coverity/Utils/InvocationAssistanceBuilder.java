@@ -35,16 +35,10 @@ public class InvocationAssistanceBuilder {
     private boolean isUsingPostCovAnalyzeCmd;
     private String postCovAnalyzeCmd;
     private String intermediateDir;
-    private String covBuildBlacklist;
     private boolean useAdvancedParser;
 
     public InvocationAssistanceBuilder withUseAdvancedParser(boolean useAdvancedParser) {
         this.useAdvancedParser = useAdvancedParser;
-        return this;
-    }
-
-    public InvocationAssistanceBuilder withCovBuildBlackList(String covBuildBlacklist) {
-        this.covBuildBlacklist = covBuildBlacklist;
         return this;
     }
 
@@ -157,7 +151,6 @@ public class InvocationAssistanceBuilder {
                 csharpAutomaticAssemblies,
                 csharpMsvsca,
                 saOverride,
-                covBuildBlacklist,
                 javaWarFiles,
                 useAdvancedParser);
     }

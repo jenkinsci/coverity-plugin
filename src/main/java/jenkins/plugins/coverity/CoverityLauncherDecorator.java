@@ -139,28 +139,11 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         setupIntermediateDirectory(build, launcher.getListener(), node, env);
         List<String> args = new CovBuildCommand(build, launcher, launcher.getListener(), publisher, home, env, true).constructArguments();
 
-        String[] blacklist;
-        if(invocationAssistance != null) {
-
-            String blacklistTemp = invocationAssistance.getCovBuildBlacklist();
-
-            if(blacklistTemp != null) {
-                blacklist = blacklistTemp.split(",");
-                for(int i = 0; i < blacklist.length; i++) {
-                    blacklist[i] = blacklist[i].trim();
-                }
-            } else {
-                blacklist = new String[0];
-            }
-        } else{
-            blacklist = new String[0];
-        }
-
         if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
             CoverityLauncherDecorator.SKIP.set(true);
         }
 
-        return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
+        return new DecoratedLauncher(launcher, node, args.toArray(new String[args.size()]));
     }
 
     /**
@@ -234,15 +217,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
     public class DecoratedLauncher extends Launcher {
         private final Launcher decorated;
         private final String[] prefix;
-        private final String[] blacklist;
         private final String toolsDir;
         private final Node node;
 
-        public DecoratedLauncher(Launcher decorated, String[] blacklist, Node node, String... prefix) {
+        public DecoratedLauncher(Launcher decorated, Node node, String... prefix) {
             super(decorated);
             this.decorated = decorated;
             this.prefix = prefix;
-            this.blacklist = blacklist;
             this.node = node;
             this.toolsDir = node.getRootPath().child("tools").getRemote();
         }
@@ -277,11 +258,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
                 if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
                     useAdvancedParser = true;
-                }
-
-                if(isBlacklisted(firstStarterCmd)) {
-                    logger.info(firstStarterCmd + " is blacklisted, skipping cov-build");
-                    return decorated.launch(starter);
                 }
 
                 //skip jdk installations
@@ -345,9 +321,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         private String[] prefix(String[] args) {
-            if(isBlacklisted(args[0])) {
-                return args;
-            }
             String[] newArgs = new String[args.length + prefix.length];
             System.arraycopy(getPrefix(), 0, newArgs, 0, prefix.length);
             System.arraycopy(args, 0, newArgs, prefix.length, args.length);
@@ -358,15 +331,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             boolean[] newArgs = new boolean[args.length + prefix.length];
             System.arraycopy(args, 0, newArgs, prefix.length, args.length);
             return newArgs;
-        }
-
-        private boolean isBlacklisted(String cmd) {
-            for(String s : blacklist) {
-                if(s.equals(cmd)) {
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }
