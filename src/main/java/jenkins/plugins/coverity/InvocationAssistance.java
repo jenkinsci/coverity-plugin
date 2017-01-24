@@ -19,9 +19,6 @@ import java.util.List;
 
 public class InvocationAssistance {
 
-    // deprecated fields which were removed in plugin version 1.9
-    private transient String covBuildBlacklist;
-
     private final String buildArguments;
     private final String analyzeArguments;
     private final String commitArguments;
