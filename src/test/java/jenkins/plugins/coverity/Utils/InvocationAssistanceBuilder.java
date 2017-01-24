@@ -28,7 +28,6 @@ public class InvocationAssistanceBuilder {
     private String saOverride;
     private boolean isUsingMisra;
     private String misraConfigFile;
-    private boolean isCompiledSrc;
     private boolean isScriptSrc;
     private boolean isUsingPostCovBuildCmd;
     private String postCovBuildCmd;
@@ -69,11 +68,6 @@ public class InvocationAssistanceBuilder {
 
     public InvocationAssistanceBuilder withIsScriptSrc(boolean isScriptSrc) {
         this.isScriptSrc = isScriptSrc;
-        return this;
-    }
-
-    public InvocationAssistanceBuilder withIsCompiledSrc(boolean isCompiledSrc) {
-        this.isCompiledSrc = isCompiledSrc;
         return this;
     }
 
@@ -138,7 +132,6 @@ public class InvocationAssistanceBuilder {
                 postCovBuildCmd,
                 isUsingPostCovAnalyzeCmd,
                 postCovAnalyzeCmd,
-                isCompiledSrc,
                 isScriptSrc,
                 buildArguments,
                 analyzeArguments,

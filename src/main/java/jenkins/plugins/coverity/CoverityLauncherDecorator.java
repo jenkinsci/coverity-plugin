@@ -23,7 +23,7 @@ import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.remoting.Channel;
-import jenkins.plugins.coverity.CoverityTool.CovBuildCommand;
+import jenkins.plugins.coverity.CoverityTool.CovBuildCompileCommand;
 import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
@@ -137,11 +137,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         setupIntermediateDirectory(build, launcher.getListener(), node, env);
-        List<String> args = new CovBuildCommand(build, launcher, launcher.getListener(), publisher, home, env, true).constructArguments();
-
-        if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
-            CoverityLauncherDecorator.SKIP.set(true);
-        }
+        List<String> args = new CovBuildCompileCommand(build, launcher, launcher.getListener(), publisher, home, env).constructArguments();
 
         return new DecoratedLauncher(launcher, node, args.toArray(new String[args.size()]));
     }
