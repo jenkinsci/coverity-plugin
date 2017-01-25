@@ -156,34 +156,6 @@ public class CIMInstance {
         return WebServiceFactory.getInstance().getConfigurationService(this);
     }
 
-    public List<MergedDefectDataObj> getDefects(String streamId, List<Long> defectIds) throws IOException, CovRemoteServiceException_Exception {
-        MergedDefectFilterSpecDataObj filterSpec = new MergedDefectFilterSpecDataObj();
-        StreamIdDataObj stream = new StreamIdDataObj();
-        stream.setName(streamId);
-        List<StreamIdDataObj> streamList = new ArrayList<StreamIdDataObj>();
-        streamList.add(stream);
-        PageSpecDataObj pageSpec = new PageSpecDataObj();
-        pageSpec.setPageSize(2500);
-
-        SnapshotScopeSpecDataObj snapshotScopeSpecDataObj = new SnapshotScopeSpecDataObj();
-
-        List<MergedDefectDataObj> result = new ArrayList<MergedDefectDataObj>();
-        int defectCount = 0;
-        MergedDefectsPageDataObj defects = null;
-        do {
-            pageSpec.setStartIndex(defectCount);
-            defects = getDefectService().getMergedDefectsForStreams(streamList, filterSpec, pageSpec, snapshotScopeSpecDataObj);
-            for(MergedDefectDataObj defect : defects.getMergedDefects()) {
-                if(defectIds.contains(defect.getCid())) {
-                    result.add(defect);
-                }
-            }
-            defectCount += defects.getMergedDefects().size();
-        } while(defectCount < defects.getTotalNumberOfRecords());
-
-        return result;
-    }
-
     public ProjectDataObj getProject(String projectId) throws IOException, CovRemoteServiceException_Exception {
         List<ProjectDataObj> projects = new ArrayList<>();
         try {

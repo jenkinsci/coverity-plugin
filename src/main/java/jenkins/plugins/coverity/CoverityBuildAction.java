@@ -17,7 +17,10 @@ import hudson.model.Action;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Captures Coverity information for a single build, including a snapshot of cim instance, project and stream, and a
@@ -25,20 +28,22 @@ import java.util.List;
  * that build.
  */
 public class CoverityBuildAction implements Action {
+    // deprecated defectIds field
+    private transient List<Long> defectIds;
+
     private final AbstractBuild build;
-    private final List<Long> defectIds;
     private final String projectId;
     private final String streamId;
     private final String cimInstance;
+    private final List<CoverityDefect> defects;
     private String url;
 
-
-    public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<Long> matchingDefects) {
+    public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<CoverityDefect> defects) {
         this.build = build;
         this.projectId = projectId;
         this.streamId = streamId;
         this.cimInstance = cimInstance;
-        this.defectIds = matchingDefects;
+        this.defects = defects;
     }
 
     /**
@@ -58,15 +63,24 @@ public class CoverityBuildAction implements Action {
     /**
      * The data for the defects that were captured for this build. This will perform a call to the web service.
      */
-    public List<MergedDefectDataObj> getDefects() throws IOException, CovRemoteServiceException_Exception {
-        CIMInstance cim = Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
-        return cim.getDefects(streamId, defectIds);
+    public List<CoverityDefect> getDefects() {
+
+        // use defectIds field if specified to support older builds (pre-1.9.0 plugin)
+        if (defectIds != null && !defectIds.isEmpty()) {
+            List<CoverityDefect> covDefects = new ArrayList<>();
+            for(Long defectId : defectIds) {
+                covDefects.add(new CoverityDefect(defectId, "---", "View in Coverity Connect", StringUtils.EMPTY));
+            }
+            return covDefects;
+        }  else {
+            return defects != null ? defects : new ArrayList<CoverityDefect>();
+        }
     }
 
     /**
      * Returns the URL to the page for this defect in the CIM instance.
      */
-    public String getURL(MergedDefectDataObj defect) throws IOException, CovRemoteServiceException_Exception {
+    public String getURL(CoverityDefect defect) throws IOException, CovRemoteServiceException_Exception {
         CIMInstance instance = Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
         String header = "http";
 
