@@ -1,0 +1,72 @@
+{
+	type : "Coverity test policy definition",
+	format_version : 1,
+	old_date_cutoff : "2016-08-15",
+	recent_date_cutoff : "2016-12-09",
+	rules : [
+		{
+			violation_name : "FUNCTION_INSUFFICIENTLY_TESTED",
+			minimum_line_coverage_pct : 80,
+			aggregation_granularity : "function",
+			file_filters : [
+				{
+					or : [
+						{
+							file_name_regex : "/src"
+						}
+					]
+				},
+				{
+					not : {
+						or : [
+							{
+								file_name_regex : "/src/test"
+							}
+						]
+					}
+				}
+			],
+			function_filters : [
+				{
+					recently_modified : true
+				},
+				{
+					recently_impacted : true
+				},
+				{
+					min_ccm : 2
+				}
+			],
+			line_filters : [
+				{
+					not : {
+						or : [
+							{
+								line_regex : "//.*cov-ignore"
+							}
+						]
+					}
+				},
+				{
+					not : {
+						or : [
+							{
+								start_section_regex : "//.*cov-begin-ignore",
+								end_section_regex : "//.*cov-end-ignore"
+							}
+						]
+					}
+				},
+				{
+					not : {
+						contains_astnode : {
+							dominated_by_astnode : {
+								unconditionally_terminates : true
+							}
+						}
+					}
+				}
+			]
+		}
+	]
+}
