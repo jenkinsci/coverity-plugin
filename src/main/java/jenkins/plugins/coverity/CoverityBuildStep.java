@@ -39,9 +39,7 @@ public class CoverityBuildStep extends Builder {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-
-        // Set the flag this is covieryt build and need to wrap with cov-build
-
+        CoverityLauncherDecorator.CoverityBuildStep.set(true);
         return buildStep.perform(build, launcher, listener);
     }
 

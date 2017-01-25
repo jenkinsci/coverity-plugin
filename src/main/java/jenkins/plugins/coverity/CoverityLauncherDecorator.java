@@ -16,13 +16,9 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.LauncherDecorator;
 import hudson.Proc;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Executor;
-import hudson.model.Node;
-import hudson.model.Queue;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.remoting.Channel;
+import hudson.tasks.Builder;
 import jenkins.plugins.coverity.CoverityTool.CovBuildCompileCommand;
 import org.apache.commons.lang.Validate;
 
@@ -44,20 +40,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
     /**
      * A ThreadLocal that is used to disable cov-build when running other Coverity tools during the build.
      */
-    public static ThreadLocal<Boolean> SKIP = new ThreadLocal<Boolean>() {
+    public static ThreadLocal<Boolean> CoverityPostBuildAction = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
             return false;
         }
     };
 
-    /**
-     * A ThreadLocal that is used to disable the pre-cov-build configurations (such as creating an idir directory.
-     *
-     * Notice that there are scenarios on which it is necessary to run this pre-cov-build configuration without
-     * running cov-build. This happens for example when running analysis for scripting languages only.
-     */
-    public static ThreadLocal<Boolean> SKIP_PRECOVBUILD = new ThreadLocal<Boolean>() {
+    public static ThreadLocal<Boolean> CoverityBuildStep = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
             return false;
@@ -80,7 +70,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         AbstractProject project = build.getProject();
 
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-       
+
         //Setting up code to allow environment variables in text fields
         EnvVars env;
         try{
@@ -235,15 +225,21 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         @Override
         public Proc launch(ProcStarter starter) throws IOException {
             EnvVars envVars = CoverityUtils.getBuildEnvVars(listener);
-            /**
-             * Sets the intermediate diretory before running cov-build. This will only be run one time per build in order
-             * to avoid recreating the idir.
-             */
-            if(!SKIP_PRECOVBUILD.get()){
-                SKIP_PRECOVBUILD.set(true);
+            boolean isCoverityBuildStepEnabled = false;
+
+            // Check if there are any Coverity Build Step configured.
+            // This is required to support backward compatibility.
+            List<Builder> builders = ((Project)CoverityUtils.getBuild().getProject()).getBuilders();
+            for (Builder buildStep : builders) {
+                if (buildStep.getDescriptor() instanceof CoverityBuildStep.CoverityBuildStepDescriptor) {
+                    isCoverityBuildStepEnabled = true;
+                    break;
+                }
             }
-            if(!SKIP.get()) {
-                String firstStarterCmd = starter.cmds().get(0);
+
+            if ((!isCoverityBuildStepEnabled && !CoverityPostBuildAction.get())
+                    || (isCoverityBuildStepEnabled && CoverityBuildStep.get() && !CoverityPostBuildAction.get())) {
+
                 InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance();
 
                 List<String> cmds = starter.cmds();
@@ -289,7 +285,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 } else {
                     starter = starter.masks(prefix(masks));
                 }
+
+                CoverityBuildStep.set(false);
             }
+
             return decorated.launch(starter);
         }
 
