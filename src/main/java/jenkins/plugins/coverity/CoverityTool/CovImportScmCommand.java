@@ -35,7 +35,7 @@ public class CovImportScmCommand extends CoverityCommand {
     public CovImportScmCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(command, build, launcher, listener, publisher, home, envVars);
         scmOptionBlock = publisher.getScmOptionBlock();
-        if (publisher != null && publisher.getInvocationAssistance() != null){
+        if (publisher.getInvocationAssistance() != null){
             useAdvancedParser = publisher.getInvocationAssistance().getUseAdvancedParser();
         }
     }

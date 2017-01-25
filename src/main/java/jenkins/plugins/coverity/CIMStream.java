@@ -176,7 +176,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         public ListBoxModel doFillProjectItems(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
             ListBoxModel result = new ListBoxModel();
             boolean containCurrentProject = false;
-            if(!StringUtils.isEmpty(instance)) {
+            if(!StringUtils.isEmpty(instance) && getInstance(instance) != null) {
                 for(ProjectDataObj projectFromCIM : getInstance(instance).getProjects()) {
                     // don't add projects for which there are no valid streams
                     ListBoxModel streams = doFillStreamItems(instance, projectFromCIM.getId().getName(), stream);
@@ -199,7 +199,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             if (StringUtils.isEmpty(project))
                 return FormValidation.ok();
 
-            if (!StringUtils.isEmpty(instance)){
+            if (!StringUtils.isEmpty(instance) && getInstance(instance) != null){
                 for (ProjectDataObj projectFromCIM : getInstance(instance).getProjects()){
                     if (projectFromCIM.getId().getName().equalsIgnoreCase(project)){
                         return FormValidation.ok();

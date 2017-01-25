@@ -52,8 +52,6 @@ public class CoverityToolHandler {
         Node node = Executor.currentExecutor().getOwner().getNode();
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        TaOptionBlock testAnalysis = publisher.getTaOptionBlock();
-        ScmOptionBlock scm = publisher.getScmOptionBlock();
 
         boolean useAdvancedParser = false;
         if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
@@ -72,9 +70,7 @@ public class CoverityToolHandler {
          * cov-build and cov-analyze commands.
          */
         envVars.put("COV_IDIR", temp.getTempDir().getRemote());
-        if(home != null) {
-            envVars.put("COV_ANALYSIS_ROOT", home);
-        }
+        envVars.put("COV_ANALYSIS_ROOT", home);
 
         //run cov-build for scripting language sources only.
         try {
@@ -249,16 +245,11 @@ public class CoverityToolHandler {
             }
         }
 
-        //keep if keepIntDir is set, or if the int dir is the default (keepIntDir is only useful if a custom int
-        //dir is set)
-        if(temp != null) {
-            //same as !(keepIntDir && !temp.def)
-            if(!publisher.isKeepIntDir() || temp.isDef()) {
-                listener.getLogger().println("[Coverity] deleting intermediate directory");
-                temp.getTempDir().deleteRecursive();
-            } else {
-                listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.getTempDir());
-            }
+        if(!publisher.isKeepIntDir() || temp.isDef()) {
+            listener.getLogger().println("[Coverity] deleting intermediate directory");
+            temp.getTempDir().deleteRecursive();
+        } else {
+            listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.getTempDir());
         }
 
         if(!publisher.isSkipFetchingDefects()) {
