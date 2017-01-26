@@ -21,6 +21,9 @@
 						or : [
 							{
 								file_name_regex : "/src/test"
+							},
+							{
+								file_name_regex : "/src/main/java/com/coverity/ws"
 							}
 						]
 					}
