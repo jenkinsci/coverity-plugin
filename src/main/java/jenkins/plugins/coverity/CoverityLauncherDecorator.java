@@ -224,6 +224,12 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         @Override
         public Proc launch(ProcStarter starter) throws IOException {
+            // Any Coverity Post-build action such as cov-analyze, cov-import-scm, etc will not be wrapped
+            // with the cov-build.
+            if (CoverityPostBuildAction.get()) {
+                return decorated.launch(starter);
+            }
+
             EnvVars envVars = CoverityUtils.getBuildEnvVars(listener);
             boolean isCoverityBuildStepEnabled = false;
 
@@ -237,15 +243,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 }
             }
 
-            // Any Coverity Post-build action such as cov-analyze, cov-import-scm, etc will not be wrapped
-            // with the cov-build.
-            if (CoverityPostBuildAction.get()) {
-                return decorated.launch(starter);
-            }
-
             // The first condition is for the case where there are no coverity build steps.
             // Then we want to wrap the build steps with cov-build. This is to support backward compatibility
-            // The second condition is for the case where there are covieryt build step and
+            // The second condition is for the case where there are coverity build step and
             // the current build step is the coverity build step.
             if (!isCoverityBuildStepEnabled
                     || (isCoverityBuildStepEnabled && CoverityBuildStep.get())) {
