@@ -129,11 +129,14 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         }
 
         public CIMInstance getInstance(String name) {
-            for(CIMInstance instance : getInstances()) {
-                if(instance.getName().equals(name)) {
-                    return instance;
+            if (!StringUtils.isEmpty(name)) {
+                for(CIMInstance instance : getInstances()) {
+                    if(instance.getName().equals(name)) {
+                        return instance;
+                    }
                 }
             }
+
             return null;
         }
 
@@ -163,8 +166,9 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         }
 
         public FormValidation doCheckInstance(@QueryParameter String instance) throws IOException, CovRemoteServiceException_Exception {
-            if (!StringUtils.isEmpty(instance)){
-                CIMInstance cimInstance = getInstance(instance);
+            CIMInstance cimInstance = getInstance(instance);
+
+            if (cimInstance != null) {
                 FormValidation checkResult = cimInstance.doCheck();
 
                 // return FormValidation.ok in order to suppress any success messages, these don't need to show automatically here
@@ -177,7 +181,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             ListBoxModel result = new ListBoxModel();
             boolean containCurrentProject = false;
             CIMInstance cimInstance = getInstance(instance);
-            if(!StringUtils.isEmpty(instance) && cimInstance != null) {
+            if(cimInstance != null) {
                 for(ProjectDataObj projectFromCIM : cimInstance.getProjects()) {
                     // don't add projects for which there are no valid streams
                     ListBoxModel streams = doFillStreamItems(instance, projectFromCIM.getId().getName(), stream);
@@ -201,7 +205,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 return FormValidation.ok();
 
             CIMInstance cimInstance = getInstance(instance);
-            if (!StringUtils.isEmpty(instance) && cimInstance != null){
+            if (cimInstance != null){
                 for (ProjectDataObj projectFromCIM : cimInstance.getProjects()){
                     if (projectFromCIM.getId().getName().equalsIgnoreCase(project)){
                         return FormValidation.ok();
