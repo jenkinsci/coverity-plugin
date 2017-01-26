@@ -28,23 +28,16 @@ public class InvocationAssistanceBuilder {
     private String saOverride;
     private boolean isUsingMisra;
     private String misraConfigFile;
-    private boolean isCompiledSrc;
     private boolean isScriptSrc;
     private boolean isUsingPostCovBuildCmd;
     private String postCovBuildCmd;
     private boolean isUsingPostCovAnalyzeCmd;
     private String postCovAnalyzeCmd;
     private String intermediateDir;
-    private String covBuildBlacklist;
     private boolean useAdvancedParser;
 
     public InvocationAssistanceBuilder withUseAdvancedParser(boolean useAdvancedParser) {
         this.useAdvancedParser = useAdvancedParser;
-        return this;
-    }
-
-    public InvocationAssistanceBuilder withCovBuildBlackList(String covBuildBlacklist) {
-        this.covBuildBlacklist = covBuildBlacklist;
         return this;
     }
 
@@ -75,11 +68,6 @@ public class InvocationAssistanceBuilder {
 
     public InvocationAssistanceBuilder withIsScriptSrc(boolean isScriptSrc) {
         this.isScriptSrc = isScriptSrc;
-        return this;
-    }
-
-    public InvocationAssistanceBuilder withIsCompiledSrc(boolean isCompiledSrc) {
-        this.isCompiledSrc = isCompiledSrc;
         return this;
     }
 
@@ -144,7 +132,6 @@ public class InvocationAssistanceBuilder {
                 postCovBuildCmd,
                 isUsingPostCovAnalyzeCmd,
                 postCovAnalyzeCmd,
-                isCompiledSrc,
                 isScriptSrc,
                 buildArguments,
                 analyzeArguments,
@@ -157,7 +144,6 @@ public class InvocationAssistanceBuilder {
                 csharpAutomaticAssemblies,
                 csharpMsvsca,
                 saOverride,
-                covBuildBlacklist,
                 javaWarFiles,
                 useAdvancedParser);
     }

@@ -74,10 +74,10 @@ public class CoverityToolHandler {
 
         //run cov-build for scripting language sources only.
         try {
-            CoverityLauncherDecorator.SKIP.set(true);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
 
-            Command covBuildCommand = new CovBuildCommand(build, launcher, listener, publisher, home, envVars, false);
-            int result = covBuildCommand.runCommand();
+            Command covBuildScriptCommand = new CovBuildScriptCommand(build, launcher, listener, publisher, home, envVars);
+            int result = covBuildScriptCommand.runCommand();
 
             if(result != 0) {
                 listener.getLogger().println("[Coverity] cov-build returned " + result + ", aborting...");
@@ -86,12 +86,12 @@ public class CoverityToolHandler {
             }
 
         } finally {
-            CoverityLauncherDecorator.SKIP.set(false);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         //run post cov-build command.
         try {
-            CoverityLauncherDecorator.SKIP.set(true);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
             Command postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
             int result = postCovBuildCommand.runCommand();
 
@@ -102,12 +102,12 @@ public class CoverityToolHandler {
             }
 
         } finally {
-            CoverityLauncherDecorator.SKIP.set(false);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         // Run Cov-Emit-Java
         try {
-            CoverityLauncherDecorator.SKIP.set(true);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
             Command covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, home, envVars, useAdvancedParser);
             int result = covEmitJavaCommand.runCommand();
 
@@ -117,12 +117,12 @@ public class CoverityToolHandler {
                 return false;
             }
         } finally {
-            CoverityLauncherDecorator.SKIP.set(false);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         // Run Cov-Capture
         try {
-            CoverityLauncherDecorator.SKIP.set(true);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
             Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, home, envVars);
             int result = covCaptureCommand.runCommand();
 
@@ -132,14 +132,14 @@ public class CoverityToolHandler {
                 return false;
             }
         } finally {
-            CoverityLauncherDecorator.SKIP.set(false);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         // Run Cov Manage History
         for(CIMStream cimStream : publisher.getCimStreams()) {
             CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
             try {
-                CoverityLauncherDecorator.SKIP.set(true);
+                CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
 
                 Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
                 int result = covManageHistoryCommand.runCommand();
@@ -151,13 +151,13 @@ public class CoverityToolHandler {
                     return false;
                 }
             } finally {
-                CoverityLauncherDecorator.SKIP.set(false);
+                CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
             }
         }
 
         // Run Cov Import Scm
         try {
-            CoverityLauncherDecorator.SKIP.set(true);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
 
             Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, home, envVars);
             int result = covImportScmCommand.runCommand();
@@ -169,12 +169,12 @@ public class CoverityToolHandler {
                 return false;
             }
         } finally {
-            CoverityLauncherDecorator.SKIP.set(false);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         //run cov-analyze
         try {
-            CoverityLauncherDecorator.SKIP.set(true);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
             Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, home, envVars);
             int result = covAnalyzeCommand.runCommand();
 
@@ -185,12 +185,12 @@ public class CoverityToolHandler {
             }
 
         } finally {
-            CoverityLauncherDecorator.SKIP.set(false);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         //run post cov-analyze command.
         try {
-            CoverityLauncherDecorator.SKIP.set(true);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
             Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
             int result = postCovAnalyzeCommand.runCommand();
 
@@ -201,7 +201,7 @@ public class CoverityToolHandler {
             }
 
         } finally {
-            CoverityLauncherDecorator.SKIP.set(false);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         // Import Microsoft Visual Studio Code Anaysis results
@@ -211,7 +211,7 @@ public class CoverityToolHandler {
             listener.getLogger().println("[Coverity] MSVSCA No results found, skipping");
         }else{
             try{
-                CoverityLauncherDecorator.SKIP.set(true);
+                CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
                 Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, home, envVars, outputFiles);
                 int result = covImportMsvscaCommand.runCommand();
 
@@ -222,14 +222,14 @@ public class CoverityToolHandler {
                 }
 
             }finally{
-                CoverityLauncherDecorator.SKIP.set(false);
+                CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
             }
         }
 
         //run cov-commit-defects
         for(CIMStream cimStream : publisher.getCimStreams()) {
             CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
-            CoverityLauncherDecorator.SKIP.set(true);
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
 
             try {
                 Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
@@ -241,7 +241,7 @@ public class CoverityToolHandler {
                     return false;
                 }
             } finally {
-                CoverityLauncherDecorator.SKIP.set(false);
+                CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
             }
         }
 
