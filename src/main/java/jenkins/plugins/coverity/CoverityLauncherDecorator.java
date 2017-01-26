@@ -16,14 +16,10 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.LauncherDecorator;
 import hudson.Proc;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Executor;
-import hudson.model.Node;
-import hudson.model.Queue;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.remoting.Channel;
-import jenkins.plugins.coverity.CoverityTool.CovBuildCommand;
+import hudson.tasks.Builder;
+import jenkins.plugins.coverity.CoverityTool.CovBuildCompileCommand;
 import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
@@ -44,20 +40,14 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
     /**
      * A ThreadLocal that is used to disable cov-build when running other Coverity tools during the build.
      */
-    public static ThreadLocal<Boolean> SKIP = new ThreadLocal<Boolean>() {
+    public static ThreadLocal<Boolean> CoverityPostBuildAction = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
             return false;
         }
     };
 
-    /**
-     * A ThreadLocal that is used to disable the pre-cov-build configurations (such as creating an idir directory.
-     *
-     * Notice that there are scenarios on which it is necessary to run this pre-cov-build configuration without
-     * running cov-build. This happens for example when running analysis for scripting languages only.
-     */
-    public static ThreadLocal<Boolean> SKIP_PRECOVBUILD = new ThreadLocal<Boolean>() {
+    public static ThreadLocal<Boolean> CoverityBuildStep = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
             return false;
@@ -80,7 +70,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         AbstractProject project = build.getProject();
 
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-       
+
         //Setting up code to allow environment variables in text fields
         EnvVars env;
         try{
@@ -137,30 +127,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         setupIntermediateDirectory(build, launcher.getListener(), node, env);
-        List<String> args = new CovBuildCommand(build, launcher, launcher.getListener(), publisher, home, env, true).constructArguments();
+        List<String> args = new CovBuildCompileCommand(build, launcher, launcher.getListener(), publisher, home, env).constructArguments();
 
-        String[] blacklist;
-        if(invocationAssistance != null) {
-
-            String blacklistTemp = invocationAssistance.getCovBuildBlacklist();
-
-            if(blacklistTemp != null) {
-                blacklist = blacklistTemp.split(",");
-                for(int i = 0; i < blacklist.length; i++) {
-                    blacklist[i] = blacklist[i].trim();
-                }
-            } else {
-                blacklist = new String[0];
-            }
-        } else{
-            blacklist = new String[0];
-        }
-
-        if(invocationAssistance != null && invocationAssistance.getIsScriptSrc() && !invocationAssistance.getIsCompiledSrc()){
-            CoverityLauncherDecorator.SKIP.set(true);
-        }
-
-        return new DecoratedLauncher(launcher, blacklist, node, args.toArray(new String[args.size()]));
+        return new DecoratedLauncher(launcher, node, args.toArray(new String[args.size()]));
     }
 
     /**
@@ -234,15 +203,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
     public class DecoratedLauncher extends Launcher {
         private final Launcher decorated;
         private final String[] prefix;
-        private final String[] blacklist;
         private final String toolsDir;
         private final Node node;
 
-        public DecoratedLauncher(Launcher decorated, String[] blacklist, Node node, String... prefix) {
+        public DecoratedLauncher(Launcher decorated, Node node, String... prefix) {
             super(decorated);
             this.decorated = decorated;
             this.prefix = prefix;
-            this.blacklist = blacklist;
             this.node = node;
             this.toolsDir = node.getRootPath().child("tools").getRemote();
         }
@@ -257,16 +224,32 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         @Override
         public Proc launch(ProcStarter starter) throws IOException {
-            EnvVars envVars = CoverityUtils.getBuildEnvVars(listener);
-            /**
-             * Sets the intermediate diretory before running cov-build. This will only be run one time per build in order
-             * to avoid recreating the idir.
-             */
-            if(!SKIP_PRECOVBUILD.get()){
-                SKIP_PRECOVBUILD.set(true);
+            // Any Coverity Post-build action such as cov-analyze, cov-import-scm, etc will not be wrapped
+            // with the cov-build.
+            if (CoverityPostBuildAction.get()) {
+                return decorated.launch(starter);
             }
-            if(!SKIP.get()) {
-                String firstStarterCmd = starter.cmds().get(0);
+
+            EnvVars envVars = CoverityUtils.getBuildEnvVars(listener);
+            boolean isCoverityBuildStepEnabled = false;
+
+            // Check if there are any Coverity Build Step configured.
+            // This is required to support backward compatibility.
+            List<Builder> builders = ((Project)CoverityUtils.getBuild().getProject()).getBuilders();
+            for (Builder buildStep : builders) {
+                if (buildStep.getDescriptor() instanceof CoverityBuildStep.CoverityBuildStepDescriptor) {
+                    isCoverityBuildStepEnabled = true;
+                    break;
+                }
+            }
+
+            // The first condition is for the case where there are no coverity build steps.
+            // Then we want to wrap the build steps with cov-build. This is to support backward compatibility
+            // The second condition is for the case where there are coverity build step and
+            // the current build step is the coverity build step.
+            if (!isCoverityBuildStepEnabled
+                    || (isCoverityBuildStepEnabled && CoverityBuildStep.get())) {
+
                 InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance();
 
                 List<String> cmds = starter.cmds();
@@ -277,11 +260,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
                 if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
                     useAdvancedParser = true;
-                }
-
-                if(isBlacklisted(firstStarterCmd)) {
-                    logger.info(firstStarterCmd + " is blacklisted, skipping cov-build");
-                    return decorated.launch(starter);
                 }
 
                 //skip jdk installations
@@ -317,7 +295,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 } else {
                     starter = starter.masks(prefix(masks));
                 }
+
+                CoverityBuildStep.set(false);
             }
+
             return decorated.launch(starter);
         }
 
@@ -345,9 +326,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
 
         private String[] prefix(String[] args) {
-            if(isBlacklisted(args[0])) {
-                return args;
-            }
             String[] newArgs = new String[args.length + prefix.length];
             System.arraycopy(getPrefix(), 0, newArgs, 0, prefix.length);
             System.arraycopy(args, 0, newArgs, prefix.length, args.length);
@@ -358,15 +336,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             boolean[] newArgs = new boolean[args.length + prefix.length];
             System.arraycopy(args, 0, newArgs, prefix.length, args.length);
             return newArgs;
-        }
-
-        private boolean isBlacklisted(String cmd) {
-            for(String s : blacklist) {
-                if(s.equals(cmd)) {
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }

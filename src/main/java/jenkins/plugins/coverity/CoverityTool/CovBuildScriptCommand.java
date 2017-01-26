@@ -21,64 +21,33 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
-public class CovBuildCommand extends CoverityCommand {
+public class CovBuildScriptCommand extends CoverityCommand {
 
     private static final String command = "cov-build";
     private static final String noCommandArg = "--no-command";
     private static final String fileSystemCapture = "--fs-capture-search";
-    private boolean catpureCompileSrc;
 
-    public CovBuildCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars, boolean catpureCompileSrc) {
+    public CovBuildScriptCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(command, build, launcher, listener, publisher, home, envVars);
-        this.catpureCompileSrc = catpureCompileSrc;
     }
 
     @Override
     protected void prepareCommand() {
-        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        if (invocationAssistance != null){
-            if (!catpureCompileSrc && invocationAssistance.getIsScriptSrc()){
-                prepareCovBuildCommandForScriptSources();
-            } else if (catpureCompileSrc && invocationAssistance.getIsCompiledSrc()){
-                prepareCovBuildCommandForCompileSources();
-            }
-        }
-        listener.getLogger().println("[Coverity] cov-build command line arguments: " + commandLine.toString());
+        addArgument(noCommandArg);
+        addScriptSourcesArgs();
+        addAdditionalBuildArguments();
+
+        listener.getLogger().println("[Coverity] cov-build command line arguments for script sources: " + commandLine.toString());
     }
 
     @Override
     protected boolean canExecute() {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        if (invocationAssistance == null) {
-            return false;
-        }
-
-        if (!catpureCompileSrc && !invocationAssistance.getIsScriptSrc()) {
-            return false;
-        }
-
-        if (catpureCompileSrc && !invocationAssistance.getIsCompiledSrc()) {
+        if (invocationAssistance == null || !invocationAssistance.getIsScriptSrc()) {
             return false;
         }
 
         return true;
-    }
-
-    private void prepareCovBuildCommandForScriptSources() {
-        addArgument(noCommandArg);
-        addScriptSourcesArgs();
-    }
-
-    private void prepareCovBuildCommandForCompileSources() {
-        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-
-        // It is possible for users to run cov-build for compiled sources and script sources at the same time.
-        if (invocationAssistance.getIsScriptSrc()) {
-            addScriptSourcesArgs();
-        }
-
-        addTaCommandArgs();
-        addAdditionalBuildArguments();
     }
 
     private void addScriptSourcesArgs() {
@@ -94,11 +63,4 @@ public class CovBuildCommand extends CoverityCommand {
         }
     }
 
-    /*
-    This method is only used by cov-build to wrap any build steps
-     */
-    public List<String> constructArguments() {
-        prepareCommand();
-        return commandLine;
-    }
 }
