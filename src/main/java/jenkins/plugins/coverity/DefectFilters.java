@@ -17,8 +17,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.datatype.DatatypeFactory;
@@ -102,8 +104,53 @@ public class DefectFilters {
         return true;
     }
 
+    public boolean isClassificationSelected(String action) {
+        return classifications.contains(action);
+    }
+
     public List<String> getCheckersList(){
         return checkers;
+    }
+
+    public boolean isActionSelected(String action) {
+        return actions.contains(action);
+    }
+
+    public boolean isImpactsSelected(String impact){
+        Map<String, String> mapWithJapaneseTranslations;
+        mapWithJapaneseTranslations = new HashMap<String, String>();
+        mapWithJapaneseTranslations.put("High", "高");
+        mapWithJapaneseTranslations.put("Medium", "中");
+        mapWithJapaneseTranslations.put("Low", "低");
+        List<String> initialImpacts = new ArrayList<String>(this.impacts);
+        if(initialImpacts != null && !initialImpacts.isEmpty()){
+            for(String specificImpact : initialImpacts){
+                if(mapWithJapaneseTranslations.containsKey(specificImpact)){
+                    this.impacts.add(mapWithJapaneseTranslations.get(specificImpact));
+                }
+            }
+        }
+        return impacts.contains(impact);
+    }
+
+    public boolean isSeveritySelected(String severity) {
+        return severities.contains(severity);
+    }
+
+    public boolean isComponentSelected(String component) {
+        return components.contains(component);
+    }
+
+    public boolean isCheckerSelected(String checker) {
+        if(ignoredCheckers == null) {
+            return false;
+        }
+        return !ignoredCheckers.contains(checker);
+    }
+
+    public String getCutOffDate() {
+        if(cutOffDate == null) return null;
+        return new SimpleDateFormat("yyyy-MM-dd").format(cutOffDate);
     }
 
     public List<String> getClassifications(){return classifications;}
