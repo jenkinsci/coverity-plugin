@@ -355,6 +355,9 @@ public class CoverityUtils {
             boolean recurse) {
         Vector<File> files = new Vector<File>();
         File[] entries = directory.listFiles();
+        if (entries == null) {
+            return files;
+        }
 
         for(File entry : entries) {
             if(filter == null || filter.accept(directory, entry.getName())) {
