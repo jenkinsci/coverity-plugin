@@ -205,25 +205,19 @@ public class CoverityToolHandler {
         }
 
         // Import Microsoft Visual Studio Code Anaysis results
-        listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
-        File[] outputFiles = findMsvscaOutputFiles(temp.getTempDir().getRemote());
-        if (outputFiles == null || outputFiles.length == 0){
-            listener.getLogger().println("[Coverity] MSVSCA No results found, skipping");
-        }else{
-            try{
-                CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
-                Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, home, envVars, outputFiles);
-                int result = covImportMsvscaCommand.runCommand();
+        try{
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
+            Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, home, envVars, build.getWorkspace());
+            int result = covImportMsvscaCommand.runCommand();
 
-                if(result != 0) {
-                    listener.getLogger().println("[Coverity] cov-import-msvsca returned " + result + ", aborting...");
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-
-            }finally{
-                CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] cov-import-msvsca returned " + result + ", aborting...");
+                build.setResult(Result.FAILURE);
+                return false;
             }
+
+        }finally{
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         //run cov-commit-defects
@@ -261,15 +255,5 @@ public class CoverityToolHandler {
         }
 
         return true;
-    }
-
-    protected File[] findMsvscaOutputFiles(String dirName) {
-        File dir = new File(dirName);
-
-        return CoverityUtils.listFilesAsArray(dir, new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith("CodeAnalysisLog.xml");
-            }
-        }, true);
     }
 }

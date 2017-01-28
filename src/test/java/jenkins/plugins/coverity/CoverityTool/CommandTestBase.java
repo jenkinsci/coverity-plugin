@@ -27,6 +27,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,5 +133,13 @@ public abstract class CommandTestBase {
                 CoverityUtils.doubleQuote(
                         Matchers.anyString(),
                         Matchers.anyBoolean())).thenAnswer(doubleQuote);
+    }
+
+    protected void setCoverityUtils_listFilesAsArray(File[] expectedFiles) {
+        when(
+                CoverityUtils.listFilesAsArray(
+                        Matchers.any(File.class),
+                        Matchers.any(FilenameFilter.class),
+                        Matchers.anyBoolean())).thenReturn(expectedFiles);
     }
 }

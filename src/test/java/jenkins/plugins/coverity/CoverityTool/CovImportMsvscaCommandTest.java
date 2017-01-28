@@ -10,6 +10,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
+import hudson.FilePath;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
@@ -20,6 +21,8 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static org.mockito.Mockito.when;
+
 public class CovImportMsvscaCommandTest extends CommandTestBase {
 
     @Test
@@ -28,11 +31,15 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
         File analysisLog1 = new File("CodeAnalysisLog1.xml");
         File analysisLog2 = new File("CodeAnalysisLog2.xml");
         File[] outputFiles = new File[] {analysisLog1, analysisLog2};
+        
+        setCoverityUtils_listFilesAsArray(outputFiles);
+
+        FilePath workspace = new FilePath(new File("."));
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCSharpMsvsca(true).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
-        Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, outputFiles);
+        Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, workspace);
         setExpectedArguments(new String[] {
                 "cov-import-msvsca", "--dir", "TestDir", "--append", analysisLog1.getAbsolutePath(), analysisLog2.getAbsolutePath()
         });
