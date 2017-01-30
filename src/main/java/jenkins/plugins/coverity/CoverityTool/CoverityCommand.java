@@ -25,7 +25,7 @@ public abstract class CoverityCommand extends Command {
 
     private static final String intermediateDirArguments = "--dir";
     private static final String covIdirEnvVar = "COV_IDIR";
-    private static final String useSslArg = "--ssl";
+    protected static final String useSslArg = "--ssl";
     private static final String onNewCertArg = "--on-new-cert";
     private static final String trustArg = "trust";
     private static final String certArg = "--cert";
@@ -70,9 +70,7 @@ public abstract class CoverityCommand extends Command {
     }
 
     protected void addSslConfiguration(CIMInstance cimInstance, CoverityVersion version) {
-        if(cimInstance.isUseSSL()){
-            addArgument(useSslArg);
-
+        if (cimInstance.isUseSSL()){
             if (version.compareTo(CoverityVersion.VERSION_JASPER) >= 0) {
                 boolean isTrustNewSelfSignedCert = false;
                 String certFileName = null;

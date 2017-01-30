@@ -44,6 +44,9 @@ public class CovManageHistoryCommand extends CoverityCommand {
     protected void prepareCommand() {
         addArgument(downloadArg);
         addCimStreamInfo();
+        if (cimInstance.isUseSSL()){
+            addArgument(useSslArg);
+        }
         addSslConfiguration(cimInstance, version);
         addUserInfo();
         addArgument(mergeArg);

@@ -54,9 +54,11 @@ public class CovCommitDefectsCommand extends CoverityCommand {
         addHost();
 
         if (cimInstance.getDataPort() != 0){
+            addSsl();
             addDataPort();
             addSslConfiguration(cimInstance, version);
         } else if (cimInstance.isUseSSL()) {
+            addSsl();
             addHtppsPort();
             addSslConfiguration(cimInstance, version);
         } else {
@@ -115,6 +117,12 @@ public class CovCommitDefectsCommand extends CoverityCommand {
             }catch(ParseException e) {
                 throw new RuntimeException("ParseException occurred during tokenizing the cov-commit-defect commit arguments.");
             }
+        }
+    }
+
+    private void addSsl() {
+        if (version.compareTo(CoverityVersion.VERSION_INDIO) > 0 && cimInstance.isUseSSL()) {
+            addArgument(useSslArg);
         }
     }
 }
