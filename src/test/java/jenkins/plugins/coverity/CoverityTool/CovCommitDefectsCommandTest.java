@@ -51,6 +51,29 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     }
 
     @Test
+    public void addMisraTest() throws IOException, InterruptedException {
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
+        List<CIMStream> cimStreamList = new ArrayList<>();
+        cimStreamList.add(cimStream);
+
+        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
+
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withUsingMisra(true).build();
+        CoverityPublisher publisher =
+                new CoverityPublisherBuilder().withCimStreams(cimStreamList).
+                        withInvocationAssistance(invocationAssistance).build();
+
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_INDIO);
+        setExpectedArguments(new String[] {
+                "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
+                "--port", "8080", "--stream", "TestStream", "--user", "TestUser", "--misra-only"
+        });
+        covCommitDefectsCommand.runCommand();
+        assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
+    }
+
+    @Test
     public void addDataPortTest() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
