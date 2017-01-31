@@ -27,6 +27,7 @@ public class CovCommitDefectsCommand extends CoverityCommand {
     private static final String streamArg = "--stream";
     private static final String userArg = "--user";
     private static final String coverity_passphrase = "COVERITY_PASSPHRASE";
+    private static final String misraOnly = "--misra-only";
 
     private CIMInstance cimInstance;
     private CIMStream cimStream;
@@ -65,6 +66,7 @@ public class CovCommitDefectsCommand extends CoverityCommand {
 
         addStream();
         addUserInfo();
+        addMisraOnly();
         addCommitArguments();
         listener.getLogger().println("[Coverity] cov-commit-defects command line arguments: " + commandLine.toString());
     }
@@ -106,6 +108,12 @@ public class CovCommitDefectsCommand extends CoverityCommand {
         addArgument(userArg);
         addArgument(cimInstance.getUser());
         envVars.put(coverity_passphrase, cimInstance.getPassword());
+    }
+
+    private void addMisraOnly() {
+        if (version.compareTo(CoverityVersion.VERSION_INDIO) == 0 && publisher.getInvocationAssistance().getIsUsingMisra()) {
+            addArgument(misraOnly);
+        }
     }
 
     private void addCommitArguments() {
