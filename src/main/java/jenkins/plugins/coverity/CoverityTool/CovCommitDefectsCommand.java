@@ -111,7 +111,7 @@ public class CovCommitDefectsCommand extends CoverityCommand {
     }
 
     private void addMisraOnly() {
-        if (version.compareTo(CoverityVersion.VERSION_INDIO) == 0 && publisher.getInvocationAssistance().getIsUsingMisra()) {
+        if (version.compareTo(CoverityVersion.VERSION_JASPER) < 0 && publisher.getInvocationAssistance().getIsUsingMisra()) {
             addArgument(misraOnly);
         }
     }
