@@ -11,11 +11,15 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 
+import com.coverity.ws.v9.SnapshotIdDataObj;
 import jenkins.plugins.coverity.*;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import jenkins.plugins.coverity.Utils.TaOptionBlockBuilder;
+import jenkins.plugins.coverity.ws.TestWebServiceFactory;
+import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
 import org.apache.commons.lang.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -28,13 +32,37 @@ import static org.mockito.Mockito.when;
 
 public class CovManageHistoryCommandTest extends CommandTestBase {
 
+    private TestConfigurationService configurationService;
+    private CIMInstance cimInstance;
+
+    @Before
+    public void setup() throws IOException, InterruptedException {
+        super.setup();
+
+        cimInstance = mock(CIMInstance.class);
+        configurationService = (TestConfigurationService) new TestWebServiceFactory().getConfigurationService(cimInstance);
+        when(cimInstance.getConfigurationService()).thenReturn(configurationService);
+
+        List<SnapshotIdDataObj> snapshotList = new ArrayList<>();
+        SnapshotIdDataObj testSnapshot = new SnapshotIdDataObj();
+        testSnapshot.setId(10001L);
+        snapshotList.add(testSnapshot);
+        configurationService.setupSnapshotList(snapshotList);
+    }
+
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
 
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
+        when(cimInstance.getHost()).thenReturn("Localhost");
+        when(cimInstance.getPort()).thenReturn(8080);
+        when(cimInstance.getUser()).thenReturn("TestUser");
+        when(cimInstance.getPassword()).thenReturn("TestPassword");
+        when(cimInstance.isUseSSL()).thenReturn(false);
+        when(cimInstance.getDataPort()).thenReturn(0);
+
         TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
@@ -59,7 +87,13 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
 
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 0);
+        when(cimInstance.getHost()).thenReturn("Localhost");
+        when(cimInstance.getPort()).thenReturn(8080);
+        when(cimInstance.getUser()).thenReturn("TestUser");
+        when(cimInstance.getPassword()).thenReturn("TestPassword");
+        when(cimInstance.isUseSSL()).thenReturn(true);
+        when(cimInstance.getDataPort()).thenReturn(0);
+
         TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
@@ -84,7 +118,13 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         List<CIMStream> cimStreamList = new ArrayList<>();
         cimStreamList.add(cimStream);
 
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 0);
+        when(cimInstance.getHost()).thenReturn("Localhost");
+        when(cimInstance.getPort()).thenReturn(8080);
+        when(cimInstance.getUser()).thenReturn("TestUser");
+        when(cimInstance.getPassword()).thenReturn("TestPassword");
+        when(cimInstance.isUseSSL()).thenReturn(true);
+        when(cimInstance.getDataPort()).thenReturn(0);
+
         TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);

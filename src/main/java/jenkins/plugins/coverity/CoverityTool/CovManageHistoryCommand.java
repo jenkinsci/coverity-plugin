@@ -10,11 +10,18 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.SnapshotIdDataObj;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
+import com.coverity.ws.v9.StreamIdDataObj;
+import com.coverity.ws.v9.SnapshotFilterSpecDataObj;
+
+import java.io.IOException;
+import java.util.List;
 
 public class CovManageHistoryCommand extends CoverityCommand {
 
@@ -60,6 +67,11 @@ public class CovManageHistoryCommand extends CoverityCommand {
         if (taOptionBlock == null || !taOptionBlock.getCovHistoryCheckbox()) {
             return false;
         }
+
+        if (!checkSnapshot()){
+            return false;
+        }
+
         return true;
     }
 
@@ -76,5 +88,23 @@ public class CovManageHistoryCommand extends CoverityCommand {
         addArgument(userArg);
         addArgument(cimInstance.getUser());
         envVars.put(coverity_passphrase, cimInstance.getPassword());
+    }
+
+    private boolean checkSnapshot() {
+
+        StreamIdDataObj streamId = new StreamIdDataObj();
+        streamId.setName(cimStream.getStream());
+
+        SnapshotFilterSpecDataObj filter = new SnapshotFilterSpecDataObj();
+        try{
+            List<SnapshotIdDataObj> snapshotList = cimInstance.getConfigurationService().getSnapshotsForStream(streamId, filter);
+            if (snapshotList == null || snapshotList.isEmpty()) {
+                return false;
+            }
+            return true;
+        }catch(Exception e) {
+            launcher.getListener().getLogger().println("Error occurred while checking the stream \"" + cimStream.getStream() + "\" has any snapshots");
+            return false;
+        }
     }
 }
