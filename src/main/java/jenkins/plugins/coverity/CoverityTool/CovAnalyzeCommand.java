@@ -18,6 +18,7 @@ import jenkins.plugins.coverity.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
+import java.util.List;
 
 public class CovAnalyzeCommand extends CoverityCommand {
 
@@ -78,11 +79,16 @@ public class CovAnalyzeCommand extends CoverityCommand {
                     addArgument(testAdvisor);
                     addArgument(testAdvisorPolicyFile);
                     addArgument(taPolicyFile);
-                    addArgument(stripPath);
-                    if (StringUtils.isEmpty(taOptionBlock.getTaStripPath())){
+
+                    List<TaStripPath> taStripPaths = taOptionBlock.getTaStripPaths();
+                    if (taStripPaths == null || taStripPaths.isEmpty()) {
+                        addArgument(stripPath);
                         addArgument(build.getWorkspace().getRemote());
-                    }else{
-                        addArgument(taOptionBlock.getTaStripPath());
+                    }else {
+                        for (TaStripPath path : taStripPaths) {
+                            addArgument(stripPath);
+                            addArgument(path.getTaStripPath());
+                        }
                     }
                 }else{
                     throw new RuntimeException("Could not find test policy file at \"" + policyFile.getAbsolutePath() + "\"");

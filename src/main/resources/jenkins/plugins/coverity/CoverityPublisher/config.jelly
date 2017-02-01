@@ -280,8 +280,17 @@
                                 <f:entry title="TA Policy File (Required):" field="policyFile">
                                     <f:textbox/>
                                 </f:entry>
-                                <f:entry title="Strip Path:" field="taStripPath">
-                                    <f:textbox/>
+                                <f:entry title="Strip Path:" field="taStripPaths">
+                                    <f:repeatable field="taStripPaths" add="Add Strip Path" minimum="0" varStatus="loopItem" var="loopItem2">
+                                        <table width="100%">
+                                            <f:entry title="Strip Path" field="taStripPath">
+                                                <f:textbox/>
+                                            </f:entry>
+                                        </table>
+                                        <div align="right">
+                                            <input type="button" value="Remove Strip Path" class="repeatable-delete" style="margin-left: 1em;"/>
+                                        </div>
+                                    </f:repeatable>
                                 </f:entry>
                                 <f:entry title="Enable Cov-Manage-History" field="covHistoryCheckbox">
                                                 <f:checkbox/>

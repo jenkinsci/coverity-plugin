@@ -11,6 +11,9 @@
 package jenkins.plugins.coverity.Utils;
 
 import jenkins.plugins.coverity.TaOptionBlock;
+import jenkins.plugins.coverity.TaStripPath;
+
+import java.util.List;
 
 public class TaOptionBlockBuilder {
 
@@ -30,7 +33,7 @@ public class TaOptionBlockBuilder {
     private boolean junit4Framework;
     private boolean scmOptionBlock;
     private String policyFile;
-    private String taStripPath;
+    private List<TaStripPath> taStripPaths;
     private String p4Port;
     private String accRevRepo;
     private String bullsEyeDir;
@@ -118,8 +121,8 @@ public class TaOptionBlockBuilder {
         return this;
     }
 
-    public TaOptionBlockBuilder withStripPath(String stripPath) {
-        this.taStripPath = stripPath;
+    public TaOptionBlockBuilder withStripPath(List<TaStripPath> stripPaths) {
+        this.taStripPaths = stripPaths;
         return this;
     }
 
@@ -172,7 +175,7 @@ public class TaOptionBlockBuilder {
                 junit4Framework,
                 scmOptionBlock,
                 policyFile,
-                taStripPath,
+                taStripPaths,
                 p4Port,
                 accRevRepo,
                 bullsEyeDir,

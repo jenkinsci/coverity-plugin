@@ -14,8 +14,15 @@ import hudson.Util;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public class TaOptionBlock {
+
+    private static final Logger logger = Logger.getLogger(CoverityPublisher.class.getName());
+
+    // Deprecated field from 1.9.0 release
+    private transient String taStripPath;
+
     private final String customTestCommand;
     private final boolean cOptionBlock;
     private final boolean csOptionBlock;
@@ -32,15 +39,16 @@ public class TaOptionBlock {
     private final boolean junit4Framework;
     private final boolean scmOptionBlock;
     private final String policyFile;
-    private final String taStripPath;
     private final String p4Port;
     private final String accRevRepo;
     private final String bullsEyeDir;
     private final String customWorkDir;
     private final boolean covHistoryCheckbox;
     private final boolean javaOptionBlock;
+    private List<TaStripPath> taStripPaths;
+
     /*
-        Generic Contructor that will hold all the elements we need for Test Advisor. All of these variables 
+        Generic Constructor that will hold all the elements we need for Test Advisor. All of these variables
         are fields within the Test Advisor Option Block
      */
     @DataBoundConstructor
@@ -61,7 +69,7 @@ public class TaOptionBlock {
                          boolean junit4Framework,
                          boolean scmOptionBlock,
                          String policyFile,
-                         String taStripPath,
+                         List<TaStripPath> taStripPaths,
                          String p4Port,
                          String accRevRepo,
                          String bullsEyeDir,
@@ -84,13 +92,41 @@ public class TaOptionBlock {
         this.junitFramework = junitFramework;
         this.scmOptionBlock = scmOptionBlock;
         this.policyFile = Util.fixEmpty(policyFile);    // Required
-        this.taStripPath = Util.fixEmpty(taStripPath); // Required
         this.p4Port = Util.fixEmpty(p4Port); // Required if perforce is selected
         this.accRevRepo = Util.fixEmpty(accRevRepo);   // Required if accurev is selected
         this.bullsEyeDir = Util.fixEmpty(bullsEyeDir); // Required if bulls eye is selected
         this.customWorkDir = Util.fixEmpty(customWorkDir); // Required if a custom command is issued
         this.covHistoryCheckbox = covHistoryCheckbox;
+        this.taStripPaths = taStripPaths;   // Required
     }
+
+    /**
+     * Implement readResolve to update the de-serialized object in the case transient data was found. Transient fields
+     * will be read during de-serialization and readResolve allow updating the TaOptionBlock object after being created.
+     */
+    protected Object readResolve() {
+        // Check for old data values taStripPath being set
+        if(taStripPath != null) {
+            logger.info("Old data format detected. Converting to new format.");
+            convertTransientDataFields();
+        }
+
+        return this;
+    }
+
+    /**
+     * Converts the old data values taStripPath to a {@link TaStripPath} object
+     * and adds to the configured taStripPaths.
+     */
+    private void convertTransientDataFields() {
+        TaStripPath stripPath = new TaStripPath(taStripPath);
+
+        if(taStripPaths == null) {
+            this.taStripPaths = new ArrayList<TaStripPath>();
+        }
+        taStripPaths.add(stripPath);
+    }
+
     /*
     Required functions needed for jenkins to access all of the Test Advisor Data.
      */
@@ -128,8 +164,6 @@ public class TaOptionBlock {
 
     public String getPolicyFile(){return policyFile;}
 
-    public String getTaStripPath(){return taStripPath;}
-
     public String getP4Port(){return p4Port;}
 
     public String getAccRevRepo(){return accRevRepo;}
@@ -140,7 +174,7 @@ public class TaOptionBlock {
 
     public boolean getCovHistoryCheckbox(){return covHistoryCheckbox;}
 
-
+    public List<TaStripPath> getTaStripPaths() { return taStripPaths; }
 
     /*
     Get Test Advisor Command Arguments
