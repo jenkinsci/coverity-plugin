@@ -122,10 +122,15 @@ public class TestWebServiceFactory extends WebServiceFactory {
     
     public class TestConfigurationService implements ConfigurationService {
         private URL url;
+        private List<SnapshotIdDataObj> snapshotList;
 
         public TestConfigurationService(URL url) {
 
             this.url = url;
+        }
+
+        public void setupSnapshotList(List<SnapshotIdDataObj> list) {
+            this.snapshotList = list;
         }
 
         @Override
@@ -270,7 +275,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public List<SnapshotIdDataObj> getSnapshotsForStream(StreamIdDataObj streamId, SnapshotFilterSpecDataObj filterSpec) throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            return snapshotList;
         }
 
         @Override
