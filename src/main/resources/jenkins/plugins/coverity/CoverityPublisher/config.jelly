@@ -115,7 +115,7 @@
 						 title="Streams"
 						 description="Streams to perform analysis for and commit to">
 					<f:repeatable field="cimStreams"
-								  add="Add Stream" minimum="1" varStatus="loopItem" var="loopItem2">
+								  add="Add Stream" minimum="1">
 						<j:set var="id" value="${descriptor.getRandomID(instance)}" />
 						<table width="100%">
 							<input type="hidden" name="id" value="${id}" />
@@ -241,7 +241,7 @@
                             </f:entry>
 
                             <f:entry title="(Only for Java) WAR files:" field="javaWarFiles">
-                                <f:repeatable field="javaWarFiles" add="Add War File" minimum="0" varStatus="loopItem" var="loopItem2">
+                                <f:repeatable field="javaWarFiles" add="Add War File">
                                     <j:set var="id" value="${descriptor.getRandomID(instance)}" />
                                     <table width="100%">
                                         <input type="hidden" name="id" value="${id}" />
@@ -280,8 +280,17 @@
                                 <f:entry title="TA Policy File (Required):" field="policyFile">
                                     <f:textbox/>
                                 </f:entry>
-                                <f:entry title="Strip Path:" field="taStripPath">
-                                    <f:textbox/>
+                                <f:entry title="Strip Path:" field="taStripPaths">
+                                    <f:repeatable field="taStripPaths" add="Add Strip Path">
+                                        <table width="100%">
+                                            <f:entry title="Strip Path" field="taStripPath">
+                                                <f:textbox/>
+                                            </f:entry>
+                                        </table>
+                                        <div align="right">
+                                            <input type="button" value="Remove Strip Path" class="repeatable-delete" style="margin-left: 1em;"/>
+                                        </div>
+                                    </f:repeatable>
                                 </f:entry>
                                 <f:entry title="Enable Cov-Manage-History" field="covHistoryCheckbox">
                                                 <f:checkbox/>

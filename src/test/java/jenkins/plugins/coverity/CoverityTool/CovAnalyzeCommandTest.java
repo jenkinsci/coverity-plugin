@@ -16,14 +16,14 @@ import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import jenkins.plugins.coverity.Utils.TaOptionBlockBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
-import org.powermock.api.mockito.PowerMockito;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
 
 public class CovAnalyzeCommandTest extends CommandTestBase {
 
@@ -107,15 +107,22 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void addTestAdvisorConfigurationTest_WithEmptyStripPath() throws IOException, InterruptedException {
+    public void addTestAdvisorConfigurationTest_WithMultipleStripPaths() throws IOException, InterruptedException {
         File taPolicyFile = new File("taPolicyFile");
+        List<TaStripPath> taStripPathList = new ArrayList<TaStripPath>();
+        TaStripPath path1 = new TaStripPath("StripPath1");
+        TaStripPath path2 = new TaStripPath("StripPath2");
+        taStripPathList.add(path1);
+        taStripPathList.add(path2);
+
         try{
             taPolicyFile.createNewFile();
-            TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withPolicyFile(taPolicyFile.getPath()).withStripPath("Path2Strip").build();
+            TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withPolicyFile(taPolicyFile.getPath()).withStripPath(taStripPathList).build();
             CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
             Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-            setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "--test-advisor", "--test-advisor-policy", taPolicyFile.getPath(), "--strip-path", "Path2Strip"});
+            setExpectedArguments(new String[] {"cov-analyze", "--dir", "TestDir", "--test-advisor", "--test-advisor-policy", taPolicyFile.getPath(),
+                    "--strip-path", "StripPath1", "--strip-path", "StripPath2"});
             covAnalyzeCommand.runCommand();
             consoleLogger.verifyLastMessage("[Coverity] cov-analyze command line arguments: " + actualArguments.toString());
         }finally {
@@ -140,7 +147,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     @Test
     public void addTestAdvisorConfigurationTest_WithInvalidTaPolicyFilePath() throws IOException, InterruptedException {
         File taPolicyFile = new File("taPolicyFile");
-        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withPolicyFile(taPolicyFile.getPath()).withStripPath("Path2Strip").build();
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withPolicyFile(taPolicyFile.getPath()).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
