@@ -13,33 +13,94 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
     <j:set var="javaOption" value="${instance.javaOptionBlock}"/>
 	<script type="text/javascript">
-		function loadDefectFilters(id) {
-			var form = document.getElementById('cimInstance-' + id).form;
-			buildFormTree(form);
+    function loadDefectFilters(id) {
+      var form = document.getElementById('cimInstance-' + id).form;
+      buildFormTree(form);
 
-			var json = form.elements["json"].value;
+      var json = form.elements["json"].value;
 
-			new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
-				parameters: { json: json, id: id },
-				onComplete: function (rsp) {
-					var target = document.getElementById("defectFilters-" + id);
-					target.innerHTML = rsp.status == 200 ? rsp.responseText
-							: '&lt;a href="" onclick="document.getElementById(\'valerr' +
-							(i = iota++) +
-							'\').style.display=\'block\';return false"&gt;ERROR' +
-							'&lt;/a&gt;' +
-							'&lt;div id="valerr' + i + '" style="display:none"&gt;' +
-							rsp.responseText +
-							'&lt;/div&gt;';
-					Behaviour.applySubtree(target);
+      new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
+        parameters: {json: json, id: id},
+        onComplete: function (rsp) {
+          var target = document.getElementById("defectFilters-" + id);
+          target.innerHTML = rsp.status == 200 ? rsp.responseText
+            : '&lt;a href="" onclick="document.getElementById(\'valerr' +
+            (i = iota++) +
+            '\').style.display=\'block\';return false"&gt;ERROR' +
+            '&lt;/a&gt;' +
+            '&lt;div id="valerr' + i + '" style="display:none"&gt;' +
+            rsp.responseText +
+            '&lt;/div&gt;';
+          Behaviour.applySubtree(target);
 
-					document.getElementById('filters-' + id).style.display = 'none';
-					document.getElementById('showFilters-' + id).style.display = 'block';
-					document.getElementById('hideFilters-' + id).style.display = 'none';
-				}
-			});
-		}
-	</script>
+          document.getElementById('filters-' + id).style.display = 'none';
+          document.getElementById('showFilters-' + id).style.display = 'block';
+          document.getElementById('hideFilters-' + id).style.display = 'none';
+        }
+      });
+    }
+
+    function loadProjects(id) {
+
+      var form = document.getElementById('cimInstance-' + id).form;
+      buildFormTree(form);
+
+      var json = form.elements["json"].value;
+
+      new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/loadProjectsForInstance", {
+        parameters: {json: json, id: id},
+        onComplete: function (t) {
+          var projectSelect = document.getElementById("project-" + id);
+
+          if (t.status == 200) {
+            var json = t.responseText.evalJSON();
+
+            projectSelect.options.length = 0;
+
+            json.projects.each(function (project) {
+              var opt = document.createElement("option");
+              opt.value = project;
+              opt.text = project;
+              projectSelect.appendChild(opt);
+            });
+          }
+
+          Behaviour.applySubtree(projectSelect);
+        }
+      });
+    }
+
+    function loadStreams(id) {
+
+      var form = document.getElementById('cimInstance-' + id).form;
+      buildFormTree(form);
+
+      var json = form.elements["json"].value;
+
+      new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/loadStreamsForProject", {
+        parameters: {json: json, id: id},
+        onComplete: function (t) {
+            debugger;
+          var streamSelect = document.getElementById("stream-" + id);
+
+          if (t.status == 200) {
+            var json = t.responseText.evalJSON();
+
+            streamSelect.options.length = 0;
+
+            json.streams.each(function (stream) {
+              var opt = document.createElement("option");
+              opt.value = stream;
+              opt.text = stream;
+              streamSelect.appendChild(opt);
+            });
+          }
+
+          Behaviour.applySubtree(streamSelect);
+        }
+      });
+    }
+  </script>
 	<script type="text/javascript">
 		function checkFilters(state, id) {
 			YAHOO.util.Dom.getElementsBy(
@@ -122,13 +183,13 @@
 							<br/>
 
 							<f:entry title="Coverity Connect instance" field="instance">
-								<f:select id="cimInstance-${id}"/>
+								<f:select id="cimInstance-${id}" onchange="loadProjects(${id})"/>
 							</f:entry>
 							<f:entry title="Project" field="project">
-								<f:select/>
+                <select id="project-${id}" name="project" class="setting-input" onchange="loadStreams(${id})"/>
 							</f:entry>
 							<f:entry title="Stream" field="stream">
-								<f:select onchange="loadDefectFilters(${id})"/>
+								<select id="stream-${id}" name="stream" class="setting-input" onchange="loadDefectFilters(${id})"/>
 							</f:entry>
 							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"
 											 checked="${instance.invocationAssistanceOverride != null}" name="invocationAssistanceOverride">

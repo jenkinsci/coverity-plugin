@@ -26,6 +26,7 @@ import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.plugins.coverity.CoverityTool.CoverityToolHandler;
+import jenkins.plugins.coverity.ws.CimCache;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -34,8 +35,11 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -611,8 +615,26 @@ public class CoverityPublisher extends Recorder {
 
                 currentDescriptor = ((CIMStream.DescriptorImpl) current.getDescriptor());
 
-                if(StringUtils.isEmpty(current.getInstance()) || StringUtils.isEmpty(current.getStream()) || StringUtils.isEmpty(current.getProject())) {
+                if (StringUtils.isEmpty(current.getInstance())) {
                     //do nothing
+                } else if(StringUtils.isEmpty(current.getStream()) || StringUtils.isEmpty(current.getProject())) {
+                    //initialize 'new' defectFilters item with default values selected
+                    DefectFilters defectFilters = current.getDefectFilters();
+                    if(defectFilters != null) {
+                        Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
+                        try {
+                            current.getDefectFilters().invertCheckers(
+                                allCheckers,
+                                toStrings(currentDescriptor.doFillClassificationDefectFilterItems(current.getInstance())),
+                                toStrings(currentDescriptor.doFillActionDefectFilterItems(current.getInstance())),
+                                toStrings(currentDescriptor.doFillSeveritiesDefectFilterItems(current.getInstance())),
+                                toStrings(currentDescriptor.doFillComponentDefectFilterItems(current.getInstance(), current.getStream()))
+                            );
+                        } catch (CovRemoteServiceException_Exception e) {
+                            throw new IOException(e);
+                        }
+                    }
+
                 } else {
                     Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
                     DefectFilters defectFilters = current.getDefectFilters();
@@ -635,6 +657,75 @@ public class CoverityPublisher extends Recorder {
                 req.setAttribute("id", id);
             }
             rsp.forward(currentDescriptor, "defectFilters", req);
+        }
+
+        @JavaScriptMethod
+        public void doLoadProjectsForInstance(StaplerRequest req, StaplerResponse rsp) throws ServletException, IOException {
+
+            JSONObject json = getJSONClassObject(req.getSubmittedForm(), getId());
+
+            CIMStream current = null;
+            if(json != null && !json.isNullObject()) {
+                CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
+                String id = ((String[]) req.getParameterMap().get("id"))[0];
+                for(CIMStream cs : publisher.getCimStreams()) {
+                    if(id.equals(cs.getId())) {
+                        current = cs;
+                    }
+                }
+
+                CIMInstance cimInstance = publisher.getDescriptor().getInstance(current.getInstance());
+                List<String> projects = new ArrayList<>(CimCache.getInstance().getProjects(cimInstance));
+                if (!StringUtils.isEmpty(current.getProject()))
+                    projects.add(current.getProject());
+
+                req.setAttribute("id", id);
+
+                rsp.setContentType("application/json; charset=utf-8");
+                final ServletOutputStream outputStream = rsp.getOutputStream();
+
+                JSONObject responseObject = new JSONObject();
+                responseObject.put("projects", projects);
+                responseObject.put("selectedProject", current.getProject());
+
+                String jsonString = responseObject.toString();
+                outputStream.write(jsonString.getBytes("UTF-8"));
+            }
+        }
+
+
+        @JavaScriptMethod
+        public void doLoadStreamsForProject(StaplerRequest req, StaplerResponse rsp) throws ServletException, IOException {
+
+            JSONObject json = getJSONClassObject(req.getSubmittedForm(), getId());
+
+            CIMStream current = null;
+            if(json != null && !json.isNullObject()) {
+                CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
+                String id = ((String[]) req.getParameterMap().get("id"))[0];
+                for(CIMStream cs : publisher.getCimStreams()) {
+                    if(id.equals(cs.getId())) {
+                        current = cs;
+                    }
+                }
+
+                CIMInstance cimInstance = publisher.getDescriptor().getInstance(current.getInstance());
+                List<String> streams = new ArrayList<>(CimCache.getInstance().getStreams(cimInstance ,current.getProject()));
+                if (!StringUtils.isEmpty(current.getStream()))
+                    streams.add(current.getStream());
+
+                req.setAttribute("id", id);
+
+                rsp.setContentType("application/json; charset=utf-8");
+                final ServletOutputStream outputStream = rsp.getOutputStream();
+
+                JSONObject responseObject = new JSONObject();
+                responseObject.put("streams", streams);
+                responseObject.put("selectedStream", current.getStream());
+
+                String jsonString = responseObject.toString();
+                outputStream.write(jsonString.getBytes("UTF-8"));
+            }
         }
     }
 }
