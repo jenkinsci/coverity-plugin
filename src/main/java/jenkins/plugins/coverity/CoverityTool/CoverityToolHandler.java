@@ -69,8 +69,13 @@ public class CoverityToolHandler {
          * Sets COV_ANALYSIS_ROOT and COV_IDIR so they are available to the scripts used, for instance, in the post
          * cov-build and cov-analyze commands.
          */
-        envVars.put("COV_IDIR", temp.getTempDir().getRemote());
-        envVars.put("COV_ANALYSIS_ROOT", home);
+        if (!envVars.containsKey("COV_IDIR")) {
+            envVars.put("COV_IDIR", temp.getTempDir().getRemote());
+        }
+
+        if (!envVars.containsKey("COV_ANALYSIS_ROOT")) {
+            envVars.put("COV_ANALYSIS_ROOT", home);
+        }
 
         //run cov-build for scripting language sources only.
         try {

@@ -63,25 +63,6 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void addMisraConfigurationTest_WithInvalidMisraConfigFilePath() throws IOException, InterruptedException {
-        File misraConfigFile = new File("misraConfigFile");
-
-        InvocationAssistance invocationAssistance =
-                new InvocationAssistanceBuilder().
-                        withUsingMisra(true).
-                        withMisraConfigFile(misraConfigFile.getPath()).build();
-        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
-
-        Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        try{
-            covAnalyzeCommand.runCommand();
-            fail("RuntimeException should have been thrown");
-        }catch (RuntimeException e) {
-            assertEquals("Could not find MISRA configuration file at \"" + misraConfigFile.getAbsolutePath() + "\"", e.getMessage());
-        }
-    }
-
-    @Test
     public void additionalArgumentsTest() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withAnalyzeArguments("additionalArgs").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
@@ -141,21 +122,6 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
             fail("RuntimeException should have been thrown");
         }catch(RuntimeException e) {
             assertEquals("Test Advisor Policy File is required to run the Test Advisor.", e.getMessage());
-        }
-    }
-
-    @Test
-    public void addTestAdvisorConfigurationTest_WithInvalidTaPolicyFilePath() throws IOException, InterruptedException {
-        File taPolicyFile = new File("taPolicyFile");
-        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withPolicyFile(taPolicyFile.getPath()).build();
-        CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
-
-        Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        try{
-            covAnalyzeCommand.runCommand();
-            fail("RuntimeException should have been thrown");
-        }catch(RuntimeException e) {
-            assertEquals("Could not find test policy file at \"" + taPolicyFile.getAbsolutePath() + "\"", e.getMessage());
         }
     }
 }

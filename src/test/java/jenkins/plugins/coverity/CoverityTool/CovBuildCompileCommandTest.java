@@ -29,7 +29,7 @@ public class CovBuildCompileCommandTest extends CommandTestBase {
                 withTaOptionBlock(taOptionBlock).build();
 
         Command covBuildCommand = new CovBuildCompileCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit"});
+        setExpectedArguments(new String[] {"cov-build", "--dir", "$COV_IDIR", "--java-coverage", "Jacoco", "--java-test", "junit"});
         covBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments for compiled sources: " + actualArguments.toString());
     }
@@ -41,7 +41,7 @@ public class CovBuildCompileCommandTest extends CommandTestBase {
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covBuildCommand = new CovBuildCompileCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        setExpectedArguments(new String[] {"cov-build", "--dir", "TestDir", "AdditionalBuildArguments"});
+        setExpectedArguments(new String[] {"cov-build", "--dir", "$COV_IDIR", "AdditionalBuildArguments"});
         covBuildCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments for compiled sources: " + actualArguments.toString());
     }

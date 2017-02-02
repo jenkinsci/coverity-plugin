@@ -56,13 +56,8 @@ public class CovAnalyzeCommand extends CoverityCommand {
         if (invocationAssistance != null && invocationAssistance.getIsUsingMisra()){
             String misraConfigFile = invocationAssistance.getMisraConfigFile();
             if (!StringUtils.isEmpty(misraConfigFile)){
-                File configFile = new File(misraConfigFile);
-                if (configFile.isFile()){
-                    addArgument(misraConfig);
-                    addArgument(misraConfigFile);
-                }else{
-                    throw new RuntimeException("Could not find MISRA configuration file at \"" + configFile.getAbsolutePath() + "\"");
-                }
+                addArgument(misraConfig);
+                addArgument(misraConfigFile);
             } else{
                 throw new RuntimeException("Misra configuration file is required to run Misra analysis.");
             }
@@ -74,24 +69,19 @@ public class CovAnalyzeCommand extends CoverityCommand {
         if (taOptionBlock != null){
             String taPolicyFile = taOptionBlock.getPolicyFile();
             if (!StringUtils.isEmpty(taPolicyFile)){
-                File policyFile = new File(taPolicyFile);
-                if (policyFile.isFile()){
-                    addArgument(testAdvisor);
-                    addArgument(testAdvisorPolicyFile);
-                    addArgument(taPolicyFile);
+                addArgument(testAdvisor);
+                addArgument(testAdvisorPolicyFile);
+                addArgument(taPolicyFile);
 
-                    List<TaStripPath> taStripPaths = taOptionBlock.getTaStripPaths();
-                    if (taStripPaths == null || taStripPaths.isEmpty()) {
+                List<TaStripPath> taStripPaths = taOptionBlock.getTaStripPaths();
+                if (taStripPaths == null || taStripPaths.isEmpty()) {
+                    addArgument(stripPath);
+                    addArgument(build.getWorkspace().getRemote());
+                }else {
+                    for (TaStripPath path : taStripPaths) {
                         addArgument(stripPath);
-                        addArgument(build.getWorkspace().getRemote());
-                    }else {
-                        for (TaStripPath path : taStripPaths) {
-                            addArgument(stripPath);
-                            addArgument(path.getTaStripPath());
-                        }
+                        addArgument(path.getTaStripPath());
                     }
-                }else{
-                    throw new RuntimeException("Could not find test policy file at \"" + policyFile.getAbsolutePath() + "\"");
                 }
             }else{
                 throw new RuntimeException("Test Advisor Policy File is required to run the Test Advisor.");

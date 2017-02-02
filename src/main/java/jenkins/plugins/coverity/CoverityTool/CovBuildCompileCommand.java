@@ -46,6 +46,12 @@ public class CovBuildCompileCommand extends CoverityCommand {
         return true;
     }
 
+    @Override
+    protected void addIntermediateDir() {
+        commandLine.add(intermediateDirArguments);
+        commandLine.add("$COV_IDIR");
+    }
+
     private void addAdditionalBuildArguments() {
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         String buildArgs = invocationAssistance.getBuildArguments();
