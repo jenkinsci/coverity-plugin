@@ -675,9 +675,13 @@ public class CoverityPublisher extends Recorder {
                 }
 
                 CIMInstance cimInstance = publisher.getDescriptor().getInstance(current.getInstance());
-                List<String> projects = new ArrayList<>(CimCache.getInstance().getProjects(cimInstance));
-                if (!StringUtils.isEmpty(current.getProject()))
-                    projects.add(current.getProject());
+                final List<String> projects = new ArrayList<>(CimCache.getInstance().getProjects(cimInstance));
+                final String currentProject = current.getProject();
+                boolean currentProjectIsvalid = true;
+                if (!StringUtils.isEmpty(currentProject) && !projects.contains(currentProject)) {
+                    projects.add(currentProject);
+                    currentProjectIsvalid = false;
+                }
 
                 req.setAttribute("id", id);
 
@@ -686,7 +690,8 @@ public class CoverityPublisher extends Recorder {
 
                 JSONObject responseObject = new JSONObject();
                 responseObject.put("projects", projects);
-                responseObject.put("selectedProject", current.getProject());
+                responseObject.put("selectedProject", currentProject);
+                responseObject.put("validSelection", currentProjectIsvalid);
 
                 String jsonString = responseObject.toString();
                 outputStream.write(jsonString.getBytes("UTF-8"));
@@ -710,9 +715,14 @@ public class CoverityPublisher extends Recorder {
                 }
 
                 CIMInstance cimInstance = publisher.getDescriptor().getInstance(current.getInstance());
-                List<String> streams = new ArrayList<>(CimCache.getInstance().getStreams(cimInstance ,current.getProject()));
-                if (!StringUtils.isEmpty(current.getStream()))
-                    streams.add(current.getStream());
+                final List<String> streams = new ArrayList<>(CimCache.getInstance().getStreams(cimInstance ,current.getProject()));
+                final String currentStream = current.getStream();
+                boolean currentStreamIsvalid = true;
+
+                if (!StringUtils.isEmpty(currentStream) && !streams.contains(currentStream)) {
+                    streams.add(currentStream);
+                    currentStreamIsvalid = false;
+                }
 
                 req.setAttribute("id", id);
 
@@ -721,7 +731,8 @@ public class CoverityPublisher extends Recorder {
 
                 JSONObject responseObject = new JSONObject();
                 responseObject.put("streams", streams);
-                responseObject.put("selectedStream", current.getStream());
+                responseObject.put("selectedStream", currentStream);
+                responseObject.put("validSelection", currentStreamIsvalid);
 
                 String jsonString = responseObject.toString();
                 outputStream.write(jsonString.getBytes("UTF-8"));

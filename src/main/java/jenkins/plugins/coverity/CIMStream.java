@@ -204,22 +204,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 //            return result;
 //        }
 
-        public FormValidation doCheckProject(@QueryParameter String instance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
-            // allow initial empty project selection
-            if (StringUtils.isEmpty(project))
-                return FormValidation.ok();
-
-            CIMInstance cimInstance = getInstance(instance);
-            if (cimInstance != null){
-                for (String projectName : CimCache.getInstance().getProjects(cimInstance)){
-                    if (projectName.equalsIgnoreCase(project)){
-                        return FormValidation.ok();
-                    }
-                }
-            }
-            return FormValidation.error("Project [ " + project + " ] is not found");
-        }
-
 //        public ListBoxModel doFillStreamItems(@QueryParameter String project, @QueryParameter String instance) throws IOException, CovRemoteServiceException_Exception {
 //            ListBoxModel result = new ListBoxModel();
 //
@@ -244,22 +228,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 result.add(stream);
             }
             return result;
-        }
-
-        public FormValidation doCheckStream(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
-            // allow initial empty stream selection
-            if (StringUtils.isEmpty(stream))
-                return FormValidation.ok();
-
-            CIMInstance cimInstance = getInstance(instance);
-            if (cimInstance != null && !StringUtils.isEmpty(project)){
-                for (StreamDataObj streamFromCIM : cimInstance.getStaticStreams(project)){
-                    if (streamFromCIM.getId().getName().equalsIgnoreCase(stream)){
-                        return FormValidation.ok();
-                    }
-                }
-            }
-            return FormValidation.error("Stream [ " + stream + " ] is not found");
         }
 
         public ListBoxModel doFillClassificationDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception, com.coverity.ws.v9.CovRemoteServiceException_Exception {

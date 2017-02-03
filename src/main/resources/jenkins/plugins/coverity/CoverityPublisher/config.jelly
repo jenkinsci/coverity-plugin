@@ -63,9 +63,29 @@
               opt.text = project;
               projectSelect.appendChild(opt);
             });
-          }
+            if (json.selectedProject)
+              projectSelect.value = json.selectedProject;
 
-          Behaviour.applySubtree(projectSelect);
+            if (!json.validSelection) {
+              var invalidInput = document.createElement('input');
+              invalidInput.setAttribute('id', 'invalidProject-' + id);
+              invalidInput.setAttribute('type', 'hidden');
+              invalidInput.value = json.selectedProject;
+
+              var errorDiv = document.createElement('div');
+              errorDiv.setAttribute('class', 'error');
+              errorDiv.innerHTML = "Project [ " + json.selectedProject + " ] is not found";
+
+              var parentRow = projectSelect.parentNode.parentNode;
+              var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+              if (validationCell.childElementCount == 0) {
+                validationCell.appendChild(errorDiv);
+                validationCell.appendChild(invalidInput);
+              }
+            } else {
+              loadStreams(id);
+            }
+          }
         }
       });
     }
@@ -80,7 +100,6 @@
       new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/loadStreamsForProject", {
         parameters: {json: json, id: id},
         onComplete: function (t) {
-            debugger;
           var streamSelect = document.getElementById("stream-" + id);
 
           if (t.status == 200) {
@@ -94,11 +113,57 @@
               opt.text = stream;
               streamSelect.appendChild(opt);
             });
-          }
+            if (json.selectedStream)
+              streamSelect.value = json.selectedStream;
 
-          Behaviour.applySubtree(streamSelect);
+            if (!json.validSelection) {
+              var invalidInput = document.createElement('input');
+              invalidInput.setAttribute('id', 'invalidStream-' + id);
+              invalidInput.setAttribute('type', 'hidden');
+              invalidInput.value = json.selectedStream;
+
+              var errorDiv = document.createElement('div');
+              errorDiv.setAttribute('class', 'error');
+              errorDiv.innerHTML = "Stream [ " + json.selectedStream + " ] is not found";
+
+              var parentRow = streamSelect.parentNode.parentNode;
+              var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+              if (validationCell.childElementCount == 0) {
+                validationCell.appendChild(errorDiv);
+                validationCell.appendChild(invalidInput);
+              }
+            } else {
+              loadDefectFilters(id);
+            }
+          }
         }
       });
+    }
+
+    function validateProjectSelection(id) {
+      var projectSelect = document.getElementById("project-" + id);
+      var projectValue = projectSelect.value;
+
+      var parentRow = projectSelect.parentNode.parentNode;
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+      var invalidProject = validationCell.select('[id=invalidProject-' + id + ']')[0];
+      if (invalidProject &amp;&amp; invalidProject.value != projectValue) {
+        validationCell.innerHTML = '';
+        projectSelect.removeChild(projectSelect.querySelector('option[value="' + invalidProject.value + '"]'));
+      }
+    }
+
+    function validateStreamSelection(id) {
+      var streamSelect = document.getElementById("stream-" + id);
+      var streamValue = streamSelect.value;
+
+      var parentRow = streamSelect.parentNode.parentNode;
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+      var invalidStream = validationCell.select('[id=invalidStream-' + id + ']')[0];
+      if (invalidStream &amp;&amp; invalidStream.value != streamValue) {
+        validationCell.innerHTML = '';
+        streamSelect.removeChild(streamSelect.querySelector('option[value="' + invalidStream.value + '"]'));
+      }
     }
   </script>
 	<script type="text/javascript">
@@ -186,10 +251,10 @@
 								<f:select id="cimInstance-${id}" onchange="loadProjects(${id})"/>
 							</f:entry>
 							<f:entry title="Project" field="project">
-                <select id="project-${id}" name="project" class="setting-input" onchange="loadStreams(${id})"/>
+                <select id="project-${id}" name="project" class="setting-input" onchange="validateProjectSelection(${id});loadStreams(${id})"/>
 							</f:entry>
 							<f:entry title="Stream" field="stream">
-								<select id="stream-${id}" name="stream" class="setting-input" onchange="loadDefectFilters(${id})"/>
+								<select id="stream-${id}" name="stream" class="setting-input" onchange="validateStreamSelection(${id});loadDefectFilters(${id})"/>
 							</f:entry>
 							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"
 											 checked="${instance.invocationAssistanceOverride != null}" name="invocationAssistanceOverride">
