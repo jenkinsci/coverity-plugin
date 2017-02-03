@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 
 public abstract class CoverityCommand extends Command {
 
-    private static final String intermediateDirArguments = "--dir";
+    protected static final String intermediateDirArguments = "--dir";
     private static final String covIdirEnvVar = "COV_IDIR";
     protected static final String useSslArg = "--ssl";
     private static final String onNewCertArg = "--on-new-cert";
