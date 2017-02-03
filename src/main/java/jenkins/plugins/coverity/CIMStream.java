@@ -10,9 +10,20 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
-import com.coverity.ws.v9.ProjectDataObj;
 import com.coverity.ws.v9.StreamDataObj;
+
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
@@ -21,18 +32,6 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.ws.CimCache;
-
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.logging.Logger;
 
 public class CIMStream extends AbstractDescribableImpl<CIMStream> {
     private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
@@ -187,47 +186,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 return checkResult.kind.equals(FormValidation.Kind.OK) ? FormValidation.ok() : checkResult;
             }
             return FormValidation.warning("Coverity Connect instance is required to select project and stream");
-        }
-
-//        public ListBoxModel doFillProjectItems(@QueryParameter String instance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
-//            ListBoxModel result = new ListBoxModel();
-//            CIMInstance cimInstance = getInstance(instance);
-//            if(cimInstance != null) {
-//                for (String projectName : CimCache.getInstance().getProjects(cimInstance)) {
-//                    result.add(projectName);
-//                }
-//            }
-//            // add project if it is not contained (instead of dropping value and clearing item)
-//            if (!StringUtils.isEmpty(project) && !result.contains(project)){
-//                result.add(project);
-//            }
-//            return result;
-//        }
-
-//        public ListBoxModel doFillStreamItems(@QueryParameter String project, @QueryParameter String instance) throws IOException, CovRemoteServiceException_Exception {
-//            ListBoxModel result = new ListBoxModel();
-//
-//            for (String stream : getStreams(instance, project, null)) {
-//                result.add(stream);
-//            }
-//
-//            return result;
-//        }
-
-        private List<String> getStreams(String instance, String project, String stream) throws IOException, CovRemoteServiceException_Exception {
-            List<String> result = new ArrayList<>();
-            if (StringUtils.isEmpty(project)) return result;
-            CIMInstance cimInstance = getInstance(instance);
-            if (cimInstance != null) {
-                for (String streamName : CimCache.getInstance().getStreams(cimInstance, project)) {
-                    result.add(streamName);
-                }
-            }
-            // add stream if it is not contained (instead of dropping value and clearing item)
-            if (!StringUtils.isEmpty(stream) && !result.contains(stream)) {
-                result.add(stream);
-            }
-            return result;
         }
 
         public ListBoxModel doFillClassificationDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception, com.coverity.ws.v9.CovRemoteServiceException_Exception {
