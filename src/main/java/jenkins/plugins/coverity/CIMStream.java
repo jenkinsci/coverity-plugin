@@ -11,10 +11,13 @@
 package jenkins.plugins.coverity;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
@@ -186,6 +189,42 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 return checkResult.kind.equals(FormValidation.Kind.OK) ? FormValidation.ok() : checkResult;
             }
             return FormValidation.warning("Coverity Connect instance is required to select project and stream");
+        }
+
+        public List<String> loadProjects(@QueryParameter String instance, @QueryParameter String project) {
+
+            Set<String> projects = new HashSet<>();
+            if (!StringUtils.isEmpty(project)) {
+                projects.add(project);
+            }
+
+            if (!StringUtils.isEmpty(instance)) {
+                CIMInstance cimInstance = getInstance(instance);
+
+                for(String projectFromCim : CimCache.getInstance().getProjects(cimInstance)) {
+                    projects.add(projectFromCim);
+                }
+            }
+
+            return new ArrayList<>(projects);
+        }
+
+        public List<String> loadStreams(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) {
+
+            Set<String> streams = new HashSet<>();
+            if (!StringUtils.isEmpty(stream)) {
+                streams.add(stream);
+            }
+
+            if (!StringUtils.isEmpty(instance) && !StringUtils.isEmpty(project)) {
+                CIMInstance cimInstance = getInstance(instance);
+
+                for(String streamFromCim : CimCache.getInstance().getStreams(cimInstance, project)) {
+                    streams.add(streamFromCim);
+                }
+            }
+
+            return new ArrayList<>(streams);
         }
 
         public ListBoxModel doFillClassificationDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception, com.coverity.ws.v9.CovRemoteServiceException_Exception {

@@ -250,12 +250,33 @@
 							<f:entry title="Coverity Connect instance" field="instance">
 								<f:select id="cimInstance-${id}" onchange="loadProjects(${id})"/>
 							</f:entry>
+
 							<f:entry title="Project" field="project">
-                <select id="project-${id}" name="project" class="setting-input" onchange="validateProjectSelection(${id});loadStreams(${id})"/>
+                <select id="project-${id}" name="project" class="setting-input" onchange="validateProjectSelection(${id});loadStreams(${id})">
+                  <j:forEach var="proj" items="${descriptor.loadProjects(instance.instance, instance.project)}">
+                    <j:if test="${proj == instance.project}">
+                      <option value="${proj}" selected="selected">${proj}</option>
+                    </j:if>
+                    <j:if test="${proj != instance.project}">
+                      <option value="${proj}">${proj}</option>
+                    </j:if>
+                  </j:forEach>
+                </select>
 							</f:entry>
+
 							<f:entry title="Stream" field="stream">
-								<select id="stream-${id}" name="stream" class="setting-input" onchange="validateStreamSelection(${id});loadDefectFilters(${id})"/>
+								<select id="stream-${id}" name="stream" class="setting-input" onchange="validateStreamSelection(${id});loadDefectFilters(${id})">
+                  <j:forEach var="str" items="${descriptor.loadStreams(instance.instance, instance.project, instance.stream)}">
+                    <j:if test="${str == instance.stream}">
+                      <option value="${str}" selected="selected">${str}</option>
+                    </j:if>
+                    <j:if test="${str != instance.stream}">
+                      <option value="${str}">${str}</option>
+                    </j:if>
+                  </j:forEach>
+                </select>
 							</f:entry>
+
 							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"
 											 checked="${instance.invocationAssistanceOverride != null}" name="invocationAssistanceOverride">
 								<j:set var="instance" value="${instance.invocationAssistanceOverride}"/>
