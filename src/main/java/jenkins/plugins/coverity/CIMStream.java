@@ -12,6 +12,7 @@ package jenkins.plugins.coverity;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -206,7 +207,9 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 }
             }
 
-            return new ArrayList<>(projects);
+            final ArrayList<String> result = new ArrayList<>(projects);
+            Collections.sort(result, String.CASE_INSENSITIVE_ORDER);
+            return result;
         }
 
         public List<String> loadStreams(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) {
@@ -224,7 +227,9 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 }
             }
 
-            return new ArrayList<>(streams);
+            final ArrayList<String> result = new ArrayList<>(streams);
+            Collections.sort(result, String.CASE_INSENSITIVE_ORDER);
+            return result;
         }
 
         public ListBoxModel doFillClassificationDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception, com.coverity.ws.v9.CovRemoteServiceException_Exception {
