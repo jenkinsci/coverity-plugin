@@ -17,8 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import com.coverity.ws.v9.ConfigurationService;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.FeatureUpdateTimeDataObj;
 import com.coverity.ws.v9.ProjectDataObj;
 import com.coverity.ws.v9.ProjectFilterSpecDataObj;
 import com.coverity.ws.v9.StreamDataObj;
@@ -49,11 +52,11 @@ public final class CimCache {
         return instance;
     }
 
-    public void cacheInstance(CIMInstance cimInstance) {
-        if(cache.containsKey(cimInstance)) {
-            //todo: check for instance data being up to data... otherwise add
-        }
-
+    /**
+     * Adds or replaces the cached data for this instance
+     * @param cimInstance {@link CIMInstance} to cache data for
+     */
+    public void cacheCimInstance(CIMInstance cimInstance) {
         cache.put(cimInstance, new CachedData(cimInstance));
     }
 

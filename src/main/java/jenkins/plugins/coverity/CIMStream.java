@@ -178,7 +178,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 FormValidation checkResult = cimInstance.doCheck();
 
                 // initialize cache for instance
-                CimCache.getInstance().cacheInstance(cimInstance);
+                CimCache.getInstance().cacheCimInstance(cimInstance);
 
                 if (id != null) {
                     Map<String, String> cims = new HashMap<>();
