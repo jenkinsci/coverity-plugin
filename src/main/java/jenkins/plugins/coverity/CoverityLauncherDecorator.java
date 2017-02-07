@@ -349,7 +349,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 } catch(InterruptedException e) {
                     throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
                 }
-                envVars.put("COV_IDIR", temp.getRemote());
+                if (temp != null) {
+                    envVars.put("COV_IDIR", temp.getRemote());
+                }
             }
         }
     }
