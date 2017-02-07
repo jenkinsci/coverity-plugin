@@ -266,12 +266,14 @@
 							<f:entry title="Project" field="project">
                 <select id="project-${id}" name="project" class="setting-input" onchange="validateProjectSelection(${id});loadStreams(${id})">
                   <j:forEach var="proj" items="${descriptor.loadProjects(instance.instance, instance.project)}">
-                    <j:if test="${proj == instance.project}">
-                      <option value="${proj}" selected="selected">${proj}</option>
-                    </j:if>
-                    <j:if test="${proj != instance.project}">
-                      <option value="${proj}">${proj}</option>
-                    </j:if>
+                    <j:choose>
+                      <j:when test="${proj == instance.project}">
+                        <option value="${proj}" selected="selected">${proj}</option>
+                      </j:when>
+                      <j:otherwise>
+                        <option value="${proj}">${proj}</option>
+                      </j:otherwise>
+                    </j:choose>
                   </j:forEach>
                 </select>
 							</f:entry>
@@ -279,12 +281,14 @@
 							<f:entry title="Stream" field="stream">
 								<select id="stream-${id}" name="stream" class="setting-input" onchange="validateStreamSelection(${id});loadDefectFilters(${id})">
                   <j:forEach var="str" items="${descriptor.loadStreams(instance.instance, instance.project, instance.stream)}">
-                    <j:if test="${str == instance.stream}">
-                      <option value="${str}" selected="selected">${str}</option>
-                    </j:if>
-                    <j:if test="${str != instance.stream}">
-                      <option value="${str}">${str}</option>
-                    </j:if>
+                    <j:choose>
+                      <j:when test="${str == instance.stream}">
+                        <option value="${str}" selected="selected">${str}</option>
+                      </j:when>
+                      <j:otherwise>
+                        <option value="${str}">${str}</option>
+                      </j:otherwise>
+                    </j:choose>
                   </j:forEach>
                 </select>
 							</f:entry>
