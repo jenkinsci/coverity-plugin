@@ -28,7 +28,6 @@ public class InvocationAssistance {
     private final boolean csharpAutomaticAssemblies;
     private final boolean csharpMsvsca;
     private final String saOverride;
-    private EnvVars envVars;
 
     private final boolean isUsingMisra;
     private final String misraConfigFile;
@@ -254,11 +253,6 @@ public class InvocationAssistance {
         List<JavaWarFile> javaWarFiles = override.getJavaWarFiles();
         boolean useAdvancedParser = override.getUseAdvancedParser();
         return new InvocationAssistance(isUsingPostBuildCmd, postBuildCmd, isUsingPostCovAnalyzeCmd, postCovAnalyzeCmd, isScriptSrc, buildArguments, analyzeArguments, commitArguments, intermediateDir, isUsingMisra, misraConfigFile, csharpAssemblies, javaWarFilesNames, csharpAutomaticAssemblies, csharpMsvsca, saOverride, javaWarFiles, useAdvancedParser);
-    }
-
-    // Sets the environment varibles for the project so that we can replace environment varibles
-    public void setEnvVars(EnvVars environment){
-        this.envVars = environment;
     }
 
     public String checkIAConfig(){
