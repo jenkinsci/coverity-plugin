@@ -120,7 +120,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
             new URL(getURL(cimInstance), CONFIGURATION_SERVICE_V9_WSDL));
     }
     
-    public class TestConfigurationService implements ConfigurationService {
+    public static class TestConfigurationService implements ConfigurationService {
         private URL url;
         private List<SnapshotIdDataObj> snapshotList;
 

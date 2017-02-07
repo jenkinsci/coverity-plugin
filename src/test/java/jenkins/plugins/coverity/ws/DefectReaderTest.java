@@ -70,7 +70,7 @@ public class DefectReaderTest {
 
     private TestableConsoleLogger consoleLogger;
     private TestDefectService defectService;
-    private final String cimInstanceName = "cim-instance";
+    private static final String cimInstanceName = "cim-instance";
 
     @Before
     public void setup() throws IOException {
