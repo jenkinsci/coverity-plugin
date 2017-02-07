@@ -60,9 +60,6 @@ public class DefectReaderTest {
     private AbstractBuild<?, ?> build;
 
     @Mock
-    private Launcher launcher;
-
-    @Mock
     private BuildListener listener;
 
     @Mock
@@ -70,7 +67,7 @@ public class DefectReaderTest {
 
     private TestableConsoleLogger consoleLogger;
     private TestDefectService defectService;
-    private final String cimInstanceName = "cim-instance";
+    private static final String cimInstanceName = "cim-instance";
 
     @Before
     public void setup() throws IOException {
@@ -103,7 +100,7 @@ public class DefectReaderTest {
 
         defectService.setupMergedDefects(10);
 
-        DefectReader reader = new DefectReader(build, launcher, listener, publisher);
+        DefectReader reader = new DefectReader(build, listener, publisher);
 
         Boolean result = reader.getLatestDefectsForBuild();
 
@@ -141,7 +138,7 @@ public class DefectReaderTest {
 
         defectService.setupMergedDefects(3);
 
-        DefectReader reader = new DefectReader(build, launcher, listener, publisher);
+        DefectReader reader = new DefectReader(build, listener, publisher);
 
         Boolean result = reader.getLatestDefectsForBuild();
 

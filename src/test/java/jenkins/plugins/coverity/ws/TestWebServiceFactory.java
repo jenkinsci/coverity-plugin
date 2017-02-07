@@ -120,13 +120,17 @@ public class TestWebServiceFactory extends WebServiceFactory {
             new URL(getURL(cimInstance), CONFIGURATION_SERVICE_V9_WSDL));
     }
     
-    public class TestConfigurationService implements ConfigurationService {
+    public static class TestConfigurationService implements ConfigurationService {
         private URL url;
         private List<SnapshotIdDataObj> snapshotList;
 
         public TestConfigurationService(URL url) {
 
             this.url = url;
+        }
+
+        public URL getUrl() {
+            return url;
         }
 
         public void setupSnapshotList(List<SnapshotIdDataObj> list) {
@@ -592,6 +596,10 @@ public class TestWebServiceFactory extends WebServiceFactory {
             attributeValueDataObj.setAttributeValueId(attributeValueId);
 
             return attributeValueDataObj;
+        }
+
+        public URL getUrl() {
+            return url;
         }
 
         @Override

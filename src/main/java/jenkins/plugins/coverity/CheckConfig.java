@@ -353,7 +353,6 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
      *  within the xml, and then store its number
      */
     private static class ConnectorParser extends DefaultHandler{
-        public String version = null;
         public String major = null;
         public String minor = null;
         public String revision = null;

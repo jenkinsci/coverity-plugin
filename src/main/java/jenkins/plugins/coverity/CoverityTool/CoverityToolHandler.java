@@ -252,7 +252,7 @@ public class CoverityToolHandler {
         }
 
         if(!publisher.isSkipFetchingDefects()) {
-            DefectReader defectReader = new DefectReader(build, launcher, listener, publisher);
+            DefectReader defectReader = new DefectReader(build, listener, publisher);
             Boolean result = defectReader.getLatestDefectsForBuild();
 
             if (!result)

@@ -44,13 +44,11 @@ import jenkins.plugins.coverity.DefectFilters;
  */
 public class DefectReader {
     private AbstractBuild<?, ?> build;
-    private Launcher launcher;
     private BuildListener listener;
     private CoverityPublisher publisher;
 
-    public DefectReader(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) {
+    public DefectReader(AbstractBuild<?, ?> build, BuildListener listener, CoverityPublisher publisher) {
         this.build = build;
-        this.launcher = launcher;
         this.listener = listener;
         this.publisher = publisher;
     }
