@@ -671,6 +671,7 @@ public class CoverityPublisher extends Recorder {
                 for(CIMStream cs : publisher.getCimStreams()) {
                     if(id.equals(cs.getId())) {
                         current = cs;
+                        break;
                     }
                 }
 
@@ -712,6 +713,7 @@ public class CoverityPublisher extends Recorder {
                 for(CIMStream cs : publisher.getCimStreams()) {
                     if(id.equals(cs.getId())) {
                         current = cs;
+                        break;
                     }
                 }
 
