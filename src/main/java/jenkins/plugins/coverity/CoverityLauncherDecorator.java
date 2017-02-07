@@ -200,9 +200,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 }
 
                 List<String> cmds = starter.cmds();
-                List<String> args = new CovBuildCompileCommand(build, decorated, decorated.getListener(), publisher, home, envVars).constructArguments();
-                prefix = args.toArray(new String[args.size()]);
-                cmds.addAll(0, args);
+                if (invocationAssistance != null) {
+                    List<String> args = new CovBuildCompileCommand(build, decorated, decorated.getListener(), publisher, home, envVars).constructArguments();
+                    prefix = args.toArray(new String[args.size()]);
+                    cmds.addAll(0, args);
+                } else {
+                    prefix = new String[0];
+                }
 
                 boolean useAdvancedParser = false;
 
