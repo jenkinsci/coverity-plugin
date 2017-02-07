@@ -272,6 +272,11 @@ public class CoverityPublisher extends Recorder {
             if(isUnstableBuild()){
                 build.setResult(Result.UNSTABLE);
             }
+
+            // Delete intermediate directory unless user checked to preserve the intermediate directory option.
+            // Deletion of the intermediate directory will occurr regardless of the result of the build job.
+            deleteIntermediateDirectory(listener, build.getAction(CoverityTempDir.class));
+
             return true;
         } catch(com.coverity.ws.v9.CovRemoteServiceException_Exception e){
             CoverityUtils.handleException("Cov Remote Service Error: \n" + e.getMessage(), build, listener, e);
@@ -291,6 +296,21 @@ public class CoverityPublisher extends Recorder {
             return null;
         } else {
             return streams.get(0);
+        }
+    }
+
+    public void deleteIntermediateDirectory(BuildListener listener, CoverityTempDir temp) {
+        if (temp != null) {
+            try{
+                if(!isKeepIntDir() || temp.isDef()) {
+                    listener.getLogger().println("[Coverity] deleting intermediate directory: " + temp.getTempDir());
+                    temp.getTempDir().deleteRecursive();
+                } else {
+                    listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.getTempDir());
+                }
+            } catch(Exception e) {
+                listener.getLogger().println("[Coverity] Error occurred during deletion of intermediate directory: " + temp.getTempDir());
+            }
         }
     }
 
