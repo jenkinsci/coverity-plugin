@@ -546,7 +546,12 @@ public class CoverityPublisher extends Recorder {
                             );
                         }
                     }
-                } catch(Exception e) {
+                } catch (CovRemoteServiceException_Exception e) {
+                    throw new Descriptor.FormException(
+                        "There was an exception from the configured Coverity Connect server (instance: " + cimInstance + "). Please verify the Coverity Connect instance configuration is valid.",
+                        e,
+                        "defectFilters");
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
