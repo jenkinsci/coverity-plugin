@@ -84,6 +84,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 
     public String getDomain() {
         CIMInstance ci = ((DescriptorImpl) getDescriptor()).getInstance(instance);
+        if (ci == null) {
+            return null;
+        }
+
         try {
             StreamDataObj str = ci.getStream(stream);
             return str.getLanguage();

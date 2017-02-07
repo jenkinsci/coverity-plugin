@@ -155,7 +155,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             EnvVars buildEnvVars = CoverityUtils.getBuildEnvVars(listener);
             if (envVars == null || envVars.isEmpty()) {
                 envVars = buildEnvVars;
-            } else {
+            } else if (buildEnvVars != null) {
                 envVars.overrideAll(buildEnvVars);
             }
 
@@ -334,7 +334,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     } else {
                         // Gets a not null nor empty intermediate directory.
                         temp = resolveIntermediateDirectory(build, listener, node, invocationAssistance.getIntermediateDir());
-                        temp.mkdirs();
+                        if (temp != null) {
+                            temp.mkdirs();
+                        }
                     }
 
                     if(invocationAssistance != null){
