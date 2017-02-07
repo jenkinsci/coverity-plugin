@@ -129,6 +129,10 @@ public class TestWebServiceFactory extends WebServiceFactory {
             this.url = url;
         }
 
+        public URL getUrl() {
+            return url;
+        }
+
         public void setupSnapshotList(List<SnapshotIdDataObj> list) {
             this.snapshotList = list;
         }
@@ -592,6 +596,10 @@ public class TestWebServiceFactory extends WebServiceFactory {
             attributeValueDataObj.setAttributeValueId(attributeValueId);
 
             return attributeValueDataObj;
+        }
+
+        public URL getUrl() {
+            return url;
         }
 
         @Override
