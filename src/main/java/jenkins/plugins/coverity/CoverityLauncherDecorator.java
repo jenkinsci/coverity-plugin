@@ -177,11 +177,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
             // Check if there are any Coverity Build Step configured.
             // This is required to support backward compatibility.
-            List<Builder> builders = ((Project)project).getBuilders();
-            for (Builder buildStep : builders) {
-                if (buildStep.getDescriptor() instanceof CoverityBuildStep.CoverityBuildStepDescriptor) {
-                    isCoverityBuildStepEnabled = true;
-                    break;
+            if (project instanceof Project) {
+                List<Builder> builders = ((Project)project).getBuilders();
+                for (Builder buildStep : builders) {
+                    if (buildStep.getDescriptor() instanceof CoverityBuildStep.CoverityBuildStepDescriptor) {
+                        isCoverityBuildStepEnabled = true;
+                        break;
+                    }
                 }
             }
 

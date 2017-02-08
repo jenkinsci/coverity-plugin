@@ -12,10 +12,7 @@ package jenkins.plugins.coverity;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Descriptor;
+import hudson.model.*;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -48,7 +45,12 @@ public class CoverityBuildStep extends Builder {
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return true;
+
+            if (Project.class.isAssignableFrom(jobType)) {
+                return true;
+            }
+
+            return false;
         }
 
         @Override
