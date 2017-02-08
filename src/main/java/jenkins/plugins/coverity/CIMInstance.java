@@ -183,7 +183,7 @@ public class CIMInstance {
         if(result == null) {
             ProjectDataObj project = getProject(projectId);
             if (project != null) {
-                result = getProject(projectId).getProjectKey();
+                result = project.getProjectKey();
                 projectKeys.put(projectId, result);
             }
         }
