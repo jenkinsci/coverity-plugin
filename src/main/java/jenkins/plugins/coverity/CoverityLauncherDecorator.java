@@ -155,7 +155,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             EnvVars buildEnvVars = CoverityUtils.getBuildEnvVars(listener);
             if (envVars == null || envVars.isEmpty()) {
                 envVars = buildEnvVars;
-            } else {
+            } else if (buildEnvVars != null) {
                 envVars.overrideAll(buildEnvVars);
             }
 
@@ -202,9 +202,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 }
 
                 List<String> cmds = starter.cmds();
-                List<String> args = new CovBuildCompileCommand(build, decorated, decorated.getListener(), publisher, home, envVars).constructArguments();
-                prefix = args.toArray(new String[args.size()]);
-                cmds.addAll(0, args);
+                if (invocationAssistance != null) {
+                    List<String> args = new CovBuildCompileCommand(build, decorated, decorated.getListener(), publisher, home, envVars).constructArguments();
+                    prefix = args.toArray(new String[args.size()]);
+                    cmds.addAll(0, args);
+                } else {
+                    prefix = new String[0];
+                }
 
                 boolean useAdvancedParser = false;
 
@@ -336,7 +340,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                     } else {
                         // Gets a not null nor empty intermediate directory.
                         temp = resolveIntermediateDirectory(build, listener, node, invocationAssistance.getIntermediateDir());
-                        temp.mkdirs();
+                        if (temp != null) {
+                            temp.mkdirs();
+                        }
                     }
 
                     if(invocationAssistance != null){
@@ -349,7 +355,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 } catch(InterruptedException e) {
                     throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
                 }
-                envVars.put("COV_IDIR", temp.getRemote());
+                if (temp != null) {
+                    envVars.put("COV_IDIR", temp.getRemote());
+                }
             }
         }
     }

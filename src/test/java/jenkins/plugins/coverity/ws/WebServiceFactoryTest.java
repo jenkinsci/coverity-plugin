@@ -10,6 +10,8 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.ws;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,6 +26,10 @@ import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestDefectService;
 public class WebServiceFactoryTest {
     private CIMInstance cimInstance = new CIMInstance("test", "cim-host", 8080, "test-user", "password", false, 0);
 
+    private URL getExpectedUrl(CIMInstance cim, String wsdl) throws MalformedURLException {
+        return new URL(cim.isUseSSL() ? "https" : "http", cim.getHost(), cim.getPort(), wsdl);
+    }
+
     @Test
     public void getDefectService_returns_DefectService_instance() throws IOException {
         WebServiceFactory factory = new TestWebServiceFactory();
@@ -32,6 +38,7 @@ public class WebServiceFactoryTest {
 
         Assert.assertNotNull(result);
         Assert.assertTrue(result instanceof TestDefectService);
+        Assert.assertEquals(getExpectedUrl(cimInstance, WebServiceFactory.DEFECT_SERVICE_V9_WSDL), ((TestDefectService)result).getUrl());
     }
 
     @Test
@@ -54,11 +61,13 @@ public class WebServiceFactoryTest {
 
         Assert.assertNotNull(result);
 
-        cimInstance = new CIMInstance("test instance 2", "other-cim-host", 8080, "test-user", "password", false, 0);
+        cimInstance = new CIMInstance("test instance 2", "other-cim-host", 8443, "test-user", "password", true, 0);
 
         DefectService result2 = factory.getDefectService(cimInstance);
 
         Assert.assertNotSame(result, result2);
+        Assert.assertTrue(result2 instanceof TestDefectService);
+        Assert.assertEquals(getExpectedUrl(cimInstance, WebServiceFactory.DEFECT_SERVICE_V9_WSDL), ((TestDefectService)result2).getUrl());
     }
 
     @Test
@@ -69,6 +78,7 @@ public class WebServiceFactoryTest {
 
         Assert.assertNotNull(result);
         Assert.assertTrue(result instanceof TestConfigurationService);
+        Assert.assertEquals(getExpectedUrl(cimInstance, WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL), ((TestConfigurationService)result).getUrl());
     }
 
     @Test
@@ -91,10 +101,12 @@ public class WebServiceFactoryTest {
 
         Assert.assertNotNull(result);
 
-        cimInstance = new CIMInstance("test instance 2", "other-cim-host", 8080, "test-user", "password", false, 0);
+        cimInstance = new CIMInstance("test instance 2", "other-cim-host", 8443, "test-user", "password", true, 0);
 
         ConfigurationService result2 = factory.getConfigurationService(cimInstance);
 
         Assert.assertNotSame(result, result2);
+        Assert.assertTrue(result2 instanceof TestConfigurationService);
+        Assert.assertEquals(getExpectedUrl(cimInstance, WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL), ((TestConfigurationService)result2).getUrl());
     }
 }

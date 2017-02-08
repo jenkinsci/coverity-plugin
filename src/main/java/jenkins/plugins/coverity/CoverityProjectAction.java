@@ -172,7 +172,7 @@ public class CoverityProjectAction implements Action {
         }
     }
 
-    class ChartLabel implements Comparable<ChartLabel> {
+    private static class ChartLabel implements Comparable<ChartLabel> {
         private AbstractBuild build;
 
         public ChartLabel(AbstractBuild build) {

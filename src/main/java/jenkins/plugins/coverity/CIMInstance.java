@@ -18,10 +18,7 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -184,8 +181,11 @@ public class CIMInstance {
 
         Long result = projectKeys.get(projectId);
         if(result == null) {
-            result = getProject(projectId).getProjectKey();
-            projectKeys.put(projectId, result);
+            ProjectDataObj project = getProject(projectId);
+            if (project != null) {
+                result = project.getProjectKey();
+                projectKeys.put(projectId, result);
+            }
         }
         return result;
     }
