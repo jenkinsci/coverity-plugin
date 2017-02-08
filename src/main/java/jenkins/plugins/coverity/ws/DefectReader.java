@@ -12,6 +12,7 @@ package jenkins.plugins.coverity.ws;
 
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +71,7 @@ public class DefectReader {
             List<MergedDefectDataObj> defects = null;
 
             try {
-                defects = getDefectsForSnapshot(cimInstance, cimStream);
+                defects = getDefectsForSnapshot(cimInstance, cimStream, listener.getLogger());
 
                 List<CoverityDefect> matchingDefects = new ArrayList<>();
 
@@ -120,7 +121,7 @@ public class DefectReader {
         return true;
     }
 
-    private List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream) throws IOException, CovRemoteServiceException_Exception {
+    private List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, PrintStream logger) throws IOException, CovRemoteServiceException_Exception {
 
         List<MergedDefectDataObj> mergeList = new ArrayList<MergedDefectDataObj>();
 
@@ -143,6 +144,9 @@ public class DefectReader {
         int pageSize = 1000; // Size of page to be pulled
         int defectSize = 3000; // Maximum amount of defect to pull
         for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
+            if (pageStart >= pageSize)
+                logger.println("[Coverity] Fetching defects for stream " + cimStream.getStream() + " (fetched " + pageStart + " of " + defectSize + ")");
+
             pageSpec.setPageSize(pageSize);
             pageSpec.setStartIndex(pageStart);
             pageSpec.setSortAscending(true);
