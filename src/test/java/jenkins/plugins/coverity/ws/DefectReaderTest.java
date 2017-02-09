@@ -113,7 +113,7 @@ public class DefectReaderTest {
 
         // verify all expected log messages were written
         consoleLogger.verifyMessages(
-            "[Coverity] Fetching defects for stream test-stream",
+            "[Coverity] Fetching defects for stream \"test-stream\"",
             "[Coverity] Found 10 defects matching all filters",
             "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
     }
@@ -151,8 +151,49 @@ public class DefectReaderTest {
 
         // verify all expected log messages were written
         consoleLogger.verifyMessages(
-            "[Coverity] Fetching defects for stream test-stream",
+            "[Coverity] Fetching defects for stream \"test-stream\"",
             "[Coverity] Found 3 defects matching all filters",
+            "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
+    }
+
+    @Test
+    public void getLatestDefectsForBuild_withOverOneThousandMatchingDefects_addDefectsToBuildAction() throws Descriptor.FormException, ParseException, DatatypeConfigurationException, IOException, CovRemoteServiceException_Exception {
+        when(jenkins.getRootUrl()).thenReturn("rootUrl/");
+        when(build.getUrl()).thenReturn("buildUrl/");
+
+        List<CIMStream> cimStreams  = new ArrayList<>();
+        DefectFilters defectFilters = new DefectFilters(
+            Arrays.asList("Undecided"),
+            new ArrayList<>(Arrays.asList("High", "Medium", "Low")),
+            Arrays.asList("Unclassified"),
+            Arrays.asList("Unspecified", "Major", "Moderate", "Minor"),
+            Arrays.asList("Default.Other"),
+            Arrays.asList("TEST_CHECKER"),
+            "2017-01-01");
+        cimStreams.add(new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters, "stream1", null));
+
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStreams(cimStreams).build();
+
+        defectService.setupMergedDefects(3750);
+
+        DefectReader reader = new DefectReader(build, listener, publisher);
+
+        Boolean result = reader.getLatestDefectsForBuild();
+
+        assertTrue(result);
+
+        // assert build action added to build with expected defect count
+        ArgumentCaptor<CoverityBuildAction> buildAction = ArgumentCaptor.forClass(CoverityBuildAction.class);
+        verify(build).addAction(buildAction.capture());
+        assertEquals(3750, buildAction.getValue().getDefects().size());
+
+        // verify all expected log messages were written
+        consoleLogger.verifyMessages(
+            "[Coverity] Fetching defects for stream \"test-stream\"",
+            "[Coverity] Fetching defects for stream \"test-stream\" (fetched 1,000 of 3,750)",
+            "[Coverity] Fetching defects for stream \"test-stream\" (fetched 2,000 of 3,750)",
+            "[Coverity] Fetching defects for stream \"test-stream\" (fetched 3,000 of 3,750)",
+            "[Coverity] Found 3,750 defects matching all filters",
             "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
     }
 }
