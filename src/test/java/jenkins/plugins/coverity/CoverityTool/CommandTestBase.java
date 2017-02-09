@@ -77,7 +77,7 @@ public abstract class CommandTestBase {
 
     private void setUpListener() {
         consoleLogger = new TestableConsoleLogger();
-        doReturn(consoleLogger.getPrintStream()).when(listener).getLogger();
+        when(listener.getLogger()).thenReturn(consoleLogger.getPrintStream());
     }
 
     private void setUpCoverityUtils() throws IOException, InterruptedException {

@@ -177,11 +177,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
             // Check if there are any Coverity Build Step configured.
             // This is required to support backward compatibility.
-            List<Builder> builders = ((Project)project).getBuilders();
-            for (Builder buildStep : builders) {
-                if (buildStep.getDescriptor() instanceof CoverityBuildStep.CoverityBuildStepDescriptor) {
-                    isCoverityBuildStepEnabled = true;
-                    break;
+            if (project instanceof Project) {
+                List<Builder> builders = ((Project)project).getBuilders();
+                for (Builder buildStep : builders) {
+                    if (buildStep.getDescriptor() instanceof CoverityBuildStep.CoverityBuildStepDescriptor) {
+                        isCoverityBuildStepEnabled = true;
+                        break;
+                    }
                 }
             }
 
@@ -200,9 +202,13 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 }
 
                 List<String> cmds = starter.cmds();
-                List<String> args = new CovBuildCompileCommand(build, decorated, decorated.getListener(), publisher, home, envVars).constructArguments();
-                prefix = args.toArray(new String[args.size()]);
-                cmds.addAll(0, args);
+                if (invocationAssistance != null) {
+                    List<String> args = new CovBuildCompileCommand(build, decorated, decorated.getListener(), publisher, home, envVars).constructArguments();
+                    prefix = args.toArray(new String[args.size()]);
+                    cmds.addAll(0, args);
+                } else {
+                    prefix = new String[0];
+                }
 
                 boolean useAdvancedParser = false;
 
@@ -349,7 +355,9 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 } catch(InterruptedException e) {
                     throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
                 }
-                envVars.put("COV_IDIR", temp.getRemote());
+                if (temp != null) {
+                    envVars.put("COV_IDIR", temp.getRemote());
+                }
             }
         }
     }
