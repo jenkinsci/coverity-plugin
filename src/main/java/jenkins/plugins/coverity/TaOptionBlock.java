@@ -26,10 +26,7 @@ public class TaOptionBlock {
     private final String customTestCommand;
     private final boolean cOptionBlock;
     private final boolean csOptionBlock;
-    private final String scmSystem;
     private final String customTestTool;
-    private final String scmToolArguments;
-    private final String scmCommandArgs;
     private final String logFileLoc;
     private final String csFramework;
     private final String csCoverageTool;
@@ -37,10 +34,7 @@ public class TaOptionBlock {
     private final String javaCoverageTool;
     private final boolean junitFramework;
     private final boolean junit4Framework;
-    private final boolean scmOptionBlock;
     private final String policyFile;
-    private final String p4Port;
-    private final String accRevRepo;
     private final String bullsEyeDir;
     private final String customWorkDir;
     private final boolean covHistoryCheckbox;
@@ -56,10 +50,7 @@ public class TaOptionBlock {
                          boolean cOptionBlock,
                          boolean csOptionBlock,
                          boolean javaOptionBlock,
-                         String scmSystem,
                          String customTestTool,
-                         String scmToolArguments,
-                         String scmCommandArgs,
                          String logFileLoc,
                          String csFramework,
                          String csCoverageTool,
@@ -67,11 +58,8 @@ public class TaOptionBlock {
                          String javaCoverageTool,
                          boolean junitFramework,
                          boolean junit4Framework,
-                         boolean scmOptionBlock,
                          String policyFile,
                          List<TaStripPath> taStripPaths,
-                         String p4Port,
-                         String accRevRepo,
                          String bullsEyeDir,
                          String customWorkDir,
                          boolean covHistoryCheckbox) {
@@ -79,10 +67,7 @@ public class TaOptionBlock {
         this.cOptionBlock = cOptionBlock;
         this.csOptionBlock = csOptionBlock;
         this.javaOptionBlock = javaOptionBlock;
-        this.scmSystem = scmSystem;
         this.customTestTool = Util.fixEmpty(customTestTool);
-        this.scmToolArguments = Util.fixEmpty(scmToolArguments);
-        this.scmCommandArgs = Util.fixEmpty(scmCommandArgs);
         this.logFileLoc = Util.fixEmpty(logFileLoc);
         this.csFramework = csFramework;
         this.csCoverageTool = csCoverageTool;     // Required if other two are not selected
@@ -90,10 +75,7 @@ public class TaOptionBlock {
         this.javaCoverageTool = javaCoverageTool; // Required if other two are not selected
         this.junit4Framework = junit4Framework;
         this.junitFramework = junitFramework;
-        this.scmOptionBlock = scmOptionBlock;
         this.policyFile = Util.fixEmpty(policyFile);    // Required
-        this.p4Port = Util.fixEmpty(p4Port); // Required if perforce is selected
-        this.accRevRepo = Util.fixEmpty(accRevRepo);   // Required if accurev is selected
         this.bullsEyeDir = Util.fixEmpty(bullsEyeDir); // Required if bulls eye is selected
         this.customWorkDir = Util.fixEmpty(customWorkDir); // Required if a custom command is issued
         this.covHistoryCheckbox = covHistoryCheckbox;
@@ -138,13 +120,7 @@ public class TaOptionBlock {
 
     public boolean getJavaOptionBlock(){return javaOptionBlock;}
 
-    public String getScmSystem(){return scmSystem;}
-
     public String getCustomTestTool(){return customTestTool;}
-
-    public String getScmToolArguments(){return scmToolArguments;}
-
-    public String getScmCommandArgs(){return scmCommandArgs;}
 
     public String getLogFileLoc(){return logFileLoc ;}
 
@@ -160,13 +136,7 @@ public class TaOptionBlock {
 
     public boolean getJunitFramework(){return junitFramework;}
 
-    public boolean getScmOptionBlock(){return scmOptionBlock;}
-
     public String getPolicyFile(){return policyFile;}
-
-    public String getP4Port(){return p4Port;}
-
-    public String getAccRevRepo(){return accRevRepo;}
 
     public String getBullsEyeDir(){return bullsEyeDir;}
 
@@ -257,18 +227,6 @@ public class TaOptionBlock {
             delim = false;
         }
 
-        // Checking the required fields for specific SCM systems
-        if(this.scmOptionBlock){
-            if(this.scmSystem.equals("accurev") && this.accRevRepo == null){
-                errorText += "[Error] Please specify AccuRev's source control repository under 'Advanced' \n";
-                delim = false;
-            }
-
-            if(this.scmSystem.equals("perforce") && this.p4Port == null){
-                errorText += "[Error] Please specify Perforce's port environment variable\n ";
-                delim = false;
-            }
-        }
         // Checking required field for bullseye
         if(this.cOptionBlock){
             if(this.cxxCoverageTool.equals("bullseye") && this.bullsEyeDir == null){
