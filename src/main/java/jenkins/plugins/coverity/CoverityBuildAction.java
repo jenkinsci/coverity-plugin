@@ -12,6 +12,8 @@ package jenkins.plugins.coverity;
 
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.MergedDefectDataObj;
+
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import jenkins.model.Jenkins;
@@ -104,6 +106,10 @@ public class CoverityBuildAction implements Action {
         return "coverity_" + getId();
     }
 
+    public String getUrlNameEncoded() {
+        return "coverity_" + Util.rawEncode(getId());
+    }
+
     /**
      * ID of the CIM project used for ths build
      *
@@ -114,7 +120,7 @@ public class CoverityBuildAction implements Action {
     }
 
     public String getUrl() {
-        return build.getUrl() + getUrlName();
+        return build.getUrl() + getUrlNameEncoded();
     }
 
     public String getId() {

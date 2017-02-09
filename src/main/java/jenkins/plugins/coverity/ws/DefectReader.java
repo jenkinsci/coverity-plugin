@@ -25,6 +25,7 @@ import com.coverity.ws.v9.SnapshotScopeSpecDataObj;
 import com.coverity.ws.v9.StreamIdDataObj;
 
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
@@ -104,7 +105,7 @@ public class DefectReader {
 
                 String rootUrl = Jenkins.getInstance().getRootUrl();
                 if(rootUrl != null) {
-                    listener.getLogger().println("Coverity details: " + rootUrl + build.getUrl() + action.getUrlName());
+                    listener.getLogger().println("Coverity details: " + rootUrl + action.getUrl());
                 }
             } catch (IOException e) {
                 e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
