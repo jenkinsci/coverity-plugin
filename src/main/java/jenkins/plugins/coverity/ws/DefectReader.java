@@ -13,6 +13,7 @@ package jenkins.plugins.coverity.ws;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class DefectReader {
             CIMStream cimStream = cimStreams.get(i);
             CIMInstance cimInstance = publisher.getDescriptor().getInstance(cimStream.getInstance());
 
-            listener.getLogger().println("[Coverity] Fetching defects for stream \"" + cimStream.getStream() + "\"");
+            listener.getLogger().println(MessageFormat.format("[Coverity] Fetching defects for stream \"{0}\"", cimStream.getStream()));
 
             List<MergedDefectDataObj> defects = null;
 
@@ -81,7 +82,7 @@ public class DefectReader {
                 }
 
                 if(!matchingDefects.isEmpty()) {
-                    listener.getLogger().println("[Coverity] Found " + matchingDefects.size() + " defects matching all filters");
+                    listener.getLogger().println(MessageFormat.format("[Coverity] Found {0} defects matching all filters", matchingDefects.size()));
                     if(publisher.isFailBuild()) {
                         if(build.getResult().isBetterThan(Result.FAILURE)) {
                             build.setResult(Result.FAILURE);
@@ -145,7 +146,7 @@ public class DefectReader {
         int defectSize = 3000; // Maximum amount of defect to pull
         for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
             if (pageStart >= pageSize)
-                logger.println("[Coverity] Fetching defects for stream \"" + cimStream.getStream() + "\" (fetched " + pageStart + " of " + defectSize + ")");
+                logger.println(MessageFormat.format("[Coverity] Fetching defects for stream \"{0}\" (fetched {1} of {2})", cimStream.getStream(), pageStart, defectSize));
 
             pageSpec.setPageSize(pageSize);
             pageSpec.setStartIndex(pageStart);
