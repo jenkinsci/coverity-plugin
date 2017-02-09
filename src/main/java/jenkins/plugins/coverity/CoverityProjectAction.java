@@ -91,7 +91,6 @@ public class CoverityProjectAction implements Action {
         protected JFreeChart createGraph() {
             final CategoryDataset dataset = createDataSet().build();
 
-            DataSetBuilder test = createDataSet();
             List rows = dataset.getColumnKeys();
             for(int i = 0; i < rows.size(); i ++){
                 Object row = rows.get(i);

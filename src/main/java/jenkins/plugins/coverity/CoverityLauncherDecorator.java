@@ -71,14 +71,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
 
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
 
-        //Setting up code to allow environment variables in text fields
-        EnvVars env;
-        try{
-            env = project.getEnvironment(node,launcher.getListener());
-        }catch(Exception e){
-            throw new RuntimeException("Error getting build environment variables", e);
-        }
-
         if(publisher == null) {
             return launcher;
         }
