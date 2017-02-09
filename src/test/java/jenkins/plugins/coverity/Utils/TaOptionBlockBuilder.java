@@ -20,10 +20,7 @@ public class TaOptionBlockBuilder {
     private String customTestCommand;
     private boolean cOptionBlock;
     private boolean csOptionBlock;
-    private String scmSystem;
     private String customTestTool;
-    private String scmToolArguments;
-    private String scmCommandArgs;
     private String logFileLoc;
     private String csFramework;
     private String csCoverageTool;
@@ -31,11 +28,8 @@ public class TaOptionBlockBuilder {
     private String javaCoverageTool;
     private boolean junitFramework;
     private boolean junit4Framework;
-    private boolean scmOptionBlock;
     private String policyFile;
     private List<TaStripPath> taStripPaths;
-    private String p4Port;
-    private String accRevRepo;
     private String bullsEyeDir;
     private String customWorkDir;
     private boolean covHistoryCheckbox;
@@ -56,23 +50,8 @@ public class TaOptionBlockBuilder {
         return this;
     }
 
-    public TaOptionBlockBuilder withScmSystem(String scmSystem) {
-        this.scmSystem = scmSystem;
-        return this;
-    }
-
     public TaOptionBlockBuilder withCustomTestTool(String customTestTool) {
         this.customTestTool = customTestTool;
-        return this;
-    }
-
-    public TaOptionBlockBuilder withScmToolArguments(String scmToolArguments) {
-        this.scmToolArguments = scmToolArguments;
-        return this;
-    }
-
-    public TaOptionBlockBuilder withScmCommandArgs(String scmCommandArgs) {
-        this.scmCommandArgs = scmCommandArgs;
         return this;
     }
 
@@ -111,11 +90,6 @@ public class TaOptionBlockBuilder {
         return this;
     }
 
-    public TaOptionBlockBuilder withScmOptionBlock(boolean scmOptionBlock) {
-        this.scmOptionBlock = scmOptionBlock;
-        return this;
-    }
-
     public TaOptionBlockBuilder withPolicyFile(String policyFile) {
         this.policyFile = policyFile;
         return this;
@@ -123,16 +97,6 @@ public class TaOptionBlockBuilder {
 
     public TaOptionBlockBuilder withStripPath(List<TaStripPath> stripPaths) {
         this.taStripPaths = stripPaths;
-        return this;
-    }
-
-    public TaOptionBlockBuilder withP4Port(String p4Port) {
-        this.p4Port = p4Port;
-        return this;
-    }
-
-    public TaOptionBlockBuilder withAccrevRepo(String accRevRepo) {
-        this.accRevRepo = accRevRepo;
         return this;
     }
 
@@ -162,10 +126,7 @@ public class TaOptionBlockBuilder {
                 cOptionBlock,
                 csOptionBlock,
                 javaOptionBlock,
-                scmSystem,
                 customTestTool,
-                scmToolArguments,
-                scmCommandArgs,
                 logFileLoc,
                 csFramework,
                 csCoverageTool,
@@ -173,11 +134,8 @@ public class TaOptionBlockBuilder {
                 javaCoverageTool,
                 junitFramework,
                 junit4Framework,
-                scmOptionBlock,
                 policyFile,
                 taStripPaths,
-                p4Port,
-                accRevRepo,
                 bullsEyeDir,
                 customWorkDir,
                 covHistoryCheckbox);
