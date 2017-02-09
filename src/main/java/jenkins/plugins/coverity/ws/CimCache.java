@@ -42,14 +42,12 @@ public final class CimCache {
     }
 
     public static CimCache getInstance() {
-        if (instance == null) {
-            synchronized (CimCache.class) {
-                if (instance == null) {
-                    instance = new CimCache();
-                }
+        synchronized (CimCache.class) {
+            if (instance == null) {
+                instance = new CimCache();
             }
+            return instance;
         }
-        return instance;
     }
 
     /**

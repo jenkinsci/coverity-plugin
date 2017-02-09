@@ -53,14 +53,12 @@ public class WebServiceFactory {
     }
 
     public static WebServiceFactory getInstance() {
-        if (instance == null) {
-            synchronized (WebServiceFactory.class) {
-                if (instance == null) {
-                    instance = new WebServiceFactory();
-                }
+        synchronized (WebServiceFactory.class) {
+            if (instance == null) {
+                instance = new WebServiceFactory();
             }
+            return instance;
         }
-        return instance;
     }
 
     /**
