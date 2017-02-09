@@ -66,7 +66,7 @@ public class DefectReader {
             CIMStream cimStream = cimStreams.get(i);
             CIMInstance cimInstance = publisher.getDescriptor().getInstance(cimStream.getInstance());
 
-            listener.getLogger().println("[Coverity] Fetching defects for stream " + cimStream.getStream());
+            listener.getLogger().println("[Coverity] Fetching defects for stream \"" + cimStream.getStream() + "\"");
 
             List<MergedDefectDataObj> defects = null;
 
@@ -145,7 +145,7 @@ public class DefectReader {
         int defectSize = 3000; // Maximum amount of defect to pull
         for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
             if (pageStart >= pageSize)
-                logger.println("[Coverity] Fetching defects for stream " + cimStream.getStream() + " (fetched " + pageStart + " of " + defectSize + ")");
+                logger.println("[Coverity] Fetching defects for stream \"" + cimStream.getStream() + "\" (fetched " + pageStart + " of " + defectSize + ")");
 
             pageSpec.setPageSize(pageSize);
             pageSpec.setStartIndex(pageStart);

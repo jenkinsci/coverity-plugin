@@ -113,7 +113,7 @@ public class DefectReaderTest {
 
         // verify all expected log messages were written
         consoleLogger.verifyMessages(
-            "[Coverity] Fetching defects for stream test-stream",
+            "[Coverity] Fetching defects for stream \"test-stream\"",
             "[Coverity] Found 10 defects matching all filters",
             "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
     }
@@ -151,7 +151,7 @@ public class DefectReaderTest {
 
         // verify all expected log messages were written
         consoleLogger.verifyMessages(
-            "[Coverity] Fetching defects for stream test-stream",
+            "[Coverity] Fetching defects for stream \"test-stream\"",
             "[Coverity] Found 3 defects matching all filters",
             "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
     }
@@ -189,10 +189,10 @@ public class DefectReaderTest {
 
         // verify all expected log messages were written
         consoleLogger.verifyMessages(
-            "[Coverity] Fetching defects for stream test-stream",
-            "[Coverity] Fetching defects for stream test-stream (fetched 1000 of 3750)",
-            "[Coverity] Fetching defects for stream test-stream (fetched 2000 of 3750)",
-            "[Coverity] Fetching defects for stream test-stream (fetched 3000 of 3750)",
+            "[Coverity] Fetching defects for stream \"test-stream\"",
+            "[Coverity] Fetching defects for stream \"test-stream\" (fetched 1000 of 3750)",
+            "[Coverity] Fetching defects for stream \"test-stream\" (fetched 2000 of 3750)",
+            "[Coverity] Fetching defects for stream \"test-stream\" (fetched 3000 of 3750)",
             "[Coverity] Found 3750 defects matching all filters",
             "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
     }
