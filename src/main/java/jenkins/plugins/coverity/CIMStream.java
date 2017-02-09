@@ -205,9 +205,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 
             if (!StringUtils.isEmpty(instance)) {
                 CIMInstance cimInstance = getInstance(instance);
-
-                for(String projectFromCim : CimCache.getInstance().getProjects(cimInstance)) {
-                    projects.add(projectFromCim);
+                if (cimInstance != null) {
+                    for(String projectFromCim : CimCache.getInstance().getProjects(cimInstance)) {
+                        projects.add(projectFromCim);
+                    }
                 }
             }
 
@@ -225,9 +226,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 
             if (!StringUtils.isEmpty(instance) && !StringUtils.isEmpty(project)) {
                 CIMInstance cimInstance = getInstance(instance);
-
-                for(String streamFromCim : CimCache.getInstance().getStreams(cimInstance, project)) {
-                    streams.add(streamFromCim);
+                if (cimInstance != null) {
+                    for (String streamFromCim : CimCache.getInstance().getStreams(cimInstance, project)) {
+                        streams.add(streamFromCim);
+                    }
                 }
             }
 
