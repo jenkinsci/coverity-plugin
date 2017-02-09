@@ -80,7 +80,7 @@ public final class CimCache {
         return cachedData.getStreamsForProject(project);
     }
 
-    private class CachedData {
+    private static class CachedData {
         private Map<String, Set<String>> projectStreams;
 
         public CachedData(CIMInstance cimInstance) {
