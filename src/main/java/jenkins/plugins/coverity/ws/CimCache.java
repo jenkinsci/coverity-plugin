@@ -42,14 +42,12 @@ public final class CimCache {
     }
 
     public static CimCache getInstance() {
-        if (instance == null) {
-            synchronized (CimCache.class) {
-                if (instance == null) {
-                    instance = new CimCache();
-                }
+        synchronized (CimCache.class) {
+            if (instance == null) {
+                instance = new CimCache();
             }
+            return instance;
         }
-        return instance;
     }
 
     /**
@@ -82,7 +80,7 @@ public final class CimCache {
         return cachedData.getStreamsForProject(project);
     }
 
-    private class CachedData {
+    private static class CachedData {
         private Map<String, Set<String>> projectStreams;
 
         public CachedData(CIMInstance cimInstance) {
