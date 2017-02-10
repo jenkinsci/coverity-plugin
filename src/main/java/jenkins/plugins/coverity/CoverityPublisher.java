@@ -306,6 +306,7 @@ public class CoverityPublisher extends Recorder {
                 if(!isKeepIntDir() || temp.isDef()) {
                     listener.getLogger().println("[Coverity] deleting intermediate directory: " + temp.getTempDir());
                     temp.getTempDir().deleteRecursive();
+                    listener.getLogger().println("[Coverity] deleting intermediate directory  \"" + temp.getTempDir() + "\" was successful");
                 } else {
                     listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.getTempDir());
                 }

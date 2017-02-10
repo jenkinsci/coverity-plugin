@@ -20,12 +20,13 @@ import hudson.model.*;
 import hudson.remoting.Channel;
 import hudson.tasks.Builder;
 import jenkins.plugins.coverity.CoverityTool.CovBuildCompileCommand;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -165,7 +166,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
 
             // Setup(or resolve) intermediate directory
-            setupIntermediateDirectory(build, this.getListener(), node);
+            setupIntermediateDirectory(build, this.getListener(), node, envVars);
 
             // Any Coverity Post-build action such as cov-analyze, cov-import-scm, etc will not be wrapped
             // with the cov-build.
@@ -323,7 +324,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
          *
          * Notice this variable must be resolved before running cov-build. Also this method creates necessary directories.
          */
-        public void setupIntermediateDirectory(@Nonnull AbstractBuild<?,?> build, @Nonnull TaskListener listener, @Nonnull Node node){
+        public void setupIntermediateDirectory(@Nonnull AbstractBuild<?,?> build, @Nonnull TaskListener listener, @Nonnull Node node, @Nonnull EnvVars envVars){
             Validate.notNull(build, AbstractBuild.class.getName() + " object can't be null");
             Validate.notNull(listener, TaskListener.class.getName() + " object can't be null");
             Validate.notNull(node, Node.class.getName() + " object can't be null");
@@ -341,6 +342,10 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                         // Gets a not null nor empty intermediate directory.
                         temp = resolveIntermediateDirectory(build, listener, node, invocationAssistance.getIntermediateDir());
                         if (temp != null) {
+                            File idir = new File(temp.getRemote());
+                            if (idir != null && !idir.isAbsolute()) {
+                                temp = new FilePath(temp.getChannel(), FilenameUtils.concat(envVars.get("WORKSPACE"), temp.getRemote()));
+                            }
                             temp.mkdirs();
                         }
                     }
