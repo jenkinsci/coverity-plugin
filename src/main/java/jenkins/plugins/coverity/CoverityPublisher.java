@@ -39,6 +39,7 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.xml.ws.WebServiceException;
 
 import java.io.File;
 import java.io.IOException;
@@ -570,7 +571,12 @@ public class CoverityPublisher extends Recorder {
                             );
                         }
                     }
-                } catch(Exception e) {
+                } catch (CovRemoteServiceException_Exception | WebServiceException e) {
+                    throw new Descriptor.FormException(
+                        "There was an exception from the configured Coverity Connect server (instance: " + cimInstance + "). Please verify the Coverity Connect instance configuration is valid.",
+                        e,
+                        "defectFilters");
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }

@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -545,7 +546,8 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
     public class TestDefectService implements DefectService {
         private URL url;
-        private MergedDefectsPageDataObj mergedDefectsPageDataObj = new MergedDefectsPageDataObj();
+        private List<MergedDefectIdDataObj> mergedDefectIds = new ArrayList<>();
+        private List<MergedDefectDataObj> mergedDefects = new ArrayList<>();
 
         public TestDefectService(URL url) {
             this.url = url;
@@ -556,7 +558,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
                 MergedDefectIdDataObj idDataObj = new MergedDefectIdDataObj();
                 idDataObj.setCid(i);
                 idDataObj.setMergeKey("MK_" + i);
-                mergedDefectsPageDataObj.getMergedDefectIds().add(idDataObj);
+                mergedDefectIds.add(idDataObj);
 
                 MergedDefectDataObj defectDataObj = new MergedDefectDataObj();
                 defectDataObj.setCid(i);
@@ -577,11 +579,8 @@ public class TestWebServiceFactory extends WebServiceFactory {
                 calender.setTime(new SimpleDateFormat("yyyy-MM-dd").parse("2017-02-01"));
                 defectDataObj.setFirstDetected(DatatypeFactory.newInstance().newXMLGregorianCalendar(calender));
 
-
-                mergedDefectsPageDataObj.getMergedDefects().add(defectDataObj);
+                mergedDefects.add(defectDataObj);
             }
-
-            mergedDefectsPageDataObj.setTotalNumberOfRecords(defectCount);
         }
 
         private DefectStateAttributeValueDataObj newAttribute(String name, String value){
@@ -624,6 +623,21 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public MergedDefectsPageDataObj getMergedDefectsForStreams(List<StreamIdDataObj> streamIds, MergedDefectFilterSpecDataObj filterSpec, PageSpecDataObj pageSpec, SnapshotScopeSpecDataObj snapshotScope) throws CovRemoteServiceException_Exception {
+            MergedDefectsPageDataObj mergedDefectsPageDataObj = new MergedDefectsPageDataObj();
+
+            final int totalRecords = mergedDefects.size();
+            mergedDefectsPageDataObj.setTotalNumberOfRecords(totalRecords);
+
+            int toIndex = pageSpec.getStartIndex() + pageSpec.getPageSize();
+            if (toIndex > mergedDefects.size())
+                toIndex = mergedDefects.size();
+
+            List<MergedDefectIdDataObj> defectIds = mergedDefectIds.subList(pageSpec.getStartIndex(), toIndex);
+            mergedDefectsPageDataObj.getMergedDefectIds().addAll(defectIds);
+
+            List<MergedDefectDataObj> defects = mergedDefects.subList(pageSpec.getStartIndex(), toIndex);
+            mergedDefectsPageDataObj.getMergedDefects().addAll(defects);
+
             return mergedDefectsPageDataObj;
         }
 
