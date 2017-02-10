@@ -195,6 +195,6 @@ public class DefectReaderTest {
             "[Coverity] Fetching defects for stream \"test-stream\" (fetched 2,000 of 3,750)",
             "[Coverity] Fetching defects for stream \"test-stream\" (fetched 3,000 of 3,750)",
             "[Coverity] Found 3,750 defects matching all filters",
-            "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
+            "Coverity details: rootUrl/buildUrl/coverity_defects");
     }
 }
