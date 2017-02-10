@@ -25,6 +25,7 @@ import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -115,7 +116,7 @@ public class DefectReaderTest {
         consoleLogger.verifyMessages(
             "[Coverity] Fetching defects for stream \"test-stream\"",
             "[Coverity] Found 10 defects matching all filters",
-            "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
+            "Coverity details: rootUrl/buildUrl/coverity_defects");
     }
 
     @Test
@@ -153,7 +154,7 @@ public class DefectReaderTest {
         consoleLogger.verifyMessages(
             "[Coverity] Fetching defects for stream \"test-stream\"",
             "[Coverity] Found 3 defects matching all filters",
-            "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
+            "Coverity details: rootUrl/buildUrl/coverity_defects");
     }
 
     @Test
@@ -194,6 +195,6 @@ public class DefectReaderTest {
             "[Coverity] Fetching defects for stream \"test-stream\" (fetched 2,000 of 3,750)",
             "[Coverity] Fetching defects for stream \"test-stream\" (fetched 3,000 of 3,750)",
             "[Coverity] Found 3,750 defects matching all filters",
-            "Coverity details: rootUrl/buildUrl/coverity_cim-instance_test-project_test-stream");
+            "Coverity details: rootUrl/buildUrl/coverity_defects");
     }
 }
