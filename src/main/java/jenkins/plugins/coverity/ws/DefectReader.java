@@ -100,12 +100,12 @@ public class DefectReader {
                     listener.getLogger().println("[Coverity] No defects matched all filters.");
                 }
 
-                CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
+                CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects, i);
                 build.addAction(action);
 
                 String rootUrl = Jenkins.getInstance().getRootUrl();
                 if(rootUrl != null) {
-                    listener.getLogger().println("Coverity details: " + rootUrl + action.getUrl());
+                    listener.getLogger().println("Coverity details: " + rootUrl + build.getUrl() + action.getUrlName());
                 }
             } catch (IOException e) {
                 e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));

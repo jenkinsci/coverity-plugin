@@ -11,9 +11,7 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
-import com.coverity.ws.v9.MergedDefectDataObj;
 
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import jenkins.model.Jenkins;
@@ -30,6 +28,8 @@ import org.apache.commons.lang.StringUtils;
  * that build.
  */
 public class CoverityBuildAction implements Action {
+    public static final String BUILD_ACTION_IDENTIFIER = "coverity_defects";
+
     // deprecated defectIds field
     private transient List<Long> defectIds;
 
@@ -38,14 +38,28 @@ public class CoverityBuildAction implements Action {
     private final String streamId;
     private final String cimInstance;
     private final List<CoverityDefect> defects;
-    private String url;
+    private String uniqueId;
 
-    public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<CoverityDefect> defects) {
+    public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<CoverityDefect> defects, int buildCommitNumber) {
         this.build = build;
         this.projectId = projectId;
         this.streamId = streamId;
         this.cimInstance = cimInstance;
+        // modify the build identifier builds where more than one stream was committed
+        this.uniqueId = buildCommitNumber == 0 ? BUILD_ACTION_IDENTIFIER : BUILD_ACTION_IDENTIFIER + buildCommitNumber;
         this.defects = defects;
+    }
+
+    /**
+     * Implement readResolve to update the de-serialized object in the case transient data was found. Transient fields
+     * will be read during de-serialization and readResolve allow updating the BuildAction object after being created.
+     */
+    protected Object readResolve() {
+        if(uniqueId == null) {
+            this.uniqueId = BUILD_ACTION_IDENTIFIER;
+        }
+
+        return this;
     }
 
     /**
@@ -53,13 +67,6 @@ public class CoverityBuildAction implements Action {
      */
     public AbstractBuild getBuild() {
         return build;
-    }
-
-    /**
-     * The IDs defects that were captured for this build
-     */
-    public List<Long> getDefectIds() {
-        return defectIds;
     }
 
     /**
@@ -102,28 +109,11 @@ public class CoverityBuildAction implements Action {
         return "Coverity Defects ";
     }
 
+    public String getGraphDisplayName() {
+        return "Coverity Defects (" + streamId + ")";
+    }
+
     public String getUrlName() {
-        return "coverity_" + getId();
-    }
-
-    public String getUrlNameEncoded() {
-        return "coverity_" + Util.rawEncode(getId());
-    }
-
-    /**
-     * ID of the CIM project used for ths build
-     *
-     * @return
-     */
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public String getUrl() {
-        return build.getUrl() + getUrlNameEncoded();
-    }
-
-    public String getId() {
-        return cimInstance + "_" + projectId + "_" + streamId;
+        return uniqueId;
     }
 }

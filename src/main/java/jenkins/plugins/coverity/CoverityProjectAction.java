@@ -78,8 +78,8 @@ public class CoverityProjectAction implements Action {
                 final List<CoverityBuildAction> actions = build.getActions(CoverityBuildAction.class);
 
                 for(CoverityBuildAction action : actions) {
-                    if(action != null && action.getDefects() != null && action.getId() != null) {
-                        data.add(action.getDefects().size(), action.getId(), new ChartLabel(build));
+                    if(action != null && action.getDefects() != null && action.getGraphDisplayName() != null) {
+                        data.add(action.getDefects().size(), action.getGraphDisplayName(), new ChartLabel(build));
                     }
                 }
                 build = build.getPreviousBuild();
@@ -148,7 +148,7 @@ public class CoverityProjectAction implements Action {
                 public String generateURL(CategoryDataset dataset, int row,
                                           int column) {
                     ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
-                    return label.getUrl() + "coverity_" + dataset.getRowKey(row);
+                    return label.getUrl() + CoverityBuildAction.BUILD_ACTION_IDENTIFIER;
                 }
 
                 @Override
