@@ -219,19 +219,19 @@ public class EnvParser {
                             throw makeInterpolationException("Missing environment variable.");
                         }
                         c = scanner.got();
-                        String envVarName = new String();
+                        StringBuilder envVarNameBuilder = new StringBuilder();
                         if(c == '{') {
                             // In this branch the nv var is terminated by a } char
                             c = scanner.hunt('}');
                             if(isFirstEnvVarChar(c)) {
-                                envVarName += c;
+                                envVarNameBuilder.append(c);
                             } else {
                                 throw makeInterpolationException("Invalid first environment variable character: '"
                                     + c + "'.");
                             }
                             while((c = scanner.hunt('}')) != '}'){
                                 if(isEnvVarChar(c)) {
-                                    envVarName += c;
+                                    envVarNameBuilder.append(c);
                                 } else {
                                     throw makeInterpolationException("Invalid environment variable character: '"
                                         + c + "'.");
@@ -240,7 +240,7 @@ public class EnvParser {
                         } else {
                             // here the env var name is terminated by a non-env-var char or end of input.
                             if(isFirstEnvVarChar(c)) {
-                                envVarName += c;
+                                envVarNameBuilder.append(c);
                             } else {
                                 throw makeInterpolationException("Invalid first environment variable character: '"
                                         + c + "'.");
@@ -248,7 +248,7 @@ public class EnvParser {
                             while(scanner.get()) {
                                 c = scanner.got();
                                 if(isEnvVarChar(c)) {
-                                    envVarName += c;
+                                    envVarNameBuilder.append(c);
                                 } else {
                                     // Unconsume the last char so it can be used in the next trip around the loop
                                     scanner.unget();
@@ -256,11 +256,11 @@ public class EnvParser {
                                 }
                             }
                         }
-                        if(envVarName.isEmpty()){
+                        if(envVarNameBuilder.length() == 0){
                             throw makeInterpolationException("Empty environment variable name");
                         }
                         // Substitute the value of the env var
-                        String envValue = environment.get(envVarName);
+                        String envValue = environment.get(envVarNameBuilder.toString());
                         if(envValue != null) {
                             builder.append(envValue);
                         }

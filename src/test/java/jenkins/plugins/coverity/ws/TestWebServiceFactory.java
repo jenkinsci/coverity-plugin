@@ -544,7 +544,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
         }
     }
 
-    public class TestDefectService implements DefectService {
+    public static class TestDefectService implements DefectService {
         private URL url;
         private List<MergedDefectIdDataObj> mergedDefectIds = new ArrayList<>();
         private List<MergedDefectDataObj> mergedDefects = new ArrayList<>();

@@ -633,55 +633,59 @@ public class CoverityPublisher extends Recorder {
             CIMStream.DescriptorImpl currentDescriptor = null;
             if(json != null && !json.isNullObject()) {
                 CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
-                String id = ((String[]) req.getParameterMap().get("id"))[0];
+                String id = req.getParameterMap().get("id")[0];
                 for(CIMStream cs : publisher.getCimStreams()) {
                     if(id.equals(cs.getId())) {
                         current = cs;
+                        break;
                     }
                 }
 
-                currentDescriptor = ((CIMStream.DescriptorImpl) current.getDescriptor());
+                if (current != null)
+                    currentDescriptor = ((CIMStream.DescriptorImpl) current.getDescriptor());
 
-                if (StringUtils.isEmpty(current.getInstance())) {
-                    //do nothing
-                } else if(StringUtils.isEmpty(current.getStream()) || StringUtils.isEmpty(current.getProject())) {
-                    //initialize 'new' defectFilters item with default values selected
-                    DefectFilters defectFilters = current.getDefectFilters();
-                    if(defectFilters != null) {
-                        Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
-                        try {
-                            current.getDefectFilters().invertCheckers(
-                                allCheckers,
-                                toStrings(currentDescriptor.doFillClassificationDefectFilterItems(current.getInstance())),
-                                toStrings(currentDescriptor.doFillActionDefectFilterItems(current.getInstance())),
-                                toStrings(currentDescriptor.doFillSeveritiesDefectFilterItems(current.getInstance())),
-                                toStrings(currentDescriptor.doFillComponentDefectFilterItems(current.getInstance(), current.getStream()))
-                            );
-                        } catch (CovRemoteServiceException_Exception e) {
-                            throw new IOException(e);
-                        }
-                    }
-
-                } else {
-                    Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
-                    DefectFilters defectFilters = current.getDefectFilters();
-                    if(defectFilters != null) {
-                        try {
-                            current.getDefectFilters().invertCheckers(
+                if (currentDescriptor != null) {
+                    if (StringUtils.isEmpty(current.getInstance())) {
+                        //do nothing
+                    } else if (StringUtils.isEmpty(current.getStream()) || StringUtils.isEmpty(current.getProject())) {
+                        //initialize 'new' defectFilters item with default values selected
+                        DefectFilters defectFilters = current.getDefectFilters();
+                        if (defectFilters != null) {
+                            Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
+                            try {
+                                current.getDefectFilters().invertCheckers(
                                     allCheckers,
                                     toStrings(currentDescriptor.doFillClassificationDefectFilterItems(current.getInstance())),
                                     toStrings(currentDescriptor.doFillActionDefectFilterItems(current.getInstance())),
                                     toStrings(currentDescriptor.doFillSeveritiesDefectFilterItems(current.getInstance())),
                                     toStrings(currentDescriptor.doFillComponentDefectFilterItems(current.getInstance(), current.getStream()))
-                            );
-                        } catch (CovRemoteServiceException_Exception e) {
-                            throw new IOException(e);
+                                );
+                            } catch (CovRemoteServiceException_Exception e) {
+                                throw new IOException(e);
+                            }
+                        }
+
+                    } else {
+                        Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
+                        DefectFilters defectFilters = current.getDefectFilters();
+                        if (defectFilters != null) {
+                            try {
+                                current.getDefectFilters().invertCheckers(
+                                    allCheckers,
+                                    toStrings(currentDescriptor.doFillClassificationDefectFilterItems(current.getInstance())),
+                                    toStrings(currentDescriptor.doFillActionDefectFilterItems(current.getInstance())),
+                                    toStrings(currentDescriptor.doFillSeveritiesDefectFilterItems(current.getInstance())),
+                                    toStrings(currentDescriptor.doFillComponentDefectFilterItems(current.getInstance(), current.getStream()))
+                                );
+                            } catch (CovRemoteServiceException_Exception e) {
+                                throw new IOException(e);
+                            }
                         }
                     }
+                    req.setAttribute("descriptor", currentDescriptor);
+                    req.setAttribute("instance", current);
+                    req.setAttribute("id", id);
                 }
-                req.setAttribute("descriptor", currentDescriptor);
-                req.setAttribute("instance", current);
-                req.setAttribute("id", id);
             }
             rsp.forward(currentDescriptor, "defectFilters", req);
         }
@@ -694,7 +698,7 @@ public class CoverityPublisher extends Recorder {
             CIMStream current = null;
             if(json != null && !json.isNullObject()) {
                 CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
-                String id = ((String[]) req.getParameterMap().get("id"))[0];
+                String id = req.getParameterMap().get("id")[0];
                 for(CIMStream cs : publisher.getCimStreams()) {
                     if(id.equals(cs.getId())) {
                         current = cs;
@@ -702,29 +706,31 @@ public class CoverityPublisher extends Recorder {
                     }
                 }
 
-                CIMInstance cimInstance = publisher.getDescriptor().getInstance(current.getInstance());
-                final List<String> projects = new ArrayList<>(CimCache.getInstance().getProjects(cimInstance));
-                final String currentProject = current.getProject();
-                boolean currentProjectIsvalid = true;
-                if (!StringUtils.isEmpty(currentProject) && !projects.contains(currentProject)) {
-                    projects.add(currentProject);
-                    currentProjectIsvalid = false;
+                if (current != null) {
+                    CIMInstance cimInstance = publisher.getDescriptor().getInstance(current.getInstance());
+                    final List<String> projects = new ArrayList<>(CimCache.getInstance().getProjects(cimInstance));
+                    final String currentProject = current.getProject();
+                    boolean currentProjectIsvalid = true;
+                    if (!StringUtils.isEmpty(currentProject) && !projects.contains(currentProject)) {
+                        projects.add(currentProject);
+                        currentProjectIsvalid = false;
+                    }
+
+                    req.setAttribute("id", id);
+
+                    rsp.setContentType("application/json; charset=utf-8");
+                    final ServletOutputStream outputStream = rsp.getOutputStream();
+
+                    Collections.sort(projects, String.CASE_INSENSITIVE_ORDER);
+
+                    JSONObject responseObject = new JSONObject();
+                    responseObject.put("projects", projects);
+                    responseObject.put("selectedProject", currentProject);
+                    responseObject.put("validSelection", currentProjectIsvalid);
+
+                    String jsonString = responseObject.toString();
+                    outputStream.write(jsonString.getBytes("UTF-8"));
                 }
-
-                req.setAttribute("id", id);
-
-                rsp.setContentType("application/json; charset=utf-8");
-                final ServletOutputStream outputStream = rsp.getOutputStream();
-
-                Collections.sort(projects, String.CASE_INSENSITIVE_ORDER);
-
-                JSONObject responseObject = new JSONObject();
-                responseObject.put("projects", projects);
-                responseObject.put("selectedProject", currentProject);
-                responseObject.put("validSelection", currentProjectIsvalid);
-
-                String jsonString = responseObject.toString();
-                outputStream.write(jsonString.getBytes("UTF-8"));
             }
         }
 
@@ -736,7 +742,7 @@ public class CoverityPublisher extends Recorder {
             CIMStream current = null;
             if(json != null && !json.isNullObject()) {
                 CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
-                String id = ((String[]) req.getParameterMap().get("id"))[0];
+                String id = req.getParameterMap().get("id")[0];
                 for(CIMStream cs : publisher.getCimStreams()) {
                     if(id.equals(cs.getId())) {
                         current = cs;
@@ -744,30 +750,32 @@ public class CoverityPublisher extends Recorder {
                     }
                 }
 
-                CIMInstance cimInstance = publisher.getDescriptor().getInstance(current.getInstance());
-                final List<String> streams = new ArrayList<>(CimCache.getInstance().getStreams(cimInstance ,current.getProject()));
-                final String currentStream = current.getStream();
-                boolean currentStreamIsvalid = true;
+                if (current != null) {
+                    CIMInstance cimInstance = publisher.getDescriptor().getInstance(current.getInstance());
+                    final List<String> streams = new ArrayList<>(CimCache.getInstance().getStreams(cimInstance ,current.getProject()));
+                    final String currentStream = current.getStream();
+                    boolean currentStreamIsvalid = true;
 
-                if (!StringUtils.isEmpty(currentStream) && !streams.contains(currentStream)) {
-                    streams.add(currentStream);
-                    currentStreamIsvalid = false;
+                    if (!StringUtils.isEmpty(currentStream) && !streams.contains(currentStream)) {
+                        streams.add(currentStream);
+                        currentStreamIsvalid = false;
+                    }
+
+                    req.setAttribute("id", id);
+
+                    rsp.setContentType("application/json; charset=utf-8");
+                    final ServletOutputStream outputStream = rsp.getOutputStream();
+
+                    Collections.sort(streams, String.CASE_INSENSITIVE_ORDER);
+
+                    JSONObject responseObject = new JSONObject();
+                    responseObject.put("streams", streams);
+                    responseObject.put("selectedStream", currentStream);
+                    responseObject.put("validSelection", currentStreamIsvalid);
+
+                    String jsonString = responseObject.toString();
+                    outputStream.write(jsonString.getBytes("UTF-8"));
                 }
-
-                req.setAttribute("id", id);
-
-                rsp.setContentType("application/json; charset=utf-8");
-                final ServletOutputStream outputStream = rsp.getOutputStream();
-
-                Collections.sort(streams, String.CASE_INSENSITIVE_ORDER);
-
-                JSONObject responseObject = new JSONObject();
-                responseObject.put("streams", streams);
-                responseObject.put("selectedStream", currentStream);
-                responseObject.put("validSelection", currentStreamIsvalid);
-
-                String jsonString = responseObject.toString();
-                outputStream.write(jsonString.getBytes("UTF-8"));
             }
         }
     }

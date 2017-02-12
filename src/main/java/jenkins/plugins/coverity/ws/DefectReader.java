@@ -27,6 +27,7 @@ import com.coverity.ws.v9.SnapshotScopeSpecDataObj;
 import com.coverity.ws.v9.StreamIdDataObj;
 
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
@@ -101,7 +102,7 @@ public class DefectReader {
                     listener.getLogger().println("[Coverity] No defects matched all filters.");
                 }
 
-                CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
+                CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects, i);
                 build.addAction(action);
 
                 String rootUrl = Jenkins.getInstance().getRootUrl();
