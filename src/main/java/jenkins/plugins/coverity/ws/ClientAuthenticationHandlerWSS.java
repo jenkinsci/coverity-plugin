@@ -27,6 +27,7 @@ import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ public class ClientAuthenticationHandlerWSS implements SOAPHandler<SOAPMessageCo
                 "password=\"" + quote(password) + "\" " +
                 "useNonce=\"false\" digestPassword=\"false\"/>  " +
                 "</xwss:SecurityConfiguration>";
-        InputStream xwssConfig = new ByteArrayInputStream(xwssConfigText.getBytes());
+        InputStream xwssConfig = new ByteArrayInputStream(xwssConfigText.getBytes(StandardCharsets.UTF_8));
         ClassLoader oldCCL = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
