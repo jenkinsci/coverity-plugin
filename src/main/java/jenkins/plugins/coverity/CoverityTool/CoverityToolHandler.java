@@ -244,13 +244,6 @@ public class CoverityToolHandler {
             }
         }
 
-        if(!publisher.isKeepIntDir() || temp.isDef()) {
-            listener.getLogger().println("[Coverity] deleting intermediate directory");
-            temp.getTempDir().deleteRecursive();
-        } else {
-            listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.getTempDir());
-        }
-
         if(!publisher.isSkipFetchingDefects()) {
             DefectReader defectReader = new DefectReader(build, listener, publisher);
             Boolean result = defectReader.getLatestDefectsForBuild();

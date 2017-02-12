@@ -10,7 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.LauncherDecorator;
@@ -95,7 +94,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
                 throw new RuntimeException(scmCheck);
             }
         }
-
         return new CoverityLauncher(launcher, node);
     }
 }
