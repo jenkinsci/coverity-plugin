@@ -50,7 +50,6 @@
       new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/loadProjectsForInstance", {
         parameters: {json: json, id: id},
         onComplete: function (t) {
-            debugger;
           var projectSelect = document.getElementById("project-" + id);
 
           if (t.status == 200) {
