@@ -49,18 +49,7 @@
 
       new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/loadProjectsForInstance", {
         parameters: {json: json, id: id},
-        onLoading: function () {
-          var parentCell = document.getElementById('cimInstance-' + id).parentNode;
-          if (parentCell) {
-            var loadingDiv = document.createElement('div');
-            loadingDiv.setAttribute('id', 'projectsloading');
-            loadingDiv.innerHTML = "Loading projects...";
-            loadingDiv.hide();
-
-            parentCell.appendChild(loadingDiv);
-            loadingDiv.show().delay(0.2);
-          }
-        },
+        onLoading: showLoadingProjects(id),
         onComplete: function (t) {
           var projectSelect = document.getElementById("project-" + id);
 
@@ -94,13 +83,7 @@
             showErrorMessage(projectSelect, "Error loading projects, server returned " + t.status);
           }
 
-          var parentCell = document.getElementById('cimInstance-' + id).parentNode;
-          var loadingDiv = parentCell.select("#projectsloading").first();
-          if (parentCell) {
-            if (loadingDiv) {
-              parentCell.removeChild(loadingDiv);
-            }
-          }
+          hideLoadingProjects(id);
         }
       });
     }
@@ -195,6 +178,34 @@
         if (validationCell.childElementCount == 0) {
           validationCell.appendChild(errorDiv);
         }
+    }
+
+    function showLoadingProjects(id) {
+      var parentCell = document.getElementById('cimInstance-' + id).parentNode;
+      if (parentCell) {
+        var loadingDiv = document.createElement('div');
+        loadingDiv.setAttribute('id', 'projectsloading');
+        loadingDiv.innerHTML = "Loading projects...";
+        loadingDiv.hide();
+
+        parentCell.appendChild(loadingDiv);
+
+        function showLoading(ld) {
+          ld.show();
+        }
+
+        showLoading.delay(0.2, loadingDiv);
+      }
+    }
+
+    function hideLoadingProjects(id) {
+      var parentCell = document.getElementById('cimInstance-' + id).parentNode;
+      var loadingDiv = parentCell.select("#projectsloading").first();
+      if (parentCell) {
+        if (loadingDiv) {
+          parentCell.removeChild(loadingDiv);
+        }
+      }
     }
   </script>
 	<script type="text/javascript">
