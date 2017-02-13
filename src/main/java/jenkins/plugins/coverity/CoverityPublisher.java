@@ -361,21 +361,6 @@ public class CoverityPublisher extends Recorder {
             this.home = home;
         }
 
-        /**
-         * Gets all checkers from CIM.
-         * This method will use getCheckerNames() on v9
-         */
-        public List<String> getAllCimCheckers() {
-            List<String> checkers = new ArrayList<String>();
-            for(CIMInstance instance :instances){
-                try {
-                    checkers.addAll(instance.getConfigurationService().getCheckerNames());
-                } catch(Exception e) {
-                }
-            }
-            return checkers;
-        }
-
         public void setSslConfigurations(SSLConfigurations sslConfigurations) {
             this.sslConfigurations = sslConfigurations;
         }
