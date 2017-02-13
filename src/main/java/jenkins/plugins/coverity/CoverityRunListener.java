@@ -62,11 +62,6 @@ public class CoverityRunListener extends RunListener<Run> {
         cc.check();
 
         for(CheckConfig.Status s : cc.getStatus()) {
-            if(s instanceof CheckConfig.StreamStatus) {
-                listener.getLogger().print("[Stream] ");
-            } else if(s instanceof CheckConfig.NodeStatus) {
-                listener.getLogger().print("[Node] ");
-            }
             listener.getLogger().println(s.getStatus());
         }
 

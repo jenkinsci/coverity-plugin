@@ -14,11 +14,6 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 	<tr>
 		<td colspan="3">
-			<!--f:entry>
-				instance=${instance}<br />
-				it=${it}<br />
-				descriptor=${descriptor}<br />
-			</f:entry-->
 			<style>
 				td.valid {
 					color: green;
@@ -26,10 +21,6 @@
 
 				td.invalid {
 					color: red;
-				}
-
-				td.left {
-					color: #606060;
 				}
 			</style>
 			<table>
@@ -47,27 +38,10 @@
 					</tr>
 				</j:if>
 				<j:forEach items="${instance.getStatus()}" var="si">
-					<j:set var="type" value="${si.getClass().getSimpleName()}"/>
 					<j:set var="class" value='${si.isValid() ? "valid" : "invalid"}'/>
-					<j:choose>
-						<j:when test='${type.equals("StreamStatus")}'>
-							<tr>
-								<td class="left">[Stream] </td>
-								<td class="${class}">${si.getStatus()}</td>
-							</tr>
-						</j:when>
-						<j:when test='${type.equals("NodeStatus")}'>
-							<tr style="color:gray">
-								<td class="left">[Node] </td>
-								<td class="${class}">${si.getStatus()}</td>
-							</tr>
-						</j:when>
-						<j:otherwise>
-							<tr>
-								<td class="${class}" colspan="2">${si.getStatus()}</td>
-							</tr>
-						</j:otherwise>
-					</j:choose>
+					<tr>
+						<td class="${class}" colspan="2">${si.getStatus()}</td>
+					</tr>
 				</j:forEach>
 			</table>
 		</td>

@@ -450,7 +450,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         @Override
         public String getStatus() {
             if (stream != null) {
-                return stream.toPrettyString() + " : " + status;
+                return "[Stream] " + stream.toPrettyString() + " : " + status;
             }
             return status;
         }
@@ -477,7 +477,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         @Override
         public String getStatus() {
             if (node != null) {
-                return node.getDisplayName() + " : " + status;
+                return "[Node] " + node.getDisplayName() + " : " + status;
             }
             return status;
         }
