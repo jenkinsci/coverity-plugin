@@ -52,13 +52,13 @@
 					<j:choose>
 						<j:when test='${type.equals("StreamStatus")}'>
 							<tr>
-								<td class="left">[Stream] ${si.getStream().toPrettyString()}:</td>
+								<td class="left">[Stream] </td>
 								<td class="${class}">${si.getStatus()}</td>
 							</tr>
 						</j:when>
 						<j:when test='${type.equals("NodeStatus")}'>
 							<tr style="color:gray">
-								<td class="left">[Node] ${si.getNode().getDisplayName()}:</td>
+								<td class="left">[Node] </td>
 								<td class="${class}">${si.getStatus()}</td>
 							</tr>
 						</j:when>
