@@ -10,7 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,14 +27,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.coverity.ws.v9.ComponentIdDataObj;
-import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v9.StreamDataObj;
-import com.coverity.ws.v9.StreamFilterSpecDataObj;
 
 import hudson.Util;
 import hudson.model.Descriptor;
-import jenkins.model.Jenkins;
 
 /**
  * Responsible for filtering the full list of defects to determine if a build should fail or not. Filters are inclusive:
@@ -233,39 +227,5 @@ public class DefectFilters {
         result = 31 * result + (checkers != null ? checkers.hashCode() : 0);
         result = 31 * result + (cutOffDate != null ? cutOffDate.hashCode() : 0);
         return result;
-    }
-
-    public CoverityPublisher.DescriptorImpl getPublisherDescriptor() {
-        return Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
-    }
-
-    /**
-     * Set checkers is used when specific jenkins instances are set up with pre-exisiting configurations and we need to
-     * reset the checkers. (Mainly because of STS)
-     * @param cimInstance
-     * @param streamId
-     * @throws IOException
-     * @throws CovRemoteServiceException_Exception
-     */
-    public void setCheckers(CIMInstance cimInstance,long streamId) throws IOException,CovRemoteServiceException_Exception{
-        try {
-            // Retrieve all defects for a specific cim instance.
-            String cs = cimInstance.getCimInstanceCheckers();
-            checkers = getPublisherDescriptor().split2List(cs);
-        } catch(Exception e) {
-            checkers = new LinkedList<String>();
-        }
-    }
-
-    public StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, CovRemoteServiceException_Exception {
-        StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
-        filter.setNamePattern(streamId);
-
-        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
-        if(streams.isEmpty()) {
-            return null;
-        } else {
-            return streams.get(0);
-        }
     }
 }

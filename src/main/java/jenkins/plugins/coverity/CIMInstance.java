@@ -306,12 +306,12 @@ public class CIMInstance {
         }
     }
 
-    public String getCimInstanceCheckers() throws IOException, CovRemoteServiceException_Exception {
+    public List<String> getCimInstanceCheckers() throws IOException, CovRemoteServiceException_Exception {
         List<String> checkers = new ArrayList<String>();
 
         checkers.addAll(this.getConfigurationService().getCheckerNames());
         Collections.sort(checkers);
-        return StringUtils.join(checkers, '\n');
+        return checkers;
     }
 
     /**

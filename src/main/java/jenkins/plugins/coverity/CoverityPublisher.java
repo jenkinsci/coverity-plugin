@@ -325,21 +325,10 @@ public class CoverityPublisher extends Recorder {
         private List<CIMInstance> instances = new ArrayList<CIMInstance>();
         private String home;
         private SSLConfigurations sslConfigurations;
-        /**
-         * This field contains all checkers on txt files and on CIM (obtained via the ws v9 call getCheckersnames() ).
-         * It's populated during DescriptorImpl instantiation.
-         */
-        private String allCheckers;
 
         public DescriptorImpl() {
             super(CoverityPublisher.class);
             load();
-
-            setAllCIMCheckers("");
-            Set<String> repeatedCheckers = new HashSet<String>(split2(allCheckers ));
-            List<String> checkersWithoutRepetitions = new ArrayList<String>(repeatedCheckers);
-            Collections.sort(checkersWithoutRepetitions);
-            this.allCheckers = StringUtils.join(checkersWithoutRepetitions,'\n');
         }
 
         public static List<String> toStrings(ListBoxModel list) {
@@ -387,10 +376,6 @@ public class CoverityPublisher extends Recorder {
             return checkers;
         }
 
-        public String getAllCheckers() {
-            return allCheckers;
-        }
-
         public void setSslConfigurations(SSLConfigurations sslConfigurations) {
             this.sslConfigurations = sslConfigurations;
         }
@@ -407,14 +392,6 @@ public class CoverityPublisher extends Recorder {
             } else {
                 return new SSLConfigurations(false, null);
             }
-        }
-
-        /**
-         * Adds to allCheckers all checkers from CIM.
-         */
-        public void setAllCIMCheckers(String allCheckers) {
-            this.allCheckers = Util.fixEmpty(allCheckers);
-            this.allCheckers = StringUtils.join(getAllCimCheckers(), '\n');
         }
 
         public String getHome(Node node, EnvVars environment) {
@@ -490,39 +467,6 @@ public class CoverityPublisher extends Recorder {
             }
         }
 
-        public ListBoxModel split(String string) {
-            ListBoxModel result = new ListBoxModel();
-            for(String s : string.split("[\r\n]")) {
-                s = Util.fixEmptyAndTrim(s);
-                if(s != null) {
-                    result.add(s);
-                }
-            }
-            return result;
-        }
-
-        public Set<String> split2(String string) {
-            Set<String> result = new TreeSet<String>();
-            for(String s : string.split("[\r\n]")) {
-                s = Util.fixEmptyAndTrim(s);
-                if(s != null) {
-                    result.add(s);
-                }
-            }
-            return result;
-        }
-        // Spliting checker strings into a usable list
-        public List<String> split2List(String string) {
-            List<String> result = new LinkedList<String>();
-            for(String s : string.split("[\r\n]")) {
-                s = Util.fixEmptyAndTrim(s);
-                if(s != null) {
-                    result.add(s);
-                }
-            }
-            return result;
-        }
-
         public FormValidation doCheckDate(@QueryParameter String date) {
             try {
                 if(!StringUtils.isEmpty(date.trim())) {
@@ -532,12 +476,6 @@ public class CoverityPublisher extends Recorder {
             } catch(ParseException e) {
                 return FormValidation.error("Date in yyyy-mm-dd format expected");
             }
-        }
-
-        private String join(Collection<String> c) {
-            StringBuffer result = new StringBuffer();
-            for(String s : c) result.append(s).append("\n");
-            return result.toString();
         }
 
         @Override
@@ -559,7 +497,7 @@ public class CoverityPublisher extends Recorder {
 
                 try {
                     if(current.isValid()) {
-                        Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
+                        Set<String> allCheckers = new HashSet<>(getInstance(current.getInstance()).getCimInstanceCheckers());
                         DefectFilters defectFilters = current.getDefectFilters();
                         if(defectFilters != null) {
                             defectFilters.invertCheckers(
@@ -650,7 +588,7 @@ public class CoverityPublisher extends Recorder {
                         //initialize 'new' defectFilters item with default values selected
                         DefectFilters defectFilters = current.getDefectFilters();
                         if (defectFilters != null) {
-                            Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
+                            Set<String> allCheckers = new HashSet<>(getInstance(current.getInstance()).getCimInstanceCheckers());
                             try {
                                 current.getDefectFilters().invertCheckers(
                                     allCheckers,
@@ -665,7 +603,7 @@ public class CoverityPublisher extends Recorder {
                         }
 
                     } else {
-                        Set<String> allCheckers = split2(getInstance(current.getInstance()).getCimInstanceCheckers());
+                        Set<String> allCheckers = new HashSet<>(getInstance(current.getInstance()).getCimInstanceCheckers());
                         DefectFilters defectFilters = current.getDefectFilters();
                         if (defectFilters != null) {
                             try {
