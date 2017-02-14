@@ -150,6 +150,9 @@ public class CoverityPublisher extends Recorder {
 
             cimStream = cimStreams.get(0);
             cimStreams = null;
+            if (cimStream.getInvocationAssistanceOverride() != null) {
+                this.getInvocationAssistance().merge(cimStream.getInvocationAssistanceOverride());
+            }
         }
 
         return this;
@@ -161,7 +164,7 @@ public class CoverityPublisher extends Recorder {
      * is missing a instance, project or stream name it is not valid).
      */
     private void convertTransientDataFields() {
-        CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null, null);
+        CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null);
 
         cimInstance = null;
         project = null;

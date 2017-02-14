@@ -94,7 +94,7 @@ public class DefectReaderTest {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
-        CIMStream cimStream  = new CIMStream(cimInstanceName, "test-project", "test-stream", null, "stream1", null);
+        CIMStream cimStream  = new CIMStream(cimInstanceName, "test-project", "test-stream", null, "stream1");
 
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
@@ -131,7 +131,7 @@ public class DefectReaderTest {
             Arrays.asList("Default.Other"),
             Arrays.asList("TEST_CHECKER"),
             "2017-01-01");
-        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters, "stream1", null);
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters, "stream1");
 
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
@@ -168,7 +168,7 @@ public class DefectReaderTest {
             Arrays.asList("Default.Other"),
             Arrays.asList("TEST_CHECKER"),
             "2017-01-01");
-        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters, "stream1", null);
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters, "stream1");
 
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
