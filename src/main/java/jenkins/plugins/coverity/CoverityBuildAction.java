@@ -38,28 +38,13 @@ public class CoverityBuildAction implements Action {
     private final String streamId;
     private final String cimInstance;
     private final List<CoverityDefect> defects;
-    private String uniqueId;
 
-    public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<CoverityDefect> defects, int buildCommitNumber) {
+    public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<CoverityDefect> defects) {
         this.build = build;
         this.projectId = projectId;
         this.streamId = streamId;
         this.cimInstance = cimInstance;
-        // modify the build identifier builds where more than one stream was committed
-        this.uniqueId = buildCommitNumber == 0 ? BUILD_ACTION_IDENTIFIER : BUILD_ACTION_IDENTIFIER + buildCommitNumber;
         this.defects = defects;
-    }
-
-    /**
-     * Implement readResolve to update the de-serialized object in the case transient data was found. Transient fields
-     * will be read during de-serialization and readResolve allow updating the BuildAction object after being created.
-     */
-    protected Object readResolve() {
-        if(uniqueId == null) {
-            this.uniqueId = BUILD_ACTION_IDENTIFIER;
-        }
-
-        return this;
     }
 
     /**
@@ -114,6 +99,6 @@ public class CoverityBuildAction implements Action {
     }
 
     public String getUrlName() {
-        return uniqueId;
+        return BUILD_ACTION_IDENTIFIER;
     }
 }
