@@ -279,11 +279,9 @@
 					    <div id="checkConfigOutput" />
 					</div>
 				</f:entry>
-				<f:entry field="cimStreams"
-						 title="Streams"
-						 description="Streams to perform analysis for and commit to">
-					<f:repeatable field="cimStreams"
-								  add="Add Stream" minimum="1">
+				<f:entry field="cimStream"
+						 title="Stream"
+						 description="Stream to perform analysis for and commit to">
 						<j:set var="id" value="${descriptor.getRandomID(instance)}" />
 						<table width="100%">
 							<input type="hidden" name="id" value="${id}" />
@@ -323,19 +321,6 @@
                 </select>
 							</f:entry>
 
-							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"
-											 checked="${instance.invocationAssistanceOverride != null}" name="invocationAssistanceOverride">
-								<j:set var="instance" value="${instance.invocationAssistanceOverride}"/>
-								<f:entry title="Additional cov-analyze arguments:" field="analyzeArguments">
-									<f:textbox/>
-								</f:entry>
-								<f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
-									<f:textbox/>
-								</f:entry>
-								<f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
-									<f:textbox/>
-								</f:entry>
-							</f:optionalBlock>
 							<f:entry title="" field="defectFilters">
 								<tr>
 									<td class="setting-leftspace">
@@ -366,11 +351,6 @@
 								</tr>
 							</f:entry>
 						</table>
-						<div align="right">
-							<input type="button" value="Remove Stream for Analysis" class="repeatable-delete"
-								   style="margin-left: 1em;"/>
-						</div>
-					</f:repeatable>
 				</f:entry>
 
                 <f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
