@@ -45,6 +45,7 @@ import com.coverity.ws.v9.StreamDataObj;
 import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import com.coverity.ws.v9.StreamIdDataObj;
 import com.coverity.ws.v9.UserDataObj;
+import com.google.common.collect.ImmutableList;
 
 import hudson.util.FormValidation;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
@@ -306,12 +307,11 @@ public class CIMInstance {
         }
     }
 
-    public String getCimInstanceCheckers() throws IOException, CovRemoteServiceException_Exception {
-        List<String> checkers = new ArrayList<String>();
+    public ImmutableList<String> getCimInstanceCheckers() throws IOException, CovRemoteServiceException_Exception {
+        final List<String> checkerNames = this.getConfigurationService().getCheckerNames();
+        Collections.sort(checkerNames);
 
-        checkers.addAll(this.getConfigurationService().getCheckerNames());
-        Collections.sort(checkers);
-        return StringUtils.join(checkers, '\n');
+        return ImmutableList.copyOf(checkerNames);
     }
 
     /**

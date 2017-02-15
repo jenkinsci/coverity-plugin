@@ -319,9 +319,15 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             if(instance == null) return new ListBoxModel();
 
             try {
-                // Retrieve all defects for a specific cim instance.
-                String cs = instance.getCimInstanceCheckers();
-                return getPublisherDescriptor().split(cs);
+                // Retrieve all checkers for a specific cim instance.
+                List<String> checkers = instance.getCimInstanceCheckers();
+
+                ListBoxModel result = new ListBoxModel();
+                for (String checker : checkers) {
+                    result.add(checker);
+                }
+
+                return result;
             } catch(Exception e) {
                 return new ListBoxModel();
             }
