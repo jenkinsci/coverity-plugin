@@ -279,11 +279,12 @@
 					    <div id="checkConfigOutput" />
 					</div>
 				</f:entry>
-				<f:entry field="cimStream"
-						 title="Stream"
-						 description="Stream to perform analysis for and commit to">
+				<f:entry field="cimStream">
+            <j:set var="instance" value="${instance.cimStream}" />
+            <j:set var="descriptor" value="${instance.descriptor}" />
 						<j:set var="id" value="${descriptor.getRandomID(instance)}" />
-						<table width="100%">
+
+						<table width="100%" name="cimStream">
 							<input type="hidden" name="id" value="${id}" />
 							<br/>
 
