@@ -124,8 +124,9 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 for(Status s : status) {
                     if(s instanceof StreamStatus) {
                         StreamStatus ss = (StreamStatus) s;
-                        if(!ss.getVersion().compareToAnalysis(analysisVersion)) {
-                            newStatus.add(new Status(false, "Connect instance " + ss.getStream().toPrettyString() + " (version " +
+                        CIMStream stream = ss.getStream();
+                        if(!ss.getVersion().compareToAnalysis(analysisVersion) && stream != null) {
+                            newStatus.add(new Status(false, "Connect instance " + stream.toPrettyString() + " (version " +
                                     ss.getVersion() + "|" + ss.getVersion().getEffectiveVersion() +
                                     ") is incompatible with analysis version " + analysisVersion));
                         }
@@ -141,8 +142,9 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                     for(Status s : status) {
                         if(s instanceof StreamStatus) {
                             StreamStatus ss = (StreamStatus) s;
-                            if(ss.getStream().getDomain().equals("MIXED")) {
-                                newStatus.add(new Status(false, "Stream " + ss.getStream().toPrettyString() + " (any language) is incompatible with analysis version " + analysisVersion));
+                            CIMStream stream = ss.getStream();
+                            if(stream != null && stream.getDomain().equals("MIXED")) {
+                                newStatus.add(new Status(false, "Stream " + stream.toPrettyString() + " (any language) is incompatible with analysis version " + analysisVersion));
                             }
                         }
                     }
@@ -442,6 +444,14 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         public CoverityVersion getVersion() {
             return version;
         }
+
+        @Override
+        public String getStatus() {
+            if (stream != null) {
+                return "[Stream] " + stream.toPrettyString() + " : " + status;
+            }
+            return status;
+        }
     }
 
     public static class NodeStatus extends Status {
@@ -460,6 +470,14 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
 
         public CoverityVersion getVersion() {
             return version;
+        }
+
+        @Override
+        public String getStatus() {
+            if (node != null) {
+                return "[Node] " + node.getDisplayName() + " : " + status;
+            }
+            return status;
         }
     }
 
