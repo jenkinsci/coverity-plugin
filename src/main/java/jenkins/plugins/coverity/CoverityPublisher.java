@@ -134,14 +134,14 @@ public class CoverityPublisher extends Recorder {
      * will be read during de-serialization and readResolve allow updating the Publisher object after being created.
      */
     protected Object readResolve() {
-        // Check for really old data values cimInstance, project, stream, defectFilters being set
+        // Check for values removed in plugin version 1.2 (cimInstance, project, stream, defectFilters) set
         if(cimInstance != null || project != null || stream != null || defectFilters != null) {
             logger.info("Old data format detected. Converting to new format.");
             convertTransientDataFields();
             return this;
         }
 
-        // Check for old data containing the streams collection
+        // Check for values removed in plugin version 1.9 (streams collection)
         if(cimStreams != null && !cimStreams.isEmpty()) {
             logger.info("Old data format detected. Converting to new format.");
             if (cimStreams.size() > 1) {
@@ -150,6 +150,8 @@ public class CoverityPublisher extends Recorder {
 
             cimStream = cimStreams.get(0);
             cimStreams = null;
+
+            // merge in any invocation assistance override values
             if (cimStream.getInvocationAssistanceOverride() != null) {
                 this.getInvocationAssistance().merge(cimStream.getInvocationAssistanceOverride());
             }
@@ -159,9 +161,8 @@ public class CoverityPublisher extends Recorder {
     }
 
     /**
-     * Converts the old data values cimInstance, project, stream, defectFilters to a {@link CIMStream} object
-     * and adds to the configured streams. Then trims any configured streams which are not valid (when a stream
-     * is missing a instance, project or stream name it is not valid).
+     * Converts the old data values cimInstance, project, stream, defectFilters (which were removed in plugin version 1.2)
+     * to a {@link CIMStream} object
      */
     private void convertTransientDataFields() {
         CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null);
