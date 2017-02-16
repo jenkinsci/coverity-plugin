@@ -74,7 +74,7 @@ public class CoverityPublisher extends Recorder {
     /**
      * Configuration for the invocation assistance feature. Null if this should not be used.
      */
-    private final InvocationAssistance invocationAssistance;
+    private InvocationAssistance invocationAssistance;
     /**
      * Should the build be marked as failed if defects are present ?
      */
@@ -154,7 +154,7 @@ public class CoverityPublisher extends Recorder {
 
             // merge in any invocation assistance override values
             if (cimStream.getInvocationAssistanceOverride() != null) {
-                this.getInvocationAssistance().merge(cimStream.getInvocationAssistanceOverride());
+                this.invocationAssistance = this.getInvocationAssistance().merge(cimStream.getInvocationAssistanceOverride());
             }
         }
 
