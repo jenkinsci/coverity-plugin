@@ -310,7 +310,11 @@ public class CoverityPublisher extends Recorder {
                 } else {
                     listener.getLogger().println("[Coverity] preserving intermediate directory: " + temp.getTempDir());
                 }
-            } catch(Exception e) {
+            } catch (InterruptedException e) {
+                listener.getLogger().println("[Coverity] Interrupted Exception occurred during deletion of intermediate directory: " + temp.getTempDir());
+            } catch (IOException e) {
+                listener.getLogger().println("[Coverity] IOException Exception occurred during deletion of intermediate directory: " + temp.getTempDir());
+            } catch (Exception e) {
                 listener.getLogger().println("[Coverity] Error occurred during deletion of intermediate directory: " + temp.getTempDir());
             }
         }

@@ -19,6 +19,7 @@ import hudson.remoting.Channel;
 import hudson.tasks.Builder;
 import jenkins.plugins.coverity.CoverityTool.CovBuildCompileCommand;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
@@ -249,8 +250,12 @@ public class CoverityLauncher extends Launcher {
                     temp = resolveIntermediateDirectory(build, listener, node, invocationAssistance.getIntermediateDir());
                     if (temp != null) {
                         File idir = new File(temp.getRemote());
-                        if (idir != null && !idir.isAbsolute()) {
-                            temp = new FilePath(temp.getChannel(), FilenameUtils.concat(envVars.get("WORKSPACE"), temp.getRemote()));
+                        String workspace = envVars.get("WORKSPACE");
+                        if (idir != null && !idir.isAbsolute() && !StringUtils.isEmpty(workspace)) {
+                            String path = FilenameUtils.concat(workspace, temp.getRemote());
+                            if (!StringUtils.isEmpty(path)) {
+                                temp = new FilePath(temp.getChannel(), path);
+                            }
                         }
                         temp.mkdirs();
                     }
