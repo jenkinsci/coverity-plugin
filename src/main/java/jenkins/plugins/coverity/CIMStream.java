@@ -13,11 +13,8 @@ package jenkins.plugins.coverity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -143,22 +140,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             }
 
             return null;
-        }
-
-        public String getRandomID() {
-            Random r = new Random();
-            StringBuilder sb = new StringBuilder();
-            for(int i = 0; i < 16; i++) {
-                sb.append("" + r.nextInt(10));
-            }
-            return sb.toString();
-        }
-
-        public String getRandomID(Object o) {
-            if(o != null) {
-                return "" + o.hashCode();
-            }
-            return getRandomID();
         }
 
         public ListBoxModel doFillInstanceItems() {
