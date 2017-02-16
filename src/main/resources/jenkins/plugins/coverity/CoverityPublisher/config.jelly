@@ -183,12 +183,15 @@
     function showLoadingProjects(id) {
       var parentCell = document.getElementById('cimInstance-' + id).parentNode;
       if (parentCell) {
-        var loadingDiv = document.createElement('div');
-        loadingDiv.setAttribute('id', 'projectsloading');
-        loadingDiv.innerHTML = "Loading projects...";
-        loadingDiv.hide();
+        var loadingDiv = parentCell.select("#projectsloading").first();
 
-        parentCell.appendChild(loadingDiv);
+        if (!loadingDiv) {
+          var loadingDiv = document.createElement('div');
+          loadingDiv.setAttribute('id', 'projectsloading');
+          loadingDiv.innerHTML = "Loading projects...";
+          loadingDiv.hide();
+          parentCell.appendChild(loadingDiv);
+        }
 
         function showLoading(ld) {
           ld.show();
