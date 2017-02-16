@@ -147,8 +147,10 @@
 
       if (invalidProject &amp;&amp; invalidProject.value != projectValue) {
         validationCell.innerHTML = '';
-        projectSelect.removeChild(projectSelect.querySelector('option[value="' + invalidProject.value + '"]'));
         parentCell.removeChild(invalidProject);
+        var invalidOption = projectSelect.querySelector('option[value="' + invalidProject.value + '"]');
+        if (invalidOption)
+          projectSelect.removeChild(invalidOption);
       }
     }
 
@@ -164,8 +166,10 @@
 
       if (invalidStream &amp;&amp; invalidStream.value != streamValue) {
         validationCell.innerHTML = '';
-        streamSelect.removeChild(streamSelect.querySelector('option[value="' + invalidStream.value + '"]'));
         parentCell.removeChild(invalidStream);
+        var invalidOption = streamSelect.querySelector('option[value="' + invalidStream.value + '"]');
+        if (invalidOption)
+          streamSelect.removeChild(invalidOption);
       }
     }
 
