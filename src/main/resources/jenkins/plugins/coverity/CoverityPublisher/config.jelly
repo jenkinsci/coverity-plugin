@@ -77,6 +77,7 @@
 
               showErrorMessage(projectSelect, "Project [ " + json.selectedProject + " ] is not found");
             } else {
+              hideErrorMessage(projectSelect, '#invalidProject');
               loadStreams(id);
             }
           } else {
@@ -124,6 +125,7 @@
 
               showErrorMessage(streamSelect, "Stream [ " + json.selectedStream + " ] is not found");
             } else {
+              hideErrorMessage(streamSelect, '#invalidStream');
               loadDefectFilters(id);
             }
           } else {
@@ -168,16 +170,34 @@
     }
 
     function showErrorMessage(fieldControl, errorMessage) {
-        var errorDiv = document.createElement('div');
-        errorDiv.setAttribute('class', 'error');
-        errorDiv.innerHTML = errorMessage;
+      var errorDiv = document.createElement('div');
+      errorDiv.setAttribute('class', 'error');
+      errorDiv.innerHTML = errorMessage;
 
-        var parentRow = fieldControl.parentNode.parentNode;
-        var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+      var parentRow = fieldControl.parentNode.parentNode;
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
 
-        if (validationCell.childElementCount == 0) {
-          validationCell.appendChild(errorDiv);
+      if (validationCell.childElementCount == 0) {
+        validationCell.appendChild(errorDiv);
+      }
+    }
+
+    function hideErrorMessage(fieldControl, invalidIdSelector) {
+      var parentCell = fieldControl.parentNode;
+      var hiddenInvalid = parentCell.select(invalidIdSelector)[0];
+      if (hiddenInvalid) {
+        parentCell.removeChild(hiddenInvalid);
+      }
+
+      var parentRow = parentCell.parentNode;
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+      var errorDiv = validationCell.querySelector('div.error');
+
+      if (validationCell) {
+        if (errorDiv) {
+          validationCell.removeChild(errorDiv);
         }
+      }
     }
 
     function showLoadingProjects(id) {
