@@ -328,6 +328,10 @@ public class CoverityPublisher extends Recorder {
             load();
         }
 
+        public CIMStream.DescriptorImpl getCIMStreamDescriptor() {
+            return Jenkins.getInstance().getDescriptorByType(CIMStream.DescriptorImpl.class);
+        }
+
         public static List<String> toStrings(ListBoxModel list) {
             List<String> result = new ArrayList<String>();
             for(ListBoxModel.Option option : list) result.add(option.name);

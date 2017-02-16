@@ -280,8 +280,15 @@
 					</div>
 				</f:entry>
 				<f:entry field="cimStream">
-            <j:set var="instance" value="${instance.cimStream}" />
-            <j:set var="descriptor" value="${instance.descriptor}" />
+          <j:choose>
+            <j:when test="${instance == null}">
+              <j:set var="descriptor" value="${descriptor.getCIMStreamDescriptor()}" />
+            </j:when>
+            <j:otherwise>
+              <j:set var="instance" value="${instance.cimStream}" />
+              <j:set var="descriptor" value="${instance.descriptor}" />
+            </j:otherwise>
+          </j:choose>
 						<j:set var="id" value="${descriptor.getRandomID(instance)}" />
 
 						<table width="100%" name="cimStream">
