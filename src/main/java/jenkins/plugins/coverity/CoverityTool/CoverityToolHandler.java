@@ -52,6 +52,8 @@ public class CoverityToolHandler {
         Node node = Executor.currentExecutor().getOwner().getNode();
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        CIMStream cimStream = publisher.getCimStream();
+        CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
 
         boolean useAdvancedParser = false;
         if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
@@ -141,23 +143,20 @@ public class CoverityToolHandler {
         }
 
         // Run Cov Manage History
-        for(CIMStream cimStream : publisher.getCimStreams()) {
-            CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
-            try {
-                CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
+        try {
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
 
-                Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
-                int result = covManageHistoryCommand.runCommand();
+            Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+            int result = covManageHistoryCommand.runCommand();
 
-                if(result != 0) {
-                    listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
 
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-            } finally {
-                CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
+                build.setResult(Result.FAILURE);
+                return false;
             }
+        } finally {
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         // Run Cov Import Scm
@@ -226,22 +225,18 @@ public class CoverityToolHandler {
         }
 
         //run cov-commit-defects
-        for(CIMStream cimStream : publisher.getCimStreams()) {
-            CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
+        try {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
+            Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+            int result = covCommitDefectsCommand.runCommand();
 
-            try {
-                Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
-                int result = covCommitDefectsCommand.runCommand();
-
-                if(result != 0) {
-                    listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
-                    build.setResult(Result.FAILURE);
-                    return false;
-                }
-            } finally {
-                CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
+            if(result != 0) {
+                listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
+                build.setResult(Result.FAILURE);
+                return false;
             }
+        } finally {
+            CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
         if(!publisher.isSkipFetchingDefects()) {

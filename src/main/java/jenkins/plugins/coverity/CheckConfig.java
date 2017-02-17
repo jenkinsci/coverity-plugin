@@ -103,9 +103,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
 
         status.clear();
 
-        for(CIMStream cs : publisher.getCimStreams()) {
-            status.add(checkStream(publisher, cs));
-        }
+        status.add(checkStream(publisher, publisher.getCimStream()));
 
         if(launcher != null) {
             NodeStatus ns = checkNode(publisher, build, launcher, listener);

@@ -39,6 +39,10 @@ import jenkins.plugins.coverity.ws.CimCache;
 
 public class CIMStream extends AbstractDescribableImpl<CIMStream> {
     private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
+
+    // deprecated field removed in plugin version 1.9 (removed invocation override when multiple streams removed)
+    private transient InvocationAssistance invocationAssistanceOverride;
+
     private final String instance;
     private final String project;
     private final String stream;
@@ -49,16 +53,13 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
      */
     private final DefectFilters defectFilters;
 
-    private final InvocationAssistance invocationAssistanceOverride;
-
     @DataBoundConstructor
-    public CIMStream(String instance, String project, String stream, DefectFilters defectFilters, String id, InvocationAssistance invocationAssistanceOverride) {
+    public CIMStream(String instance, String project, String stream, DefectFilters defectFilters, String id) {
         this.instance = Util.fixEmpty(instance);
         this.project = Util.fixEmpty(project);
         this.stream = Util.fixEmpty(stream);
         this.id = Util.fixEmpty(id);
         this.defectFilters = defectFilters;
-        this.invocationAssistanceOverride = invocationAssistanceOverride;
     }
 
     public String getInstance() {
@@ -81,6 +82,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         return defectFilters;
     }
 
+    @Deprecated
     public InvocationAssistance getInvocationAssistanceOverride() {
         return invocationAssistanceOverride;
     }
@@ -115,7 +117,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 ", stream='" + stream + '\'' +
                 ", id='" + id + '\'' +
                 ", defectFilters=" + defectFilters +
-                ", invocationAssistanceOverride=" + invocationAssistanceOverride +
                 '}';
     }
 
