@@ -13,11 +13,8 @@ package jenkins.plugins.coverity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -46,7 +43,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
     private final String instance;
     private final String project;
     private final String stream;
-    private final String id;
 
     /**
      * Defines how to filter discovered defects. Null for no filtering.
@@ -54,11 +50,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
     private final DefectFilters defectFilters;
 
     @DataBoundConstructor
-    public CIMStream(String instance, String project, String stream, DefectFilters defectFilters, String id) {
+    public CIMStream(String instance, String project, String stream, DefectFilters defectFilters) {
         this.instance = Util.fixEmpty(instance);
         this.project = Util.fixEmpty(project);
         this.stream = Util.fixEmpty(stream);
-        this.id = Util.fixEmpty(id);
         this.defectFilters = defectFilters;
     }
 
@@ -72,10 +67,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 
     public String getStream() {
         return stream;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public DefectFilters getDefectFilters() {
@@ -115,7 +106,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 "instance='" + instance + '\'' +
                 ", project='" + project + '\'' +
                 ", stream='" + stream + '\'' +
-                ", id='" + id + '\'' +
                 ", defectFilters=" + defectFilters +
                 '}';
     }
@@ -152,22 +142,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return null;
         }
 
-        public String getRandomID() {
-            Random r = new Random();
-            StringBuilder sb = new StringBuilder();
-            for(int i = 0; i < 16; i++) {
-                sb.append("" + r.nextInt(10));
-            }
-            return sb.toString();
-        }
-
-        public String getRandomID(Object o) {
-            if(o != null) {
-                return "" + o.hashCode();
-            }
-            return getRandomID();
-        }
-
         public ListBoxModel doFillInstanceItems() {
             ListBoxModel result = new ListBoxModel();
             result.add("");
@@ -177,7 +151,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
-        public FormValidation doCheckInstance(@QueryParameter String instance, @QueryParameter String id) throws IOException, CovRemoteServiceException_Exception {
+        public FormValidation doCheckInstance(@QueryParameter String instance) throws IOException, CovRemoteServiceException_Exception {
             CIMInstance cimInstance = getInstance(instance);
 
             if (cimInstance != null) {
@@ -185,11 +159,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 
                 // initialize cache for instance
                 CimCache.getInstance().cacheCimInstance(cimInstance);
-
-                if (id != null) {
-                    Map<String, String> cims = new HashMap<>();
-                    cims.put(id, instance);
-                }
 
                 // return FormValidation.ok in order to suppress any success messages, these don't need to show automatically here
                 return checkResult.kind.equals(FormValidation.Kind.OK) ? FormValidation.ok() : checkResult;

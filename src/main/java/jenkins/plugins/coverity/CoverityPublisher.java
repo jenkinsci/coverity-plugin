@@ -166,7 +166,7 @@ public class CoverityPublisher extends Recorder {
      * to a {@link CIMStream} object
      */
     private void convertTransientDataFields() {
-        CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters, null);
+        CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters);
 
         cimInstance = null;
         project = null;
@@ -558,7 +558,6 @@ public class CoverityPublisher extends Recorder {
             CIMStream.DescriptorImpl cimStreamDescriptor = null;
             if(json != null && !json.isNullObject()) {
                 CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
-                String id = req.getParameterMap().get("id")[0];
                 CIMStream cimStream = publisher.getCimStream();
 
                 if (cimStream != null)
@@ -604,7 +603,6 @@ public class CoverityPublisher extends Recorder {
                     }
                     req.setAttribute("descriptor", cimStreamDescriptor);
                     req.setAttribute("instance", cimStream);
-                    req.setAttribute("id", id);
                 }
             }
             rsp.forward(cimStreamDescriptor, "defectFilters", req);
@@ -617,7 +615,6 @@ public class CoverityPublisher extends Recorder {
 
             if(json != null && !json.isNullObject()) {
                 CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
-                String id = req.getParameterMap().get("id")[0];
                 CIMStream cimStream = publisher.getCimStream();
 
                 if (cimStream != null) {
@@ -629,8 +626,6 @@ public class CoverityPublisher extends Recorder {
                         projects.add(selectedProject);
                         selectedProjectIsvalid = false;
                     }
-
-                    req.setAttribute("id", id);
 
                     rsp.setContentType("application/json; charset=utf-8");
                     final ServletOutputStream outputStream = rsp.getOutputStream();
@@ -656,7 +651,6 @@ public class CoverityPublisher extends Recorder {
 
             if(json != null && !json.isNullObject()) {
                 CoverityPublisher publisher = req.bindJSON(CoverityPublisher.class, json);
-                String id = req.getParameterMap().get("id")[0];
                 CIMStream cimStream = publisher.getCimStream();
 
                 if (cimStream != null) {
@@ -669,8 +663,6 @@ public class CoverityPublisher extends Recorder {
                         streams.add(selectedStream);
                         selectedStreamIsvalid = false;
                     }
-
-                    req.setAttribute("id", id);
 
                     rsp.setContentType("application/json; charset=utf-8");
                     final ServletOutputStream outputStream = rsp.getOutputStream();

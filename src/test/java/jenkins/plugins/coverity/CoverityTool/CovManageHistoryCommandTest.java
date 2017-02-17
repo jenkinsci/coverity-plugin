@@ -52,7 +52,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
@@ -81,7 +81,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest_WithSslConfiguration_ForIndio() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
@@ -110,7 +110,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest_WithSslConfiguration_ForJasperOrHigher() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
