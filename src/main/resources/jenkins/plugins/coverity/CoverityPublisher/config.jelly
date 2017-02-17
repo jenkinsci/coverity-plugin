@@ -77,7 +77,7 @@
 
               showErrorMessage(projectSelect, "Project [ " + json.selectedProject + " ] is not found");
             } else {
-              hideErrorMessage(projectSelect, '#invalidProject');
+              hideErrorMessage(projectSelect, '#invalidProject-' + id);
               loadStreams(id);
             }
           } else {
@@ -125,7 +125,7 @@
 
               showErrorMessage(streamSelect, "Stream [ " + json.selectedStream + " ] is not found");
             } else {
-              hideErrorMessage(streamSelect, '#invalidStream');
+              hideErrorMessage(streamSelect, '#invalidStream-' + id);
               loadDefectFilters(id);
             }
           } else {
