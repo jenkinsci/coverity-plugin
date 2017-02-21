@@ -30,10 +30,8 @@ public class InvocationAssistance {
     private final String buildArguments;
     private final String analyzeArguments;
     private final String commitArguments;
-    private final String csharpAssemblies;
     private List<String> javaWarFilesNames;
     private final List<JavaWarFile> javaWarFiles;
-    private final boolean csharpAutomaticAssemblies;
     private final boolean csharpMsvsca;
     private final String saOverride;
 
@@ -67,9 +65,7 @@ public class InvocationAssistance {
                                 String commitArguments,
                                 String intermediateDir,
                                 MisraConfig misraConfig,
-                                String csharpAssemblies,
                                 List<JavaWarFile> javaWarFiles,
-                                boolean csharpAutomaticAssemblies,
                                 boolean csharpMsvsca,
                                 String saOverride,
                                 boolean useAdvancedParser) {
@@ -81,7 +77,6 @@ public class InvocationAssistance {
         this.commitArguments = Util.fixEmpty(commitArguments);
         this.intermediateDir = Util.fixEmpty(intermediateDir);
         this.misraConfig = misraConfig;
-        this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
         List<String> tempJavaWarFilesPaths = new ArrayList<String>();
         if(javaWarFiles != null && !javaWarFiles.isEmpty()){
             for(JavaWarFile javaWarFile : javaWarFiles){
@@ -90,7 +85,6 @@ public class InvocationAssistance {
         }
         this.javaWarFilesNames = tempJavaWarFilesPaths;
         this.javaWarFiles = javaWarFiles;
-        this.csharpAutomaticAssemblies = csharpAutomaticAssemblies;
         this.csharpMsvsca = csharpMsvsca;
         this.saOverride = Util.fixEmpty(saOverride);
         this.useAdvancedParser = useAdvancedParser;
@@ -155,10 +149,6 @@ public class InvocationAssistance {
         return intermediateDir;
     }
 
-    public String getCsharpAssemblies() {
-        return csharpAssemblies;
-    }
-
     public List<JavaWarFile> getJavaWarFiles() {
         return javaWarFiles;
     }
@@ -169,10 +159,6 @@ public class InvocationAssistance {
 
     public boolean getCsharpMsvsca() {
         return csharpMsvsca;
-    }
-
-    public boolean getCsharpAutomaticAssemblies() {
-        return csharpAutomaticAssemblies;
     }
 
     public String getSaOverride() {
@@ -197,9 +183,7 @@ public class InvocationAssistance {
         String analyzeArguments = override.getAnalyzeArguments() != null ? override.getAnalyzeArguments() : getAnalyzeArguments();
         String buildArguments = override.getBuildArguments() != null ? override.getBuildArguments() : getBuildArguments();
         String commitArguments = override.getCommitArguments() != null ? override.getCommitArguments() : getCommitArguments();
-        String csharpAssemblies = override.getCsharpAssemblies() != null ? override.getCsharpAssemblies() : getCsharpAssemblies();
         String intermediateDir = override.getIntermediateDir() != null ? override.getIntermediateDir() : getIntermediateDir();
-        boolean csharpAutomaticAssemblies = override.getCsharpAutomaticAssemblies();
         boolean csharpMsvsca = override.getCsharpMsvsca();
         String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
         MisraConfig misraConfig = override.isUsingMisra ? new MisraConfig(override.misraConfigFile) : null;
@@ -217,9 +201,7 @@ public class InvocationAssistance {
             commitArguments,
             intermediateDir,
             misraConfig,
-            csharpAssemblies,
             javaWarFiles,
-            csharpAutomaticAssemblies,
             csharpMsvsca,
             saOverride,
             useAdvancedParser);

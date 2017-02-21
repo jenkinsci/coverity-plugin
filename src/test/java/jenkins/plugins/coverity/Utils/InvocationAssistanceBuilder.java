@@ -23,9 +23,7 @@ public class InvocationAssistanceBuilder {
     private String buildArguments;
     private String analyzeArguments;
     private String commitArguments;
-    private String csharpAssemblies;
     private List<JavaWarFile> javaWarFiles;
-    private boolean csharpAutomaticAssemblies;
     private boolean csharpMsvsca;
     private String saOverride;
     private MisraConfig misraConfig;
@@ -75,11 +73,6 @@ public class InvocationAssistanceBuilder {
         return this;
     }
 
-    public InvocationAssistanceBuilder withCSharpAutomaticAssemblies(boolean csharpAutomaticAssemblies) {
-        this.csharpAutomaticAssemblies = csharpAutomaticAssemblies;
-        return this;
-    }
-
     public InvocationAssistanceBuilder withJavaWarFiles(List<JavaWarFile> javaWarFiles) {
         this.javaWarFiles = javaWarFiles;
         return this;
@@ -100,11 +93,6 @@ public class InvocationAssistanceBuilder {
         return this;
     }
 
-    public InvocationAssistanceBuilder withCSharpAssemblies(String csharpAssemblies) {
-        this.csharpAssemblies = csharpAssemblies;
-        return this;
-    }
-
     public InvocationAssistance build() {
         return new InvocationAssistance(
             postCovBuild,
@@ -115,9 +103,7 @@ public class InvocationAssistanceBuilder {
             commitArguments,
             intermediateDir,
             misraConfig,
-            csharpAssemblies,
             javaWarFiles,
-            csharpAutomaticAssemblies,
             csharpMsvsca,
             saOverride,
             useAdvancedParser);
