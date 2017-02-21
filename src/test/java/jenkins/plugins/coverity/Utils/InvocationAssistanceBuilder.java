@@ -12,6 +12,9 @@ package jenkins.plugins.coverity.Utils;
 
 import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.JavaWarFile;
+import jenkins.plugins.coverity.MisraConfig;
+import jenkins.plugins.coverity.PostCovAnalyze;
+import jenkins.plugins.coverity.PostCovBuild;
 
 import java.util.List;
 
@@ -21,18 +24,14 @@ public class InvocationAssistanceBuilder {
     private String analyzeArguments;
     private String commitArguments;
     private String csharpAssemblies;
-    private List<String> javaWarFilesNames;
     private List<JavaWarFile> javaWarFiles;
     private boolean csharpAutomaticAssemblies;
     private boolean csharpMsvsca;
     private String saOverride;
-    private boolean isUsingMisra;
-    private String misraConfigFile;
+    private MisraConfig misraConfig;
     private boolean isScriptSrc;
-    private boolean isUsingPostCovBuildCmd;
-    private String postCovBuildCmd;
-    private boolean isUsingPostCovAnalyzeCmd;
-    private String postCovAnalyzeCmd;
+    private PostCovBuild postCovBuild;
+    private PostCovAnalyze postCovAnalyze;
     private String intermediateDir;
     private boolean useAdvancedParser;
 
@@ -47,22 +46,12 @@ public class InvocationAssistanceBuilder {
     }
 
     public InvocationAssistanceBuilder withPostAnalyzeCmd(String postCovAnalyzeCmd) {
-        this.postCovAnalyzeCmd = postCovAnalyzeCmd;
-        return this;
-    }
-
-    public InvocationAssistanceBuilder withUsingPostAnalyzeCmnd(boolean isUsingPostCovAnalyzeCmd) {
-        this.isUsingPostCovAnalyzeCmd = isUsingPostCovAnalyzeCmd;
+        this.postCovAnalyze =new PostCovAnalyze(postCovAnalyzeCmd);
         return this;
     }
 
     public InvocationAssistanceBuilder withPostCovBuildCmd(String postCovBuildCmd) {
-        this.postCovBuildCmd = postCovBuildCmd;
-        return this;
-    }
-
-    public InvocationAssistanceBuilder withUsingPostCovBuildCmd(boolean isUsingPostCovBuildCmd) {
-        this.isUsingPostCovBuildCmd = isUsingPostCovBuildCmd;
+        this.postCovBuild = new PostCovBuild(postCovBuildCmd);
         return this;
     }
 
@@ -72,12 +61,7 @@ public class InvocationAssistanceBuilder {
     }
 
     public InvocationAssistanceBuilder withMisraConfigFile(String misraConfigFile) {
-        this.misraConfigFile = misraConfigFile;
-        return this;
-    }
-
-    public InvocationAssistanceBuilder withUsingMisra(boolean isUsingMisra) {
-        this.isUsingMisra = isUsingMisra;
+        this.misraConfig = new MisraConfig(misraConfigFile);
         return this;
     }
 
@@ -98,11 +82,6 @@ public class InvocationAssistanceBuilder {
 
     public InvocationAssistanceBuilder withJavaWarFiles(List<JavaWarFile> javaWarFiles) {
         this.javaWarFiles = javaWarFiles;
-        return this;
-    }
-
-    public InvocationAssistanceBuilder withJavaWarFilesNames(List<String> javaWarFilesNames) {
-        this.javaWarFilesNames = javaWarFilesNames;
         return this;
     }
 
@@ -128,23 +107,19 @@ public class InvocationAssistanceBuilder {
 
     public InvocationAssistance build() {
         return new InvocationAssistance(
-                isUsingPostCovBuildCmd,
-                postCovBuildCmd,
-                isUsingPostCovAnalyzeCmd,
-                postCovAnalyzeCmd,
-                isScriptSrc,
-                buildArguments,
-                analyzeArguments,
-                commitArguments,
-                intermediateDir,
-                isUsingMisra,
-                misraConfigFile,
-                csharpAssemblies,
-                javaWarFilesNames,
-                csharpAutomaticAssemblies,
-                csharpMsvsca,
-                saOverride,
-                javaWarFiles,
-                useAdvancedParser);
+            postCovBuild,
+            postCovAnalyze,
+            isScriptSrc,
+            buildArguments,
+            analyzeArguments,
+            commitArguments,
+            intermediateDir,
+            misraConfig,
+            csharpAssemblies,
+            javaWarFiles,
+            csharpAutomaticAssemblies,
+            csharpMsvsca,
+            saOverride,
+            useAdvancedParser);
     }
 }

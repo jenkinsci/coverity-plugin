@@ -30,7 +30,6 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     public void addMisraConfigurationTest() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance =
                 new InvocationAssistanceBuilder().
-                        withUsingMisra(true).
                         withMisraConfigFile("misraConfigFile").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
@@ -42,7 +41,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
 
     @Test
     public void addMisraConfigurationTest_WithEmptyMisraConfigFilePath() throws IOException, InterruptedException {
-        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withUsingMisra(true).withMisraConfigFile("").build();
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withMisraConfigFile("").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
