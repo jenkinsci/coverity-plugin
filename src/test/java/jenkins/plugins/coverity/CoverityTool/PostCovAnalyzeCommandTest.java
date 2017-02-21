@@ -26,7 +26,6 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().
-                withUsingPostAnalyzeCmnd(true).
                 withPostAnalyzeCmd("TestPostAnalyzeCommand").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
@@ -39,7 +38,6 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
     @Test
     public void prepareCommandTest_WithParseException() throws IOException, InterruptedException {
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().
-                withUsingPostAnalyzeCmnd(true).
                 withPostAnalyzeCmd("\'").build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 

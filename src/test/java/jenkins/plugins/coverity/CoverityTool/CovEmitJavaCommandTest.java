@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.CoverityPublisher;
+import jenkins.plugins.coverity.JavaWarFile;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
@@ -25,11 +26,11 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
 
     @Test
     public void addJavaWarFilesTest() throws IOException, InterruptedException {
-        List<String> javaWarFiles = new ArrayList<>();
-        javaWarFiles.add("webapp1.war");
-        javaWarFiles.add("webapp2.war");
+        List<JavaWarFile> javaWarFiles = new ArrayList<>();
+        javaWarFiles.add(new JavaWarFile("webapp1.war"));
+        javaWarFiles.add(new JavaWarFile("webapp2.war"));
 
-        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withJavaWarFilesNames(javaWarFiles).build();
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withJavaWarFiles(javaWarFiles).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
 
         Command covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
