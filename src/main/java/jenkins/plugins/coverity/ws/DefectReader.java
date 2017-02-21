@@ -63,61 +63,58 @@ public class DefectReader {
             return false;
         }
 
-        List<CIMStream> cimStreams = publisher.getCimStreams();
-        for(int i = 0; i < cimStreams.size(); i++) {
-            CIMStream cimStream = cimStreams.get(i);
-            CIMInstance cimInstance = publisher.getDescriptor().getInstance(cimStream.getInstance());
+        CIMStream cimStream = publisher.getCimStream();
+        CIMInstance cimInstance = publisher.getDescriptor().getInstance(cimStream.getInstance());
 
-            listener.getLogger().println(MessageFormat.format("[Coverity] Fetching defects for stream \"{0}\"", cimStream.getStream()));
+        listener.getLogger().println(MessageFormat.format("[Coverity] Fetching defects for stream \"{0}\"", cimStream.getStream()));
 
-            List<MergedDefectDataObj> defects = null;
+        List<MergedDefectDataObj> defects = null;
 
-            try {
-                defects = getDefectsForSnapshot(cimInstance, cimStream, listener.getLogger());
+        try {
+            defects = getDefectsForSnapshot(cimInstance, cimStream, listener.getLogger());
 
-                List<CoverityDefect> matchingDefects = new ArrayList<>();
+            List<CoverityDefect> matchingDefects = new ArrayList<>();
 
-                // Loop through all defects create defect objects
-                for(MergedDefectDataObj defect : defects) {
-                    matchingDefects.add(new CoverityDefect(defect.getCid(), defect.getCheckerName(), defect.getFunctionDisplayName(), defect.getFilePathname()));
-                }
-
-                if(!matchingDefects.isEmpty()) {
-                    listener.getLogger().println(MessageFormat.format("[Coverity] Found {0} defects matching all filters", matchingDefects.size()));
-                    if(publisher.isFailBuild()) {
-                        if(build.getResult().isBetterThan(Result.FAILURE)) {
-                            build.setResult(Result.FAILURE);
-                            return false;
-                        }
-                    }
-
-                    // if the user wants to mark the build as unstable when defects are found, then we
-                    // notify the publisher to do so.
-                    if(publisher.isUnstable()){
-                        publisher.setUnstableBuild(true);
-
-                    }
-
-                } else {
-                    listener.getLogger().println("[Coverity] No defects matched all filters.");
-                }
-
-                CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects, i);
-                build.addAction(action);
-
-                String rootUrl = Jenkins.getInstance().getRootUrl();
-                if(rootUrl != null) {
-                    listener.getLogger().println("Coverity details: " + rootUrl + build.getUrl() + action.getUrlName());
-                }
-            } catch (IOException e) {
-                e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
-                build.setResult(Result.FAILURE);
-                return false;
-            } catch (CovRemoteServiceException_Exception e) {
-                e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
-                build.setResult(Result.FAILURE);
-                return false;
+            // Loop through all defects create defect objects
+            for(MergedDefectDataObj defect : defects) {
+                matchingDefects.add(new CoverityDefect(defect.getCid(), defect.getCheckerName(), defect.getFunctionDisplayName(), defect.getFilePathname()));
             }
+
+            if(!matchingDefects.isEmpty()) {
+                listener.getLogger().println(MessageFormat.format("[Coverity] Found {0} defects matching all filters", matchingDefects.size()));
+                if(publisher.isFailBuild()) {
+                    if(build.getResult().isBetterThan(Result.FAILURE)) {
+                        build.setResult(Result.FAILURE);
+                        return false;
+                    }
+                }
+
+                // if the user wants to mark the build as unstable when defects are found, then we
+                // notify the publisher to do so.
+                if(publisher.isUnstable()){
+                    publisher.setUnstableBuild(true);
+
+                }
+
+            } else {
+                listener.getLogger().println("[Coverity] No defects matched all filters.");
+            }
+
+            CoverityBuildAction action = new CoverityBuildAction(build, cimStream.getProject(), cimStream.getStream(), cimStream.getInstance(), matchingDefects);
+            build.addAction(action);
+
+            String rootUrl = Jenkins.getInstance().getRootUrl();
+            if(rootUrl != null) {
+                listener.getLogger().println("Coverity details: " + rootUrl + build.getUrl() + action.getUrlName());
+            }
+        } catch (IOException e) {
+            e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
+            build.setResult(Result.FAILURE);
+            return false;
+        } catch (CovRemoteServiceException_Exception e) {
+            e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
+            build.setResult(Result.FAILURE);
+            return false;
         }
 
         return true;

@@ -135,39 +135,45 @@ public class CoverityProjectAction implements Action {
             rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
             rangeAxis.setAutoRange(true);
 
-            StackedAreaRenderer ar = new StackedAreaRenderer2() {
-                @Override
-                public Paint getItemPaint(int row, int column) {
-                    ChartLabel key = (ChartLabel) dataset.getColumnKey(column);
-                    if(key.getColor() != null) return key.getColor();
-                    return super.getItemPaint(row, column);
-                }
-
-                @Override
-                public String generateURL(CategoryDataset dataset, int row,
-                                          int column) {
-                    ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
-                    return label.getUrl() + CoverityBuildAction.BUILD_ACTION_IDENTIFIER;
-                }
-
-                @Override
-                public String generateToolTip(CategoryDataset dataset, int row,
-                                              int column) {
-                    ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
-                    int defects = 0;
-                    for(CoverityBuildAction a : label.build.getActions(CoverityBuildAction.class)) {
-                        defects += a.getDefects().size();
-                    }
-                    return label.build.getDisplayName() + " has " + defects + " total defects";
-                }
-            };
-            plot.setRenderer(ar);
-            //ar.setSeriesPaint(0, ColorPalette.RED);
+            plot.setRenderer(new ChartItemRenderer(dataset));
 
             // crop extra space around the graph
             plot.setInsets(new RectangleInsets(0, 0, 0, 5.0));
 
             return chart;
+        }
+    }
+
+    private static class ChartItemRenderer extends StackedAreaRenderer2 {
+        private final CategoryDataset ds;
+
+        public ChartItemRenderer(CategoryDataset ds) {
+            this.ds = ds;
+        }
+
+        @Override
+        public Paint getItemPaint(int row, int column) {
+            ChartLabel key = (ChartLabel) ds.getColumnKey(column);
+            if(key.getColor() != null) return key.getColor();
+            return super.getItemPaint(row, column);
+        }
+
+        @Override
+        public String generateURL(CategoryDataset dataset, int row,
+                                  int column) {
+            ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
+            return label.getUrl() + CoverityBuildAction.BUILD_ACTION_IDENTIFIER;
+        }
+
+        @Override
+        public String generateToolTip(CategoryDataset dataset, int row,
+                                      int column) {
+            ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
+            int defects = 0;
+            for(CoverityBuildAction a : label.build.getActions(CoverityBuildAction.class)) {
+                defects += a.getDefects().size();
+            }
+            return label.build.getDisplayName() + " has " + defects + " total defects";
         }
     }
 

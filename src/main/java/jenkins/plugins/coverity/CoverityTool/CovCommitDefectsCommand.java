@@ -44,9 +44,6 @@ public class CovCommitDefectsCommand extends CoverityCommand {
 
         if (publisher != null && publisher.getInvocationAssistance() != null) {
             invocationAssistance = publisher.getInvocationAssistance();
-            if (cimStream.getInvocationAssistanceOverride() != null) {
-                invocationAssistance = invocationAssistance.merge(cimStream.getInvocationAssistanceOverride());
-            }
         }
     }
 
