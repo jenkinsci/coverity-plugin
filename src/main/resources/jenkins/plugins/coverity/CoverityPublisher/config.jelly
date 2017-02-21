@@ -77,6 +77,7 @@
 
               showErrorMessage(projectSelect, "Project [ " + json.selectedProject + " ] is not found");
             } else {
+              hideErrorMessage(projectSelect, '#invalidProject');
               loadStreams();
             }
           } else {
@@ -124,6 +125,7 @@
 
               showErrorMessage(streamSelect, "Stream [ " + json.selectedStream + " ] is not found");
             } else {
+              hideErrorMessage(streamSelect, '#invalidStream');
               loadDefectFilters();
             }
           } else {
@@ -145,8 +147,10 @@
 
       if (invalidProject &amp;&amp; invalidProject.value != projectValue) {
         validationCell.innerHTML = '';
-        projectSelect.removeChild(projectSelect.querySelector('option[value="' + invalidProject.value + '"]'));
         parentCell.removeChild(invalidProject);
+        var invalidOption = projectSelect.querySelector('option[value="' + invalidProject.value + '"]');
+        if (invalidOption)
+          projectSelect.removeChild(invalidOption);
       }
     }
 
@@ -162,33 +166,56 @@
 
       if (invalidStream &amp;&amp; invalidStream.value != streamValue) {
         validationCell.innerHTML = '';
-        streamSelect.removeChild(streamSelect.querySelector('option[value="' + invalidStream.value + '"]'));
         parentCell.removeChild(invalidStream);
+        var invalidOption = streamSelect.querySelector('option[value="' + invalidStream.value + '"]');
+        if (invalidOption)
+          streamSelect.removeChild(invalidOption);
       }
     }
 
     function showErrorMessage(fieldControl, errorMessage) {
-        var errorDiv = document.createElement('div');
-        errorDiv.setAttribute('class', 'error');
-        errorDiv.innerHTML = errorMessage;
+      var errorDiv = document.createElement('div');
+      errorDiv.setAttribute('class', 'error');
+      errorDiv.innerHTML = errorMessage;
 
-        var parentRow = fieldControl.parentNode.parentNode;
-        var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+      var parentRow = fieldControl.parentNode.parentNode;
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
 
-        if (validationCell.childElementCount == 0) {
-          validationCell.appendChild(errorDiv);
+      if (validationCell.childElementCount == 0) {
+        validationCell.appendChild(errorDiv);
+      }
+    }
+
+    function hideErrorMessage(fieldControl, invalidIdSelector) {
+      var parentCell = fieldControl.parentNode;
+      var hiddenInvalid = parentCell.select(invalidIdSelector)[0];
+      if (hiddenInvalid) {
+        parentCell.removeChild(hiddenInvalid);
+      }
+
+      var parentRow = parentCell.parentNode;
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+      var errorDiv = validationCell.querySelector('div.error');
+
+      if (validationCell) {
+        if (errorDiv) {
+          validationCell.removeChild(errorDiv);
         }
+      }
     }
 
     function showLoadingProjects() {
       var parentCell = document.getElementById('cimInstance').parentNode;
       if (parentCell) {
-        var loadingDiv = document.createElement('div');
-        loadingDiv.setAttribute('id', 'projectsloading');
-        loadingDiv.innerHTML = "Loading projects...";
-        loadingDiv.hide();
+        var loadingDiv = parentCell.select("#projectsloading").first();
 
-        parentCell.appendChild(loadingDiv);
+        if (!loadingDiv) {
+          var loadingDiv = document.createElement('div');
+          loadingDiv.setAttribute('id', 'projectsloading');
+          loadingDiv.innerHTML = "Loading projects...";
+          loadingDiv.hide();
+          parentCell.appendChild(loadingDiv);
+        }
 
         function showLoading(ld) {
           ld.show();
