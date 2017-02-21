@@ -65,4 +65,23 @@ public class CovCaptureCommandTest extends CommandTestBase {
             assertEquals("ParseException occurred during tokenizing the cov capture custom test command.", e.getMessage());
         }
     }
+
+    @Test
+    public void doesNotExecute_WithNoTaOptionBlock() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+
+        Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covCaptureCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_WithNoCustomTestCommand() throws IOException, InterruptedException {
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
+
+        Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covCaptureCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
 }

@@ -109,4 +109,12 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
             assertEquals("Test Advisor Policy File is required to run the Test Advisor.", e.getMessage());
         }
     }
+
+    @Test
+    public void canExecuteTest() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+        Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covAnalyzeCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
 }

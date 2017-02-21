@@ -137,4 +137,23 @@ public class CovImportScmCommandTest extends CommandTestBase {
             assertEquals("ParseException occurred during tokenizing the cov import scm additional command.", e.getMessage());
         }
     }
+
+    @Test
+    public void doesNotExecute_WithoutScmOptionBlock() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covImportScmCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_WithoutScmTool() throws IOException, InterruptedException {
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlockBuilder().withScmSystem("none").build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withScmOptionBlock(scmOptionBlock).build();
+
+        Command covImportScmCommand = new CovImportScmCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covImportScmCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
 }
