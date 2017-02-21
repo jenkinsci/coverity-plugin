@@ -175,6 +175,25 @@ public class CoverityProjectAction implements Action {
             }
             return label.build.getDisplayName() + " has " + defects + " total defects";
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(obj == this) {
+                return true;
+            } else if(!(obj instanceof ChartItemRenderer)) {
+                return false;
+            } else {
+                ChartItemRenderer that = (ChartItemRenderer)obj;
+                return this.ds != that.ds ? false : super.equals(obj);
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            int result = ds.hashCode();
+            result = 31 * result + super.hashCode();
+            return result;
+        }
     }
 
     private static class ChartLabel implements Comparable<ChartLabel> {
