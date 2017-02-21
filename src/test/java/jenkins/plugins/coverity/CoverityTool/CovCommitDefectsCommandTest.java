@@ -58,7 +58,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
 
-        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withUsingMisra(true).build();
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withUsingMisra(true).withMisraConfigFile("MISRA_cpp1008_1.config").build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().withCimStreams(cimStreamList).
                         withInvocationAssistance(invocationAssistance).build();

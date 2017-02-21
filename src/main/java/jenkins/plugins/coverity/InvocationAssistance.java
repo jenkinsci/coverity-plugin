@@ -9,15 +9,23 @@
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
 package jenkins.plugins.coverity;
-import hudson.EnvVars;
-import hudson.Util;
-import org.kohsuke.stapler.DataBoundConstructor;
-import net.sf.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import hudson.Util;
+
 public class InvocationAssistance {
+
+    // deprecated fields which were removed in plugin version 1.9
+    private transient boolean isUsingMisra;
+    private transient String misraConfigFile;
+    private transient boolean isUsingPostCovBuildCmd;
+    private transient String postCovBuildCmd;
+    private transient boolean isUsingPostCovAnalyzeCmd;
+    private transient String postCovAnalyzeCmd;
 
     private final String buildArguments;
     private final String analyzeArguments;
@@ -29,19 +37,15 @@ public class InvocationAssistance {
     private final boolean csharpMsvsca;
     private final String saOverride;
 
-    private final boolean isUsingMisra;
-    private final String misraConfigFile;
-    private JSONObject misraMap;
+
+    private MisraConfig misraConfig;
 
     private final boolean isScriptSrc;
 
-    private final boolean isUsingPostCovBuildCmd;
-    private final String postCovBuildCmd;
-    private JSONObject postCovBuildJSON;
 
-    private final boolean isUsingPostCovAnalyzeCmd;
-    private final String postCovAnalyzeCmd;
-    private JSONObject postCovAnalyzeJSON;
+    private PostCovBuild postCovBuild;
+
+        private PostCovAnalyze postCovAnalyze;
 
     /**
      * Absolute path to the intermediate directory that Coverity should use. Null to use the default.
@@ -54,15 +58,33 @@ public class InvocationAssistance {
 
     private final boolean useAdvancedParser;
 
-    public InvocationAssistance(boolean isUsingPostCovBuildCmd, String postCovBuildCmd, boolean isUsingPostCovAnalyzeCmd, String postCovAnalyzeCmd, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, boolean isUsingMisra, String misraConfigFile, String csharpAssemblies, List<String> javaWarFilesNames, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, List<JavaWarFile> javaWarFiles, boolean useAdvancedParser) {
+    public InvocationAssistance(boolean isUsingPostCovBuildCmd,
+                                String postCovBuildCmd,
+                                boolean isUsingPostCovAnalyzeCmd,
+                                String postCovAnalyzeCmd,
+                                boolean isScriptSrc,
+                                String buildArguments,
+                                String analyzeArguments,
+                                String commitArguments,
+                                String intermediateDir,
+                                boolean isUsingMisra,
+                                String misraConfigFile,
+                                String csharpAssemblies,
+                                List<String> javaWarFilesNames,
+                                boolean csharpAutomaticAssemblies,
+                                boolean csharpMsvsca,
+                                String saOverride,
+                                List<JavaWarFile> javaWarFiles,
+                                boolean useAdvancedParser) {
         this.useAdvancedParser = useAdvancedParser;
-        this.isUsingPostCovBuildCmd = isUsingPostCovBuildCmd;
-        this.postCovBuildCmd = postCovBuildCmd;
-        this.isUsingPostCovAnalyzeCmd = isUsingPostCovAnalyzeCmd;
-        this.postCovAnalyzeCmd = postCovAnalyzeCmd;
+        if (postCovBuildCmd != null)
+            this.postCovBuild = new PostCovBuild(postCovBuildCmd);
+
+        if (postCovAnalyzeCmd != null)
+            this.postCovAnalyze = new PostCovAnalyze(postCovAnalyzeCmd);
         this.isScriptSrc = isScriptSrc;
-        this.isUsingMisra = isUsingMisra;
-        this.misraConfigFile = misraConfigFile;
+        if (misraConfigFile != null)
+            this.misraConfig = new MisraConfig(misraConfigFile);
         this.javaWarFiles = javaWarFiles;
         this.intermediateDir = Util.fixEmpty(intermediateDir);
         this.buildArguments = Util.fixEmpty(buildArguments);
@@ -76,34 +98,28 @@ public class InvocationAssistance {
     }
 
     @DataBoundConstructor
-    public InvocationAssistance(JSONObject postCovBuildJSON, JSONObject postCovAnalyzeJSON, boolean isScriptSrc, String buildArguments, String analyzeArguments, String commitArguments, String intermediateDir, JSONObject misraMap, String csharpAssemblies, List<JavaWarFile> javaWarFiles, boolean csharpAutomaticAssemblies, boolean csharpMsvsca, String saOverride, boolean useAdvancedParser) {
+    public InvocationAssistance(PostCovBuild postCovBuild,
+                                PostCovAnalyze postCovAnalyze,
+                                boolean isScriptSrc,
+                                String buildArguments,
+                                String analyzeArguments,
+                                String commitArguments,
+                                String intermediateDir,
+                                MisraConfig misraConfig,
+                                String csharpAssemblies,
+                                List<JavaWarFile> javaWarFiles,
+                                boolean csharpAutomaticAssemblies,
+                                boolean csharpMsvsca,
+                                String saOverride,
+                                boolean useAdvancedParser) {
+        this.postCovBuild = postCovBuild;
+        this.postCovAnalyze = postCovAnalyze;
         this.isScriptSrc = isScriptSrc;
-        this.postCovBuildJSON = postCovBuildJSON;
-        this.useAdvancedParser = useAdvancedParser;
-        if(this.postCovBuildJSON != null) {
-            this.postCovBuildCmd = (String) postCovBuildJSON.get("postCovBuildCmd");
-        } else {
-            this.postCovBuildCmd = null;
-        }
-        this.isUsingPostCovBuildCmd = this.postCovBuildJSON != null;
-        this.postCovAnalyzeJSON = postCovAnalyzeJSON;
-        if(this.postCovAnalyzeJSON != null) {
-            this.postCovAnalyzeCmd = (String) postCovAnalyzeJSON.get("postCovAnalyzeCmd");
-        } else {
-            this.postCovAnalyzeCmd =null;
-        }
-        this.isUsingPostCovAnalyzeCmd = this.postCovAnalyzeJSON != null;
-        this.misraMap = misraMap;
-        if(this.misraMap != null) {
-            this.misraConfigFile = (String) misraMap.get("misraConfigFile");
-        } else {
-            this.misraConfigFile = null;
-        }
-        this.isUsingMisra = this.misraMap != null;
-        this.intermediateDir = Util.fixEmpty(intermediateDir);
         this.buildArguments = Util.fixEmpty(buildArguments);
         this.analyzeArguments = Util.fixEmpty(analyzeArguments);
         this.commitArguments = Util.fixEmpty(commitArguments);
+        this.intermediateDir = Util.fixEmpty(intermediateDir);
+        this.misraConfig = misraConfig;
         this.csharpAssemblies = Util.fixEmpty(csharpAssemblies);
         List<String> tempJavaWarFilesPaths = new ArrayList<String>();
         if(javaWarFiles != null && !javaWarFiles.isEmpty()){
@@ -113,25 +129,49 @@ public class InvocationAssistance {
         }
         this.javaWarFilesNames = tempJavaWarFilesPaths;
         this.javaWarFiles = javaWarFiles;
-        this.csharpMsvsca = csharpMsvsca;
         this.csharpAutomaticAssemblies = csharpAutomaticAssemblies;
+        this.csharpMsvsca = csharpMsvsca;
         this.saOverride = Util.fixEmpty(saOverride);
+        this.useAdvancedParser = useAdvancedParser;
+    }
+
+    /**
+     * Implement readResolve to update the de-serialized object in the case transient data was found. Transient fields
+     * will be read during de-serialization and readResolve allow updating the InvocationAssistance object after being created.
+     */
+    protected Object readResolve() {
+        // Check for existing misraConfig
+        if(isUsingMisra && misraConfigFile != null) {
+            this.misraConfig = new MisraConfig(misraConfigFile);
+        }
+
+        // Check for existing postCovBuild
+        if(isUsingPostCovBuildCmd && postCovBuildCmd != null) {
+            this.postCovBuild = new PostCovBuild(postCovBuildCmd);
+        }
+
+        // Check for existing postCovAnalyze
+        if(isUsingPostCovAnalyzeCmd && postCovAnalyzeCmd != null) {
+            this.postCovAnalyze = new PostCovAnalyze(postCovAnalyzeCmd);
+        }
+
+        return this;
     }
 
     public String getPostCovBuildCmd() {
-        return postCovBuildCmd;
+        return postCovBuild != null ? postCovBuild.getPostCovBuildCmd() : null;
     }
 
     public boolean getIsUsingPostCovBuildCmd() {
-        return isUsingPostCovBuildCmd;
+        return postCovBuild != null;
     }
 
     public boolean getIsUsingPostCovAnalyzeCmd() {
-        return isUsingPostCovAnalyzeCmd;
+        return postCovAnalyze != null;
     }
 
     public String getPostCovAnalyzeCmd() {
-        return postCovAnalyzeCmd;
+        return postCovAnalyze != null ? postCovAnalyze.getPostCovAnalyzeCmd() : null;
     }
 
     public boolean getIsScriptSrc() {
@@ -179,52 +219,11 @@ public class InvocationAssistance {
     }
 
     public boolean getIsUsingMisra() {
-        return isUsingMisra;
+        return misraConfig != null;
     }
 
     public String getMisraConfigFile(){
-        return misraConfigFile;
-    }
-
-
-
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-
-        InvocationAssistance that = (InvocationAssistance) o;
-
-        if(csharpAutomaticAssemblies != that.csharpAutomaticAssemblies) return false;
-        if(csharpMsvsca != that.csharpMsvsca) return false;
-        if(analyzeArguments != null ? !analyzeArguments.equals(that.analyzeArguments) : that.analyzeArguments != null)
-            return false;
-        if(buildArguments != null ? !buildArguments.equals(that.buildArguments) : that.buildArguments != null)
-            return false;
-        if(commitArguments != null ? !commitArguments.equals(that.commitArguments) : that.commitArguments != null)
-            return false;
-        if(csharpAssemblies != null ? !csharpAssemblies.equals(that.csharpAssemblies) : that.csharpAssemblies != null)
-            return false;
-        if(intermediateDir != null ? !intermediateDir.equals(that.intermediateDir) : that.intermediateDir != null)
-            return false;
-        if(javaWarFiles != null ? !javaWarFiles.equals(that.javaWarFiles) : that.javaWarFiles != null) return false;
-        if(saOverride != null ? !saOverride.equals(that.saOverride) : that.saOverride != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = buildArguments != null ? buildArguments.hashCode() : 0;
-        result = 31 * result + (analyzeArguments != null ? analyzeArguments.hashCode() : 0);
-        result = 31 * result + (commitArguments != null ? commitArguments.hashCode() : 0);
-        result = 31 * result + (csharpAssemblies != null ? csharpAssemblies.hashCode() : 0);
-        result = 31 * result + (javaWarFiles != null ? javaWarFiles.hashCode() : 0);
-        result = 31 * result + (csharpAutomaticAssemblies ? 1 : 0);
-        result = 31 * result + (csharpMsvsca ? 1 : 0);
-        result = 31 * result + (saOverride != null ? saOverride.hashCode() : 0);
-        result = 31 * result + (intermediateDir != null ? intermediateDir.hashCode() : 0);
-        return result;
+        return misraConfig != null ? misraConfig.getMisraConfigFile() : null;
     }
 
     /**
@@ -259,12 +258,12 @@ public class InvocationAssistance {
         boolean delim = true;
         String errorText = "Errors with your \"Perform Coverity build/analyze/commit\" options: \n";
         // Making sure they pick a test language
-        if(isUsingMisra){
-            if(misraConfigFile == null){
+        if(getIsUsingMisra()){
+            if(getMisraConfigFile() == null){
                 delim = false;
-            } else if (misraConfigFile.isEmpty()){
+            } else if (getMisraConfigFile().isEmpty()){
                 delim = false;
-            } else if (misraConfigFile.trim().isEmpty()){
+            } else if (getMisraConfigFile().trim().isEmpty()){
                 delim = false;
             }
         }
