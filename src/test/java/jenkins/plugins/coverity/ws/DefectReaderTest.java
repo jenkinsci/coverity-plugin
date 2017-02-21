@@ -94,10 +94,9 @@ public class DefectReaderTest {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
-        List<CIMStream> cimStreams  = new ArrayList<>();
-        cimStreams.add(new CIMStream(cimInstanceName, "test-project", "test-stream", null, "stream1", null));
+        CIMStream cimStream  = new CIMStream(cimInstanceName, "test-project", "test-stream", null);
 
-        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStreams(cimStreams).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
         defectService.setupMergedDefects(10);
 
@@ -124,7 +123,6 @@ public class DefectReaderTest {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
-        List<CIMStream> cimStreams  = new ArrayList<>();
         DefectFilters defectFilters = new DefectFilters(
             Arrays.asList("Undecided"),
             new ArrayList<>(Arrays.asList("High", "Medium", "Low")),
@@ -133,9 +131,9 @@ public class DefectReaderTest {
             Arrays.asList("Default.Other"),
             Arrays.asList("TEST_CHECKER"),
             "2017-01-01");
-        cimStreams.add(new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters, "stream1", null));
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters);
 
-        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStreams(cimStreams).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
         defectService.setupMergedDefects(3);
 
@@ -162,7 +160,6 @@ public class DefectReaderTest {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
-        List<CIMStream> cimStreams  = new ArrayList<>();
         DefectFilters defectFilters = new DefectFilters(
             Arrays.asList("Undecided"),
             new ArrayList<>(Arrays.asList("High", "Medium", "Low")),
@@ -171,9 +168,9 @@ public class DefectReaderTest {
             Arrays.asList("Default.Other"),
             Arrays.asList("TEST_CHECKER"),
             "2017-01-01");
-        cimStreams.add(new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters, "stream1", null));
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters);
 
-        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStreams(cimStreams).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
         defectService.setupMergedDefects(3750);
 

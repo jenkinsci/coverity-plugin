@@ -19,7 +19,7 @@ import java.util.List;
 
 public class CoverityPublisherBuilder {
 
-    private List<CIMStream> cimStreams;
+    private CIMStream cimStream;
     private InvocationAssistance invocationAssistance;
     private boolean failBuild;
     private boolean unstable;
@@ -29,8 +29,8 @@ public class CoverityPublisherBuilder {
     private TaOptionBlock taOptionBlock;
     private ScmOptionBlock scmOptionBlock;
 
-    public CoverityPublisherBuilder withCimStreams(List<CIMStream> streams) {
-        this.cimStreams = streams;
+    public CoverityPublisherBuilder withCimStream(CIMStream stream) {
+        this.cimStream = stream;
         return this;
     }
 
@@ -76,7 +76,7 @@ public class CoverityPublisherBuilder {
 
     public CoverityPublisher build() {
         return new CoverityPublisher(
-                cimStreams,
+                cimStream,
                 invocationAssistance,
                 failBuild,
                 unstable,

@@ -13,16 +13,16 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
     <j:set var="javaOption" value="${instance.javaOptionBlock}"/>
 	<script type="text/javascript">
-    function loadDefectFilters(id) {
-      var form = document.getElementById('cimInstance-' + id).form;
+    function loadDefectFilters() {
+      var form = document.getElementById('cimInstance').form;
       buildFormTree(form);
 
       var json = form.elements["json"].value;
 
       new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
-        parameters: {json: json, id: id},
+        parameters: {json: json},
         onComplete: function (rsp) {
-          var target = document.getElementById("defectFilters-" + id);
+          var target = document.getElementById("defectFilters");
           target.innerHTML = rsp.status == 200 ? rsp.responseText
             : '&lt;a href="" onclick="document.getElementById(\'valerr' +
             (i = iota++) +
@@ -33,25 +33,25 @@
             '&lt;/div&gt;';
           Behaviour.applySubtree(target);
 
-          document.getElementById('filters-' + id).style.display = 'none';
-          document.getElementById('showFilters-' + id).style.display = 'block';
-          document.getElementById('hideFilters-' + id).style.display = 'none';
+          document.getElementById('filters').style.display = 'none';
+          document.getElementById('showFilters').style.display = 'block';
+          document.getElementById('hideFilters').style.display = 'none';
         }
       });
     }
 
-    function loadProjects(id) {
+    function loadProjects() {
 
-      var form = document.getElementById('cimInstance-' + id).form;
+      var form = document.getElementById('cimInstance').form;
       buildFormTree(form);
 
       var json = form.elements["json"].value;
 
       new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/loadProjectsForInstance", {
-        parameters: {json: json, id: id},
-        onLoading: showLoadingProjects(id),
+        parameters: {json: json},
+        onLoading: showLoadingProjects(),
         onComplete: function (t) {
-          var projectSelect = document.getElementById("project-" + id);
+          var projectSelect = document.getElementById("project");
 
           if (t.status == 200) {
             var json = t.responseText.evalJSON();
@@ -69,7 +69,7 @@
 
             if (!json.validSelection) {
               var invalidInput = document.createElement('input');
-              invalidInput.setAttribute('id', 'invalidProject-' + id);
+              invalidInput.setAttribute('id', 'invalidProject');
               invalidInput.setAttribute('type', 'hidden');
               invalidInput.value = json.selectedProject;
 
@@ -77,28 +77,28 @@
 
               showErrorMessage(projectSelect, "Project [ " + json.selectedProject + " ] is not found");
             } else {
-              loadStreams(id);
+              loadStreams();
             }
           } else {
             showErrorMessage(projectSelect, "Error loading projects, server returned " + t.status);
           }
 
-          hideLoadingProjects(id);
+          hideLoadingProjects();
         }
       });
     }
 
-    function loadStreams(id) {
+    function loadStreams() {
 
-      var form = document.getElementById('cimInstance-' + id).form;
+      var form = document.getElementById('cimInstance').form;
       buildFormTree(form);
 
       var json = form.elements["json"].value;
 
       new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/loadStreamsForProject", {
-        parameters: {json: json, id: id},
+        parameters: {json: json},
         onComplete: function (t) {
-          var streamSelect = document.getElementById("stream-" + id);
+          var streamSelect = document.getElementById("stream");
 
           if (t.status == 200) {
             var json = t.responseText.evalJSON();
@@ -116,7 +116,7 @@
 
             if (!json.validSelection) {
               var invalidInput = document.createElement('input');
-              invalidInput.setAttribute('id', 'invalidStream-' + id);
+              invalidInput.setAttribute('id', 'invalidStream');
               invalidInput.setAttribute('type', 'hidden');
               invalidInput.value = json.selectedStream;
 
@@ -124,7 +124,7 @@
 
               showErrorMessage(streamSelect, "Stream [ " + json.selectedStream + " ] is not found");
             } else {
-              loadDefectFilters(id);
+              loadDefectFilters();
             }
           } else {
             showErrorMessage(streamSelect, "Error loading streams, server returned " + t.status);
@@ -133,15 +133,15 @@
       });
     }
 
-    function validateProjectSelection(id) {
-      var projectSelect = document.getElementById("project-" + id);
+    function validateProjectSelection() {
+      var projectSelect = document.getElementById("project");
       var projectValue = projectSelect.value;
 
       var parentCell = projectSelect.parentNode;
       var parentRow = parentCell.parentNode;
 
       var validationCell = parentRow.next('.validation-error-area').childElements()[1];
-      var invalidProject = parentCell.select('[id=invalidProject-' + id + ']')[0];
+      var invalidProject = parentCell.select('[id=invalidProject]')[0];
 
       if (invalidProject &amp;&amp; invalidProject.value != projectValue) {
         validationCell.innerHTML = '';
@@ -150,15 +150,15 @@
       }
     }
 
-    function validateStreamSelection(id) {
-      var streamSelect = document.getElementById("stream-" + id);
+    function validateStreamSelection() {
+      var streamSelect = document.getElementById("stream");
       var streamValue = streamSelect.value;
 
       var parentCell = streamSelect.parentNode;
       var parentRow = parentCell.parentNode;
 
       var validationCell = parentRow.next('.validation-error-area').childElements()[1];
-      var invalidStream = parentCell.select('[id=invalidStream-' + id + ']')[0];
+      var invalidStream = parentCell.select('[id=invalidStream]')[0];
 
       if (invalidStream &amp;&amp; invalidStream.value != streamValue) {
         validationCell.innerHTML = '';
@@ -180,8 +180,8 @@
         }
     }
 
-    function showLoadingProjects(id) {
-      var parentCell = document.getElementById('cimInstance-' + id).parentNode;
+    function showLoadingProjects() {
+      var parentCell = document.getElementById('cimInstance').parentNode;
       if (parentCell) {
         var loadingDiv = document.createElement('div');
         loadingDiv.setAttribute('id', 'projectsloading');
@@ -198,8 +198,8 @@
       }
     }
 
-    function hideLoadingProjects(id) {
-      var parentCell = document.getElementById('cimInstance-' + id).parentNode;
+    function hideLoadingProjects() {
+      var parentCell = document.getElementById('cimInstance').parentNode;
       var loadingDiv = parentCell.select("#projectsloading").first();
       if (parentCell) {
         if (loadingDiv) {
@@ -209,26 +209,26 @@
     }
   </script>
 	<script type="text/javascript">
-		function checkFilters(state, id) {
+		function checkFilters(state) {
 			YAHOO.util.Dom.getElementsBy(
 					function (el) {
 						return (el.name == 'checkers');
 					},
 					'input',
-					'checkers-'+id,
+					'checkers',
 					function (el) {
 						el.checked = (state ? 'true' : null);
 					}
 			);
 		}
 
-		function checkFiltersComponents(state, id) {
+		function checkFiltersComponents(state) {
 			YAHOO.util.Dom.getElementsBy(
 					function (el) {
 						return (el.name == 'components');
 					},
 					'input',
-					'filters-'+id,
+					'filters',
 					function (el) {
 						el.checked = (state ? 'true' : null);
 					}
@@ -279,22 +279,23 @@
 					    <div id="checkConfigOutput" />
 					</div>
 				</f:entry>
-				<f:entry field="cimStreams"
-						 title="Streams"
-						 description="Streams to perform analysis for and commit to">
-					<f:repeatable field="cimStreams"
-								  add="Add Stream" minimum="1">
-						<j:set var="id" value="${descriptor.getRandomID(instance)}" />
-						<table width="100%">
-							<input type="hidden" name="id" value="${id}" />
-							<br/>
-
+				<f:entry field="cimStream">
+          <j:choose>
+            <j:when test="${instance == null}">
+              <j:set var="descriptor" value="${descriptor.getCIMStreamDescriptor()}" />
+            </j:when>
+            <j:otherwise>
+              <j:set var="instance" value="${instance.cimStream}" />
+              <j:set var="descriptor" value="${instance.descriptor}" />
+            </j:otherwise>
+          </j:choose>
+						<table width="100%" name="cimStream">
 							<f:entry title="Coverity Connect instance" field="instance">
-								<f:select id="cimInstance-${id}" onchange="loadProjects(${id})"/>
+								<f:select id="cimInstance" onchange="loadProjects()"/>
 							</f:entry>
 
 							<f:entry title="Project" field="project">
-                <select id="project-${id}" name="project" class="setting-input" onchange="validateProjectSelection(${id});loadStreams(${id})">
+                <select id="project" name="project" class="setting-input" onchange="validateProjectSelection();loadStreams()">
                   <j:forEach var="proj" items="${descriptor.loadProjects(instance.instance, instance.project)}">
                     <j:choose>
                       <j:when test="${proj == instance.project}">
@@ -309,7 +310,7 @@
 							</f:entry>
 
 							<f:entry title="Stream" field="stream">
-								<select id="stream-${id}" name="stream" class="setting-input" onchange="validateStreamSelection(${id});loadDefectFilters(${id})">
+								<select id="stream" name="stream" class="setting-input" onchange="validateStreamSelection();loadDefectFilters()">
                   <j:forEach var="str" items="${descriptor.loadStreams(instance.instance, instance.project, instance.stream)}">
                     <j:choose>
                       <j:when test="${str == instance.stream}">
@@ -323,33 +324,23 @@
                 </select>
 							</f:entry>
 
-							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"
-											 checked="${instance.invocationAssistanceOverride != null}" name="invocationAssistanceOverride">
-								<j:set var="instance" value="${instance.invocationAssistanceOverride}"/>
-								<f:entry title="Additional cov-analyze arguments:" field="analyzeArguments">
-									<f:textbox/>
-								</f:entry>
-								<f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
-									<f:textbox/>
-								</f:entry>
-							</f:optionalBlock>
 							<f:entry title="" field="defectFilters">
 								<tr>
 									<td class="setting-leftspace">
 										<st:nbsp/>
 									</td>
 									<td class="setting-name">
-										<a href="#filters-${id}" id="showFilters-${id}"
-										   onclick="document.getElementById('filters-${id}').style.display='block';document.getElementById('hideFilters-${id}').style.display='block';this.style.display='none';">
+										<a href="#filters" id="showFilters"
+										   onclick="document.getElementById('filters').style.display='block';document.getElementById('hideFilters').style.display='block';this.style.display='none';">
 											Defect Filters >>>
 										</a>
-										<a href="#filters-${id}" id="hideFilters-${id}"
+										<a href="#filters" id="hideFilters"
 										   style="display: none;"
-										   onclick="document.getElementById('filters-${id}').style.display='none';document.getElementById('showFilters-${id}').style.display='block';this.style.display='none';">
+										   onclick="document.getElementById('filters').style.display='none';document.getElementById('showFilters').style.display='block';this.style.display='none';">
 											Defect Filters &lt;&lt;&lt;</a>
 									</td>
 									<td class="setting-main">
-										<table width="100%" id="defectFilters-${id}" name="defectFilters">
+										<table width="100%" id="defectFilters" name="defectFilters">
 											<st:include from="${descriptor}" page="defectFilters.jelly" />
 										</table>
 									</td>
@@ -363,11 +354,6 @@
 								</tr>
 							</f:entry>
 						</table>
-						<div align="right">
-							<input type="button" value="Remove Stream for Analysis" class="repeatable-delete"
-								   style="margin-left: 1em;"/>
-						</div>
-					</f:repeatable>
 				</f:entry>
 
                 <f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
@@ -426,10 +412,7 @@
 
                             <f:entry title="(Only for Java) WAR files:" field="javaWarFiles">
                                 <f:repeatable field="javaWarFiles" add="Add War File">
-                                    <j:set var="id" value="${descriptor.getRandomID(instance)}" />
                                     <table width="100%">
-                                        <input type="hidden" name="id" value="${id}" />
-                                        <br/>
                                         <f:entry title="War File" field="warFile">
                                             <f:textbox/>
                                         </f:entry>

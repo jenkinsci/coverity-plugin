@@ -52,9 +52,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
-        List<CIMStream> cimStreamList = new ArrayList<>();
-        cimStreamList.add(cimStream);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
@@ -67,7 +65,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().
-                        withCimStreams(cimStreamList).
+                        withCimStream(cimStream).
                         withInvocationAssistance(invocationAssistance).
                         withTaOptionBlock(taOptionBlock).build();
 
@@ -83,9 +81,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest_WithSslConfiguration_ForIndio() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
-        List<CIMStream> cimStreamList = new ArrayList<>();
-        cimStreamList.add(cimStream);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
@@ -98,7 +94,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().
-                        withCimStreams(cimStreamList).
+                        withCimStream(cimStream).
                         withInvocationAssistance(invocationAssistance).
                         withTaOptionBlock(taOptionBlock).build();
 
@@ -114,9 +110,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest_WithSslConfiguration_ForJasperOrHigher() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null, "TestId", null);
-        List<CIMStream> cimStreamList = new ArrayList<>();
-        cimStreamList.add(cimStream);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
@@ -135,7 +129,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
         when(publisher.getTaOptionBlock()).thenReturn(taOptionBlock);
         when(publisher.getDescriptor()).thenReturn(descriptor);
-        when(publisher.getCimStreams()).thenReturn(cimStreamList);
+        when(publisher.getCimStream()).thenReturn(cimStream);
         when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
         when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
 
