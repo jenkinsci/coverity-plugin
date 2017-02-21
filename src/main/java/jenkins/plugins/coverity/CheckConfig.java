@@ -105,6 +105,11 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
 
         status.add(checkStream(publisher, publisher.getCimStream()));
 
+        TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
+        if (taOptionBlock != null) {
+            status.add(checkTaOptionBlock(taOptionBlock));
+        }
+
         if(launcher != null) {
             NodeStatus ns = checkNode(publisher, build, launcher, listener);
             status.add(ns);
@@ -263,6 +268,17 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             e.printStackTrace();
             return new NodeStatus(false, "Interrupted while checking node.", node, null);
         }
+    }
+
+    /*
+    This method performs the validation on TaOptionBlock
+     */
+    public static Status checkTaOptionBlock(TaOptionBlock taOptionBlock) {
+        String taCheck = taOptionBlock.checkTaConfig();
+        if(!taCheck.equals("Pass")){
+            return new Status(false, taCheck);
+        }
+        return new Status(true, "[Test Advisor] TaOptionBlock configuration is valid!");
     }
 
     /*

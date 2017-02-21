@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity;
 
 import hudson.Util;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.*;
@@ -208,36 +209,37 @@ public class TaOptionBlock {
 
     /*
     Check Test Advisor Config
-        - Ran before the build, to check that all of the fields are filled out correctly. 
+        - Ran before the build, to check that all of the fields are filled out correctly.
+        - Ran when "Check Configuration" button is clicked on the configuration page.
         - There are some special cases that are also checked and also making sure that all required fields 
         are filled out. 
      */
     public String checkTaConfig(){
         boolean delim = true;
-        String errorText = "Errors with your Test Analysis configuration. Please look into the specified issues: \n";
+        String errorText = StringUtils.EMPTY;
         // Making sure they pick a test language
         if(!this.javaOptionBlock && !this.cOptionBlock && !this.csOptionBlock){
-            errorText += "[Error] No Coverage language was chosen, please pick at least one \n";
+            errorText += "[Test Advisor] No Coverage language was chosen, please pick at least one \n";
             delim = false;
         }
 
         // Making sure that a policy file is specified
         if(this.policyFile == null){
-            errorText += "[Error] Policy file is not specified. \n";
+            errorText += "[Test Advisor] Policy file is not specified. \n";
             delim = false;
         }
 
         // Checking required field for bullseye
         if(this.cOptionBlock){
             if(this.cxxCoverageTool.equals("bullseye") && this.bullsEyeDir == null){
-                errorText += "[Error] Bulls eye requires the installation directory. \n";
+                errorText += "[Test Advisor] Bulls eye requires the installation directory. \n";
                 delim = false;
             }
         }
-        // Checking to see if a working directory is specified for a custom test command so that seperate test
+        // Checking to see if a working directory is specified for a custom test command so that separate test
         // commands work correctly
         if(this.customTestCommand != null && this.customWorkDir == null){
-            errorText += "[Error] When running a custom test command, a working directory must be specified \n";
+            errorText += "[Test Advisor] When running a custom test command, a working directory must be specified \n";
             delim = false;
         }
 
