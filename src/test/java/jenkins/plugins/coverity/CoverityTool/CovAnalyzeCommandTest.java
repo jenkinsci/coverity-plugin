@@ -111,7 +111,7 @@ public class CovAnalyzeCommandTest extends CommandTestBase {
     }
 
     @Test
-    public void canExecuteTest() throws IOException, InterruptedException {
+    public void doesNotExecute_WithoutInvocationAssistance() throws IOException, InterruptedException {
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
         Command covAnalyzeCommand = new CovAnalyzeCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
         covAnalyzeCommand.runCommand();
