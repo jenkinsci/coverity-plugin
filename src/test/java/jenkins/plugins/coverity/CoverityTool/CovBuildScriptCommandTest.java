@@ -56,4 +56,23 @@ public class CovBuildScriptCommandTest extends CommandTestBase {
         covBuildScriptCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-build command line arguments for script sources: " + actualArguments.toString());
     }
+
+    @Test
+    public void doesNotExecute_NoInvocationAssistance() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+
+        Command covBuildScriptCommand = new CovBuildScriptCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covBuildScriptCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_NoCaptureForScriptingCodes() throws IOException, InterruptedException {
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
+
+        Command covBuildScriptCommand = new CovBuildScriptCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        covBuildScriptCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
 }

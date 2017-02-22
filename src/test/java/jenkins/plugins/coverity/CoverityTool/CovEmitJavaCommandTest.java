@@ -38,4 +38,23 @@ public class CovEmitJavaCommandTest extends CommandTestBase {
         covEmitJavaCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-emit-java command line arguments: " + actualArguments.toString());
     }
+
+    @Test
+    public void doesNotExecute_WithoutInvocationAssistance() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+
+        Command covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
+        covEmitJavaCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_WithoutJavaWarFiles() throws IOException, InterruptedException {
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
+
+        Command covEmitJavaCommand = new CovEmitJavaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, false);
+        covEmitJavaCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
 }

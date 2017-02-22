@@ -53,6 +53,7 @@ public abstract class CommandTestBase {
     protected String[] expectedArguments;
     protected List<String> actualArguments;
     protected TestableConsoleLogger consoleLogger;
+    private int noExecutedCommands;
 
     @Before
     public void setup() throws IOException, InterruptedException {
@@ -65,6 +66,7 @@ public abstract class CommandTestBase {
 
         setUpListener();
         setUpCoverityUtils();
+        noExecutedCommands = 0;
     }
 
     protected void setExpectedArguments(String[] args) {
@@ -92,6 +94,7 @@ public abstract class CommandTestBase {
             public Integer answer(InvocationOnMock mock) throws Throwable {
                 actualArguments = (ArrayList<String>)mock.getArguments()[0];
                 checkCommandLineArguments();
+                noExecutedCommands++;
                 return 0;
             }
         };
@@ -141,5 +144,9 @@ public abstract class CommandTestBase {
                         Matchers.any(File.class),
                         Matchers.any(FilenameFilter.class),
                         Matchers.anyBoolean())).thenReturn(expectedFiles);
+    }
+
+    protected boolean verifyNumberOfExecutedCommands(int expectedNum) {
+        return expectedNum == noExecutedCommands;
     }
 }

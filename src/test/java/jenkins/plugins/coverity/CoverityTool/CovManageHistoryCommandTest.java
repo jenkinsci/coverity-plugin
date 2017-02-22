@@ -143,4 +143,37 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
         consoleLogger.verifyLastMessage("[Coverity] cov-manage-history command line arguments: " + actualArguments.toString());
     }
+
+    @Test
+    public void doesNotExecute_WithoutTaOptionBlock() throws IOException, InterruptedException {
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        covManageHistoryCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_WithoutCovHistoryEnabled() throws IOException, InterruptedException {
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
+
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        covManageHistoryCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_WithoutSnapshots() throws IOException, InterruptedException {
+        configurationService.setupSnapshotList(null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
+
+        Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        covManageHistoryCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
 }

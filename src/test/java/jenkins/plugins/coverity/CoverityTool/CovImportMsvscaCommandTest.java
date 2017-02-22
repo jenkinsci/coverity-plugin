@@ -16,6 +16,7 @@ import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 import org.junit.Test;
 
 import java.io.File;
@@ -45,5 +46,40 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
         });
         covImportMsvscaCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-import-msvsca command line arguments: " + actualArguments.toString());
+    }
+
+    @Test
+    public void doesNotExecute_WithoutInvocationAssistance() throws IOException, InterruptedException {
+        FilePath workspace = new FilePath(new File("."));
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+
+        Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, workspace);
+        covImportMsvscaCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_WithoutCSharpMsvscaEnabled() throws IOException, InterruptedException {
+        FilePath workspace = new FilePath(new File("."));
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
+
+        Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, workspace);
+        covImportMsvscaCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_WithoutAnalysisConfigFiles() throws IOException, InterruptedException {
+        FilePath workspace = new FilePath(new File("."));
+        setCoverityUtils_listFilesAsArray(null);
+
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCSharpMsvsca(true).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
+
+        Command covImportMsvscaCommand = new CovImportMsvscaCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, workspace);
+        covImportMsvscaCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+        consoleLogger.verifyLastMessage("[Coverity] MSVSCA No results found, skipping");
     }
 }

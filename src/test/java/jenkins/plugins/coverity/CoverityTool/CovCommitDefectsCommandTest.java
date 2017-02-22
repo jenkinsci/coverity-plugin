@@ -244,4 +244,15 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
             assertEquals("ParseException occurred during tokenizing the cov-commit-defect commit arguments.", e.getMessage());
         }
     }
+
+    @Test
+    public void doesNotExecute_WithoutInvocationAssistance() throws IOException, InterruptedException {
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        covCommitDefectsCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
 }

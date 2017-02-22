@@ -49,4 +49,23 @@ public class PostCovBuildCommandTest extends CommandTestBase {
             assertEquals("ParseException occurred during tokenizing the post cov-build command.", e.getMessage());
         }
     }
+
+    @Test
+    public void doesNotExecute_WithoutInvocationAssistance() throws IOException, InterruptedException {
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+
+        Command postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
+        postCovBuildCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_WithoutPostAnalyzeCommandEnabled() throws IOException, InterruptedException {
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
+
+        Command postCovBuildCommand = new PostCovBuildCommand(build, launcher, listener, publisher, envVars);
+        postCovBuildCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+    }
 }
