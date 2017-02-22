@@ -124,10 +124,12 @@ public class TestWebServiceFactory extends WebServiceFactory {
     public static class TestConfigurationService implements ConfigurationService {
         private URL url;
         private List<SnapshotIdDataObj> snapshotList;
+        private List<ProjectDataObj> projects;
 
         public TestConfigurationService(URL url) {
 
             this.url = url;
+            this.projects = new ArrayList<>();
         }
 
         public URL getUrl() {
@@ -136,6 +138,25 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         public void setupSnapshotList(List<SnapshotIdDataObj> list) {
             this.snapshotList = list;
+        }
+
+        public void setupProjects(String projectNamePrefix, int projectCount, String streamNamePrefix, int streamCount) {
+            for (int i = 0; i < projectCount; i++) {
+                final ProjectDataObj projectDataObj = new ProjectDataObj();
+                ProjectIdDataObj projectIdDataObj = new ProjectIdDataObj();
+                projectIdDataObj.setName(projectNamePrefix + i);
+                projectDataObj.setId(projectIdDataObj);
+
+                for (int j = 0; j < streamCount; j++) {
+                    StreamDataObj streamDataObj = new StreamDataObj();
+                    StreamIdDataObj streamIdDataObj = new StreamIdDataObj();
+                    streamIdDataObj.setName(streamNamePrefix + j);
+                    streamDataObj.setId(streamIdDataObj);
+                    projectDataObj.getStreams().add(streamDataObj);
+                }
+
+                projects.add(projectDataObj);
+            }
         }
 
         @Override
@@ -330,7 +351,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public List<ProjectDataObj> getProjects(ProjectFilterSpecDataObj filterSpec) throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            return projects;
         }
 
         @Override

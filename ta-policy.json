@@ -62,11 +62,22 @@
 				},
 				{
 					not : {
-						contains_astnode : {
-							dominated_by_astnode : {
-								unconditionally_terminates : true
+						or: [
+							{
+								contains_astnode : {
+									dominated_by_astnode : {
+										unconditionally_terminates : true
+									}
+								}
+							},
+							{
+								contains_astnode: {
+									contained_by_astnode: {
+										statement_kind: "catch"
+									}
+								}
 							}
-						}
+						]
 					}
 				}
 			]

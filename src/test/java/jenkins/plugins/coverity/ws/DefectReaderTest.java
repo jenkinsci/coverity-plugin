@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity.ws;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -40,6 +41,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
+import hudson.model.Result;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CIMInstance;
 import jenkins.plugins.coverity.CIMStream;
@@ -88,8 +90,23 @@ public class DefectReaderTest {
         when(jenkins.getDescriptorOrDie(CoverityPublisher.class)).thenReturn(descriptor);
     }
 
+    private DefectFilters getMatchingDefectFilters(){
+        try {
+            return new DefectFilters(
+                Arrays.asList("Undecided"),
+                new ArrayList<>(Arrays.asList("High", "Medium", "Low")),
+                Arrays.asList("Unclassified"),
+                Arrays.asList("Unspecified", "Major", "Moderate", "Minor"),
+                Arrays.asList("Default.Other"),
+                Arrays.asList("TEST_CHECKER"),
+                "2017-01-01");
+        } catch(Descriptor.FormException e) {
+            return null;
+        }
+    }
+
     @Test
-    public void getLatestDefectsForBuild_withNoDefectFilters_addDefectsToBuildAction() throws Descriptor.FormException, ParseException, DatatypeConfigurationException, IOException, CovRemoteServiceException_Exception {
+    public void getLatestDefectsForBuild_withNoDefectFilters_addDefectsToBuildAction() throws ParseException, DatatypeConfigurationException, IOException, CovRemoteServiceException_Exception {
 
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
@@ -119,19 +136,11 @@ public class DefectReaderTest {
     }
 
     @Test
-    public void getLatestDefectsForBuild_withMatchingDefectFilters_addDefectsToBuildAction() throws Descriptor.FormException, ParseException, DatatypeConfigurationException, IOException, CovRemoteServiceException_Exception {
+    public void getLatestDefectsForBuild_withMatchingDefectFilters_addDefectsToBuildAction() throws ParseException, DatatypeConfigurationException, IOException, CovRemoteServiceException_Exception {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
-        DefectFilters defectFilters = new DefectFilters(
-            Arrays.asList("Undecided"),
-            new ArrayList<>(Arrays.asList("High", "Medium", "Low")),
-            Arrays.asList("Unclassified"),
-            Arrays.asList("Unspecified", "Major", "Moderate", "Minor"),
-            Arrays.asList("Default.Other"),
-            Arrays.asList("TEST_CHECKER"),
-            "2017-01-01");
-        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters);
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", getMatchingDefectFilters());
 
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
@@ -160,15 +169,7 @@ public class DefectReaderTest {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
-        DefectFilters defectFilters = new DefectFilters(
-            Arrays.asList("Undecided"),
-            new ArrayList<>(Arrays.asList("High", "Medium", "Low")),
-            Arrays.asList("Unclassified"),
-            Arrays.asList("Unspecified", "Major", "Moderate", "Minor"),
-            Arrays.asList("Default.Other"),
-            Arrays.asList("TEST_CHECKER"),
-            "2017-01-01");
-        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", defectFilters);
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", getMatchingDefectFilters());
 
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
@@ -193,5 +194,39 @@ public class DefectReaderTest {
             "[Coverity] Fetching defects for stream \"test-stream\" (fetched 3,000 of 3,750)",
             "[Coverity] Found 3,750 defects matching all filters",
             "Coverity details: rootUrl/buildUrl/coverity_defects");
+    }
+
+    @Test
+    public void getLatestDefectsForBuild_withMatchingDefectFilters_setsBuildResultAsFailed() throws ParseException, DatatypeConfigurationException, IOException, CovRemoteServiceException_Exception {
+        // set initial state as success (result can only get worse)
+        when(build.getResult()).thenReturn(Result.SUCCESS);
+
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", getMatchingDefectFilters());
+
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).withFailBuild(true).build();
+
+        defectService.setupMergedDefects(3);
+
+        DefectReader reader = new DefectReader(build, listener, publisher);
+
+        Boolean result = reader.getLatestDefectsForBuild();
+
+        assertFalse(result);
+
+        // verify all expected log messages were written
+        consoleLogger.verifyMessages(
+            "[Coverity] Fetching defects for stream \"test-stream\"",
+            "[Coverity] Found 3 defects matching all filters");
+    }
+
+    @Test
+    public void getLatestDefectsForBuild_skipsFetchingDefects() throws Descriptor.FormException, ParseException, DatatypeConfigurationException, IOException, CovRemoteServiceException_Exception {
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withSkipFetchingDefects(true).build();
+
+        DefectReader reader = new DefectReader(build, listener, publisher);
+
+        Boolean result = reader.getLatestDefectsForBuild();
+
+        assertFalse(result);
     }
 }
