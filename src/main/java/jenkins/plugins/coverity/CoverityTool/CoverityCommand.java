@@ -55,7 +55,14 @@ public abstract class CoverityCommand extends Command {
             commandLine.add(idir);
         }else{
             CoverityTempDir tempDir = build.getAction(CoverityTempDir.class);
-            commandLine.add(tempDir.getTempDir().getRemote());
+            if (tempDir != null) {
+                commandLine.add(tempDir.getTempDir().getRemote());
+            } else {
+                // This is fall-back logic since when the command is invoked through launcher,
+                // the launcher checks the intermeidate directory with the $COV_IDIR environment variable
+                commandLine.add("$COV_IDIR");
+            }
+
         }
     }
 

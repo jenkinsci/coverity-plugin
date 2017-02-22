@@ -40,6 +40,7 @@ import jenkins.plugins.coverity.CoverityBuildAction;
 import jenkins.plugins.coverity.CoverityDefect;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.DefectFilters;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Class responsible for reading defects from Coverity after the commit process has been completed. The defects
@@ -65,6 +66,11 @@ public class DefectReader {
 
         CIMStream cimStream = publisher.getCimStream();
         CIMInstance cimInstance = publisher.getDescriptor().getInstance(cimStream.getInstance());
+
+        if (cimStream == null || StringUtils.isEmpty(cimStream.getStream())) {
+            listener.getLogger().println("[Coverity] Stream has not been configured. Skipping fetching defects.");
+            return false;
+        }
 
         listener.getLogger().println(MessageFormat.format("[Coverity] Fetching defects for stream \"{0}\"", cimStream.getStream()));
 
