@@ -152,6 +152,16 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 }
             }
         }
+
+        TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
+        if (taOptionBlock != null) {
+            status.add(checkTaOptionBlock(taOptionBlock));
+        }
+
+        ScmOptionBlock scmOptionBlock = publisher.getScmOptionBlock();
+        if (scmOptionBlock != null) {
+            status.add(checkScmOptionBlock(scmOptionBlock));
+        }
     }
 
     public static StreamStatus checkStream(CoverityPublisher publisher, CIMStream cs) {
@@ -263,6 +273,28 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             e.printStackTrace();
             return new NodeStatus(false, "Interrupted while checking node.", node, null);
         }
+    }
+
+    /*
+    Performs the validation on TaOptionBlock
+     */
+    public static Status checkTaOptionBlock(TaOptionBlock taOptionBlock) {
+        String taCheck = taOptionBlock.checkTaConfig();
+        if(!taCheck.equals("Pass")){
+            return new Status(false, taCheck);
+        }
+        return new Status(true, "[Test Advisor] Configuration is valid!");
+    }
+
+    /*
+    Performs the validation on ScmOptionBlock
+     */
+    public static Status checkScmOptionBlock(ScmOptionBlock scmOptionBlock) {
+        String scmCheck = scmOptionBlock.checkScmConfig();
+        if(!scmCheck.equals("Pass")){
+            return new Status(false, scmCheck);
+        }
+        return new Status(true, "[SCM] Configuration is valid!");
     }
 
     /*

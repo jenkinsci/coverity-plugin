@@ -26,7 +26,7 @@
 			<table>
 				<j:if test="${instance.isValid()}">
 					<tr style="font-weight: bolder">
-						<td colspan="2" class="valid">Stream configuration is valid.</td>
+						<td colspan="2" class="valid">Configuration is valid.</td>
 					</tr>
 					<tr style="color:#c0a030">
 						<td colspan="2">Node configuration will be checked before each build.</td>
@@ -34,7 +34,7 @@
 				</j:if>
 				<j:if test="${!instance.isValid()}">
 					<tr style="font-weight: bolder">
-						<td colspan="2" class="invalid">Stream configuration is invalid.</td>
+						<td colspan="2" class="invalid">Configuration is invalid.</td>
 					</tr>
 				</j:if>
 				<j:forEach items="${instance.getStatus()}" var="si">

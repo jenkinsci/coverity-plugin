@@ -58,8 +58,6 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
             return launcher;
         }
 
-        CoverityVersion version = CheckConfig.checkNode(publisher, build, launcher, launcher.getListener()).getVersion();
-
         TaOptionBlock ta = publisher.getTaOptionBlock();
         ScmOptionBlock scm = publisher.getScmOptionBlock();
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
@@ -89,7 +87,7 @@ public class CoverityLauncherDecorator extends LauncherDecorator {
         }
         
         if(scm != null){
-            String scmCheck = scm.checkScmConfig(version);
+            String scmCheck = scm.checkScmConfig();
             if(!scmCheck.equals("Pass")){
                 throw new RuntimeException(scmCheck);
             }
