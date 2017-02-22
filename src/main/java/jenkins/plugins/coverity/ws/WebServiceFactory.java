@@ -53,12 +53,15 @@ public class WebServiceFactory {
     }
 
     public static WebServiceFactory getInstance() {
+        // ignore for Coverity TA since unit tests will not run against a real Connect server
+        //.*cov-ignore
         synchronized (WebServiceFactory.class) {
             if (instance == null) {
                 instance = new WebServiceFactory();
             }
             return instance;
         }
+        //.*cov-end-ignore
     }
 
     /**
