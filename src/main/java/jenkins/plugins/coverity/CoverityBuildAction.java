@@ -55,7 +55,7 @@ public class CoverityBuildAction implements Action {
     }
 
     /**
-     * The data for the defects that were captured for this build. This will perform a call to the web service.
+     * The data for the defects that were captured for this build.
      */
     public List<CoverityDefect> getDefects() {
 

@@ -23,6 +23,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang.StringUtils;
 
 import com.coverity.ws.v9.AttributeDefinitionDataObj;
 import com.coverity.ws.v9.AttributeDefinitionIdDataObj;
@@ -146,6 +147,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
                 ProjectIdDataObj projectIdDataObj = new ProjectIdDataObj();
                 projectIdDataObj.setName(projectNamePrefix + i);
                 projectDataObj.setId(projectIdDataObj);
+                projectDataObj.setProjectKey((long)i);
 
                 for (int j = 0; j < streamCount; j++) {
                     StreamDataObj streamDataObj = new StreamDataObj();
@@ -351,6 +353,16 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public List<ProjectDataObj> getProjects(ProjectFilterSpecDataObj filterSpec) throws CovRemoteServiceException_Exception {
+            if (!StringUtils.isEmpty(filterSpec.getNamePattern()))
+            {
+                List<ProjectDataObj> matchingProjects = new ArrayList<>();
+                for (ProjectDataObj project : projects) {
+                    if (project.getId().getName().equals(filterSpec.getNamePattern()))
+                        matchingProjects.add(project);
+                }
+                return matchingProjects;
+            }
+
             return projects;
         }
 
