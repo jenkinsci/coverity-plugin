@@ -203,29 +203,6 @@ public class CIMInstance {
         return new ArrayList<>();
     }
 
-    public List<StreamDataObj> getStaticStreams(String projectId) throws IOException, CovRemoteServiceException_Exception {
-        /*
-            to get a list of all static streams for one project,
-            - get a list of streams for the project
-            - get a list of all static streams
-            - compute the intersection
-            there should be a better way, but I can't see it.
-
-            you can't filter on project, and StreamDataObj does not have project or type information
-         */
-
-        ProjectDataObj project = getProject(projectId);
-        List<StreamDataObj> result = new ArrayList<StreamDataObj>();
-        if (project != null){
-            for(StreamDataObj stream : project.getStreams()) {
-                if(!stream.getId().getName().matches(STREAM_NAME_IGNORE_PATTERN)) {
-                    result.add(stream);
-                }
-            }
-        }
-        return result;
-    }
-
     /**
      * Returns a StreamDataObj for a given streamId. This object must be not null in order to avoid null pointer exceptions.
      * If the stream is not found an exception explaining the issue is raised.
