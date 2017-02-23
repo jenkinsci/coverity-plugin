@@ -285,18 +285,6 @@ public class CoverityPublisher extends Recorder {
         }
     }
 
-    public StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception {
-        StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
-        filter.setNamePattern(streamId);
-
-        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
-        if(streams.isEmpty()) {
-            return null;
-        } else {
-            return streams.get(0);
-        }
-    }
-
     public void deleteIntermediateDirectory(BuildListener listener, CoverityTempDir temp) {
         if (temp != null) {
             try{
