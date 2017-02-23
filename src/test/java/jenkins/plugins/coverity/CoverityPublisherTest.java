@@ -12,7 +12,6 @@ package jenkins.plugins.coverity;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -143,9 +142,9 @@ public class CoverityPublisherTest {
             "            <components>\n" +
             "              <string>Default.Other</string>\n" +
             "            </components>\n" +
-            "            <checkers class=\"empty-list\"/>\n" +
+            "            <checkers/>\n" +
             "            <ignoredCheckers/>\n" +
-            "            <impacts class=\"empty-list\"/>\n" +
+            "            <impacts/>\n" +
             "          </defectFilters>\n" +
             "          <invocationAssistanceOverride>\n" +
             "            <buildArguments>--return-emit-failures</buildArguments>\n" +
@@ -227,9 +226,9 @@ public class CoverityPublisherTest {
         assertEquals(5, defectFilters.getActions().size());
         assertEquals(4, defectFilters.getSeverities().size());
         assertEquals(1, defectFilters.getComponents().size());
-        assertNull( defectFilters.getCheckersList());
+        assertEquals(0, defectFilters.getCheckersList().size());
         assertEquals(0, defectFilters.getIgnoredChecker().size());
-        assertNull(defectFilters.getImpacts());
+        assertEquals(0, defectFilters.getImpacts().size());
 
         // verify invocation assistance overrides
         final InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
