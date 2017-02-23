@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -91,15 +92,20 @@ public class CoverityPublisherDescriptorImplTests {
                 testableStream.write(b);
             }
         };
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
 
-        descriptor.doLoadProjectsForInstance(request, response);
+        try {
+            when(response.getOutputStream()).thenReturn(responseOutputStream);
 
-        Mockito.verify(response).setContentType("application/json; charset=utf-8");
-        String responseOutput = new String(testableStream.toByteArray());
-        assertEquals(
-            String.format("{\"projects\":[\"%1$s\",\"%1$s0\",\"%1$s1\"],\"selectedProject\":\"%1$s\",\"validSelection\":false}", projectName),
-            responseOutput);
+            descriptor.doLoadProjectsForInstance(request, response);
+
+            Mockito.verify(response).setContentType("application/json; charset=utf-8");
+            String responseOutput = new String(testableStream.toByteArray(), StandardCharsets.UTF_8);
+            assertEquals(
+                String.format("{\"projects\":[\"%1$s\",\"%1$s0\",\"%1$s1\"],\"selectedProject\":\"%1$s\",\"validSelection\":false}", projectName),
+                responseOutput);
+        } finally {
+            responseOutputStream.close();
+        }
     }
 
     @Test
@@ -126,14 +132,19 @@ public class CoverityPublisherDescriptorImplTests {
                 testableStream.write(b);
             }
         };
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
 
-        descriptor.doLoadStreamsForProject(request, response);
+        try {
+            when(response.getOutputStream()).thenReturn(responseOutputStream);
 
-        Mockito.verify(response).setContentType("application/json; charset=utf-8");
-        String responseOutput = new String(testableStream.toByteArray());
-        assertEquals(
-            String.format("{\"streams\":[\"%1$s\",\"%1$s0\",\"%1$s1\",\"%1$s2\"],\"selectedStream\":\"%1$s\",\"validSelection\":false}", streamName),
-            responseOutput);
+            descriptor.doLoadStreamsForProject(request, response);
+
+            Mockito.verify(response).setContentType("application/json; charset=utf-8");
+            String responseOutput = new String(testableStream.toByteArray(), StandardCharsets.UTF_8);
+            assertEquals(
+                String.format("{\"streams\":[\"%1$s\",\"%1$s0\",\"%1$s1\",\"%1$s2\"],\"selectedStream\":\"%1$s\",\"validSelection\":false}", streamName),
+                responseOutput);
+        } finally {
+            responseOutputStream.close();
+        }
     }
 }
