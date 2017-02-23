@@ -13,6 +13,22 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
     <j:set var="javaOption" value="${instance.javaOptionBlock}"/>
 	<script type="text/javascript">
+    document.observe("dom:loaded", function() {
+      // check for initial stream validation
+      var invalidStream = document.getElementById('invalidStream');
+      if (invalidStream) {
+        var streamSelect = document.getElementById("stream");
+        showErrorMessage(streamSelect, "Stream [ " + invalidStream.value + " ] is not found");
+      }
+
+      // check for initial project validation
+      var invalidProject = document.getElementById('invalidProject');
+      if (invalidProject) {
+        var projectSelect = document.getElementById("project");
+        showErrorMessage(projectSelect, "Project [ " + invalidProject.value + " ] is not found");
+      }
+    });
+
     function loadDefectFilters() {
       var form = document.getElementById('cimInstance').form;
       buildFormTree(form);
@@ -334,6 +350,10 @@
                     </j:choose>
                   </j:forEach>
                 </select>
+                <j:set var="initialProjectIsValid" value="${descriptor.checkProjectIsValid(instance.instance, instance.project)}"/>
+                <j:if test="${!initialProjectIsValid}">
+                  <input type="hidden" id="invalidProject" value="${instance.project}" />
+                </j:if>
 							</f:entry>
 
 							<f:entry title="Stream" field="stream">
@@ -349,6 +369,10 @@
                     </j:choose>
                   </j:forEach>
                 </select>
+                <j:set var="initialStreamIsValid" value="${descriptor.checkStreamIsValid(instance.instance, instance.project, instance.stream)}"/>
+                <j:if test="${!initialStreamIsValid}">
+                  <input type="hidden" id="invalidStream" value="${instance.stream}" />
+                </j:if>
 							</f:entry>
 
 							<f:entry title="" field="defectFilters">
