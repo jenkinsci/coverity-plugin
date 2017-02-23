@@ -78,6 +78,9 @@ public class CoverityLauncher extends Launcher {
         // Any Coverity Post-build action such as cov-analyze, cov-import-scm, etc will not be wrapped
         // with the cov-build.
         if (CoverityLauncherDecorator.CoverityPostBuildAction.get()) {
+            String[] starterEnvVars = starter.envs();
+            starterEnvVars = CoverityUtils.addEnvVars(starterEnvVars, envVars);
+            starter = starter.envs(starterEnvVars);
             return decorated.launch(starter);
         }
 

@@ -72,7 +72,9 @@ public class CoverityToolHandler {
          * cov-build and cov-analyze commands.
          */
         if (!envVars.containsKey("COV_IDIR")) {
-            envVars.put("COV_IDIR", temp.getTempDir().getRemote());
+            if (temp != null) {
+                envVars.put("COV_IDIR", temp.getTempDir().getRemote());
+            }
         }
 
         if (!envVars.containsKey("COV_ANALYSIS_ROOT")) {
