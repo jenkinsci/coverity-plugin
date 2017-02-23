@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -46,7 +46,6 @@ import net.sf.json.JSONObject;
 @PrepareForTest({Jenkins.class, WebServiceFactory.class})
 public class CoverityPublisherDescriptorImplTests {
     private static final JSONObject PUBLISHER_FORM_OBJECT_JSON = JSONObject.fromObject("{\"name\":\"test-job\",\"publisher\":{\"kind\":\"jenkins.plugins.coverity.CoverityPublisher\",\"unstable\":false,\"hideChart\":false,\"invocationAssistance\":{\"buildArguments\":\"\",\"intermediateDir\":\"\",\"csharpMsvsca\":false,\"analyzeArguments\":\"\",\"saOverride\":\"\",\"commitArguments\":\"\",\"javaWarFile\":\"\"},\"keepIntDir\":false,\"cimStream\":{\"instance\":\"test-cim-instance\",\"id\":null,\"defectFilters\":{\"cutOffDate\":\"\"},\"project\":\"test-cim-project\",\"stream\":\"test-cim-stream\"},\"skipFetchingDefects\":false,\"failBuild\":false,\"stapler-class\":\"jenkins.plugins.coverity.CoverityPublisher\"},\"properties\":{\"hudson-model-ParametersDefinitionProperty\":{},\"stapler-class-bag\":\"true\"}}");
-    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
     @Mock
     private Jenkins jenkins;
@@ -100,7 +99,7 @@ public class CoverityPublisherDescriptorImplTests {
             descriptor.doLoadProjectsForInstance(request, response);
 
             Mockito.verify(response).setContentType("application/json; charset=utf-8");
-            String responseOutput = new String(testableStream.toByteArray(), UTF8_CHARSET);
+            String responseOutput = new String(testableStream.toByteArray(), StandardCharsets.UTF_8);
             assertEquals(
                 String.format("{\"projects\":[\"%1$s\",\"%1$s0\",\"%1$s1\"],\"selectedProject\":\"%1$s\",\"validSelection\":false}", projectName),
                 responseOutput);
@@ -140,7 +139,7 @@ public class CoverityPublisherDescriptorImplTests {
             descriptor.doLoadStreamsForProject(request, response);
 
             Mockito.verify(response).setContentType("application/json; charset=utf-8");
-            String responseOutput = new String(testableStream.toByteArray(), UTF8_CHARSET);
+            String responseOutput = new String(testableStream.toByteArray(), StandardCharsets.UTF_8);
             assertEquals(
                 String.format("{\"streams\":[\"%1$s\",\"%1$s0\",\"%1$s1\",\"%1$s2\"],\"selectedStream\":\"%1$s\",\"validSelection\":false}", streamName),
                 responseOutput);
