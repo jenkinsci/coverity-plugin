@@ -187,6 +187,24 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
+        public boolean checkProjectIsValid(@QueryParameter String instance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
+            // allow initial empty project selection
+            if (StringUtils.isEmpty(project))
+                return true;
+
+            CIMInstance cimInstance = getInstance(instance);
+            if (cimInstance != null){
+                for (String projectName : CimCache.getInstance().getProjects(cimInstance)){
+                    if (projectName.equalsIgnoreCase(project)){
+                        return true;
+                    }
+                }
+            }
+
+            // project not found for cim instance is invalid
+            return false;
+        }
+
         public List<String> loadStreams(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) {
 
             Set<String> streams = new HashSet<>();
@@ -206,6 +224,24 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             final ArrayList<String> result = new ArrayList<>(streams);
             Collections.sort(result, String.CASE_INSENSITIVE_ORDER);
             return result;
+        }
+
+        public boolean checkStreamIsValid(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
+            // allow initial empty stream selection
+            if (StringUtils.isEmpty(stream))
+                return true;
+
+            CIMInstance cimInstance = getInstance(instance);
+            if (cimInstance != null && !StringUtils.isEmpty(project)){
+                for (String streamFromCIM : CimCache.getInstance().getStreams(cimInstance, project)){
+                    if (streamFromCIM.equalsIgnoreCase(stream)){
+                        return true;
+                    }
+                }
+            }
+
+            // stream not found for the project is invalid
+            return false;
         }
 
         public ListBoxModel doFillClassificationDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
