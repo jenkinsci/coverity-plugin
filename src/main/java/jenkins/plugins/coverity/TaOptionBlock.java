@@ -229,6 +229,13 @@ public class TaOptionBlock {
             delim = false;
         }
 
+        if ((this.javaOptionBlock && this.javaCoverageTool.equals("none"))
+                || (this.cOptionBlock && this.cxxCoverageTool.equals("none"))
+                || (this.csOptionBlock && this.csCoverageTool.equals("none"))) {
+            errorText += "[Test Advisor] No Coverage tool was chosen \n";
+            delim = false;
+        }
+
         // Checking required field for bullseye
         if(this.cOptionBlock){
             if(this.cxxCoverageTool.equals("bullseye") && this.bullsEyeDir == null){
