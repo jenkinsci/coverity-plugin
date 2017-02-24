@@ -37,7 +37,6 @@ public class TaOptionBlock {
     private final boolean junit4Framework;
     private final String policyFile;
     private final String bullsEyeDir;
-    private final String customWorkDir;
     private final boolean covHistoryCheckbox;
     private final boolean javaOptionBlock;
     private List<TaStripPath> taStripPaths;
@@ -62,7 +61,6 @@ public class TaOptionBlock {
                          String policyFile,
                          List<TaStripPath> taStripPaths,
                          String bullsEyeDir,
-                         String customWorkDir,
                          boolean covHistoryCheckbox) {
         this.customTestCommand = Util.fixEmpty(customTestCommand);
         this.cOptionBlock = cOptionBlock;
@@ -78,7 +76,6 @@ public class TaOptionBlock {
         this.junitFramework = junitFramework;
         this.policyFile = Util.fixEmpty(policyFile);    // Required
         this.bullsEyeDir = Util.fixEmpty(bullsEyeDir); // Required if bulls eye is selected
-        this.customWorkDir = Util.fixEmpty(customWorkDir); // Required if a custom command is issued
         this.covHistoryCheckbox = covHistoryCheckbox;
         this.taStripPaths = taStripPaths;   // Required
     }
@@ -140,8 +137,6 @@ public class TaOptionBlock {
     public String getPolicyFile(){return policyFile;}
 
     public String getBullsEyeDir(){return bullsEyeDir;}
-
-    public String getCustomWorkDir(){return customWorkDir;}
 
     public boolean getCovHistoryCheckbox(){return covHistoryCheckbox;}
 
@@ -242,12 +237,6 @@ public class TaOptionBlock {
                 errorText += "[Test Advisor] Bulls eye requires the installation directory. \n";
                 delim = false;
             }
-        }
-        // Checking to see if a working directory is specified for a custom test command so that separate test
-        // commands work correctly
-        if(this.customTestCommand != null && this.customWorkDir == null){
-            errorText += "[Test Advisor] When running a custom test command, a working directory must be specified \n";
-            delim = false;
         }
 
         if(delim){
