@@ -31,7 +31,6 @@ public class TaOptionBlockBuilder {
     private String policyFile;
     private List<TaStripPath> taStripPaths;
     private String bullsEyeDir;
-    private String customWorkDir;
     private boolean covHistoryCheckbox;
     private boolean javaOptionBlock;
 
@@ -105,11 +104,6 @@ public class TaOptionBlockBuilder {
         return this;
     }
 
-    public TaOptionBlockBuilder withCustomWorkDir(String customWorkDir) {
-        this.customWorkDir = customWorkDir;
-        return this;
-    }
-
     public TaOptionBlockBuilder withCovHistoryCheckBox(boolean covHistoryCheckBox) {
         this.covHistoryCheckbox = covHistoryCheckBox;
         return this;
@@ -137,7 +131,6 @@ public class TaOptionBlockBuilder {
                 policyFile,
                 taStripPaths,
                 bullsEyeDir,
-                customWorkDir,
                 covHistoryCheckbox);
     }
 }

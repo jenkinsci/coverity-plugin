@@ -492,9 +492,6 @@
                                 <f:entry title="Custom command to run tests " field="customTestCommand">
                                     <f:textbox/>
                                 </f:entry>
-                                <f:entry title="Custom command working directory" field="customWorkDir">
-                                    <f:textbox />
-                                </f:entry>
                                 <f:entry title="TA Policy File (Required):" field="policyFile">
                                     <f:textbox/>
                                 </f:entry>
