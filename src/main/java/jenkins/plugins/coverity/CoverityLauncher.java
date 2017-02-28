@@ -146,12 +146,6 @@ public class CoverityLauncher extends Launcher {
 
             cmds = CoverityUtils.prepareCmds(cmds, envVars, useAdvancedParser);
 
-            /**
-             * Display cov-build command on the console. Coverity's parser is used in order to resolve environment
-             * variables on that command just for display purposes.
-             */
-            getListener().getLogger().println(CoverityUtils.prepareCmds(cmds, envVars, true).toString());
-
             starter = starter.cmds(cmds);
             boolean[] masks = starter.masks();
             if(masks == null) {
