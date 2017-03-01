@@ -618,8 +618,6 @@ public class CoverityPublisher extends Recorder {
                     rsp.setContentType("application/json; charset=utf-8");
                     final ServletOutputStream outputStream = rsp.getOutputStream();
 
-                    Collections.sort(projects, String.CASE_INSENSITIVE_ORDER);
-
                     JSONObject responseObject = new JSONObject();
                     responseObject.put("projects", projects);
                     responseObject.put("selectedProject", selectedProject);
@@ -654,8 +652,6 @@ public class CoverityPublisher extends Recorder {
 
                     rsp.setContentType("application/json; charset=utf-8");
                     final ServletOutputStream outputStream = rsp.getOutputStream();
-
-                    Collections.sort(streams, String.CASE_INSENSITIVE_ORDER);
 
                     JSONObject responseObject = new JSONObject();
                     responseObject.put("streams", streams);

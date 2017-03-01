@@ -10,11 +10,13 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.ws;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,21 +46,21 @@ public class CimCacheTest {
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 1);
 
-        Set<String> projects = CimCache.getInstance().getProjects(cimInstance);
+        List<String> projects = CimCache.getInstance().getProjects(cimInstance);
 
-        String[] expectedProjectNames = { "project2", "project1", "project0" };
-        assertArrayEquals(expectedProjectNames, projects.toArray());
+        List<String> expectedProjectNames = new ArrayList<>(Arrays.asList("project0", "project1", "project2"));
+        assertEquals(expectedProjectNames, projects);
 
         projects = CimCache.getInstance().getProjects(cimInstance);
-        assertArrayEquals(expectedProjectNames, projects.toArray());
+        assertEquals(expectedProjectNames, projects);
 
         cimInstance = new CIMInstance("test-instance-2", "test.coverity2.", 8080, "admin", "password", false, 9080);
         testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 2, "stream", 1);
 
-        expectedProjectNames = new String[]{ "project1", "project0" };
+        expectedProjectNames = new ArrayList<>(Arrays.asList("project0", "project1"));
         projects = CimCache.getInstance().getProjects(cimInstance);
-        assertArrayEquals(expectedProjectNames, projects.toArray());
+        assertEquals(expectedProjectNames, projects);
     }
 
     @Test
@@ -68,22 +70,22 @@ public class CimCacheTest {
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 2);
 
-        Set<String> streams = CimCache.getInstance().getStreams(cimInstance, "project1");
+        List<String> streams = CimCache.getInstance().getStreams(cimInstance, "project1");
 
-        String[] expectedStreamNames = { "stream0", "stream1" };
-        assertArrayEquals(expectedStreamNames, streams.toArray());
+        List<String> expectedStreamNames = new ArrayList<>(Arrays.asList("stream0", "stream1"));
+        assertEquals(expectedStreamNames, streams);
 
         streams = CimCache.getInstance().getStreams(cimInstance, "project0");
-        assertArrayEquals(expectedStreamNames, streams.toArray());
+        assertEquals(expectedStreamNames, streams);
 
         cimInstance = new CIMInstance("test-instance-2", "test.coverity2.", 8080, "admin", "password", false, 9080);
         testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 1, "stream", 4);
 
-        expectedStreamNames = new String[]{ "stream0", "stream1", "stream2", "stream3" };
+        expectedStreamNames = new ArrayList<>(Arrays.asList("stream0", "stream1", "stream2", "stream3"));
         streams = CimCache.getInstance().getStreams(cimInstance, "project0");
-        assertArrayEquals(expectedStreamNames, streams.toArray());
+        assertEquals(expectedStreamNames, streams);
         streams = CimCache.getInstance().getStreams(cimInstance, "unknownProject");
-        assertArrayEquals(new String[]{ } , streams.toArray());
+        assertEquals(new ArrayList<String>(), streams);
     }
 }
