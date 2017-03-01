@@ -135,6 +135,10 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 # Make sure that the environmental variable $keystore points to the Java keystore used by Coverity Connect.
 # Restart the Tomcat server.
 
+h4. Compatability with other Jenkins plugins
+
+ # [Flexible Publisher Plugin|https://wiki.jenkins-ci.org/display/JENKINS/Flexible+Publish+Plugin] (Coverity Post-Build Actions fail to run)
+
 h2. Upgrading
 
 When upgrading, make sure that all jobs using the Coverity plugin are finished and not running during upgrade. For best results, restart your Jenkins after upgrade.
