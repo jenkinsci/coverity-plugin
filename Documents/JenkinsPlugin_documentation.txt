@@ -48,15 +48,18 @@ h2. Coverity Post-build Action Settings
 The Coverity post-build action has the following options:
 || {color:#000000}Option{color} || {color:#000000}Description{color} ||
 | Check configuration | Click to verify that the connection to a stream in Coverity Connect is configured correctly. |
-| Stream | Select the Coverity Connect instance, Project, and Stream. |
+| Coverity Connect instance | The Coverity Connect instance selection (from global configuration). |
+| Project | The Project which contains the Stream to commit and fetch defects. |
+| Stream | The Stream to commit and fetch defects. |
 | Defect Filters | Select defects according to Classification, Action, Severity, Impact, Component, Checker, or Date first detected. |
 | Perform Coverity build, analysis, and commit | When this option is selected, Jenkins will monitor the build using cov-build, run the analysis, and commit defects to Coverity Connect. Various arguments can be specified to optimize the build process. |
 | Perform Coverity Test Advisor and Commit | Make settings for Test Advisor Configuration, and Coverage Configuration settings specific to C/C++, C#, and Java. |
 | Source Control Configuration 'SCM' (optional) | Make settings to enable retrieval of the version history from source control. |
-| Fail the build if matching defects are found | Mark the build as unstable if defects are found that pass all the defect filters. |
+| Fail the build if matching defects are found | Fail the build if defects are found that pass all the defect filters. |
+| Mark build as unstable if matching defects are found | Mark the build as unstable if defects are found that pass all the defect filters. |
 | Do not fetch defects after the build | Select this if builds are slow or fetching defects is taking too many resources. |
-| Preserve the intermediate directory after each build | This only has an effect if a non-default intermediate directory is chosen. |
-| Hide the defects chart on the project page | This setting will speed up page loads when there are a large number of defects or builds. |
+| Preserve the intermediate directory after each build | Keep the intermediate directory after a build. This will only have an effect is a non-default intermediate directory is chosen. |
+| Hide the defects chart on the project page | Hide the defects chart on the project page. This setting can speed up page loads when there are a large number of defects or builds. |
 
 h2. Coverity Advanced Parsing
 
