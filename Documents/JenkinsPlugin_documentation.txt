@@ -48,11 +48,8 @@ h2. Coverity Post-build Action Settings
 The Coverity post-build action has the following options:
 || {color:#000000}Option{color} || {color:#000000}Description{color} ||
 | Check configuration | Click to verify that the connection to a stream in Coverity Connect is configured correctly. |
-| Streams | Select the Coverity Connect instance, Project, Stream, and Language. |
-| Override default tool settings | Specify other arguments for Coverity tools, or Assemblies in the case of C#. |
+| Stream | Select the Coverity Connect instance, Project, Stream, and Language. |
 | Defect Filters | Select defects according to Classification, Action, Severity, Impact, Component, Checker, or Date first detected. |
-| Add Stream | Click to add another stream to the analysis process. |
-| Remove Stream for Analysis | Click to remove a stream from the analysis process. |
 | Perform Coverity build, analysis, and commit | When this option is selected, Jenkins will monitor the build using cov-build, run the analysis, and commit defects to Coverity Connect. Various arguments can be specified to optimize the build process. |
 | Perform Coverity Test Advisor and Commit | Make settings for Test Advisor Configuration, and Coverage Configuration settings specific to C/C++, C#, and Java. |
 | Source Control Configuration 'SCM' (optional) | Make settings to enable retrieval of the version history from source control. |
