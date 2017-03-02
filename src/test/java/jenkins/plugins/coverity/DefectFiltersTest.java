@@ -12,30 +12,91 @@ package jenkins.plugins.coverity;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.text.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.commons.lang.StringUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import hudson.model.Descriptor.FormException;
 
 public class DefectFiltersTest {
+
+    private final List<String> allClassifications = new ArrayList<>(Arrays.asList("Unclassified", "Pending", "False Positive", "Intentional", "Bug", "Untested", "No Test Needed", "Tested Elsewhere"));
+    private final List<String> allActions = new ArrayList<>(Arrays.asList("Undecided", "Fix Required", "Fix Submitted", "Modeling Required", "Ignore"));
+    private final List<String> allSeverities = new ArrayList<>(Arrays.asList("Unspecified", "Major", "Moderate", "Minor"));
+    private final List<String> allImpacts = new ArrayList<>(Arrays.asList("High", "Medium", "Low"));
+    private final List<String> components = new ArrayList<>(Arrays.asList("Default"));
+    private final List<String> checkers = new ArrayList<>(Arrays.asList("CHECKER1", "CHECKER2"));
+
     @Test
-    public void invertChecker_maintainsComponentsAndCheckersNotSelected() throws FormException {
+    public void initializeFilter_setsExpectedAttributes() throws FormException {
         DefectFilters filters = new DefectFilters(
-            Arrays.asList("Undecided"),
-            Arrays.asList("High"),
-            Arrays.asList("Unclassified"),
-            Arrays.asList("Major"),
-            new ArrayList<>(Arrays.asList("Default")),
-            new ArrayList<>(Arrays.asList("CHECKER1", "CHECKER2")),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
             StringUtils.EMPTY);
+
+        filters.initializeFilter(checkers,
+            allClassifications,
+            allActions,
+            allSeverities,
+            components,
+            allImpacts);
+
+        assertEquals(allActions, filters.getActions());
+        for (String action : allActions)
+            assertTrue(filters.isActionSelected(action));
+
+        assertEquals(allSeverities, filters.getSeverities());
+        for (String severities : allSeverities)
+            assertTrue(filters.isSeveritySelected(severities));
+
+        assertEquals(allImpacts, filters.getImpacts());
+        for(String impact : new ArrayList<>(allImpacts))
+            assertTrue(filters.isImpactsSelected(impact));
+
+        // only "outstanding" classifications selected by default
+        List<String> expectedClassifications = Arrays.asList("Unclassified", "Pending", "Bug", "Untested");
+        assertEquals(expectedClassifications, filters.getClassifications());
+        for (String classification : expectedClassifications)
+            assertTrue(filters.isClassificationSelected(classification));
+
+        assertEquals(components, filters.getComponents());
+        for (String component : components)
+            assertTrue(filters.isComponentSelected(component));
+        assertEquals(new ArrayList<String>(), filters.getIgnoredComponents());
+
+        assertEquals(checkers, filters.getCheckersList());
+        for (String checker : checkers)
+            assertTrue(filters.isCheckerSelected(checker));
+        assertEquals(new ArrayList<String>(), filters.getIgnoredChecker());
+    }
+
+    @Test
+    public void initializeFilter_invertChecker_maintainsComponentsAndCheckersNotSelected() throws FormException {
+        DefectFilters filters = new DefectFilters(
+            null,
+            null,
+            null,
+            null,
+            components,
+            checkers,
+            null);
 
         // verify component / checker selections
         assertTrue(filters.isComponentSelected("Default"));
@@ -45,7 +106,7 @@ public class DefectFiltersTest {
         assertTrue(filters.isCheckerSelected("CHECKER2"));
         assertEquals(0, filters.getIgnoredChecker().size());
 
-        filters.initializeFilter(new HashSet<>(Arrays.asList("CHECKER1", "CHECKER2", "CHECKER3")),
+        filters.initializeFilter(Arrays.asList("CHECKER1", "CHECKER2", "CHECKER3"),
             Arrays.asList("Unclassified"),
             Arrays.asList("Undecided"),
             Arrays.asList("Major"),
@@ -63,7 +124,7 @@ public class DefectFiltersTest {
         assertTrue(filters.isCheckerSelected("CHECKER3"));
         assertEquals(0, filters.getIgnoredChecker().size());
 
-        filters.initializeFilter(new HashSet<>(Arrays.asList("CHECKER1", "CHECKER2", "CHECKER3", "CHECKER4")),
+        filters.initializeFilter(Arrays.asList("CHECKER1", "CHECKER2", "CHECKER3", "CHECKER4"),
             Arrays.asList("Unclassified"),
             Arrays.asList("Undecided"),
             Arrays.asList("Major"),
@@ -74,11 +135,8 @@ public class DefectFiltersTest {
         filters.getComponents().remove("SecondComponent");
         filters.getCheckersList().remove("CHECKER3");
 
-        filters.invertCheckers(new HashSet<>(Arrays.asList("CHECKER1", "CHECKER2", "CHECKER3", "CHECKER4")),
-            Arrays.asList("Unclassified"),
-            Arrays.asList("Undecided"),
-            Arrays.asList("Major"),
-            new ArrayList<>(Arrays.asList("DefaultComponent", "SecondComponent", "ThirdComponent")));
+        filters.invertCheckers(Arrays.asList("CHECKER1", "CHECKER2", "CHECKER3", "CHECKER4"));
+        filters.invertComponents(Arrays.asList("DefaultComponent", "SecondComponent", "ThirdComponent"));
 
         // verify component / checker selections include added checkers
         assertTrue(filters.isComponentSelected("DefaultComponent"));
@@ -93,17 +151,14 @@ public class DefectFiltersTest {
         assertEquals(1, filters.getIgnoredChecker().size());
 
         // reset back to the original to ensure ignoreLists now cleared
-        filters.initializeFilter(new HashSet<>(Arrays.asList("CHECKER1", "CHECKER2")),
+        filters.initializeFilter(Arrays.asList("CHECKER1", "CHECKER2"),
             Arrays.asList("Unclassified"),
             Arrays.asList("Undecided"),
             Arrays.asList("Major"),
             new ArrayList<>(Arrays.asList("Default")),
             Arrays.asList("High", "Medium", "Low"));
-        filters.invertCheckers(new HashSet<>(Arrays.asList("CHECKER1", "CHECKER2")),
-            Arrays.asList("Unclassified"),
-            Arrays.asList("Undecided"),
-            Arrays.asList("Major"),
-            new ArrayList<>(Arrays.asList("Default")));
+        filters.invertCheckers(Arrays.asList("CHECKER1", "CHECKER2"));
+        filters.invertComponents(Arrays.asList("Default"));
 
         // verify component / checker selections
         assertTrue(filters.isComponentSelected("Default"));
@@ -112,5 +167,51 @@ public class DefectFiltersTest {
         assertTrue(filters.isCheckerSelected("CHECKER1"));
         assertTrue(filters.isCheckerSelected("CHECKER2"));
         assertEquals(0, filters.getIgnoredChecker().size());
+    }
+
+    @Test
+    public void defectCutOffDates() throws FormException, java.text.ParseException, DatatypeConfigurationException {
+        String cutOffDate = null;
+        DefectFilters filters = new DefectFilters(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            cutOffDate);
+
+        assertNull(filters.getCutOffDate());
+        assertNull(filters.getXMLCutOffDate());
+
+        cutOffDate = "unparsable-date-format";
+        filters = new DefectFilters(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            cutOffDate);
+
+        assertNull(filters.getCutOffDate());
+        assertNull(filters.getXMLCutOffDate());
+
+        cutOffDate = "2010-01-31";
+        filters = new DefectFilters(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            cutOffDate);
+
+        assertEquals(cutOffDate, filters.getCutOffDate());
+
+        GregorianCalendar calender = new GregorianCalendar();
+        calender.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(cutOffDate));
+        XMLGregorianCalendar expectedXmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(calender);
+        assertEquals(expectedXmlDate, filters.getXMLCutOffDate());
     }
 }

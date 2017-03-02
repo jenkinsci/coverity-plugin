@@ -19,7 +19,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -70,7 +69,10 @@ public class DefectFilters {
         }
     }
 
-    void initializeFilter(Set<String> allCheckers, List<String> allClassifications, List<String> allActions, List<String> allSeverities, List<String> allComponents, List<String> allImpacts) {
+    /**
+     * Initializes the default filter selection values when given the attribute values from the active Coverity connect.
+     */
+    void initializeFilter(List<String> allCheckers, List<String> allClassifications, List<String> allActions, List<String> allSeverities, List<String> allComponents, List<String> allImpacts) {
         // initialize new values by enabling all defaults
         ignoredCheckers = new ArrayList<String>();
         checkers = new ArrayList<>(allCheckers);
@@ -85,11 +87,22 @@ public class DefectFilters {
         classifications = allClassifications;
     }
 
-    void invertCheckers(Set<String> allCheckers, List<String> allClassifications, List<String> allActions, List<String> allSeverities, List<String> allComponents) {
-        ignoredComponents = new ArrayList<String>(allComponents);
-        ignoredComponents.removeAll(components);
-        ignoredCheckers = new ArrayList<String>(allCheckers);
+    /**
+     * Inverts the check selection in order to persist the list of ignored checkers. This is necessary to allow new
+     * checkers to be enabled by default when added to Coverity connect (via commits).
+     */
+    public void invertCheckers(List<String> allCheckers) {
+        ignoredCheckers = new ArrayList<>(allCheckers);
         ignoredCheckers.removeAll(checkers);
+    }
+
+    /**
+     * Inverts the component selection in order to persist the list of ignored components. This is necessary to allow new
+     * component mapss configured on the stream in Coverity connect.
+     */
+    public void invertComponents(List<String> allComponents) {
+        ignoredComponents = new ArrayList<>(allComponents);
+        ignoredComponents.removeAll(components);
     }
 
     /**

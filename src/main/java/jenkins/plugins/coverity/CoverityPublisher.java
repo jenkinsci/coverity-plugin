@@ -474,16 +474,12 @@ public class CoverityPublisher extends Recorder {
 
             try {
                 if(cimStream.isValid()) {
-                    Set<String> allCheckers = new HashSet<>(getInstance(cimStream.getInstance()).getCimInstanceCheckers());
                     DefectFilters defectFilters = cimStream.getDefectFilters();
                     if(defectFilters != null) {
-                        defectFilters.invertCheckers(
-                                allCheckers,
-                                toStrings(cimStreamDescriptor.doFillClassificationDefectFilterItems(cimInstance)),
-                                toStrings(cimStreamDescriptor.doFillActionDefectFilterItems(cimInstance)),
-                                toStrings(cimStreamDescriptor.doFillSeveritiesDefectFilterItems(cimInstance)),
-                                toStrings(cimStreamDescriptor.doFillComponentDefectFilterItems(cimInstance, cimStream.getStream()))
-                        );
+                        List<String> allCheckers = getInstance(cimStream.getInstance()).getCimInstanceCheckers();
+                        List<String> allComponents = toStrings(cimStreamDescriptor.doFillComponentDefectFilterItems(cimInstance, cimStream.getStream()));
+                        defectFilters.invertCheckers(allCheckers);
+                        defectFilters.invertComponents(allComponents);
                     }
                 }
             } catch (CovRemoteServiceException_Exception | WebServiceException e) {
@@ -557,7 +553,7 @@ public class CoverityPublisher extends Recorder {
                     } else {
                         //initialize 'new' defectFilters item with default values selected
 
-                        Set<String> allCheckers = new HashSet<>(getInstance(cimStream.getInstance()).getCimInstanceCheckers());
+                        List<String> allCheckers = getInstance(cimStream.getInstance()).getCimInstanceCheckers();
                         DefectFilters defectFilters = cimStream.getDefectFilters();
                         if (defectFilters != null) {
                             try {
