@@ -16,13 +16,10 @@ import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-
-import static org.mockito.Mockito.when;
 
 public class CovImportMsvscaCommandTest extends CommandTestBase {
 
