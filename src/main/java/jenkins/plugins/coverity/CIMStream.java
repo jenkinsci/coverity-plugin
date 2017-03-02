@@ -169,9 +169,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         public List<String> loadProjects(@QueryParameter String instance, @QueryParameter String project) {
 
             List<String> projects = new ArrayList<>();
-            if (!StringUtils.isEmpty(project)) {
-                projects.add(project);
-            }
 
             if (!StringUtils.isEmpty(instance)) {
                 CIMInstance cimInstance = getInstance(instance);
@@ -180,6 +177,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                         projects.add(projectFromCim);
                     }
                 }
+            }
+
+            if (!StringUtils.isEmpty(project) && !projects.contains(project)) {
+                projects.add(project);
             }
 
             return projects;
@@ -206,9 +207,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         public List<String> loadStreams(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) {
 
             List<String> streams = new ArrayList<>();
-            if (!StringUtils.isEmpty(stream)) {
-                streams.add(stream);
-            }
 
             if (!StringUtils.isEmpty(instance) && !StringUtils.isEmpty(project)) {
                 CIMInstance cimInstance = getInstance(instance);
@@ -217,6 +215,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                         streams.add(streamFromCim);
                     }
                 }
+            }
+
+            if (!StringUtils.isEmpty(stream) && !streams.contains(stream)) {
+                streams.add(stream);
             }
 
             return streams;
