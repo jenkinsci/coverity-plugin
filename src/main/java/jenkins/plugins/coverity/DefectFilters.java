@@ -222,33 +222,4 @@ public class DefectFilters {
         }
         return filterSpecDataObj;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-
-        DefectFilters that = (DefectFilters) o;
-
-        if(actions != null ? !actions.equals(that.actions) : that.actions != null) return false;
-        if(checkers != null ? !checkers.equals(that.checkers) : that.checkers != null) return false;
-        if(classifications != null ? !classifications.equals(that.classifications) : that.classifications != null)
-            return false;
-        if(components != null ? !components.equals(that.components) : that.components != null) return false;
-        if(cutOffDate != null ? !cutOffDate.equals(that.cutOffDate) : that.cutOffDate != null) return false;
-        if(severities != null ? !severities.equals(that.severities) : that.severities != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = classifications != null ? classifications.hashCode() : 0;
-        result = 31 * result + (actions != null ? actions.hashCode() : 0);
-        result = 31 * result + (severities != null ? severities.hashCode() : 0);
-        result = 31 * result + (components != null ? components.hashCode() : 0);
-        result = 31 * result + (checkers != null ? checkers.hashCode() : 0);
-        result = 31 * result + (cutOffDate != null ? cutOffDate.hashCode() : 0);
-        return result;
-    }
 }
