@@ -168,7 +168,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 
         public List<String> loadProjects(@QueryParameter String instance, @QueryParameter String project) {
 
-            Set<String> projects = new HashSet<>();
+            List<String> projects = new ArrayList<>();
             if (!StringUtils.isEmpty(project)) {
                 projects.add(project);
             }
@@ -182,9 +182,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 }
             }
 
-            final ArrayList<String> result = new ArrayList<>(projects);
-            Collections.sort(result, String.CASE_INSENSITIVE_ORDER);
-            return result;
+            return projects;
         }
 
         public boolean checkProjectIsValid(@QueryParameter String instance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
@@ -207,7 +205,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 
         public List<String> loadStreams(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) {
 
-            Set<String> streams = new HashSet<>();
+            List<String> streams = new ArrayList<>();
             if (!StringUtils.isEmpty(stream)) {
                 streams.add(stream);
             }
@@ -221,9 +219,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
                 }
             }
 
-            final ArrayList<String> result = new ArrayList<>(streams);
-            Collections.sort(result, String.CASE_INSENSITIVE_ORDER);
-            return result;
+            return streams;
         }
 
         public boolean checkStreamIsValid(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
