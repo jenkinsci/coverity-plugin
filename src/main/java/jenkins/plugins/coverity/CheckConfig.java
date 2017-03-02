@@ -40,6 +40,8 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
+import org.jenkinsci.remoting.RoleChecker;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -303,17 +305,22 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
      */
     public static CoverityVersion getVersion(FilePath homePath, final TaskListener listener) throws IOException, InterruptedException {
         CoverityVersion version = homePath.child("VERSION.xml").act(new FilePath.FileCallable<CoverityVersion>() {
-                                                                        public CoverityVersion invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                                                                            InputStream fis = new FileInputStream(f);
+            @Override
+            public void checkRoles(RoleChecker roleChecker) throws SecurityException {
+            }
 
-                                                                            // Setting up reader into UTF-8 format since xml document is that format
-                                                                            Reader reader = new InputStreamReader(fis,"UTF-8");
-                                                                            InputSource is = new InputSource(reader);
-                                                                            is.setEncoding("UTF-8");
-                                                                            CoverityVersion cv = parseVersionXML(is, listener);
-                                                                            fis.close();
-                                                                            return cv;
-                                                                        }});
+            public CoverityVersion invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+                InputStream fis = new FileInputStream(f);
+
+                // Setting up reader into UTF-8 format since xml document is that format
+                Reader reader = new InputStreamReader(fis, "UTF-8");
+                InputSource is = new InputSource(reader);
+                is.setEncoding("UTF-8");
+                CoverityVersion cv = parseVersionXML(is, listener);
+                fis.close();
+                return cv;
+            }
+        });
 
         return version;
     }

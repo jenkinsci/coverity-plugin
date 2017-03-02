@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -86,12 +87,7 @@ public class CoverityPublisherDescriptorImplTests {
 
         StaplerResponse response = mock(StaplerResponse.class);
         final ByteArrayOutputStream testableStream = new ByteArrayOutputStream();
-        ServletOutputStream responseOutputStream = new ServletOutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                testableStream.write(b);
-            }
-        };
+        ServletOutputStream responseOutputStream = getServletOutputStream(testableStream);
 
         try {
             when(response.getOutputStream()).thenReturn(responseOutputStream);
@@ -126,12 +122,7 @@ public class CoverityPublisherDescriptorImplTests {
 
         StaplerResponse response = mock(StaplerResponse.class);
         final ByteArrayOutputStream testableStream = new ByteArrayOutputStream();
-        ServletOutputStream responseOutputStream = new ServletOutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                testableStream.write(b);
-            }
-        };
+        ServletOutputStream responseOutputStream = getServletOutputStream(testableStream);
 
         try {
             when(response.getOutputStream()).thenReturn(responseOutputStream);
@@ -146,5 +137,23 @@ public class CoverityPublisherDescriptorImplTests {
         } finally {
             responseOutputStream.close();
         }
+    }
+
+    private ServletOutputStream getServletOutputStream(final ByteArrayOutputStream testableStream) {
+        return new ServletOutputStream() {
+                @Override
+                public boolean isReady() {
+                    return true;
+                }
+
+                @Override
+                public void setWriteListener(WriteListener listener) {
+                }
+
+                @Override
+                public void write(int b) throws IOException {
+                    testableStream.write(b);
+                }
+            };
     }
 }
