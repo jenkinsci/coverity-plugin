@@ -11,6 +11,8 @@
 package jenkins.plugins.coverity.ws;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +60,7 @@ public final class CimCache {
         cache.put(cimInstance, new CachedData(cimInstance));
     }
 
-    public Set<String> getProjects(CIMInstance cimInstance) {
+    public List<String> getProjects(CIMInstance cimInstance) {
         if (cache.containsKey(cimInstance)) {
             final CachedData cachedData = cache.get(cimInstance);
             return cachedData.getAvailableProjects();
@@ -69,7 +71,7 @@ public final class CimCache {
         return cachedData.getAvailableProjects();
     }
 
-    public Set<String> getStreams(CIMInstance cimInstance, String project) {
+    public List<String> getStreams(CIMInstance cimInstance, String project) {
         if (cache.containsKey(cimInstance)) {
             final CachedData cachedData = cache.get(cimInstance);
             return cachedData.getStreamsForProject(project);
@@ -81,7 +83,7 @@ public final class CimCache {
     }
 
     private static class CachedData {
-        private Map<String, Set<String>> projectStreams;
+        private Map<String, List<String>> projectStreams;
 
         public CachedData(CIMInstance cimInstance) {
             projectStreams = new HashMap<>();
@@ -90,10 +92,14 @@ public final class CimCache {
                 final List<ProjectDataObj> projects = configurationService.getProjects(new ProjectFilterSpecDataObj());
 
                 for (ProjectDataObj project : projects){
-                    Set<String> streamNames = new HashSet<>();
+                    List<String> streamNames = new ArrayList<>();
+
                     for (StreamDataObj stream : project.getStreams()) {
                         streamNames.add(stream.getId().getName());
                     }
+
+                    Collections.sort(streamNames, String.CASE_INSENSITIVE_ORDER);
+
                     projectStreams.put(project.getId().getName(), streamNames);
                 }
             } catch (IOException e) {
@@ -103,16 +109,18 @@ public final class CimCache {
             }
         }
 
-        public Set<String> getAvailableProjects() {
-            return projectStreams.keySet();
+        public List<String> getAvailableProjects() {
+            final ArrayList<String> projectNames = new ArrayList<>(projectStreams.keySet());
+            Collections.sort(projectNames, String.CASE_INSENSITIVE_ORDER);
+            return projectNames;
         }
 
-        public Set<String> getStreamsForProject(String projectName) {
+        public List<String> getStreamsForProject(String projectName) {
             if (projectStreams.containsKey(projectName)) {
                 return projectStreams.get(projectName);
             }
 
-            return new HashSet<>();
+            return new ArrayList<>();
         }
     }
 }
