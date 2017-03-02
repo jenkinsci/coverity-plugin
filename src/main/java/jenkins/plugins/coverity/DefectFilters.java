@@ -19,7 +19,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -41,6 +40,7 @@ public class DefectFilters {
     private List<String> actions;
     private List<String> severities;
     private List<String> components;
+    private List<String> ignoredComponents;
     private List<String> checkers;
     private List<String> ignoredCheckers;
     private Date cutOffDate;
@@ -53,6 +53,7 @@ public class DefectFilters {
         this.impacts = Util.fixNull(impacts);
         this.severities = Util.fixNull(severities);
         this.components = Util.fixNull(components);
+        this.ignoredComponents = new ArrayList<String>();
         this.checkers = Util.fixNull(checkers);
         this.ignoredCheckers = new ArrayList<String>();
 
@@ -68,20 +69,40 @@ public class DefectFilters {
         }
     }
 
-    void invertCheckers(Set<String> allCheckers, List<String> allClassifications, List<String> allActions, List<String> allSeverities, List<String> allComponents) {
-        if(classifications.isEmpty() && checkers.isEmpty() && actions.isEmpty() && components.isEmpty() && severities.isEmpty()) {
-            ignoredCheckers = new ArrayList<String>();
-            actions = allActions;
-            severities = allSeverities;
-            components = allComponents;
+    /**
+     * Initializes the default filter selection values when given the attribute values from the active Coverity connect.
+     */
+    void initializeFilter(List<String> allCheckers, List<String> allClassifications, List<String> allActions, List<String> allSeverities, List<String> allComponents, List<String> allImpacts) {
+        // initialize new values by enabling all defaults
+        ignoredCheckers = new ArrayList<String>();
+        checkers = new ArrayList<>(allCheckers);
+        actions = allActions;
+        severities = allSeverities;
+        ignoredComponents = new ArrayList<String>();
+        components = allComponents;
+        impacts = allImpacts;
 
-            // remove the "Intentional", "False Positive", "No Test Needed", "Tested Elsewhere" classifications to match default outstanding filters
-            allClassifications.removeAll(Arrays.asList("Intentional", "False Positive", "No Test Needed", "Tested Elsewhere"));
-            classifications = allClassifications;
-        } else {
-            ignoredCheckers = new ArrayList<String>(allCheckers);
-            ignoredCheckers.removeAll(checkers);
-        }
+        // remove the "Intentional", "False Positive", "No Test Needed", "Tested Elsewhere" classifications to match default outstanding filters
+        allClassifications.removeAll(Arrays.asList("Intentional", "False Positive", "No Test Needed", "Tested Elsewhere"));
+        classifications = allClassifications;
+    }
+
+    /**
+     * Inverts the check selection in order to persist the list of ignored checkers. This is necessary to allow new
+     * checkers to be enabled by default when added to Coverity connect (via commits).
+     */
+    public void invertCheckers(List<String> allCheckers) {
+        ignoredCheckers = new ArrayList<>(allCheckers);
+        ignoredCheckers.removeAll(checkers);
+    }
+
+    /**
+     * Inverts the component selection in order to persist the list of ignored components. This is necessary to allow new
+     * component mapss configured on the stream in Coverity connect.
+     */
+    public void invertComponents(List<String> allComponents) {
+        ignoredComponents = new ArrayList<>(allComponents);
+        ignoredComponents.removeAll(components);
     }
 
     /**
@@ -132,7 +153,11 @@ public class DefectFilters {
     }
 
     public boolean isComponentSelected(String component) {
-        return components.contains(component);
+        if (ignoredComponents == null) {
+            return false;
+        }
+
+        return !ignoredComponents.contains(component);
     }
 
     public boolean isCheckerSelected(String checker) {
@@ -155,14 +180,12 @@ public class DefectFilters {
 
     public List<String> getImpacts(){return impacts;}
 
-    public List<ComponentIdDataObj> getComponents(){
-        List<ComponentIdDataObj> componentIdDataList = new ArrayList<ComponentIdDataObj>();
-        for(String comp : components){
-            ComponentIdDataObj cIdDataObj = new ComponentIdDataObj();
-            cIdDataObj.setName(comp);
-            componentIdDataList.add(cIdDataObj);
-        }
-        return componentIdDataList;
+    public List<String> getComponents(){
+        return components;
+    }
+
+    public List<String> getIgnoredComponents() {
+        return ignoredComponents;
     }
 
     public List<String> getIgnoredChecker(){return ignoredCheckers;}
@@ -198,34 +221,5 @@ public class DefectFilters {
             filterSpecDataObj.setFirstDetectedStartDate(xmlCutOffDate);
         }
         return filterSpecDataObj;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-
-        DefectFilters that = (DefectFilters) o;
-
-        if(actions != null ? !actions.equals(that.actions) : that.actions != null) return false;
-        if(checkers != null ? !checkers.equals(that.checkers) : that.checkers != null) return false;
-        if(classifications != null ? !classifications.equals(that.classifications) : that.classifications != null)
-            return false;
-        if(components != null ? !components.equals(that.components) : that.components != null) return false;
-        if(cutOffDate != null ? !cutOffDate.equals(that.cutOffDate) : that.cutOffDate != null) return false;
-        if(severities != null ? !severities.equals(that.severities) : that.severities != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = classifications != null ? classifications.hashCode() : 0;
-        result = 31 * result + (actions != null ? actions.hashCode() : 0);
-        result = 31 * result + (severities != null ? severities.hashCode() : 0);
-        result = 31 * result + (components != null ? components.hashCode() : 0);
-        result = 31 * result + (checkers != null ? checkers.hashCode() : 0);
-        result = 31 * result + (cutOffDate != null ? cutOffDate.hashCode() : 0);
-        return result;
     }
 }
