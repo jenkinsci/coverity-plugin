@@ -38,6 +38,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.xml.ws.WebServiceException;
@@ -456,8 +458,13 @@ public class CoverityPublisher extends Recorder {
         }
 
         @Override
-        public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public Publisher newInstance(@CheckForNull StaplerRequest req, @Nonnull JSONObject formData) throws FormException {
             logger.info(formData.toString());
+
+            // even though request is always non-null, needs check (see note on Descriptor.newInstance)
+            if (req == null) {
+                return super.newInstance(req, formData);
+            }
 
             String cutOffDate = Util.fixEmpty(req.getParameter("cutOffDate"));
             try {
