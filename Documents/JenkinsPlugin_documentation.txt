@@ -24,10 +24,10 @@ The Coverity plugin for Jenkins performs four functions:
 
 h2. Getting Started
 
-# Install the plugin using the Plugin Manager, and restart Jenkins.
-# Go to the global configuration page (Manage Jenkins > Configure System).
+# Install the plugin using the *Plugin Manager*, and restart Jenkins.
+# Go to the global configuration page (*Manage Jenkins* > *Configure System*).
 # If the Coverity Static Analysis tools are not on the PATH, configure the location (for the master) here.
-# Add connection details for any number of Coverity Connect instances you want to use. Click "Check configuration" to validate your settings.
+# Add connection details for any number of Coverity Connect instances you want to use. Click *Check configuration* to validate your settings.
 # For any node where Coverity Static Analysis is not on the PATH (and is at a different location than on the master), configure the location on the node configuration page.
 
 h2. Job Setup
@@ -36,10 +36,10 @@ h2. Job Setup
 # Under *Build*, select *Add build step* and select *Invoke Coverity Capture Build*, if needed. 
 # Under *Post-build Actions*, select *Add post-build action* and select *Coverity*.
 # Select the Coverity Connect instance, project and stream relevant for this job.
-# If you want the plugin to invoke cov-build/cov-analyze/cov-commit-defects for you, check ‘Perform Coverity build, analysis and commit’. You can add additional arguments for each of these tools, and configure the intermediate directory used (all optional).
+# If you want the plugin to invoke *cov-build/cov-analyze/cov-commit-defects* for you, check *Perform Coverity build, analysis and commit*. You can add additional arguments for each of these tools, and configure the intermediate directory used (all optional).
 # If your build already invokes Coverity, leave the checkbox unchecked.
 # If you want to fail the build when defects are found, check the corresponding checkbox. By default all defects are considered, but you can specify filters. Every filter should match for a defect to be included.
-# If you want the plugin to invoke test and Test Advisor functions for you, check "Perform Coverity Test Advisor and Commit". You can add additional arguments and functionality to the build by entering your source control configurations (optional).
+# If you want the plugin to invoke test and Test Advisor functions for you, check *Perform Coverity Test Advisor and Commit*. You can add additional arguments and functionality to the build by entering your source control configurations (optional).
 
 Start your build. After the build has completed, a link to Coverity Defects will be available on the build page. On the project page, a graph with historical defect counts will be visible (as soon as more than one build has been performed).
 
@@ -161,7 +161,8 @@ h2. Changelog
 h4. *Version 1.9.0 (March 17, 2017)*
 
 * Changed *Required Core* Jenkins version from 1.534 to 1.651.3. (BZ 101526)
-* Fixed the error "command line parsing fails" when using the MSbuild or Gradle plugins to build with Coverity on Windows. (BZ 101359)
+* Fixed the error "command line parsing fails" when using the MSbuild, Gradle, or NAnt plugins to build with Coverity on Windows. (BZ 101359, 101799)
+* The ability to filter on Checkers is deprecated, and this functionality will be removed in an upcoming release. (BZ 101225)
 * Resolved an issue where links to view Coverity defects were broken if any of the instance, project, or streams names had spaces. Updated the graph key display name to "Coverity Defects (stream name)" and the defects page URL to "coverity_defects". (BZ 100794)
 * The Coverity Jenkins plugin now provides a new "Invoke Coverity Capture Build" as part of build step for users to specify which build step they wish to capture build from. Other build steps will be performed normally without wrapping around with the Coverity cov-build. (BZ 52497, 88273, 93992, 98963, 100175, 100514)
 * The Coverity plugin correctly sets up the intermediate directory when capturing builds of source files that only include scripting languages. (BZ 100126)
@@ -170,17 +171,13 @@ h4. *Version 1.9.0 (March 17, 2017)*
 * Removed support for v6 web services (Coverity Connect version 7.6.x and earlier) and older Coverity Analysis Tools (version 7.6.x and earlier). (BZ 98702)
 * The Coverity Defects page displays *CID/Checker/Function/File Location* of defects. (BZ 97772)
 * The Jenkins Coverity plugin does not work properly when it is configured inside the Flexible Publish plugin. This is not a supported way of using the Jenkins Coverity plugin. (BZ 97184)
-* Resolved an issue with the Unstable status being incorrectly set. (BZ 96455)
-* Resolved an issue with the Dismissed defects status being implicitly filtered (regardless of classification filters). (BZ 92293, 96455)
-  Note: This may cause an increase in defects which were previously filtered automatically to be unfiltered (to match filtering de-select classifications "False Positive", "Intentional" "No Test Needed", "Tested Elsewhere"). (BZ 92293, 96455)
-* Updated the default classification filters selected to match Coverity Connect Outstanding view filters.(BZ 92293, 96455)
+* Resolved an issue with the Unstable status being incorrectly set. (BZ 82665, 88020, 92293, 96455)
+* Resolved an issue with the Dismissed defects status being implicitly filtered (regardless of classification filters). (BZ 82665, 88020, 92293, 96455)
+  Note: This may cause an increase in defects which were previously filtered automatically to be unfiltered (to match filtering de-select classifications "False Positive", "Intentional" "No Test Needed", "Tested Elsewhere"). (BZ 82665, 88020, 92293, 96455)
+* Updated the default classification filters selected to match Coverity Connect Outstanding view filters. (BZ 82665, 88020, 92293, 96455)
 * Removed "Microsoft Code Analysis results files" option (use "Search for Microsoft Code Analysis results" option instead). (BZ 94805)
 * The Coverity plugin no longer provides a drop-down to select the "Language" in the configuration. (BZ 92811)
 * Resolved an issue where Coverity publisher could not be configured by the Job DSL plugin. (BZ 91929)
-* Fixed issue with the unstable status being incorrectly set. (BZ 82665, 88020)
-* Fixed issue with Dismissed defects status being implicitly filtered (regardless of classification filters). 
-  Note: may cause an increase in defects which were previously filtered automatically to be unfiltered (to match filtering de-select classifications "False Positive", "Intentional" "No Test Needed", "Tested Elsewhere"). (BZ 82665, 88020)
-* Updated the default classification filters selected to match Coverity Connect Outstanding view filters. (BZ 82665, 88020)
 * The configuration checking logic was improved. (BZ 84848)
 * The "Check Configuration" button on the configuration page will validate the "Test Advisor" and "SCM" configurations as well as project and stream. (BZ 82064)
 * Removed the 3000 defect limit when downloading defects from the Coverity Connect stream. (BZ 73634)
