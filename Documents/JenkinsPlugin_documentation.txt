@@ -165,7 +165,7 @@ h4. *Version 1.9.0 (March 17, 2017)*
 * Resolved an issue where links to view Coverity defects were broken if any of the instance, project, or streams names had spaces. Updated the graph key display name to "Coverity Defects (stream name)" and the defects page URL to "coverity_defects". (BZ 100794)
 * The Coverity Jenkins plugin now provides a new "Invoke Coverity Capture Build" as part of build step for users to specify which build step they wish to capture build from. Other build steps will be performed normally without wrapping around with the Coverity cov-build. (BZ 52497, 88273, 93992, 98963, 100175, 100514)
 * The Coverity plugin correctly sets up the intermediate directory when capturing builds of source files that only include scripting languages. (BZ 100126)
-* The ability to specify multiple commit streams in a single Jenkins job was removed. Existing configurations with more than one commit stream will continue to use the first commit stream specified. (BZ 99084)
+* The ability to specify multiple commit streams in a single Jenkins job was removed. Existing configurations with more than one commit stream will continue to use the first commit stream specified. Links to defects for additional streams on old build jobs will now only show the main stream defects. (BZ 99084)
 * The custom intermediate directory (or default intermediate directory) is deleted whether the build was successful or a failure, unless the option to preserve the intermediate directory is checked. (BZ 99064)
 * Removed support for v6 web services (Coverity Connect version 7.6.x and earlier) and older Coverity Analysis Tools (version 7.6.x and earlier). (BZ 98702)
 * The Coverity Defects page displays *CID/Checker/Function/File Location* of defects. (BZ 97772)
