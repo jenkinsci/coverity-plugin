@@ -12,6 +12,7 @@ package jenkins.plugins.coverity;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -235,5 +236,54 @@ public class CoverityPublisherTest {
         assertNotNull(invocationAssistance);
         assertEquals("--return-emit-failures", invocationAssistance.getBuildArguments());
         assertEquals("-j 4 --all", invocationAssistance.getAnalyzeArguments());
+    }
+
+    @Test
+    public void getInvocationAssistance_fromOldPre190Configuration() {
+        String oldJobXml = "<jenkins.plugins.coverity.CoverityPublisher plugin=\"coverity@1.8.1\">\n" +
+            "      <cimStreams>\n" +
+            "        <jenkins.plugins.coverity.CIMStream>\n" +
+            "          <instance>first-cim-instance</instance>\n" +
+            "          <project>first-cim-project</project>\n" +
+            "          <stream>first-cim-stream</stream>\n" +
+            "          <id>1955941757</id>\n" +
+            "          <defectFilters/>\n" +
+            "        </jenkins.plugins.coverity.CIMStream>\n" +
+            "      </cimStreams>\n" +
+            "      <invocationAssistance>\n" +
+            "        <javaWarFilesNames/>\n" +
+            "        <csharpAutomaticAssemblies>false</csharpAutomaticAssemblies>\n" +
+            "        <csharpMsvsca>false</csharpMsvsca>\n" +
+            "        <isUsingMisra>true</isUsingMisra>\n" +
+            "        <misraConfigFile>misra.config</misraConfigFile>\n" +
+            "        <isCompiledSrc>false</isCompiledSrc>\n" +
+            "        <isScriptSrc>true</isScriptSrc>\n" +
+            "        <isUsingPostCovBuildCmd>true</isUsingPostCovBuildCmd>\n" +
+            "        <postCovBuildCmd>post cov build</postCovBuildCmd>\n" +
+            "        <isUsingPostCovAnalyzeCmd>true</isUsingPostCovAnalyzeCmd>\n" +
+            "        <postCovAnalyzeCmd>post cov analyze</postCovAnalyzeCmd>\n" +
+            "        <useAdvancedParser>false</useAdvancedParser>\n" +
+            "      </invocationAssistance>\n" +
+            "      <failBuild>false</failBuild>\n" +
+            "      <unstable>false</unstable>\n" +
+            "      <keepIntDir>false</keepIntDir>\n" +
+            "      <skipFetchingDefects>false</skipFetchingDefects>\n" +
+            "      <hideChart>false</hideChart>\n" +
+            "      <unstableBuild>false</unstableBuild>\n" +
+            "    </jenkins.plugins.coverity.CoverityPublisher>";
+
+        XStream xstream = new XStream2();
+
+        final CoverityPublisher publisher = (CoverityPublisher)xstream.fromXML(oldJobXml);
+        assertNotNull(publisher);
+
+        final InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        assertNotNull(invocationAssistance);
+        assertTrue(invocationAssistance.getIsUsingMisra());
+        assertEquals("misra.config", invocationAssistance.getMisraConfigFile());
+        assertTrue(invocationAssistance.getIsUsingPostCovBuildCmd());
+        assertEquals("post cov build", invocationAssistance.getPostCovBuildCmd());
+        assertTrue(invocationAssistance.getIsUsingPostCovAnalyzeCmd());
+        assertEquals("post cov analyze", invocationAssistance.getPostCovAnalyzeCmd());
     }
 }

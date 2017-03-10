@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -86,12 +87,7 @@ public class CoverityPublisherDescriptorImplTests {
 
         StaplerResponse response = mock(StaplerResponse.class);
         final ByteArrayOutputStream testableStream = new ByteArrayOutputStream();
-        ServletOutputStream responseOutputStream = new ServletOutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                testableStream.write(b);
-            }
-        };
+        ServletOutputStream responseOutputStream = getServletOutputStream(testableStream);
 
         try {
             when(response.getOutputStream()).thenReturn(responseOutputStream);
@@ -101,7 +97,7 @@ public class CoverityPublisherDescriptorImplTests {
             Mockito.verify(response).setContentType("application/json; charset=utf-8");
             String responseOutput = new String(testableStream.toByteArray(), StandardCharsets.UTF_8);
             assertEquals(
-                String.format("{\"projects\":[\"%1$s\",\"%1$s0\",\"%1$s1\"],\"selectedProject\":\"%1$s\",\"validSelection\":false}", projectName),
+                String.format("{\"projects\":[\"%1$s0\",\"%1$s1\",\"%1$s\"],\"selectedProject\":\"%1$s\",\"validSelection\":false}", projectName),
                 responseOutput);
         } finally {
             responseOutputStream.close();
@@ -126,12 +122,7 @@ public class CoverityPublisherDescriptorImplTests {
 
         StaplerResponse response = mock(StaplerResponse.class);
         final ByteArrayOutputStream testableStream = new ByteArrayOutputStream();
-        ServletOutputStream responseOutputStream = new ServletOutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                testableStream.write(b);
-            }
-        };
+        ServletOutputStream responseOutputStream = getServletOutputStream(testableStream);
 
         try {
             when(response.getOutputStream()).thenReturn(responseOutputStream);
@@ -141,10 +132,28 @@ public class CoverityPublisherDescriptorImplTests {
             Mockito.verify(response).setContentType("application/json; charset=utf-8");
             String responseOutput = new String(testableStream.toByteArray(), StandardCharsets.UTF_8);
             assertEquals(
-                String.format("{\"streams\":[\"%1$s\",\"%1$s0\",\"%1$s1\",\"%1$s2\"],\"selectedStream\":\"%1$s\",\"validSelection\":false}", streamName),
+                String.format("{\"streams\":[\"%1$s0\",\"%1$s1\",\"%1$s2\",\"%1$s\"],\"selectedStream\":\"%1$s\",\"validSelection\":false}", streamName),
                 responseOutput);
         } finally {
             responseOutputStream.close();
         }
+    }
+
+    private ServletOutputStream getServletOutputStream(final ByteArrayOutputStream testableStream) {
+        return new ServletOutputStream() {
+                @Override
+                public boolean isReady() {
+                    return true;
+                }
+
+                @Override
+                public void setWriteListener(WriteListener listener) {
+                }
+
+                @Override
+                public void write(int b) throws IOException {
+                    testableStream.write(b);
+                }
+            };
     }
 }

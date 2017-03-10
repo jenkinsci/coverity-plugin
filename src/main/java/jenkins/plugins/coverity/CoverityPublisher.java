@@ -38,6 +38,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.xml.ws.WebServiceException;
@@ -456,8 +458,13 @@ public class CoverityPublisher extends Recorder {
         }
 
         @Override
-        public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public Publisher newInstance(@CheckForNull StaplerRequest req, @Nonnull JSONObject formData) throws FormException {
             logger.info(formData.toString());
+
+            // even though request is always non-null, needs check (see note on Descriptor.newInstance)
+            if (req == null) {
+                return super.newInstance(req, formData);
+            }
 
             String cutOffDate = Util.fixEmpty(req.getParameter("cutOffDate"));
             try {
@@ -474,16 +481,12 @@ public class CoverityPublisher extends Recorder {
 
             try {
                 if(cimStream.isValid()) {
-                    Set<String> allCheckers = new HashSet<>(getInstance(cimStream.getInstance()).getCimInstanceCheckers());
                     DefectFilters defectFilters = cimStream.getDefectFilters();
                     if(defectFilters != null) {
-                        defectFilters.invertCheckers(
-                                allCheckers,
-                                toStrings(cimStreamDescriptor.doFillClassificationDefectFilterItems(cimInstance)),
-                                toStrings(cimStreamDescriptor.doFillActionDefectFilterItems(cimInstance)),
-                                toStrings(cimStreamDescriptor.doFillSeveritiesDefectFilterItems(cimInstance)),
-                                toStrings(cimStreamDescriptor.doFillComponentDefectFilterItems(cimInstance, cimStream.getStream()))
-                        );
+                        List<String> allCheckers = getInstance(cimStream.getInstance()).getCimInstanceCheckers();
+                        List<String> allComponents = toStrings(cimStreamDescriptor.doFillComponentDefectFilterItems(cimInstance, cimStream.getStream()));
+                        defectFilters.invertCheckers(allCheckers);
+                        defectFilters.invertComponents(allComponents);
                     }
                 }
             } catch (CovRemoteServiceException_Exception | WebServiceException e) {
@@ -552,38 +555,22 @@ public class CoverityPublisher extends Recorder {
                     cimStreamDescriptor = ((CIMStream.DescriptorImpl) cimStream.getDescriptor());
 
                 if (cimStreamDescriptor != null) {
-                    if (StringUtils.isEmpty(cimStream.getInstance())) {
-                        //do nothing
-                    } else if (StringUtils.isEmpty(cimStream.getStream()) || StringUtils.isEmpty(cimStream.getProject())) {
-                        //initialize 'new' defectFilters item with default values selected
-                        DefectFilters defectFilters = cimStream.getDefectFilters();
-                        if (defectFilters != null) {
-                            Set<String> allCheckers = new HashSet<>(getInstance(cimStream.getInstance()).getCimInstanceCheckers());
-                            try {
-                                cimStream.getDefectFilters().invertCheckers(
-                                    allCheckers,
-                                    toStrings(cimStreamDescriptor.doFillClassificationDefectFilterItems(cimStream.getInstance())),
-                                    toStrings(cimStreamDescriptor.doFillActionDefectFilterItems(cimStream.getInstance())),
-                                    toStrings(cimStreamDescriptor.doFillSeveritiesDefectFilterItems(cimStream.getInstance())),
-                                    toStrings(cimStreamDescriptor.doFillComponentDefectFilterItems(cimStream.getInstance(), cimStream.getStream()))
-                                );
-                            } catch (CovRemoteServiceException_Exception e) {
-                                throw new IOException(e);
-                            }
-                        }
-
+                    if (StringUtils.isEmpty(cimStream.getInstance()) || StringUtils.isEmpty(cimStream.getProject()) || StringUtils.isEmpty(cimStream.getStream())) {
+                        //do nothing when any of instance / project / stream is not yet configured
                     } else {
-                        Set<String> allCheckers = new HashSet<>(getInstance(cimStream.getInstance()).getCimInstanceCheckers());
+                        //initialize 'new' defectFilters item with default values selected
+
+                        List<String> allCheckers = getInstance(cimStream.getInstance()).getCimInstanceCheckers();
                         DefectFilters defectFilters = cimStream.getDefectFilters();
                         if (defectFilters != null) {
                             try {
-                                cimStream.getDefectFilters().invertCheckers(
+                                cimStream.getDefectFilters().initializeFilter(
                                     allCheckers,
                                     toStrings(cimStreamDescriptor.doFillClassificationDefectFilterItems(cimStream.getInstance())),
                                     toStrings(cimStreamDescriptor.doFillActionDefectFilterItems(cimStream.getInstance())),
                                     toStrings(cimStreamDescriptor.doFillSeveritiesDefectFilterItems(cimStream.getInstance())),
-                                    toStrings(cimStreamDescriptor.doFillComponentDefectFilterItems(cimStream.getInstance(), cimStream.getStream()))
-                                );
+                                    toStrings(cimStreamDescriptor.doFillComponentDefectFilterItems(cimStream.getInstance(), cimStream.getStream())),
+                                    toStrings(cimStreamDescriptor.doFillImpactDefectFilterItems(cimStream.getInstance())));
                             } catch (CovRemoteServiceException_Exception e) {
                                 throw new IOException(e);
                             }
@@ -617,8 +604,6 @@ public class CoverityPublisher extends Recorder {
 
                     rsp.setContentType("application/json; charset=utf-8");
                     final ServletOutputStream outputStream = rsp.getOutputStream();
-
-                    Collections.sort(projects, String.CASE_INSENSITIVE_ORDER);
 
                     JSONObject responseObject = new JSONObject();
                     responseObject.put("projects", projects);
@@ -654,8 +639,6 @@ public class CoverityPublisher extends Recorder {
 
                     rsp.setContentType("application/json; charset=utf-8");
                     final ServletOutputStream outputStream = rsp.getOutputStream();
-
-                    Collections.sort(streams, String.CASE_INSENSITIVE_ORDER);
 
                     JSONObject responseObject = new JSONObject();
                     responseObject.put("streams", streams);
