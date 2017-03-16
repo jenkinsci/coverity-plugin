@@ -1,6 +1,6 @@
 <!--
  /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,17 +10,19 @@
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
 -->
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson">
     <l:layout title="${it.build.parent.displayName} #${it.build.number} Coverity Defects">
         <st:include page="sidepanel.jelly" it="${it.build}" optional="true"/>
         <l:main-panel>
 
             <H2>Coverity Defects</H2>
-            <l:pane title="Coverity Defects" width="3">
+            <table>
                 <tr class="pane">
                     <th align="left">CID</th>
                     <th align="left">Checker</th>
                     <th align="left">Function</th>
+                    <th align="left">File Location</th>
                 </tr>
                 <j:forEach var="defect" items="${it.defects}">
                     <tr class="pane">
@@ -29,9 +31,10 @@
                         </td>
                         <td>${defect.checkerName}</td>
                         <td>${defect.functionDisplayName}</td>
+                        <td>${defect.filePathname}</td>
                     </tr>
                 </j:forEach>
-            </l:pane>
+            </table>
         </l:main-panel>
     </l:layout>
 </j:jelly>

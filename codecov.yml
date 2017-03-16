@@ -1,0 +1,12 @@
+# https://docs.codecov.io/docs/codecov-yaml
+# https://github.com/codecov/support/wiki/Codecov-Yaml
+coverage:
+  status:
+    # lines changed by a single commit or merge request
+    patch:
+      default:
+        only_pulls: true
+    # coverage of the whole project
+    project:
+      default:
+        only_pulls: true

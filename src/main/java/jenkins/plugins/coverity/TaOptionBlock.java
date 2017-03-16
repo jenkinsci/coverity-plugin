@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,20 +11,23 @@
 package jenkins.plugins.coverity;
 
 import hudson.Util;
-import hudson.EnvVars;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.File;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class TaOptionBlock {
+
+    private static final Logger logger = Logger.getLogger(CoverityPublisher.class.getName());
+
+    // Deprecated field from 1.9.0 release
+    private transient String taStripPath;
+
     private final String customTestCommand;
     private final boolean cOptionBlock;
     private final boolean csOptionBlock;
-    private final String scmSystem;
     private final String customTestTool;
-    private final String scmToolArguments;
-    private final String scmCommandArgs;
     private final String logFileLoc;
     private final String csFramework;
     private final String csCoverageTool;
@@ -32,20 +35,14 @@ public class TaOptionBlock {
     private final String javaCoverageTool;
     private final boolean junitFramework;
     private final boolean junit4Framework;
-    private final boolean scmOptionBlock;
     private final String policyFile;
-    private final String taStripPath;
-    private final String p4Port;
-    private final String accRevRepo;
     private final String bullsEyeDir;
-    private final String customWorkDir;
     private final boolean covHistoryCheckbox;
-    private EnvVars envVars;
-
-
     private final boolean javaOptionBlock;
+    private List<TaStripPath> taStripPaths;
+
     /*
-        Generic Contructor that will hold all the elements we need for Test Advisor. All of these variables 
+        Generic Constructor that will hold all the elements we need for Test Advisor. All of these variables
         are fields within the Test Advisor Option Block
      */
     @DataBoundConstructor
@@ -53,10 +50,7 @@ public class TaOptionBlock {
                          boolean cOptionBlock,
                          boolean csOptionBlock,
                          boolean javaOptionBlock,
-                         String scmSystem,
                          String customTestTool,
-                         String scmToolArguments,
-                         String scmCommandArgs,
                          String logFileLoc,
                          String csFramework,
                          String csCoverageTool,
@@ -64,22 +58,15 @@ public class TaOptionBlock {
                          String javaCoverageTool,
                          boolean junitFramework,
                          boolean junit4Framework,
-                         boolean scmOptionBlock,
                          String policyFile,
-                         String taStripPath,
-                         String p4Port,
-                         String accRevRepo,
+                         List<TaStripPath> taStripPaths,
                          String bullsEyeDir,
-                         String customWorkDir,
                          boolean covHistoryCheckbox) {
         this.customTestCommand = Util.fixEmpty(customTestCommand);
         this.cOptionBlock = cOptionBlock;
         this.csOptionBlock = csOptionBlock;
         this.javaOptionBlock = javaOptionBlock;
-        this.scmSystem = scmSystem;
         this.customTestTool = Util.fixEmpty(customTestTool);
-        this.scmToolArguments = Util.fixEmpty(scmToolArguments);
-        this.scmCommandArgs = Util.fixEmpty(scmCommandArgs);
         this.logFileLoc = Util.fixEmpty(logFileLoc);
         this.csFramework = csFramework;
         this.csCoverageTool = csCoverageTool;     // Required if other two are not selected
@@ -87,15 +74,39 @@ public class TaOptionBlock {
         this.javaCoverageTool = javaCoverageTool; // Required if other two are not selected
         this.junit4Framework = junit4Framework;
         this.junitFramework = junitFramework;
-        this.scmOptionBlock = scmOptionBlock;
         this.policyFile = Util.fixEmpty(policyFile);    // Required
-        this.taStripPath = Util.fixEmpty(taStripPath); // Required
-        this.p4Port = Util.fixEmpty(p4Port); // Required if perforce is selected
-        this.accRevRepo = Util.fixEmpty(accRevRepo);   // Required if accurev is selected
         this.bullsEyeDir = Util.fixEmpty(bullsEyeDir); // Required if bulls eye is selected
-        this.customWorkDir = Util.fixEmpty(customWorkDir); // Required if a custom command is issued
         this.covHistoryCheckbox = covHistoryCheckbox;
+        this.taStripPaths = taStripPaths;   // Required
     }
+
+    /**
+     * Implement readResolve to update the de-serialized object in the case transient data was found. Transient fields
+     * will be read during de-serialization and readResolve allow updating the TaOptionBlock object after being created.
+     */
+    protected Object readResolve() {
+        // Check for old data values taStripPath being set
+        if(taStripPath != null) {
+            logger.info("Old data format detected. Converting to new format.");
+            convertTransientDataFields();
+        }
+
+        return this;
+    }
+
+    /**
+     * Converts the old data values taStripPath to a {@link TaStripPath} object
+     * and adds to the configured taStripPaths.
+     */
+    private void convertTransientDataFields() {
+        TaStripPath stripPath = new TaStripPath(taStripPath);
+
+        if(taStripPaths == null) {
+            this.taStripPaths = new ArrayList<TaStripPath>();
+        }
+        taStripPaths.add(stripPath);
+    }
+
     /*
     Required functions needed for jenkins to access all of the Test Advisor Data.
      */
@@ -107,13 +118,7 @@ public class TaOptionBlock {
 
     public boolean getJavaOptionBlock(){return javaOptionBlock;}
 
-    public String getScmSystem(){return scmSystem;}
-
     public String getCustomTestTool(){return customTestTool;}
-
-    public String getScmToolArguments(){return scmToolArguments;}
-
-    public String getScmCommandArgs(){return scmCommandArgs;}
 
     public String getLogFileLoc(){return logFileLoc ;}
 
@@ -129,23 +134,13 @@ public class TaOptionBlock {
 
     public boolean getJunitFramework(){return junitFramework;}
 
-    public boolean getScmOptionBlock(){return scmOptionBlock;}
-
     public String getPolicyFile(){return policyFile;}
-
-    public String getTaStripPath(){return taStripPath;}
-
-    public String getP4Port(){return p4Port;}
-
-    public String getAccRevRepo(){return accRevRepo;}
 
     public String getBullsEyeDir(){return bullsEyeDir;}
 
-    public String getCustomWorkDir(){return customWorkDir;}
-
     public boolean getCovHistoryCheckbox(){return covHistoryCheckbox;}
 
-
+    public List<TaStripPath> getTaStripPaths() { return taStripPaths; }
 
     /*
     Get Test Advisor Command Arguments
@@ -209,49 +204,39 @@ public class TaOptionBlock {
 
     /*
     Check Test Advisor Config
-        - Ran before the build, to check that all of the fields are filled out correctly. 
+        - Ran before the build, to check that all of the fields are filled out correctly.
+        - Ran when "Check Configuration" button is clicked on the configuration page.
         - There are some special cases that are also checked and also making sure that all required fields 
         are filled out. 
      */
     public String checkTaConfig(){
         boolean delim = true;
-        String errorText = "Errors with your Test Analysis configuration. Please look into the specified issues: \n";
+        String errorText = StringUtils.EMPTY;
         // Making sure they pick a test language
         if(!this.javaOptionBlock && !this.cOptionBlock && !this.csOptionBlock){
-            errorText += "[Error] No Coverage language was chosen, please pick at least one \n";
+            errorText += "[Test Advisor] No Coverage language was chosen, please pick at least one \n";
             delim = false;
         }
 
         // Making sure that a policy file is specified
         if(this.policyFile == null){
-            errorText += "[Error] Policy file is not specified. \n";
+            errorText += "[Test Advisor] Policy file is not specified. \n";
             delim = false;
         }
 
-        // Checking the required fields for specific SCM systems
-        if(this.scmOptionBlock){
-            if(this.scmSystem.equals("accurev") && this.accRevRepo == null){
-                errorText += "[Error] Please specify AccuRev's source control repository under 'Advanced' \n";
-                delim = false;
-            }
-
-            if(this.scmSystem.equals("perforce") && this.p4Port == null){
-                errorText += "[Error] Please specify Perforce's port environment variable\n ";
-                delim = false;
-            }
+        if ((this.javaOptionBlock && this.javaCoverageTool.equals("none"))
+                || (this.cOptionBlock && this.cxxCoverageTool.equals("none"))
+                || (this.csOptionBlock && this.csCoverageTool.equals("none"))) {
+            errorText += "[Test Advisor] No Coverage tool was chosen \n";
+            delim = false;
         }
+
         // Checking required field for bullseye
         if(this.cOptionBlock){
             if(this.cxxCoverageTool.equals("bullseye") && this.bullsEyeDir == null){
-                errorText += "[Error] Bulls eye requires the installation directory. \n";
+                errorText += "[Test Advisor] Bulls eye requires the installation directory. \n";
                 delim = false;
             }
-        }
-        // Checking to see if a working directory is specified for a custom test command so that seperate test
-        // commands work correctly
-        if(this.customTestCommand != null && this.customWorkDir == null){
-            errorText += "[Error] When running a custom test command, a working directory must be specified \n";
-            delim = false;
         }
 
         if(delim){

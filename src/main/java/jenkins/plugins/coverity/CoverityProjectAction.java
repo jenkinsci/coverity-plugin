@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,12 +13,13 @@ package jenkins.plugins.coverity;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.Hudson;
 import hudson.util.ChartUtil;
 import hudson.util.DataSetBuilder;
 import hudson.util.Graph;
 import hudson.util.ShiftedCategoryAxis;
 import hudson.util.StackedAreaRenderer2;
+import jenkins.model.Jenkins;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -77,8 +78,8 @@ public class CoverityProjectAction implements Action {
                 final List<CoverityBuildAction> actions = build.getActions(CoverityBuildAction.class);
 
                 for(CoverityBuildAction action : actions) {
-                    if(action != null && action.getDefectIds() != null && action.getId() != null) {
-                        data.add(action.getDefectIds().size(), action.getId(), new ChartLabel(build));
+                    if(action != null && action.getDefects() != null && action.getGraphDisplayName() != null) {
+                        data.add(action.getDefects().size(), action.getGraphDisplayName(), new ChartLabel(build));
                     }
                 }
                 build = build.getPreviousBuild();
@@ -90,7 +91,6 @@ public class CoverityProjectAction implements Action {
         protected JFreeChart createGraph() {
             final CategoryDataset dataset = createDataSet().build();
 
-            DataSetBuilder test = createDataSet();
             List rows = dataset.getColumnKeys();
             for(int i = 0; i < rows.size(); i ++){
                 Object row = rows.get(i);
@@ -135,34 +135,7 @@ public class CoverityProjectAction implements Action {
             rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
             rangeAxis.setAutoRange(true);
 
-            StackedAreaRenderer ar = new StackedAreaRenderer2() {
-                @Override
-                public Paint getItemPaint(int row, int column) {
-                    ChartLabel key = (ChartLabel) dataset.getColumnKey(column);
-                    if(key.getColor() != null) return key.getColor();
-                    return super.getItemPaint(row, column);
-                }
-
-                @Override
-                public String generateURL(CategoryDataset dataset, int row,
-                                          int column) {
-                    ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
-                    return label.getUrl() + "coverity_" + dataset.getRowKey(row);
-                }
-
-                @Override
-                public String generateToolTip(CategoryDataset dataset, int row,
-                                              int column) {
-                    ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
-                    int defects = 0;
-                    for(CoverityBuildAction a : label.build.getActions(CoverityBuildAction.class)) {
-                        defects += a.getDefectIds().size();
-                    }
-                    return label.build.getDisplayName() + " has " + defects + " total defects";
-                }
-            };
-            plot.setRenderer(ar);
-            //ar.setSeriesPaint(0, ColorPalette.RED);
+            plot.setRenderer(new ChartItemRenderer(dataset));
 
             // crop extra space around the graph
             plot.setInsets(new RectangleInsets(0, 0, 0, 5.0));
@@ -171,7 +144,59 @@ public class CoverityProjectAction implements Action {
         }
     }
 
-    class ChartLabel implements Comparable<ChartLabel> {
+    private static class ChartItemRenderer extends StackedAreaRenderer2 {
+        private final CategoryDataset ds;
+
+        public ChartItemRenderer(CategoryDataset ds) {
+            this.ds = ds;
+        }
+
+        @Override
+        public Paint getItemPaint(int row, int column) {
+            ChartLabel key = (ChartLabel) ds.getColumnKey(column);
+            if(key.getColor() != null) return key.getColor();
+            return super.getItemPaint(row, column);
+        }
+
+        @Override
+        public String generateURL(CategoryDataset dataset, int row,
+                                  int column) {
+            ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
+            return label.getUrl() + CoverityBuildAction.BUILD_ACTION_IDENTIFIER;
+        }
+
+        @Override
+        public String generateToolTip(CategoryDataset dataset, int row,
+                                      int column) {
+            ChartLabel label = (ChartLabel) dataset.getColumnKey(column);
+            int defects = 0;
+            for(CoverityBuildAction a : label.build.getActions(CoverityBuildAction.class)) {
+                defects += a.getDefects().size();
+            }
+            return label.build.getDisplayName() + " has " + defects + " total defects";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(obj == this) {
+                return true;
+            } else if(!(obj instanceof ChartItemRenderer)) {
+                return false;
+            } else {
+                ChartItemRenderer that = (ChartItemRenderer)obj;
+                return this.ds != that.ds ? false : super.equals(obj);
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            int result = ds.hashCode();
+            result = 31 * result + super.hashCode();
+            return result;
+        }
+    }
+
+    private static class ChartLabel implements Comparable<ChartLabel> {
         private AbstractBuild build;
 
         public ChartLabel(AbstractBuild build) {
@@ -179,7 +204,7 @@ public class CoverityProjectAction implements Action {
         }
 
         public String getUrl() {
-            return Hudson.getInstance().getRootUrl() + build.getUrl();
+            return Jenkins.getInstance().getRootUrl() + build.getUrl();
         }
 
         public int compareTo(ChartLabel that) {

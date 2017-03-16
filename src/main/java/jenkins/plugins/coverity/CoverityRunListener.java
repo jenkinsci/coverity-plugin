@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,11 +62,6 @@ public class CoverityRunListener extends RunListener<Run> {
         cc.check();
 
         for(CheckConfig.Status s : cc.getStatus()) {
-            if(s instanceof CheckConfig.StreamStatus) {
-                listener.getLogger().print("[Stream] " + ((CheckConfig.StreamStatus) s).getStream().toPrettyString() + " : ");
-            } else if(s instanceof CheckConfig.NodeStatus) {
-                listener.getLogger().print("[Node] " + ((CheckConfig.NodeStatus) s).getNode().getDisplayName() + " : ");
-            }
             listener.getLogger().println(s.getStatus());
         }
 

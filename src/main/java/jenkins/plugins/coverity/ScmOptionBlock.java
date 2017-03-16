@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package jenkins.plugins.coverity;
 import hudson.Util;
 import hudson.EnvVars;
 import hudson.model.BuildListener;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
@@ -77,23 +78,18 @@ public class ScmOptionBlock {
         return fileRegex;
     }
 
-    public String checkScmConfig(CoverityVersion version){
+    public String checkScmConfig(){
         // Checking the required fields for specific SCM systems
 
-        String errorText = "Errors with your SCM configuration. Please look into the specified issues: \n";
+        String errorText = StringUtils.EMPTY;
         Boolean delim = true;
         if(this.scmSystem.equals("accurev") && this.accRevRepo == null){
-            errorText += "[Error] Please specify AccuRev's source control repository under 'Advanced' \n";
+            errorText += "[SCM] Please specify AccuRev's source control repository under 'Advanced' \n";
             delim = false;
         }
 
         if(this.scmSystem.equals("perforce") && this.p4Port == null){
-            errorText += "[Error] Please specify Perforce's port environment variable under 'Advanced'\n ";
-            delim = false;
-        }
-
-        if(!version.compareToAnalysis(new CoverityVersion(7, 5, 0)) && this.scmSystem.equals("perforce2009")){
-            errorText += "[Error] Perforce 2009 is only available with Coverity Analysis versions 7.5.0 and greater \n";
+            errorText += "[SCM] Please specify Perforce's port environment variable under 'Advanced'\n ";
             delim = false;
         }
 

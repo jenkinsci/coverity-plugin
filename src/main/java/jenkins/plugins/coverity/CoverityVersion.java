@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,9 +20,10 @@ import java.util.regex.Pattern;
  * codenames are all valid and comparable.
  */
 public class CoverityVersion implements Comparable<CoverityVersion>, Serializable {
-    public static final CoverityVersion VERSION_FRESNO = new CoverityVersion("fresno");
     public static final CoverityVersion VERSION_INDIO = new CoverityVersion("indio");
     public static final CoverityVersion VERSION_JASPER = new CoverityVersion("jasper");
+
+    public static final CoverityVersion MINIMUM_SUPPORTED_VERSION = VERSION_INDIO;
 
     static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\w+)");
 
@@ -171,15 +172,43 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
         return (a < b ? -1 : (a == b ? 0 : 1));
     }
 
-    public int compareMajor(int major){
-        return cmp(this.major,major);
-    }
-    // Returns if the version is a code name or not.
-    public boolean isCodeName(){
-        return isCodeName;
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) {
+            return true;
+        }
+        if(o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        CoverityVersion other = (CoverityVersion) o;
+
+        if (isCodeName || other.isCodeName) {
+            return getEffectiveVersion().equals(other.getEffectiveVersion());
+        }
+
+        if (major != other.major) {
+            return false;
+        }
+        if (minor != other.minor) {
+            return false;
+        }
+        if (patch != other.patch) {
+            return false;
+        }
+        if (hotfix != other.hotfix) {
+            return false;
+        }
+        return true;
     }
 
-    public boolean containsCodeName(){
-        return codeNameEquivalents.containsKey(codeName);
+    @Override
+    public int hashCode() {
+        int result = 31;
+        result = 31 * result + major;
+        result = 31 * result + minor;
+        result = 31 * result + patch;
+        result = 31 * result + hotfix;
+        return result;
     }
 }

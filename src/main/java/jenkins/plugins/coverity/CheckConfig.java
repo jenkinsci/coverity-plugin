@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
-import com.coverity.ws.v6.StreamDataObj;
-import com.coverity.ws.v6.StreamFilterSpecDataObj;
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.coverity.ws.v9.StreamDataObj;
+import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -25,7 +25,6 @@ import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.util.FormValidation;
-import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,12 +34,14 @@ import java.io.Reader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.logging.Logger;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
+import org.jenkinsci.remoting.RoleChecker;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -51,6 +52,7 @@ import org.xml.sax.XMLReader;
  * A configuration checker, and the results of such a check.
  */
 public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
+    private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
     private CoverityPublisher publisher;
     private final List<Status> status;
     private Launcher launcher;
@@ -103,9 +105,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
 
         status.clear();
 
-        for(CIMStream cs : publisher.getCimStreams()) {
-            status.add(checkStream(publisher, cs));
-        }
+        status.add(checkStream(publisher, publisher.getCimStream()));
 
         if(launcher != null) {
             NodeStatus ns = checkNode(publisher, build, launcher, listener);
@@ -126,8 +126,9 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 for(Status s : status) {
                     if(s instanceof StreamStatus) {
                         StreamStatus ss = (StreamStatus) s;
-                        if(!ss.getVersion().compareToAnalysis(analysisVersion)) {
-                            newStatus.add(new Status(false, "Connect instance " + ss.getStream().toPrettyString() + " (version " +
+                        CIMStream stream = ss.getStream();
+                        if(!ss.getVersion().compareToAnalysis(analysisVersion) && stream != null) {
+                            newStatus.add(new Status(false, "Connect instance " + stream.toPrettyString() + " (version " +
                                     ss.getVersion() + "|" + ss.getVersion().getEffectiveVersion() +
                                     ") is incompatible with analysis version " + analysisVersion));
                         }
@@ -143,58 +144,25 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                     for(Status s : status) {
                         if(s instanceof StreamStatus) {
                             StreamStatus ss = (StreamStatus) s;
-                            if(ss.getStream().getDomain().equals("MIXED")) {
-                                newStatus.add(new Status(false, "Stream " + ss.getStream().toPrettyString() + " (any language) is incompatible with analysis version " + analysisVersion));
+                            CIMStream stream = ss.getStream();
+                            if(stream != null && stream.getDomain().equals("MIXED")) {
+                                newStatus.add(new Status(false, "Stream " + stream.toPrettyString() + " (any language) is incompatible with analysis version " + analysisVersion));
                             }
                         }
                     }
                     status.addAll(newStatus);
                 }
             }
+        }
 
-            //can we commit to each stream, given the languages we are analyzing? (assuming analysis >= fresno
-            {
-                if(analysisVersion.compareTo(CoverityVersion.codeNameEquivalents.get("fresno")) >= 0) {
-                    List<Status> newStatus = new ArrayList<Status>();
-                    Set<String> languagesToAnalyze = new HashSet<String>();
-                    boolean singleDomainStreamExists = false;
+        TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
+        if (taOptionBlock != null) {
+            status.add(checkTaOptionBlock(taOptionBlock));
+        }
 
-                    for(Status s : status) {
-                        if(s instanceof StreamStatus) {
-                            StreamStatus ss = (StreamStatus) s;
-                            if(ss.getStream() != null && ss.getStream().getLanguage() != null && !ss.getStream().getLanguage().equals("ALL")) {
-                                singleDomainStreamExists = true;
-                                languagesToAnalyze.add(ss.getStream().getLanguage());
-                            } else {
-                                languagesToAnalyze.add("JAVA");
-                                languagesToAnalyze.add("CXX");
-                                languagesToAnalyze.add("CSHARP");
-                            }
-                        }
-                    }
-
-                    if(singleDomainStreamExists && languagesToAnalyze.size() > 1) {
-                        System.out.println(languagesToAnalyze);
-                        newStatus.add(new Status(false, "There is a single-domain stream, but there are multiple languages to be committed."));
-                    }
-
-                    if(languagesToAnalyze.size() == 1) {
-                        String language = languagesToAnalyze.iterator().next();
-                        for(Status s : status) {
-                            if(s instanceof StreamStatus) {
-                                StreamStatus ss = (StreamStatus) s;
-                                if(ss.getStream().getDomain().equals("MIXED") || ss.getStream().getDomain().equals(language)) {
-                                    //we're fine so far
-                                } else {
-                                    newStatus.add(new Status(false, "Language " + language + " cannot be committed to stream " + ss.getStream().toPrettyString()));
-                                }
-                            }
-                        }
-                    }
-
-                    status.addAll(newStatus);
-                }
-            }
+        ScmOptionBlock scmOptionBlock = publisher.getScmOptionBlock();
+        if (scmOptionBlock != null) {
+            status.add(checkScmOptionBlock(scmOptionBlock));
         }
     }
 
@@ -274,34 +242,30 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             }
 
             if(home == null) {
-                return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);
+                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + home + "]", node, null);
             }
 
             try {
                 CoverityUtils.checkDir(launcher.getChannel(), home);
             } catch (Exception e) {
                 e.printStackTrace();
-                return new NodeStatus(false, "Could not find Coverity Analysis home directory.", node, null);
+                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + home + "]", node, null);
             }
 
             FilePath homePath = new FilePath(launcher.getChannel(), home);
 
             final TaskListener listen = listener; // Final copy of listner to help print debugging messages
 
-            // Function to go into Analysis directory and find the VERSION.xml file, then pull the version number.
-            CoverityVersion version = homePath.child("VERSION.xml").act(new FilePath.FileCallable<CoverityVersion>() {
-                public CoverityVersion invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                    InputStream fis = new FileInputStream(f);
+            CoverityVersion version = getVersion(homePath, listen);
 
-                    // Setting up reader into UTF-8 format since xml document is that format
-                    Reader reader = new InputStreamReader(fis,"UTF-8");
-                    InputSource is = new InputSource(reader);
-                    is.setEncoding("UTF-8");
-                    CoverityVersion cv = parseVersionXML(is,listen);
-                    fis.close();
-                    return cv;
-                }
-            });
+            if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
+                return new NodeStatus(false,
+                    "\"Coverity Static Analysis\" version " + version.toString() + " is not supported. " +
+                    "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().toString(),
+                    node,
+                    version);
+            }
+
             return new NodeStatus(true, "version " + version, node, version);
 
         } catch(IOException e) {
@@ -313,6 +277,54 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         }
     }
 
+    /*
+    Performs the validation on TaOptionBlock
+     */
+    public static Status checkTaOptionBlock(TaOptionBlock taOptionBlock) {
+        String taCheck = taOptionBlock.checkTaConfig();
+        if(!taCheck.equals("Pass")){
+            return new Status(false, taCheck);
+        }
+        return new Status(true, "[Test Advisor] Configuration is valid!");
+    }
+
+    /*
+    Performs the validation on ScmOptionBlock
+     */
+    public static Status checkScmOptionBlock(ScmOptionBlock scmOptionBlock) {
+        String scmCheck = scmOptionBlock.checkScmConfig();
+        if(!scmCheck.equals("Pass")){
+            return new Status(false, scmCheck);
+        }
+        return new Status(true, "[SCM] Configuration is valid!");
+    }
+
+    /*
+     * Gets the {@link CoverityVersion} given a static analysis tools home directory by finding the VERSION.xml file,
+     * then reading the version number
+     */
+    public static CoverityVersion getVersion(FilePath homePath, final TaskListener listener) throws IOException, InterruptedException {
+        CoverityVersion version = homePath.child("VERSION.xml").act(new FilePath.FileCallable<CoverityVersion>() {
+            @Override
+            public void checkRoles(RoleChecker roleChecker) throws SecurityException {
+            }
+
+            public CoverityVersion invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+                InputStream fis = new FileInputStream(f);
+
+                // Setting up reader into UTF-8 format since xml document is that format
+                Reader reader = new InputStreamReader(fis, "UTF-8");
+                InputSource is = new InputSource(reader);
+                is.setEncoding("UTF-8");
+                CoverityVersion cv = parseVersionXML(is, listener);
+                fis.close();
+                return cv;
+            }
+        });
+
+        return version;
+    }
+
     /**
      * Parse Version XML File
      * We use SAX Parser to go thought the VERSION.xml file, and extract the Major, Minor, Revision, and Beta elements.
@@ -322,8 +334,9 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
      * @return {@link CoverityVersion}
      */
     private static CoverityVersion parseVersionXML(InputSource path, TaskListener listener){
-        try{
+        String errorMessage;
 
+        try{
             // Setting up SAX Parser
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(false);
@@ -356,14 +369,21 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                     return new CoverityVersion(connectorParser.major);
             }
         }catch(ParserConfigurationException x){
-            listener.fatalError("Unable to configure XML parser: " + x.getMessage());
+            errorMessage = "Unable to configure XML parser: " + x.getMessage();
         }catch(SAXException x){
-            listener.fatalError("Unable to parse VERSION.xml: " + x.getMessage());
+            errorMessage = "Unable to parse VERSION.xml: " + x.getMessage();
         }catch(FileNotFoundException x){
-            listener.fatalError("Could not find VERSION.xml file at: " + path.toString());
+            errorMessage = "Could not find VERSION.xml file at: " + path.toString();
         }catch(IOException x){
-            listener.fatalError("IOException reading VERSION.xml: " + x.getMessage());
+            errorMessage = "IOException reading VERSION.xml: " + x.getMessage();
         }
+
+        if (listener != null) {
+            listener.fatalError(errorMessage);
+        } else {
+            logger.warning(errorMessage);
+        }
+
         return null;
     }
 
@@ -372,7 +392,6 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
      *  within the xml, and then store its number
      */
     private static class ConnectorParser extends DefaultHandler{
-        public String version = null;
         public String major = null;
         public String minor = null;
         public String revision = null;
@@ -464,6 +483,14 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         public CoverityVersion getVersion() {
             return version;
         }
+
+        @Override
+        public String getStatus() {
+            if (stream != null) {
+                return "[Stream] " + stream.toPrettyString() + " : " + status;
+            }
+            return status;
+        }
     }
 
     public static class NodeStatus extends Status {
@@ -482,6 +509,14 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
 
         public CoverityVersion getVersion() {
             return version;
+        }
+
+        @Override
+        public String getStatus() {
+            if (node != null) {
+                return "[Node] " + node.getDisplayName() + " : " + status;
+            }
+            return status;
         }
     }
 

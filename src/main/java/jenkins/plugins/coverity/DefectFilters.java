@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,20 +10,26 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v6.*;
-import com.coverity.ws.v9.DefectStateAttributeValueDataObj;
-import hudson.Util;
-import hudson.model.BuildListener;
-import hudson.model.Descriptor;
-import hudson.model.Hudson;
-import org.kohsuke.stapler.DataBoundConstructor;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import com.coverity.ws.v9.ComponentIdDataObj;
+import com.coverity.ws.v9.MergedDefectFilterSpecDataObj;
+
+import hudson.Util;
+import hudson.model.Descriptor;
 
 /**
  * Responsible for filtering the full list of defects to determine if a build should fail or not. Filters are inclusive:
@@ -34,10 +40,10 @@ public class DefectFilters {
     private List<String> actions;
     private List<String> severities;
     private List<String> components;
+    private List<String> ignoredComponents;
     private List<String> checkers;
     private List<String> ignoredCheckers;
     private Date cutOffDate;
-    private Map<String,String> impactMap;
     private List<String> impacts;
 
     @DataBoundConstructor
@@ -47,6 +53,7 @@ public class DefectFilters {
         this.impacts = Util.fixNull(impacts);
         this.severities = Util.fixNull(severities);
         this.components = Util.fixNull(components);
+        this.ignoredComponents = new ArrayList<String>();
         this.checkers = Util.fixNull(checkers);
         this.ignoredCheckers = new ArrayList<String>();
 
@@ -62,17 +69,40 @@ public class DefectFilters {
         }
     }
 
-    void invertCheckers(Set<String> allCheckers, List<String> allClassifications, List<String> allActions, List<String> allSeverities, List<String> allComponents) {
-        if(classifications.isEmpty() && checkers.isEmpty() && actions.isEmpty() && components.isEmpty() && severities.isEmpty()) {
-            ignoredCheckers = new ArrayList<String>();
-            actions = allActions;
-            severities = allSeverities;
-            components = allComponents;
-            classifications = allClassifications;
-        } else {
-            ignoredCheckers = new ArrayList<String>(allCheckers);
-            ignoredCheckers.removeAll(checkers);
-        }
+    /**
+     * Initializes the default filter selection values when given the attribute values from the active Coverity connect.
+     */
+    void initializeFilter(List<String> allCheckers, List<String> allClassifications, List<String> allActions, List<String> allSeverities, List<String> allComponents, List<String> allImpacts) {
+        // initialize new values by enabling all defaults
+        ignoredCheckers = new ArrayList<String>();
+        checkers = new ArrayList<>(allCheckers);
+        actions = allActions;
+        severities = allSeverities;
+        ignoredComponents = new ArrayList<String>();
+        components = allComponents;
+        impacts = allImpacts;
+
+        // remove the "Intentional", "False Positive", "No Test Needed", "Tested Elsewhere" classifications to match default outstanding filters
+        allClassifications.removeAll(Arrays.asList("Intentional", "False Positive", "No Test Needed", "Tested Elsewhere"));
+        classifications = allClassifications;
+    }
+
+    /**
+     * Inverts the check selection in order to persist the list of ignored checkers. This is necessary to allow new
+     * checkers to be enabled by default when added to Coverity connect (via commits).
+     */
+    public void invertCheckers(List<String> allCheckers) {
+        ignoredCheckers = new ArrayList<>(allCheckers);
+        ignoredCheckers.removeAll(checkers);
+    }
+
+    /**
+     * Inverts the component selection in order to persist the list of ignored components. This is necessary to allow new
+     * component mapss configured on the stream in Coverity connect.
+     */
+    public void invertComponents(List<String> allComponents) {
+        ignoredComponents = new ArrayList<>(allComponents);
+        ignoredComponents.removeAll(components);
     }
 
     /**
@@ -123,7 +153,11 @@ public class DefectFilters {
     }
 
     public boolean isComponentSelected(String component) {
-        return components.contains(component);
+        if (ignoredComponents == null) {
+            return false;
+        }
+
+        return !ignoredComponents.contains(component);
     }
 
     public boolean isCheckerSelected(String checker) {
@@ -132,8 +166,6 @@ public class DefectFilters {
         }
         return !ignoredCheckers.contains(checker);
     }
-
-
 
     public String getCutOffDate() {
         if(cutOffDate == null) return null;
@@ -148,216 +180,46 @@ public class DefectFilters {
 
     public List<String> getImpacts(){return impacts;}
 
-    public List<ComponentIdDataObj> getComponents(){
-        List<ComponentIdDataObj> componentIdDataList = new ArrayList<ComponentIdDataObj>();
-        for(String comp : components){
-            ComponentIdDataObj cIdDataObj = new ComponentIdDataObj();
-            cIdDataObj.setName(comp);
-            componentIdDataList.add(cIdDataObj);
-        }
-        return componentIdDataList;
+    public List<String> getComponents(){
+        return components;
     }
 
-    public List<CheckerSubcategoryFilterSpecDataObj> getCheckers(BuildListener listener){
-        List<CheckerSubcategoryFilterSpecDataObj> checkerSubFilterSpecDataObjList = new ArrayList<CheckerSubcategoryFilterSpecDataObj>();
-        for(String check : checkers){
-            if(check != null){
-                CheckerSubcategoryFilterSpecDataObj checkerSubFilterSpecDataObj = new CheckerSubcategoryFilterSpecDataObj();
-                checkerSubFilterSpecDataObj.setCheckerName(check);
-                checkerSubFilterSpecDataObjList.add(checkerSubFilterSpecDataObj);
-            }
-        }
-        return checkerSubFilterSpecDataObjList;
+    public List<String> getIgnoredComponents() {
+        return ignoredComponents;
     }
 
     public List<String> getIgnoredChecker(){return ignoredCheckers;}
 
     public XMLGregorianCalendar getXMLCutOffDate(){
-        GregorianCalendar calender = new GregorianCalendar();
-        calender.setTime(cutOffDate);
-        try{
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(calender);
-        }catch(Exception e){
+        if (cutOffDate != null) {
+            GregorianCalendar calender = new GregorianCalendar();
+            calender.setTime(cutOffDate);
+            try{
+                return DatatypeFactory.newInstance().newXMLGregorianCalendar(calender);
+            }catch(Exception e){
 
+            }
         }
+
         return null;
     }
 
-    /*
-    createImpactMap
-        Creates an impact map with a key that is based upon the Checkername:Domain:Subcategory. 
-            We use that as the key because it can be easily obtained from the mergedDefectDataObj 
-            and can be tied to the CheckerSubcategoryDataObj since that contains the impact. 
-
-        That map is then stored within DefectFilters which it will later use to filter defects. 
-     */
-    public void createImpactMap(CIMInstance cim){
-        this.impactMap = new HashMap<String,String>();
-
-        try{
-            // Setting up the ws call to get all CheckerSubcategory for the current project
-            ConfigurationService configurationService = cim.getConfigurationService();
-            CheckerPropertyFilterSpecDataObj checkerPropFilter = new CheckerPropertyFilterSpecDataObj();
-            List<CheckerPropertyDataObj> checkerPropertyList = configurationService.getCheckerProperties(checkerPropFilter);
-            // Going through each CheckerSubcategory to get the ID object, which contains the Checker name, domain and Subcategory information
-            for(CheckerPropertyDataObj checkerProp : checkerPropertyList){
-                // Make sure we save the impact
-                String impact = checkerProp.getImpact();
-                CheckerSubcategoryIdDataObj checkerSub = checkerProp.getCheckerSubcategoryId();
-                // Creating the key based on the format of CheckerName:Domain:Subcategory
-                String key = String.format("%s:%s:%s", checkerSub.getCheckerName(), checkerSub.getDomain(), checkerSub.getSubcategory());
-                impactMap.put(key,impact);
-            }
-        }catch(Exception e){
-            // We dont to do anything if this fails since it happens so late within the build.
+    public MergedDefectFilterSpecDataObj ToFilterSpecDataObj(){
+        MergedDefectFilterSpecDataObj filterSpecDataObj = new MergedDefectFilterSpecDataObj();
+        filterSpecDataObj.getActionNameList().addAll(actions);
+        filterSpecDataObj.getClassificationNameList().addAll(classifications);
+        filterSpecDataObj.getSeverityNameList().addAll(severities);
+        filterSpecDataObj.getImpactList().addAll(impacts);
+        for (String component : components) {
+            ComponentIdDataObj componentIdDataObj = new ComponentIdDataObj();
+            componentIdDataObj.setName(component);
+            filterSpecDataObj.getComponentIdList().add(componentIdDataObj);
         }
-    }
-
-    /*
-    checkImpactSelected
-        The function is used to see if the mergeDefect that is passed in has a impact that matches with the impacts 
-        selected within the configuration. 
-     */
-    public boolean checkImpactSelected(MergedDefectDataObj defect){
-        // Creating the key with  a specific format. CheckerName:Domain:CheckerSubcategory
-        String key = String.format("%s:%s:%s", defect.getCheckerName(), defect.getDomain(), defect.getCheckerSubcategory());
-
-        // if a checker does not have a impact, we let it through since the impact is undetermined. 
-        if(this.impactMap == null || key == null || !this.impactMap.containsKey(key)){
-            return true;
+        filterSpecDataObj.getCheckerList().addAll(checkers);
+        XMLGregorianCalendar xmlCutOffDate = getXMLCutOffDate();
+        if (xmlCutOffDate != null) {
+            filterSpecDataObj.setFirstDetectedStartDate(xmlCutOffDate);
         }
-
-        if(this.impacts != null && this.impactMap != null){
-            // Go through the impacts map that will have the key associated with an impact. 
-            for(String selectedImpact : this.impacts){
-                if(selectedImpact != null){
-                    if(this.impactMap.get(key).equals(selectedImpact)){
-                        return true;
-                    }  
-                }
-            }
-        }
-
-        return false;
-    }
-
-
-    public boolean matches(MergedDefectDataObj defect, BuildListener listener) {
-        return isActionSelected(defect.getAction()) &&
-                isClassificationSelected(defect.getClassification()) &&
-                isSeveritySelected(defect.getSeverity()) &&
-                isComponentSelected(defect.getComponentName()) &&
-                isCheckerSelected(defect.getCheckerName()) &&
-                checkImpactSelected(defect) &&
-                Arrays.asList("New", "Triaged", "Various", "新規", "選別済み", "混在").contains(defect.getStatus()) &&
-                (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
-    }
-
-    public boolean matchesIndio(com.coverity.ws.v9.MergedDefectDataObj defect, BuildListener listener) {
-        String status = "";
-        String action = "";
-        String classification = "";
-        String severity = "";
-
-        List<DefectStateAttributeValueDataObj> listOfAttributes = defect.getDefectStateAttributeValues();
-        for(DefectStateAttributeValueDataObj defectAttribute : listOfAttributes){
-            if(defectAttribute.getAttributeDefinitionId().getName().equals("DefectStatus")){
-                status = defectAttribute.getAttributeValueId().getName();
-            }
-            if(defectAttribute.getAttributeDefinitionId().getName().equals("Action")){
-                action = defectAttribute.getAttributeValueId().getName();
-            }
-            if(defectAttribute.getAttributeDefinitionId().getName().equals("Classification")){
-                classification = defectAttribute.getAttributeValueId().getName();
-            }
-            if(defectAttribute.getAttributeDefinitionId().getName().equals("Severity")){
-                severity = defectAttribute.getAttributeValueId().getName();
-            }
-        }
-
-        return isActionSelected(action) &&
-                isClassificationSelected(classification) &&
-                isSeveritySelected(severity) &&
-                isComponentSelected(defect.getComponentName()) &&
-                isCheckerSelected(defect.getCheckerName()) &&
-                isImpactsSelected(defect.getDisplayImpact()) &&
-                Arrays.asList("New", "Triaged", "Various", "新規", "選別済み", "混在").contains(status) &&
-                (cutOffDate == null || defect.getFirstDetected().toGregorianCalendar().getTime().after(cutOffDate));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-
-        DefectFilters that = (DefectFilters) o;
-
-        if(actions != null ? !actions.equals(that.actions) : that.actions != null) return false;
-        if(checkers != null ? !checkers.equals(that.checkers) : that.checkers != null) return false;
-        if(classifications != null ? !classifications.equals(that.classifications) : that.classifications != null)
-            return false;
-        if(components != null ? !components.equals(that.components) : that.components != null) return false;
-        if(cutOffDate != null ? !cutOffDate.equals(that.cutOffDate) : that.cutOffDate != null) return false;
-        if(severities != null ? !severities.equals(that.severities) : that.severities != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = classifications != null ? classifications.hashCode() : 0;
-        result = 31 * result + (actions != null ? actions.hashCode() : 0);
-        result = 31 * result + (severities != null ? severities.hashCode() : 0);
-        result = 31 * result + (components != null ? components.hashCode() : 0);
-        result = 31 * result + (checkers != null ? checkers.hashCode() : 0);
-        result = 31 * result + (cutOffDate != null ? cutOffDate.hashCode() : 0);
-        return result;
-    }
-
-    public CoverityPublisher.DescriptorImpl getPublisherDescriptor() {
-        return Hudson.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
-    }
-
-    /**
-     * Set checkers is used when specific jenkins instances are set up with pre-exisiting configurations and we need to
-     * reset the checkers. (Mainly because of STS)
-     * @param cimInstance
-     * @param streamId
-     * @throws IOException
-     * @throws CovRemoteServiceException_Exception
-     */
-    public void setCheckers(CIMInstance cimInstance,long streamId) throws IOException,CovRemoteServiceException_Exception{
-
-        String wsversion = cimInstance.getWsVersion();
-        try {
-            if(wsversion.equals("v9")){
-                // Retrieve all defects for a specific cim instance.
-                String cs = cimInstance.getCimInstanceCheckers();
-                checkers = getPublisherDescriptor().split2List(cs);
-            } else {
-                StreamDataObj stream = getStream(String.valueOf(streamId), cimInstance);
-                String type = stream.getLanguage();
-
-                if("MIXED".equals(type)) {
-                    type = "ALL";
-                }
-                String cs = getPublisherDescriptor().getCheckers(type);
-                checkers = getPublisherDescriptor().split2List(cs);
-            }
-        } catch(Exception e) {
-            checkers = new LinkedList<String>();
-        }
-    }
-
-    public StreamDataObj getStream(String streamId, CIMInstance cimInstance) throws IOException, CovRemoteServiceException_Exception {
-        StreamFilterSpecDataObj filter = new StreamFilterSpecDataObj();
-        filter.setNamePattern(streamId);
-
-        List<StreamDataObj> streams = cimInstance.getConfigurationService().getStreams(filter);
-        if(streams.isEmpty()) {
-            return null;
-        } else {
-            return streams.get(0);
-        }
+        return filterSpecDataObj;
     }
 }

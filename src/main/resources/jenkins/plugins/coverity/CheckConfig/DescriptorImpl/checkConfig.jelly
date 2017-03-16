@@ -1,6 +1,6 @@
 <!--
  /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,11 +14,6 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 	<tr>
 		<td colspan="3">
-			<!--f:entry>
-				instance=${instance}<br />
-				it=${it}<br />
-				descriptor=${descriptor}<br />
-			</f:entry-->
 			<style>
 				td.valid {
 					color: green;
@@ -27,15 +22,11 @@
 				td.invalid {
 					color: red;
 				}
-
-				td.left {
-					color: #606060;
-				}
 			</style>
 			<table>
 				<j:if test="${instance.isValid()}">
 					<tr style="font-weight: bolder">
-						<td colspan="2" class="valid">Stream configuration is valid.</td>
+						<td colspan="2" class="valid">Configuration is valid.</td>
 					</tr>
 					<tr style="color:#c0a030">
 						<td colspan="2">Node configuration will be checked before each build.</td>
@@ -43,31 +34,14 @@
 				</j:if>
 				<j:if test="${!instance.isValid()}">
 					<tr style="font-weight: bolder">
-						<td colspan="2" class="valid">Stream configuration is invalid.</td>
+						<td colspan="2" class="invalid">Configuration is invalid.</td>
 					</tr>
 				</j:if>
 				<j:forEach items="${instance.getStatus()}" var="si">
-					<j:set var="type" value="${si.getClass().getSimpleName()}"/>
 					<j:set var="class" value='${si.isValid() ? "valid" : "invalid"}'/>
-					<j:choose>
-						<j:when test='${type.equals("StreamStatus")}'>
-							<tr>
-								<td class="left">[Stream] ${si.getStream().toPrettyString()}:</td>
-								<td class="${class}">${si.getStatus()}</td>
-							</tr>
-						</j:when>
-						<j:when test='${type.equals("NodeStatus")}'>
-							<tr style="color:gray">
-								<td class="left">[Node] ${si.getNode().getDisplayName()}:</td>
-								<td class="${class}">${si.getStatus()}</td>
-							</tr>
-						</j:when>
-						<j:otherwise>
-							<tr>
-								<td class="${class}" colspan="2">${si.getStatus()}</td>
-							</tr>
-						</j:otherwise>
-					</j:choose>
+					<tr>
+						<td class="${class}" colspan="2">${si.getStatus()}</td>
+					</tr>
 				</j:forEach>
 			</table>
 		</td>

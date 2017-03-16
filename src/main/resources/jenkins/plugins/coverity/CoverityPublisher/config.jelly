@@ -1,6 +1,6 @@
 <!--
  /*******************************************************************************
- * Copyright (c) 2016 Synopsys, Inc
+ * Copyright (c) 2017 Synopsys, Inc
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,54 +13,265 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
     <j:set var="javaOption" value="${instance.javaOptionBlock}"/>
 	<script type="text/javascript">
-		function loadDefectFilters(id) {
-			var form = document.getElementById('cimInstance-' + id).form;
-			buildFormTree(form);
+    document.observe("dom:loaded", function() {
+      // check for initial stream validation
+      var invalidStream = document.getElementById('invalidStream');
+      if (invalidStream) {
+        var streamSelect = document.getElementById("stream");
+        showErrorMessage(streamSelect, "Stream [ " + invalidStream.value + " ] is not found");
+      }
 
-			var json = form.elements["json"].value;
+      // check for initial project validation
+      var invalidProject = document.getElementById('invalidProject');
+      if (invalidProject) {
+        var projectSelect = document.getElementById("project");
+        showErrorMessage(projectSelect, "Project [ " + invalidProject.value + " ] is not found");
+      }
+    });
 
-			new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
-				parameters: { json: json, id: id },
-				onComplete: function (rsp) {
-					var target = document.getElementById("defectFilters-" + id);
-					target.innerHTML = rsp.status == 200 ? rsp.responseText
-							: '&lt;a href="" onclick="document.getElementById(\'valerr' +
-							(i = iota++) +
-							'\').style.display=\'block\';return false"&gt;ERROR' +
-							'&lt;/a&gt;' +
-							'&lt;div id="valerr' + i + '" style="display:none"&gt;' +
-							rsp.responseText +
-							'&lt;/div&gt;';
-					Behaviour.applySubtree(target);
+    function loadDefectFilters() {
+      var form = document.getElementById('cimInstance').form;
+      buildFormTree(form);
 
-					document.getElementById('filters-' + id).style.display = 'none';
-					document.getElementById('showFilters-' + id).style.display = 'block';
-					document.getElementById('hideFilters-' + id).style.display = 'none';
-				}
-			});
-		}
-	</script>
+      var json = form.elements["json"].value;
+
+      new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/defectFiltersConfig", {
+        parameters: {json: json},
+        onComplete: function (rsp) {
+          var target = document.getElementById("defectFilters");
+          target.innerHTML = rsp.status == 200 ? rsp.responseText
+            : '&lt;a href="" onclick="document.getElementById(\'valerr' +
+            (i = iota++) +
+            '\').style.display=\'block\';return false"&gt;ERROR' +
+            '&lt;/a&gt;' +
+            '&lt;div id="valerr' + i + '" style="display:none"&gt;' +
+            rsp.responseText +
+            '&lt;/div&gt;';
+          Behaviour.applySubtree(target);
+
+          document.getElementById('filters').style.display = 'none';
+          document.getElementById('showFilters').style.display = 'block';
+          document.getElementById('hideFilters').style.display = 'none';
+        }
+      });
+    }
+
+    function loadProjects() {
+
+      var form = document.getElementById('cimInstance').form;
+      buildFormTree(form);
+
+      var json = form.elements["json"].value;
+
+      new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/loadProjectsForInstance", {
+        parameters: {json: json},
+        onLoading: showLoadingProjects(),
+        onComplete: function (t) {
+          var projectSelect = document.getElementById("project");
+
+          if (t.status == 200) {
+            var json = t.responseText.evalJSON();
+
+            projectSelect.options.length = 0;
+
+            json.projects.each(function (project) {
+              var opt = document.createElement("option");
+              opt.value = project;
+              opt.text = project;
+              projectSelect.appendChild(opt);
+            });
+            if (json.selectedProject)
+              projectSelect.value = json.selectedProject;
+
+            if (!json.validSelection) {
+              var invalidInput = document.createElement('input');
+              invalidInput.setAttribute('id', 'invalidProject');
+              invalidInput.setAttribute('type', 'hidden');
+              invalidInput.value = json.selectedProject;
+
+              projectSelect.parentNode.append(invalidInput);
+
+              showErrorMessage(projectSelect, "Project [ " + json.selectedProject + " ] is not found");
+            } else {
+              hideErrorMessage(projectSelect, '#invalidProject');
+              loadStreams();
+            }
+          } else {
+            showErrorMessage(projectSelect, "Error loading projects, server returned " + t.status);
+          }
+
+          hideLoadingProjects();
+        }
+      });
+    }
+
+    function loadStreams() {
+
+      var form = document.getElementById('cimInstance').form;
+      buildFormTree(form);
+
+      var json = form.elements["json"].value;
+
+      new Ajax.Request("${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/loadStreamsForProject", {
+        parameters: {json: json},
+        onComplete: function (t) {
+          var streamSelect = document.getElementById("stream");
+
+          if (t.status == 200) {
+            var json = t.responseText.evalJSON();
+
+            streamSelect.options.length = 0;
+
+            json.streams.each(function (stream) {
+              var opt = document.createElement("option");
+              opt.value = stream;
+              opt.text = stream;
+              streamSelect.appendChild(opt);
+            });
+            if (json.selectedStream)
+              streamSelect.value = json.selectedStream;
+
+            if (!json.validSelection) {
+              var invalidInput = document.createElement('input');
+              invalidInput.setAttribute('id', 'invalidStream');
+              invalidInput.setAttribute('type', 'hidden');
+              invalidInput.value = json.selectedStream;
+
+              streamSelect.parentNode.append(invalidInput);
+
+              showErrorMessage(streamSelect, "Stream [ " + json.selectedStream + " ] is not found");
+            } else {
+              hideErrorMessage(streamSelect, '#invalidStream');
+              loadDefectFilters();
+            }
+          } else {
+            showErrorMessage(streamSelect, "Error loading streams, server returned " + t.status);
+          }
+        }
+      });
+    }
+
+    function validateProjectSelection() {
+      var projectSelect = document.getElementById("project");
+      var projectValue = projectSelect.value;
+
+      var parentCell = projectSelect.parentNode;
+      var parentRow = parentCell.parentNode;
+
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+      var invalidProject = parentCell.select('[id=invalidProject]')[0];
+
+      if (invalidProject &amp;&amp; invalidProject.value != projectValue) {
+        validationCell.innerHTML = '';
+        parentCell.removeChild(invalidProject);
+        var invalidOption = projectSelect.querySelector('option[value="' + invalidProject.value + '"]');
+        if (invalidOption)
+          projectSelect.removeChild(invalidOption);
+      }
+    }
+
+    function validateStreamSelection() {
+      var streamSelect = document.getElementById("stream");
+      var streamValue = streamSelect.value;
+
+      var parentCell = streamSelect.parentNode;
+      var parentRow = parentCell.parentNode;
+
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+      var invalidStream = parentCell.select('[id=invalidStream]')[0];
+
+      if (invalidStream &amp;&amp; invalidStream.value != streamValue) {
+        validationCell.innerHTML = '';
+        parentCell.removeChild(invalidStream);
+        var invalidOption = streamSelect.querySelector('option[value="' + invalidStream.value + '"]');
+        if (invalidOption)
+          streamSelect.removeChild(invalidOption);
+      }
+    }
+
+    function showErrorMessage(fieldControl, errorMessage) {
+      var errorDiv = document.createElement('div');
+      errorDiv.setAttribute('class', 'error');
+      errorDiv.innerHTML = errorMessage;
+
+      var parentRow = fieldControl.parentNode.parentNode;
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+
+      if (validationCell.childElementCount == 0) {
+        validationCell.appendChild(errorDiv);
+      }
+    }
+
+    function hideErrorMessage(fieldControl, invalidIdSelector) {
+      var parentCell = fieldControl.parentNode;
+      var hiddenInvalid = parentCell.select(invalidIdSelector)[0];
+      if (hiddenInvalid) {
+        parentCell.removeChild(hiddenInvalid);
+      }
+
+      var parentRow = parentCell.parentNode;
+      var validationCell = parentRow.next('.validation-error-area').childElements()[1];
+      var errorDiv = validationCell.querySelector('div.error');
+
+      if (validationCell) {
+        if (errorDiv) {
+          validationCell.removeChild(errorDiv);
+        }
+      }
+    }
+
+    function showLoadingProjects() {
+      var parentCell = document.getElementById('cimInstance').parentNode;
+      if (parentCell) {
+        var loadingDiv = parentCell.select("#projectsloading").first();
+
+        if (!loadingDiv) {
+          var loadingDiv = document.createElement('div');
+          loadingDiv.setAttribute('id', 'projectsloading');
+          loadingDiv.innerHTML = "Loading projects...";
+          loadingDiv.hide();
+          parentCell.appendChild(loadingDiv);
+        }
+
+        function showLoading(ld) {
+          ld.show();
+        }
+
+        showLoading.delay(0.2, loadingDiv);
+      }
+    }
+
+    function hideLoadingProjects() {
+      var parentCell = document.getElementById('cimInstance').parentNode;
+      var loadingDiv = parentCell.select("#projectsloading").first();
+      if (parentCell) {
+        if (loadingDiv) {
+          parentCell.removeChild(loadingDiv);
+        }
+      }
+    }
+  </script>
 	<script type="text/javascript">
-		function checkFilters(state, id) {
+		function checkFilters(state) {
 			YAHOO.util.Dom.getElementsBy(
 					function (el) {
 						return (el.name == 'checkers');
 					},
 					'input',
-					'checkers-'+id,
+					'checkers',
 					function (el) {
 						el.checked = (state ? 'true' : null);
 					}
 			);
 		}
 
-		function checkFiltersComponents(state, id) {
+		function checkFiltersComponents(state) {
 			YAHOO.util.Dom.getElementsBy(
 					function (el) {
 						return (el.name == 'components');
 					},
 					'input',
-					'filters-'+id,
+					'filters',
 					function (el) {
 						el.checked = (state ? 'true' : null);
 					}
@@ -111,76 +322,76 @@
 					    <div id="checkConfigOutput" />
 					</div>
 				</f:entry>
-				<f:entry field="cimStreams"
-						 title="Streams"
-						 description="Streams to perform analysis for and commit to">
-					<f:repeatable field="cimStreams"
-								  add="Add Stream" minimum="1" varStatus="loopItem" var="loopItem2">
-						<j:set var="id" value="${descriptor.getRandomID(instance)}" />
-						<table width="100%">
-							<input type="hidden" name="id" value="${id}" />
-							<br/>
-
+				<f:entry field="cimStream">
+          <j:choose>
+            <j:when test="${instance == null}">
+              <j:set var="descriptor" value="${descriptor.getCIMStreamDescriptor()}" />
+            </j:when>
+            <j:otherwise>
+              <j:set var="instance" value="${instance.cimStream}" />
+              <j:set var="descriptor" value="${instance.descriptor}" />
+            </j:otherwise>
+          </j:choose>
+						<table width="100%" name="cimStream">
 							<f:entry title="Coverity Connect instance" field="instance">
-								<f:select id="cimInstance-${id}"/>
+								<f:select id="cimInstance" onchange="loadProjects()"/>
 							</f:entry>
+
 							<f:entry title="Project" field="project">
-								<f:select/>
+                <select id="project" name="project" class="setting-input" onchange="validateProjectSelection();loadStreams()">
+                  <j:forEach var="proj" items="${descriptor.loadProjects(instance.instance, instance.project)}">
+                    <j:choose>
+                      <j:when test="${proj == instance.project}">
+                        <option value="${proj}" selected="selected">${proj}</option>
+                      </j:when>
+                      <j:otherwise>
+                        <option value="${proj}">${proj}</option>
+                      </j:otherwise>
+                    </j:choose>
+                  </j:forEach>
+                </select>
+                <j:set var="initialProjectIsValid" value="${descriptor.checkProjectIsValid(instance.instance, instance.project)}"/>
+                <j:if test="${!initialProjectIsValid}">
+                  <input type="hidden" id="invalidProject" value="${instance.project}" />
+                </j:if>
 							</f:entry>
+
 							<f:entry title="Stream" field="stream">
-								<f:select/>
+								<select id="stream" name="stream" class="setting-input" onchange="validateStreamSelection();loadDefectFilters()">
+                  <j:forEach var="str" items="${descriptor.loadStreams(instance.instance, instance.project, instance.stream)}">
+                    <j:choose>
+                      <j:when test="${str == instance.stream}">
+                        <option value="${str}" selected="selected">${str}</option>
+                      </j:when>
+                      <j:otherwise>
+                        <option value="${str}">${str}</option>
+                      </j:otherwise>
+                    </j:choose>
+                  </j:forEach>
+                </select>
+                <j:set var="initialStreamIsValid" value="${descriptor.checkStreamIsValid(instance.instance, instance.project, instance.stream)}"/>
+                <j:if test="${!initialStreamIsValid}">
+                  <input type="hidden" id="invalidStream" value="${instance.stream}" />
+                </j:if>
 							</f:entry>
-							<f:entry title="Language" field="language">
-                                <f:select onchange="loadDefectFilters(${id})"/>
-                            </f:entry>
-							<f:optionalBlock title="Override default tool settings" field="invocationAssistanceOverride"
-											 checked="${instance.invocationAssistanceOverride != null}" name="invocationAssistanceOverride">
-								<j:set var="instance" value="${instance.invocationAssistanceOverride}"/>
-								<f:entry title="Additional cov-analyze arguments:" field="analyzeArguments">
-									<f:textbox/>
-								</f:entry>
-								<f:entry title="Additional cov-commit-defects arguments:" field="commitArguments">
-									<f:textbox/>
-								</f:entry>
-								<!--f:entry title="Intermediate directory:" field="intermediateDir">
-									<f:textbox/>
-								</f:entry-->
-								<f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
-									<f:textbox/>
-								</f:entry>
-								<!--f:entry title="(Only for C#) Search for DLL and EXE files to analyze:" field="csharpAutomaticAssemblies">
-									<f:checkbox/>
-								</f:entry-->
-								<!--f:entry title="(Only for C#) Microsoft Code Analysis results files:" field="csharpMsvscaOutputFiles">
-									<f:textbox/>
-								</f:entry-->
-								<!--f:entry title="(Only for C#) Search for Microsoft Code Analysis results:" field="csharpMsvsca">
-									<f:checkbox/>
-								</f:entry-->
-								<!--f:entry title="Static analysis location override:" field="saOverride">
-									<f:textbox/>
-								</f:entry-->
-								<!--f:entry title="cov-build blacklist:" field="covBuildBlacklist">
-									<f:textbox/>
-								</f:entry-->
-							</f:optionalBlock>
+
 							<f:entry title="" field="defectFilters">
 								<tr>
 									<td class="setting-leftspace">
 										<st:nbsp/>
 									</td>
 									<td class="setting-name">
-										<a href="#filters-${id}" id="showFilters-${id}"
-										   onclick="document.getElementById('filters-${id}').style.display='block';document.getElementById('hideFilters-${id}').style.display='block';this.style.display='none';">
+										<a href="#filters" id="showFilters"
+										   onclick="document.getElementById('filters').style.display='block';document.getElementById('hideFilters').style.display='block';this.style.display='none';">
 											Defect Filters >>>
 										</a>
-										<a href="#filters-${id}" id="hideFilters-${id}"
+										<a href="#filters" id="hideFilters"
 										   style="display: none;"
-										   onclick="document.getElementById('filters-${id}').style.display='none';document.getElementById('showFilters-${id}').style.display='block';this.style.display='none';">
+										   onclick="document.getElementById('filters').style.display='none';document.getElementById('showFilters').style.display='block';this.style.display='none';">
 											Defect Filters &lt;&lt;&lt;</a>
 									</td>
 									<td class="setting-main">
-										<table width="100%" id="defectFilters-${id}" name="defectFilters">
+										<table width="100%" id="defectFilters" name="defectFilters">
 											<st:include from="${descriptor}" page="defectFilters.jelly" />
 										</table>
 									</td>
@@ -194,40 +405,23 @@
 								</tr>
 							</f:entry>
 						</table>
-						<div align="right">
-							<input type="button" value="Remove Stream for Analysis" class="repeatable-delete"
-								   style="margin-left: 1em;"/>
-						</div>
-					</f:repeatable>
 				</f:entry>
-
-				<!--
-				<f:optionalBlock title="Send a mail when defects are found" field="mailSender" checked="${instance.mailSender != null}" name="mailSender">
-					<j:set var="instance" value="${instance.mailSender}"/>
-					<f:entry title="Additional recipients" field="recipients">
-						<f:textbox/>
-					</f:entry>
-				</f:optionalBlock>
-				-->
 
                 <f:optionalBlock title="Perform Coverity build, analysis and commit" field="invocationAssistance"
 								 checked="${instance.invocationAssistance != null}" name="invocationAssistance">
 					<j:set var="instance" value="${instance.invocationAssistance}"/>
                     <f:block>
                         <table style="padding-left:2%; width:100%;">
-                            <f:entry title="Support compiled language sources during cov-build phase" field="isCompiledSrc">
-                                <f:checkbox/>
-                            </f:entry>
                             <f:entry title="Support scripting language sources during cov-build phase" field="isScriptSrc">
                                 <f:checkbox/>
                             </f:entry>
                             <f:entry title="Additional cov-build arguments:" field="buildArguments">
                                 <f:textbox/>
                             </f:entry>
-                            <f:optionalBlock title="Add post cov-build command" field="postCovBuildJSON" checked="${instance.postCovBuildCmd != null}" >
+                            <f:optionalBlock title="Add post cov-build command" field="postCovBuild" checked="${instance.postCovBuildCmd != null}">
                                 <f:block>
                                     <table style="padding-left:2%; width:100%;">
-                                        <f:entry name="postCovBuildCmd" title="Post cov-build command:" field="postCovBuildCmd" value="${it.postCovBuildCmd}">
+                                        <f:entry title="Post cov-build command:" field="postCovBuildCmd">
                                             <f:textbox/>
                                         </f:entry>
                                     </table>
@@ -236,10 +430,10 @@
                             <f:entry title="Additional cov-analyze arguments:" field="analyzeArguments">
                                 <f:textbox/>
                             </f:entry>
-                            <f:optionalBlock title="Add post cov-analyze command" field="postCovAnalyzeJSON" checked="${instance.postCovAnalyzeCmd != null}" >
+                            <f:optionalBlock title="Add post cov-analyze command" field="postCovAnalyze" checked="${instance.postCovAnalyzeCmd != null}">
                                 <f:block>
                                     <table style="padding-left:2%; width:100%;">
-                                        <f:entry name="postCovAnalyzeCmd" title="Post cov-analyze command:" field="postCovAnalyzeCmd" value="${it.postCovAnalyzeCmd}">
+                                        <f:entry title="Post cov-analyze command:" field="postCovAnalyzeCmd">
                                             <f:textbox/>
                                         </f:entry>
                                     </table>
@@ -254,34 +448,22 @@
                             <f:entry title="Use advanced parsing mechanism" field="useAdvancedParser">
                                 <f:checkbox/>
                             </f:entry>
-                            <f:optionalBlock title="Use MISRA for analysis and commit" field="misraMap" checked="${instance.misraConfigFile != null}" >
+                            <f:optionalBlock title="Use MISRA for analysis and commit" field="misraConfig" checked="${instance.misraConfigFile != null}">
                                 <f:block>
                                     <table style="padding-left:2%; width:100%;">
-                                        <f:entry name="misraConfigFile" title="MISRA configuration file:" field="misraConfigFile" value="${it.misraConfigFile}">
+                                        <f:entry title="MISRA configuration file:" field="misraConfigFile">
                                             <f:textbox/>
                                         </f:entry>
                                     </table>
                                 </f:block>
                             </f:optionalBlock>
-                            <f:entry title="(Only for C#) Assemblies:" field="csharpAssemblies">
-                                <f:textbox/>
-                            </f:entry>
-                            <f:entry title="(Only for C#) Search for DLL and EXE files to analyze:" field="csharpAutomaticAssemblies">
-                                <f:checkbox/>
-                            </f:entry>
-                            <f:entry title="(Only for C#) Microsoft Code Analysis results files:" field="csharpMsvscaOutputFiles">
-                                <f:textbox/>
-                            </f:entry>
                             <f:entry title="(Only for C#) Search for Microsoft Code Analysis results:" field="csharpMsvsca">
                                 <f:checkbox/>
                             </f:entry>
 
                             <f:entry title="(Only for Java) WAR files:" field="javaWarFiles">
-                                <f:repeatable field="javaWarFiles" add="Add War File" minimum="0" varStatus="loopItem" var="loopItem2">
-                                    <j:set var="id" value="${descriptor.getRandomID(instance)}" />
+                                <f:repeatable field="javaWarFiles" add="Add War File">
                                     <table width="100%">
-                                        <input type="hidden" name="id" value="${id}" />
-                                        <br/>
                                         <f:entry title="War File" field="warFile">
                                             <f:textbox/>
                                         </f:entry>
@@ -293,9 +475,6 @@
                             </f:entry>
 
                             <f:entry title="Static analysis location override:" field="saOverride">
-                                <f:textbox/>
-                            </f:entry>
-                            <f:entry title="cov-build blacklist:" field="covBuildBlacklist">
                                 <f:textbox/>
                             </f:entry>
                         </table>
@@ -313,16 +492,20 @@
                                 <f:entry title="Custom command to run tests " field="customTestCommand">
                                     <f:textbox/>
                                 </f:entry>
-                                <f:entry title="Custom command working directory" field="customWorkDir">
-                                    <f:textbox />
-                                </f:entry>
                                 <f:entry title="TA Policy File (Required):" field="policyFile">
-                                    <st:nbsp />
                                     <f:textbox/>
                                 </f:entry>
-                                <f:entry title="Strip Path:" field="taStripPath">
-                                    <st:nbsp />
-                                    <f:textbox/>
+                                <f:entry title="Strip Path:" field="taStripPaths">
+                                    <f:repeatable field="taStripPaths" add="Add Strip Path">
+                                        <table width="100%">
+                                            <f:entry title="Strip Path" field="taStripPath">
+                                                <f:textbox/>
+                                            </f:entry>
+                                        </table>
+                                        <div align="right">
+                                            <input type="button" value="Remove Strip Path" class="repeatable-delete" style="margin-left: 1em;"/>
+                                        </div>
+                                    </f:repeatable>
                                 </f:entry>
                                 <f:entry title="Enable Cov-Manage-History" field="covHistoryCheckbox">
                                                 <f:checkbox/>
@@ -397,7 +580,7 @@
                                                 </select>
                                             </f:entry>
 
-                                            <f:entry title="Choose a C# Test Framework:">
+                                            <f:entry title="Choose a C# Test Framework:" field="csFramework">
                                                 <st:nbsp /><st:nbsp />
                                                 <f:radio name="csFramework"
                                                          checked="${instance.csFramework == 'mstest' &amp;&amp; instance.csOptionBlock}" value="mstest"/>
@@ -454,14 +637,14 @@
                                                 </select>
                                             </f:entry>
 
-                                                <f:entry title="Choose a Java Test Framework:">
-                                                    <st:nbsp /><st:nbsp />
-                                                    <f:checkbox title="junit" field="junitFramework"
+                                            <f:entry title="Choose a Java Test Framework:">
+                                                <st:nbsp /><st:nbsp />
+                                                <f:checkbox title="junit" field="junitFramework"
                                                             checked="${instance.junitFramework &amp;&amp; instance.javaOptionBlock}"/>
-                                                    <st:nbsp /><st:nbsp />
-                                                    <f:checkbox title="junit4" field="junit4Framework"
-                                                                checked="${instance.junit4Framework &amp;&amp; instance.javaOptionBlock}"/>
-                                                </f:entry>
+                                                <st:nbsp /><st:nbsp />
+                                                <f:checkbox title="junit4" field="junit4Framework"
+                                                            checked="${instance.junit4Framework &amp;&amp; instance.javaOptionBlock}"/>
+                                            </f:entry>
                                         </table>
                                     </f:block>
                                 </tr>
@@ -584,11 +767,9 @@
                             </select>
                         </f:entry>
                         <f:entry title="AccuRev root repository" field="accRevRepo">
-                                <st:nbsp /><st:nbsp />
                                 <f:textbox/>
                             </f:entry>
                             <f:entry title="Perforce P4PORT" field="p4Port">
-                                <st:nbsp /><st:nbsp />
                                 <f:textbox/>
                         </f:entry>
 
