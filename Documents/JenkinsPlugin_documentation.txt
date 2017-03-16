@@ -188,6 +188,7 @@ h4. *Version 1.9.0 (March 17, 2017)*
 * Users can now configure multiple strip paths for their Test Advisor configurations. (BZ 65793)
 * Show a "loading projects" message when the Coverity Connect instance changes in the job configuration. (BZ 60138)
 * The Coverity plugin will display the invalid project and error message to indicate that the select project cannot be found in Coverity Connect. (BZ 55377)
+* Resolved a NullPointerException on the CoverityTempDir (idir) (BZ 101589)
 
 h4. *Version 1.8.1 (January 9, 2017)*
 
