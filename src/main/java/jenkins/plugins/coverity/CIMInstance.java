@@ -31,6 +31,8 @@ import com.coverity.ws.v9.ConfigurationService;
 import com.coverity.ws.v9.ConfigurationServiceService;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.DefectService;
+import com.coverity.ws.v9.GroupIdDataObj;
+import com.coverity.ws.v9.GroupDataObj;
 import com.coverity.ws.v9.MergedDefectDataObj;
 import com.coverity.ws.v9.MergedDefectFilterSpecDataObj;
 import com.coverity.ws.v9.MergedDefectsPageDataObj;
@@ -310,17 +312,30 @@ public class CIMInstance {
                 return true;
             }
 
-            for (RoleAssignmentDataObj role : userData.getRoleAssignments()){
-                RoleDataObj roleData = getConfigurationService().getRole(role.getRoleId());
-                if (roleData != null){
-                    for (PermissionDataObj permission : roleData.getPermissionDataObjs()){
-                        if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")){
-                            canCommit = true;
-                        } else if (permission.getPermissionValue().equalsIgnoreCase("viewDefects")){
-                            canViewIssues = true;
-                        }
-                        if (canCommit && canViewIssues){
-                            return true;
+            // Start the queue with direct role assignments to the user
+            final LinkedList<RoleAssignmentDataObj> roleAssignments = new LinkedList<>(userData.getRoleAssignments());
+            final Iterator<String> groupNameIterator = userData.getGroups().iterator();
+            while (!(canCommit && canViewIssues) && (!roleAssignments.isEmpty() || groupNameIterator.hasNext())) {
+                // No more role assignments, add more from the next available group
+                if (roleAssignments.isEmpty()) {
+                    final GroupIdDataObj groupId = new GroupIdDataObj();
+                    groupId.setName(groupNameIterator.next());
+                    final GroupDataObj group = getConfigurationService().getGroup(groupId);
+                    if (group != null) {
+                        roleAssignments.addAll(group.getRoleAssignments());
+                    }
+                }
+                // The user still has direct role assignments or a few more were added from a group
+                if (!roleAssignments.isEmpty()) {
+                    final RoleAssignmentDataObj roleAssignment = roleAssignments.removeFirst();
+                    final RoleDataObj roleData = getConfigurationService().getRole(roleAssignment.getRoleId());
+                    if (roleData != null) {
+                        for (PermissionDataObj permission : roleData.getPermissionDataObjs()) {
+                            if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")) {
+                                canCommit = true;
+                            } else if (permission.getPermissionValue().equalsIgnoreCase("viewDefects")) {
+                                canViewIssues = true;
+                            }
                         }
                     }
                 }
@@ -334,7 +349,7 @@ public class CIMInstance {
             missingPermissions.add("View issues");
         }
 
-        return false;
+        return canCommit && canViewIssues;
     }
 
     @Override
