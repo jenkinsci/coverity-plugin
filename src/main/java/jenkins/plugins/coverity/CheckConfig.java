@@ -170,14 +170,14 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
 
         if(cs == null || cs.getInstance() == null){
             return new StreamStatus(false, "Could not connect to a Coverity instance. \n " +
-                    "Verify that a Coverity instance have been configured for this job", cs, null);
+                    "Verify that a Coverity instance has been configured for this job", cs, null);
         }
 
         CIMInstance ci = publisher.getDescriptor().getInstance(cs.getInstance());
 
         if(ci == null){
             return new StreamStatus(false, "Could not connect to a Coverity instance. \n " +
-                    "Verify that a Coverity instance have been configured for this job", cs, null);
+                    "Verify that a Coverity instance has been configured for this job", cs, null);
         }
 
         if(cs.getStream() == null){
@@ -204,10 +204,10 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 version = CoverityVersion.parse(ci.getConfigurationService().getVersion().getExternalVersion());
             } catch(CovRemoteServiceException_Exception e) {
                 e.printStackTrace();
-                return new StreamStatus(false, "Could not retrive version info: " + e, cs, null);
+                return new StreamStatus(false, "Could not retrieve version info: " + e, cs, null);
             } catch(IOException e) {
                 e.printStackTrace();
-                return new StreamStatus(false, "Could not retrive version info: " + e, cs, null);
+                return new StreamStatus(false, "Could not retrieve version info: " + e, cs, null);
             }
         }
 
