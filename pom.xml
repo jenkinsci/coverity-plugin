@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>coverity</artifactId>
-    <version>1.9.0-SNAPSHOT</version>
+    <version>1.9.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Coverity plugin</name>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin</url>
@@ -83,7 +83,8 @@
         <connection>scm:git:ssh://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    </scm>
+      <tag>HEAD</tag>
+  </scm>
 
     <build>
         <plugins>
@@ -172,39 +173,32 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <taskdef name="jacoco-report" classname="org.jacoco.ant.ReportTask"
-                                                 classpathref="maven.plugin.classpath"/>
-                                        <taskdef classpathref="maven.runtime.classpath"
-                                                 resource="net/sf/antcontrib/antcontrib.properties"/>
-                                        <available file="${project.build.directory}/jacoco.exec"
-                                                   property="jacoco.exec.file.exists"/>
-                                        <echo message="${project.build.directory}/jacoco.exec"/>
+                                        <taskdef name="jacoco-report" classname="org.jacoco.ant.ReportTask" classpathref="maven.plugin.classpath" />
+                                        <taskdef classpathref="maven.runtime.classpath" resource="net/sf/antcontrib/antcontrib.properties" />
+                                        <available file="${project.build.directory}/jacoco.exec" property="jacoco.exec.file.exists" />
+                                        <echo message="${project.build.directory}/jacoco.exec" />
                                         <if>
-                                            <equals arg1="${jacoco.exec.file.exists}" arg2="true"/>
+                                            <equals arg1="${jacoco.exec.file.exists}" arg2="true" />
                                             <then>
-                                                <echo message="Executing jacoco report"/>
+                                                <echo message="Executing jacoco report" />
                                                 <trycatch>
                                                     <try>
                                                         <jacoco-report>
                                                             <executiondata>
-                                                                <file file="${project.build.directory}/jacoco.exec"/>
+                                                                <file file="${project.build.directory}/jacoco.exec" />
                                                             </executiondata>
                                                             <structure name="Coverity">
                                                                 <classfiles>
-                                                                    <fileset dir="${project.build.outputDirectory}"/>
-                                                                    <fileset
-                                                                      dir="${project.build.testOutputDirectory}"/>
+                                                                    <fileset dir="${project.build.outputDirectory}" />
+                                                                    <fileset dir="${project.build.testOutputDirectory}" />
                                                                 </classfiles>
                                                                 <sourcefiles encoding="${project.build.sourceEncoding}">
-                                                                    <fileset dir="${project.build.sourceDirectory}"/>
-                                                                    <fileset
-                                                                      dir="${project.build.testSourceDirectory}"/>
+                                                                    <fileset dir="${project.build.sourceDirectory}" />
+                                                                    <fileset dir="${project.build.testSourceDirectory}" />
                                                                 </sourcefiles>
                                                             </structure>
-                                                            <html
-                                                              destdir="${project.reporting.outputDirectory}/jacoco"/>
-                                                            <xml
-                                                              destfile="${project.reporting.outputDirectory}/jacoco/jacoco.xml"/>
+                                                            <html destdir="${project.reporting.outputDirectory}/jacoco" />
+                                                            <xml destfile="${project.reporting.outputDirectory}/jacoco/jacoco.xml" />
                                                         </jacoco-report>
                                                     </try>
                                                     <catch>
@@ -213,7 +207,7 @@
                                                 </trycatch>
                                             </then>
                                             <else>
-                                                <echo message="No jacoco.exec file found."/>
+                                                <echo message="No jacoco.exec file found." />
                                             </else>
                                         </if>
                                     </target>
