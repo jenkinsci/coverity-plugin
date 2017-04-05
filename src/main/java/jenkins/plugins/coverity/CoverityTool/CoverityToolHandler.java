@@ -44,7 +44,7 @@ public class CoverityToolHandler {
         this.version = version;
     }
 
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws Exception {
+    public void perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws Exception {
         EnvVars envVars = build.getEnvironment(listener);
 
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
@@ -91,7 +91,7 @@ public class CoverityToolHandler {
             if(result != 0) {
                 listener.getLogger().println("[Coverity] cov-build returned " + result + ", aborting...");
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
 
         } finally {
@@ -107,7 +107,7 @@ public class CoverityToolHandler {
             if(result != 0) {
                 listener.getLogger().println("[Coverity] post cov-build command returned " + result + ", aborting...");
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
 
         } finally {
@@ -123,7 +123,7 @@ public class CoverityToolHandler {
             if(result != 0) {
                 listener.getLogger().println("[Coverity] cov-emit-java returned " + result + ", aborting...");
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
         } finally {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
@@ -138,7 +138,7 @@ public class CoverityToolHandler {
             if(result != 0) {
                 listener.getLogger().println("[Coverity] cov-capture returned " + result + ", aborting...");
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
         } finally {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
@@ -155,7 +155,7 @@ public class CoverityToolHandler {
                 listener.getLogger().println("[Coverity] cov-manage-history returned " + result + ", aborting...");
 
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
         } finally {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
@@ -172,7 +172,7 @@ public class CoverityToolHandler {
                 listener.getLogger().println("[Coverity] cov-import-scm returned " + result + ", aborting...");
 
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
         } finally {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
@@ -187,7 +187,7 @@ public class CoverityToolHandler {
             if(result != 0) {
                 listener.getLogger().println("[Coverity] cov-analyze returned " + result + ", aborting...");
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
 
         } finally {
@@ -203,7 +203,7 @@ public class CoverityToolHandler {
             if(result != 0) {
                 listener.getLogger().println("[Coverity] post cov-analyze command returned " + result + ", aborting...");
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
 
         } finally {
@@ -219,7 +219,7 @@ public class CoverityToolHandler {
             if(result != 0) {
                 listener.getLogger().println("[Coverity] cov-import-msvsca returned " + result + ", aborting...");
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
 
         }finally{
@@ -235,7 +235,7 @@ public class CoverityToolHandler {
             if(result != 0) {
                 listener.getLogger().println("[Coverity] cov-commit-defects returned " + result + ", aborting...");
                 build.setResult(Result.FAILURE);
-                return false;
+                return;
             }
         } finally {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
@@ -243,12 +243,7 @@ public class CoverityToolHandler {
 
         if(!publisher.isSkipFetchingDefects()) {
             DefectReader defectReader = new DefectReader(build, listener, publisher);
-            Boolean result = defectReader.getLatestDefectsForBuild();
-
-            if (!result)
-                return false;
+            defectReader.getLatestDefectsForBuild();
         }
-
-        return true;
     }
 }
