@@ -11,8 +11,6 @@
 package jenkins.plugins.coverity.ws;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,12 +19,10 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -37,7 +33,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 
-import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
@@ -119,9 +114,7 @@ public class DefectReaderTest {
 
         DefectReader reader = new DefectReader(build, listener, publisher);
 
-        Boolean result = reader.getLatestDefectsForBuild();
-
-        assertTrue(result);
+        reader.getLatestDefectsForBuild();
 
         // assert build action added to build with expected defect count
         ArgumentCaptor<CoverityBuildAction> buildAction = ArgumentCaptor.forClass(CoverityBuildAction.class);
@@ -148,9 +141,7 @@ public class DefectReaderTest {
 
         DefectReader reader = new DefectReader(build, listener, publisher);
 
-        Boolean result = reader.getLatestDefectsForBuild();
-
-        assertTrue(result);
+        reader.getLatestDefectsForBuild();
 
         // assert build action added to build with expected defect count
         ArgumentCaptor<CoverityBuildAction> buildAction = ArgumentCaptor.forClass(CoverityBuildAction.class);
@@ -177,9 +168,7 @@ public class DefectReaderTest {
 
         DefectReader reader = new DefectReader(build, listener, publisher);
 
-        Boolean result = reader.getLatestDefectsForBuild();
-
-        assertTrue(result);
+        reader.getLatestDefectsForBuild();
 
         // assert build action added to build with expected defect count
         ArgumentCaptor<CoverityBuildAction> buildAction = ArgumentCaptor.forClass(CoverityBuildAction.class);
@@ -209,9 +198,12 @@ public class DefectReaderTest {
 
         DefectReader reader = new DefectReader(build, listener, publisher);
 
-        Boolean result = reader.getLatestDefectsForBuild();
+        reader.getLatestDefectsForBuild();
 
-        assertFalse(result);
+        // assert build action added to build with expected defect count
+        ArgumentCaptor<CoverityBuildAction> buildAction = ArgumentCaptor.forClass(CoverityBuildAction.class);
+        verify(build).addAction(buildAction.capture());
+        assertEquals(3, buildAction.getValue().getDefects().size());
 
         // verify all expected log messages were written
         consoleLogger.verifyMessages(
@@ -225,8 +217,9 @@ public class DefectReaderTest {
 
         DefectReader reader = new DefectReader(build, listener, publisher);
 
-        Boolean result = reader.getLatestDefectsForBuild();
+        reader.getLatestDefectsForBuild();
 
-        assertFalse(result);
+        // verify no log messages were written
+        consoleLogger.verifyMessages();
     }
 }

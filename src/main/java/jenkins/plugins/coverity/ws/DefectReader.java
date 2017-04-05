@@ -57,11 +57,11 @@ public class DefectReader {
         this.publisher = publisher;
     }
 
-    public boolean getLatestDefectsForBuild()
+    public void getLatestDefectsForBuild()
     {
         if (publisher.isSkipFetchingDefects()) {
             // never get any defects when configured to skip fetching defects
-            return false;
+            return;
         }
 
         CIMStream cimStream = publisher.getCimStream();
@@ -69,7 +69,7 @@ public class DefectReader {
 
         if (StringUtils.isEmpty(cimStream.getStream())) {
             listener.getLogger().println("[Coverity] Stream has not been configured. Skipping fetching defects.");
-            return false;
+            return;
         }
 
         listener.getLogger().println(MessageFormat.format("[Coverity] Fetching defects for stream \"{0}\"", cimStream.getStream()));
@@ -91,7 +91,6 @@ public class DefectReader {
                 if(publisher.isFailBuild()) {
                     if(build.getResult().isBetterThan(Result.FAILURE)) {
                         build.setResult(Result.FAILURE);
-                        return false;
                     }
                 }
 
@@ -99,7 +98,6 @@ public class DefectReader {
                 // notify the publisher to do so.
                 if(publisher.isUnstable()){
                     publisher.setUnstableBuild(true);
-
                 }
 
             } else {
@@ -116,14 +114,10 @@ public class DefectReader {
         } catch (IOException e) {
             e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
             build.setResult(Result.FAILURE);
-            return false;
         } catch (CovRemoteServiceException_Exception e) {
             e.printStackTrace(listener.error("[Coverity] An error occurred while fetching defects"));
             build.setResult(Result.FAILURE);
-            return false;
         }
-
-        return true;
     }
 
     private List<MergedDefectDataObj> getDefectsForSnapshot(CIMInstance cim, CIMStream cimStream, PrintStream logger) throws IOException, CovRemoteServiceException_Exception {
