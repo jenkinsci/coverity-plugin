@@ -25,6 +25,7 @@ import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.util.FormValidation;
+import hudson.util.FormValidation.Kind;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -188,7 +189,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         {
             try {
                 FormValidation fv = ci.doCheck();
-                if(fv.kind != FormValidation.Kind.OK) {
+                if(fv.kind == Kind.ERROR) {
                     return new StreamStatus(false, "Could not connect to instance: " + fv, cs, null);
                 }
             } catch(Exception e) {

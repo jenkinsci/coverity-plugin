@@ -239,12 +239,24 @@ public class CIMInstance {
                     CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().getEffectiveVersion() + ").");
             }
 
-            List<String> missingPermission = new ArrayList<String>();;
-            if (!checkUserPermission(missingPermission) && !missingPermission.isEmpty()){
+            List<String> missingPermission = new ArrayList<String>();
+            if (!checkUserPermission(missingPermission, false) && !missingPermission.isEmpty()){
                 for (String permission : missingPermission){
                     errorMessage.append("\"" + permission + "\" ");
                 }
                 return FormValidation.error(errorMessage.toString());
+            }
+
+            // check for missing global permissions to warn users
+            //   in some cases users could have group permissions but only a specific project, stream, etc.
+            List<String> missingGlobalPermission = new ArrayList<String>();
+            if (!checkUserPermission(missingGlobalPermission, true) && !missingGlobalPermission.isEmpty()) {
+                StringBuilder warningMessage = new StringBuilder();
+                warningMessage.append("\"" + user + "\" does not have following global permission(s): ");
+                for (String permission : missingGlobalPermission){
+                    warningMessage.append("\"" + permission + "\" ");
+                }
+                return FormValidation.warning(warningMessage.toString());
             }
 
             return FormValidation.ok("Successfully connected to the instance.");
@@ -300,7 +312,7 @@ public class CIMInstance {
      * Returns true if the user have all the permissions, otherwise, return false with
      * a list of missing permissions.
      */
-    private boolean checkUserPermission(List<String> missingPermissions) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
+    private boolean checkUserPermission(List<String> missingPermissions, boolean onlyCheckGlobal) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
 
         boolean canCommit = false;
         boolean canViewIssues = false;
@@ -329,6 +341,8 @@ public class CIMInstance {
                 if (!roleAssignments.isEmpty()) {
                     final RoleAssignmentDataObj roleAssignment = roleAssignments.removeFirst();
                     final RoleDataObj roleData = getConfigurationService().getRole(roleAssignment.getRoleId());
+                    if (onlyCheckGlobal && !roleAssignment.getType().equals("global"))
+                        continue;
                     if (roleData != null) {
                         for (PermissionDataObj permission : roleData.getPermissionDataObjs()) {
                             if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")) {
