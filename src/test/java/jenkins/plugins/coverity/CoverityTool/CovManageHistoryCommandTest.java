@@ -137,7 +137,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         setExpectedArguments(new String[] {
                 "cov-manage-history", "--dir", "TestDir", "download", "--host", "Localhost",
                 "--port", "8080", "--stream", "TestStream", "--ssl", "--on-new-cert", "trust",
-                "--certs", "TestCertFile", "--user", "TestUser", "--merge"
+                "--cert", "TestCertFile", "--user", "TestUser", "--merge"
         });
         covManageHistoryCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));

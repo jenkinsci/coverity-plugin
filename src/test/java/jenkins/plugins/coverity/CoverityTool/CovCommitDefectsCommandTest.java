@@ -110,7 +110,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
-                "--ssl", "--dataport", "1234", "--on-new-cert", "trust", "--certs", "TestCertFile",
+                "--ssl", "--dataport", "1234", "--on-new-cert", "trust", "--cert", "TestCertFile",
                  "--stream", "TestStream", "--user", "TestUser"
         });
         covCommitDefectsCommand.runCommand();
@@ -168,7 +168,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
-                "--ssl", "--https-port", "8080", "--on-new-cert", "trust", "--certs", "TestCertFile",
+                "--ssl", "--https-port", "8080", "--on-new-cert", "trust", "--cert", "TestCertFile",
                 "--stream", "TestStream", "--user", "TestUser"
         });
         covCommitDefectsCommand.runCommand();
