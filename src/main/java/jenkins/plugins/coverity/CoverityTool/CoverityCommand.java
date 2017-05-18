@@ -28,7 +28,7 @@ public abstract class CoverityCommand extends Command {
     protected static final String useSslArg = "--ssl";
     private static final String onNewCertArg = "--on-new-cert";
     private static final String trustArg = "trust";
-    private static final String certArg = "--cert";
+    private static final String certArg = "--certs";
 
     public CoverityCommand(@Nonnull String command, AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(build, launcher, listener, publisher, envVars);
