@@ -34,16 +34,10 @@ public class InvocationAssistance {
     private final List<JavaWarFile> javaWarFiles;
     private final boolean csharpMsvsca;
     private final String saOverride;
-
-
     private MisraConfig misraConfig;
-
     private final boolean isScriptSrc;
-
-
     private PostCovBuild postCovBuild;
-
-        private PostCovAnalyze postCovAnalyze;
+    private PostCovAnalyze postCovAnalyze;
 
     /**
      * Absolute path to the intermediate directory that Coverity should use. Null to use the default.
@@ -78,8 +72,8 @@ public class InvocationAssistance {
         this.intermediateDir = Util.fixEmpty(intermediateDir);
         this.misraConfig = misraConfig;
         List<String> tempJavaWarFilesPaths = new ArrayList<String>();
-        if(javaWarFiles != null && !javaWarFiles.isEmpty()){
-            for(JavaWarFile javaWarFile : javaWarFiles){
+        if (javaWarFiles != null && !javaWarFiles.isEmpty()) {
+            for (JavaWarFile javaWarFile : javaWarFiles) {
                 tempJavaWarFilesPaths.add(javaWarFile.getWarFile());
             }
         }
@@ -96,17 +90,17 @@ public class InvocationAssistance {
      */
     protected Object readResolve() {
         // Check for existing misraConfig
-        if(isUsingMisra && misraConfigFile != null) {
+        if (isUsingMisra && misraConfigFile != null) {
             this.misraConfig = new MisraConfig(misraConfigFile);
         }
 
         // Check for existing postCovBuild
-        if(isUsingPostCovBuildCmd && postCovBuildCmd != null) {
+        if (isUsingPostCovBuildCmd && postCovBuildCmd != null) {
             this.postCovBuild = new PostCovBuild(postCovBuildCmd);
         }
 
         // Check for existing postCovAnalyze
-        if(isUsingPostCovAnalyzeCmd && postCovAnalyzeCmd != null) {
+        if (isUsingPostCovAnalyzeCmd && postCovAnalyzeCmd != null) {
             this.postCovAnalyze = new PostCovAnalyze(postCovAnalyzeCmd);
         }
 
@@ -169,7 +163,7 @@ public class InvocationAssistance {
         return misraConfig != null;
     }
 
-    public String getMisraConfigFile(){
+    public String getMisraConfigFile() {
         return misraConfig != null ? misraConfig.getMisraConfigFile() : null;
     }
 
@@ -207,21 +201,21 @@ public class InvocationAssistance {
             useAdvancedParser);
     }
 
-    public String checkIAConfig(){
+    public String checkIAConfig() {
         boolean delim = true;
         String errorText = "Errors with your \"Perform Coverity build/analyze/commit\" options: \n";
         // Making sure they pick a test language
-        if(getIsUsingMisra()){
-            if(getMisraConfigFile() == null){
+        if (getIsUsingMisra()) {
+            if (getMisraConfigFile() == null) {
                 delim = false;
-            } else if (getMisraConfigFile().isEmpty()){
+            } else if (getMisraConfigFile().isEmpty()) {
                 delim = false;
-            } else if (getMisraConfigFile().trim().isEmpty()){
+            } else if (getMisraConfigFile().trim().isEmpty()) {
                 delim = false;
             }
         }
 
-        if(delim){
+        if (delim) {
             errorText = "Pass";
         } else {
             errorText += "[Error] No MISRA configuration file was specified. \n";
@@ -229,5 +223,4 @@ public class InvocationAssistance {
 
         return errorText;
     }
-
 }
