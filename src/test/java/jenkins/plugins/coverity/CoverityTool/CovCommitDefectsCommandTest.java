@@ -97,7 +97,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName("TestCertFile");
+        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
 
         CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         CoverityPublisher publisher = mock(CoverityPublisher.class);
@@ -110,7 +110,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
-                "--ssl", "--dataport", "1234", "--on-new-cert", "trust", "--cert", "TestCertFile",
+                "--ssl", "--dataport", "1234", "--on-new-cert", "trust", "--certs", "TestCertFile",
                  "--stream", "TestStream", "--user", "TestUser"
         });
         covCommitDefectsCommand.runCommand();
@@ -126,7 +126,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName("TestCertFile");
+        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
 
         CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         CoverityPublisher publisher = mock(CoverityPublisher.class);
@@ -154,7 +154,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName("TestCertFile");
+        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
 
         CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         CoverityPublisher publisher = mock(CoverityPublisher.class);
@@ -168,7 +168,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
-                "--ssl", "--https-port", "8080", "--on-new-cert", "trust", "--cert", "TestCertFile",
+                "--ssl", "--https-port", "8080", "--on-new-cert", "trust", "--certs", "TestCertFile",
                 "--stream", "TestStream", "--user", "TestUser"
         });
         covCommitDefectsCommand.runCommand();
@@ -184,7 +184,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName("TestCertFile");
+        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
 
         CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         CoverityPublisher publisher = mock(CoverityPublisher.class);
