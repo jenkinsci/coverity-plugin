@@ -97,7 +97,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName("TestCertFile");
+        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
 
         CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         CoverityPublisher publisher = mock(CoverityPublisher.class);
@@ -126,7 +126,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName("TestCertFile");
+        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
 
         CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         CoverityPublisher publisher = mock(CoverityPublisher.class);
@@ -154,7 +154,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName("TestCertFile");
+        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
 
         CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         CoverityPublisher publisher = mock(CoverityPublisher.class);
@@ -184,7 +184,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName("TestCertFile");
+        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
 
         CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         CoverityPublisher publisher = mock(CoverityPublisher.class);
