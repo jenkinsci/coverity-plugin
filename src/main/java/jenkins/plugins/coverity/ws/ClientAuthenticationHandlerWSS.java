@@ -31,6 +31,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * SOAP handler for user authentication using ws-security.  This mechanism inserts the user's user name and password in
  * the SOAP header of each message.
@@ -41,15 +43,11 @@ public class ClientAuthenticationHandlerWSS implements SOAPHandler<SOAPMessageCo
     public static final String WSS_AUTH_URI = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
     private XWSSProcessor xwssProcessor = null;
 
-    private String quote(String in) {
-        return in.replace("\"", "&quot;");
-    }
-
     public ClientAuthenticationHandlerWSS(String userName, String password) {
         String xwssConfigText = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> " +
                 "<xwss:SecurityConfiguration xmlns:xwss=\"http://java.sun.com/xml/ns/xwss/config\"> " +
-                "<xwss:UsernameToken name=\"" + quote(userName) + "\" " +
-                "password=\"" + quote(password) + "\" " +
+                "<xwss:UsernameToken name=\"" + StringEscapeUtils.escapeXml(userName) + "\" " +
+                "password=\"" + StringEscapeUtils.escapeXml(password) + "\" " +
                 "useNonce=\"false\" digestPassword=\"false\"/>  " +
                 "</xwss:SecurityConfiguration>";
         InputStream xwssConfig = new ByteArrayInputStream(xwssConfigText.getBytes(StandardCharsets.UTF_8));
