@@ -127,33 +127,15 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 for(Status s : status) {
                     if(s instanceof StreamStatus) {
                         StreamStatus ss = (StreamStatus) s;
+                        CoverityVersion cimVersion = ss.getVersion();
                         CIMStream stream = ss.getStream();
-                        if(!ss.getVersion().compareToAnalysis(analysisVersion) && stream != null) {
-                            newStatus.add(new Status(false, "Connect instance " + stream.toPrettyString() + " (version " +
-                                    ss.getVersion() + "|" + ss.getVersion().getEffectiveVersion() +
-                                    ") is incompatible with analysis version " + analysisVersion));
+                        if(cimVersion != null && !cimVersion.compareToAnalysis(analysisVersion) && stream != null) {
+                            newStatus.add(new Status(false, "Connect instance " + stream.toPrettyString() +
+                                    " (version " + cimVersion.toString() + ") is incompatible with analysis version " + analysisVersion));
                         }
                     }
                 }
                 status.addAll(newStatus);
-            }
-
-            //is there a mixed stream, and analysis < fresno?
-            {
-                if(analysisVersion.compareTo(CoverityVersion.codeNameEquivalents.get("fresno")) < 0) {
-                    List<Status> newStatus = new ArrayList<Status>();
-                    for(Status s : status) {
-                        if(s instanceof StreamStatus) {
-                            StreamStatus ss = (StreamStatus) s;
-                            CIMStream stream = ss.getStream();
-                            if(stream != null && stream.getDomain() != null
-                                    && stream.getDomain().equals("MIXED")) {
-                                newStatus.add(new Status(false, "Stream " + stream.toPrettyString() + " (any language) is incompatible with analysis version " + analysisVersion));
-                            }
-                        }
-                    }
-                    status.addAll(newStatus);
-                }
             }
         }
 
@@ -263,7 +245,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
                 return new NodeStatus(false,
                     "\"Coverity Static Analysis\" version " + version.toString() + " is not supported. " +
-                    "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().toString(),
+                    "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString(),
                     node,
                     version);
             }
@@ -356,19 +338,21 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             xmlReader.parse(path);
 
             // Checks to see if beta was set or not, since its not required on releases.
-            try{
-                if(connectorParser.beta != null){
+            try {
+                if (connectorParser.beta != null) {
                     return new CoverityVersion(Integer.parseInt(connectorParser.major),
-                                               Integer.parseInt(connectorParser.minor),
-                                               Integer.parseInt(connectorParser.revision),
-                                               Integer.parseInt(connectorParser.beta));
-                }else{
+                        Integer.parseInt(connectorParser.minor),
+                        Integer.parseInt(connectorParser.revision),
+                        Integer.parseInt(connectorParser.beta));
+                } else {
                     return new CoverityVersion(Integer.parseInt(connectorParser.major),
-                                               Integer.parseInt(connectorParser.minor),
-                                               Integer.parseInt(connectorParser.revision));
+                        Integer.parseInt(connectorParser.minor),
+                        Integer.parseInt(connectorParser.revision),
+                        0);
                 }
-            }catch(NumberFormatException e){
-                    return new CoverityVersion(connectorParser.major);
+            } catch (NumberFormatException e) {
+                // unsupported version
+                return new CoverityVersion(0, 0, 0, 0);
             }
         }catch(ParserConfigurationException x){
             errorMessage = "Unable to configure XML parser: " + x.getMessage();

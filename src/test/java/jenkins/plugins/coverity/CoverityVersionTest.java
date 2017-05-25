@@ -85,8 +85,36 @@ public class CoverityVersionTest {
 
         version2 = CoverityVersion.VERSION_INDIO;
         Assert.assertTrue(version1.compareToAnalysis(version2));
+    }
 
-        version2 = new CoverityVersion("lodi");
-        Assert.assertFalse(version1.compareToAnalysis(version2));
+    @Test
+    public void parseTest() {
+        // test supported versions
+        CoverityVersion version = CoverityVersion.parse("7.7.0");
+        Assert.assertEquals(7, version.major);
+        Assert.assertEquals(7, version.minor);
+        Assert.assertEquals(0, version.patch);
+        Assert.assertEquals(0, version.hotfix);
+
+        version = CoverityVersion.parse("7.7.0.15");
+        Assert.assertEquals(7, version.major);
+        Assert.assertEquals(7, version.minor);
+        Assert.assertEquals(0, version.patch);
+        Assert.assertEquals(15, version.hotfix);
+
+        version = CoverityVersion.parse("8.7.1");
+        Assert.assertEquals(8, version.major);
+        Assert.assertEquals(7, version.minor);
+        Assert.assertEquals(1, version.patch);
+        Assert.assertEquals(0, version.hotfix);
+
+        version = CoverityVersion.parse("2017.07");
+        Assert.assertEquals(2017, version.major);
+        Assert.assertEquals(7, version.minor);
+        Assert.assertEquals(0, version.patch);
+        Assert.assertEquals(0, version.hotfix);
+
+        version = CoverityVersion.parse("lodi");
+        Assert.assertNull(version);
     }
 }

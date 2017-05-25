@@ -421,7 +421,7 @@ public class CoverityPublisher extends Recorder {
 
                         if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
                             return FormValidation.error("\"Coverity Static Analysis\" version " + version.toString() + " detected. " +
-                                "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().toString());
+                                "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString());
                         }
 
                     } catch (InterruptedException e) {
