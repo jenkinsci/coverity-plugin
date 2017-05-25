@@ -96,10 +96,9 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
 
     /**
      * The way that Compare Major Minor works is that the argument passed in is the analysis version.
-     * Compares the version's major and minor version number. Returns true if the current version is greater than
-     *  or equals to the passed in version. Else, the compare will return false.
+     * Compares the version's major and minor version number.
      * @param version
-     * @return
+     * @return true if the current version is greater than or equals to the passed in version; Otherwise false
      */
     public boolean compareToAnalysis(CoverityVersion version){
         if(major == version.major){
