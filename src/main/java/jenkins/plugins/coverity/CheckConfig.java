@@ -146,7 +146,8 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                         if(s instanceof StreamStatus) {
                             StreamStatus ss = (StreamStatus) s;
                             CIMStream stream = ss.getStream();
-                            if(stream != null && stream.getDomain().equals("MIXED")) {
+                            if(stream != null && stream.getDomain() != null
+                                    && stream.getDomain().equals("MIXED")) {
                                 newStatus.add(new Status(false, "Stream " + stream.toPrettyString() + " (any language) is incompatible with analysis version " + analysisVersion));
                             }
                         }
