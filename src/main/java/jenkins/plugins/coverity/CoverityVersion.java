@@ -25,7 +25,7 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
 
     public static final CoverityVersion MINIMUM_SUPPORTED_VERSION = VERSION_INDIO;
 
-    static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\w+)");
+    static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\d\\d\\d\\d)\\.(\\d\\d)?|(\\w+)");
 
     final int major;
     final int minor;
@@ -80,15 +80,27 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
         this.major = major;
     }
 
+    public CoverityVersion(int major, int minor) {
+        this.isCodeName = false;
+        this.codeName = null;
+        this.hotfix = 0;
+        this.patch = 0;
+        this.major = major;
+        this.minor = minor;
+    }
+
     public static CoverityVersion parse(String s) {
         Matcher m = parseRegex.matcher(s);
         if(!m.find()) {
             return null;
         }
 
-        if(m.group(5) != null) {
+        if(m.group(7) != null) {
             //codename
-            return new CoverityVersion(m.group(5));
+            return new CoverityVersion(m.group(7));
+        } else if (m.group(5) != null && m.group(6) != null) {
+            //srm number
+            return new CoverityVersion(gi(m, 5), gi(m, 6));
         } else {
             //number
             return new CoverityVersion(gi(m, 1), gi(m, 2), gi(m, 3), gi(m, 4));
