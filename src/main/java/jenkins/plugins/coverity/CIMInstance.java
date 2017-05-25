@@ -236,7 +236,7 @@ public class CIMInstance {
             if(responseCode != 200) {
                 return FormValidation.error("Coverity web services were not detected. Connection attempt responded with " +
                     responseCode + ", check Coverity Connect version (minimum supported version is " +
-                    CoverityVersion.MINIMUM_SUPPORTED_VERSION.getEffectiveVersion().getEffectiveVersion() + ").");
+                    CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ").");
             }
 
             List<String> missingPermission = new ArrayList<String>();
