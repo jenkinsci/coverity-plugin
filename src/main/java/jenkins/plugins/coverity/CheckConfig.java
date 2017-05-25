@@ -137,23 +137,6 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 }
                 status.addAll(newStatus);
             }
-
-            //is there a mixed stream, and analysis < fresno?
-            {
-                if(analysisVersion.compareTo(CoverityVersion.codeNameEquivalents.get("fresno")) < 0) {
-                    List<Status> newStatus = new ArrayList<Status>();
-                    for(Status s : status) {
-                        if(s instanceof StreamStatus) {
-                            StreamStatus ss = (StreamStatus) s;
-                            CIMStream stream = ss.getStream();
-                            if(stream != null && stream.getDomain().equals("MIXED")) {
-                                newStatus.add(new Status(false, "Stream " + stream.toPrettyString() + " (any language) is incompatible with analysis version " + analysisVersion));
-                            }
-                        }
-                    }
-                    status.addAll(newStatus);
-                }
-            }
         }
 
         TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
