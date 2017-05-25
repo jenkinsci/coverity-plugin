@@ -20,69 +20,27 @@ import java.util.regex.Pattern;
  * codenames are all valid and comparable.
  */
 public class CoverityVersion implements Comparable<CoverityVersion>, Serializable {
-    public static final CoverityVersion VERSION_INDIO = new CoverityVersion("indio");
-    public static final CoverityVersion VERSION_JASPER = new CoverityVersion("jasper");
+    public static final CoverityVersion VERSION_INDIO = new CoverityVersion(7, 7, 0, 0);
+    public static final CoverityVersion VERSION_JASPER = new CoverityVersion(8, 0, 0, 0);
 
     public static final CoverityVersion MINIMUM_SUPPORTED_VERSION = VERSION_INDIO;
 
-    static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\d\\d\\d\\d)\\.(\\d\\d)?|(\\w+)");
+    // pattern to match format for <major.minor.patch.hotfix> or for <YYYY.MM> version numbers
+    static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\d\\d\\d\\d)\\.(\\d\\d)");
 
     final int major;
     final int minor;
     final int patch;
     final int hotfix;
-    final String codeName;
-    final boolean isCodeName;
-
-    static final HashMap<String, CoverityVersion> codeNameEquivalents = new HashMap<String, CoverityVersion>();
-
-    static {
-        codeNameEquivalents.put("lodi", new CoverityVersion(8, 6, 0));
-        codeNameEquivalents.put("kent1", new CoverityVersion(8, 5, 1));
-        codeNameEquivalents.put("kent", new CoverityVersion(8, 5, 0));
-        codeNameEquivalents.put("jasper", new CoverityVersion(8, 0, 0));
-        codeNameEquivalents.put("indio", new CoverityVersion(7, 7, 0));
-        codeNameEquivalents.put("harmony", new CoverityVersion(7, 6, 0));
-        codeNameEquivalents.put("gilroy1", new CoverityVersion(7, 5, 1));
-        codeNameEquivalents.put("gilroy", new CoverityVersion(7, 5, 0));
-        codeNameEquivalents.put("fresno", new CoverityVersion(7, 0, 0));
-        codeNameEquivalents.put("eureka", new CoverityVersion(6, 6, 0));
-        codeNameEquivalents.put("davis", new CoverityVersion(6, 5, 1));
-        codeNameEquivalents.put("carmel", new CoverityVersion(6, 5, 0));
-        codeNameEquivalents.put("berkeley", new CoverityVersion(6, 0, 0));
-        codeNameEquivalents.put("alameda", new CoverityVersion(5, 5, 0));
-    }
-
-    public CoverityVersion(String codeName) {
-        this.isCodeName = true;
-        this.codeName = codeName;
-        this.hotfix = 0;
-        this.minor = 0;
-        this.patch = 0;
-        this.major = 0;
-    }
 
     public CoverityVersion(int major, int minor, int patch, int hotfix) {
-        this.isCodeName = false;
-        this.codeName = null;
         this.hotfix = hotfix;
         this.minor = minor;
         this.patch = patch;
         this.major = major;
     }
 
-    public CoverityVersion(int major, int minor, int patch) {
-        this.isCodeName = false;
-        this.codeName = null;
-        this.hotfix = 0;
-        this.minor = minor;
-        this.patch = patch;
-        this.major = major;
-    }
-
     public CoverityVersion(int major, int minor) {
-        this.isCodeName = false;
-        this.codeName = null;
         this.hotfix = 0;
         this.patch = 0;
         this.major = major;
@@ -95,10 +53,7 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
             return null;
         }
 
-        if(m.group(7) != null) {
-            //codename
-            return new CoverityVersion(m.group(7));
-        } else if (m.group(5) != null && m.group(6) != null) {
+        if (m.group(5) != null && m.group(6) != null) {
             //srm number
             return new CoverityVersion(gi(m, 5), gi(m, 6));
         } else {
@@ -117,47 +72,25 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
         return Integer.parseInt(m.group(group));
     }
 
-    /**
-     * Converts from a codename version to an equivalent numbered version if necessary.
-     */
-    public CoverityVersion getEffectiveVersion() {
-        if(isCodeName) {
-            if(codeNameEquivalents.containsKey(codeName)) {
-                return codeNameEquivalents.get(codeName);
-            } else {
-                return new CoverityVersion(0, 0, 0);
-            }
-        } else {
-            return this;
-        }
-    }
-
     @Override
     public String toString() {
-        if(isCodeName) {
-            return codeName;
-        } else {
-            return major + "." + minor + "." + patch + (hotfix > 0 ? ("." + hotfix) : "");
-        }
+        return major + "." + minor + "." + patch + (hotfix > 0 ? ("." + hotfix) : "");
     }
 
     public int compareTo(CoverityVersion o) {
-        if(isCodeName || o.isCodeName) {
-            return getEffectiveVersion().compareTo(o.getEffectiveVersion());
-        } else {
-            if(major == o.major) {
-                if(minor == o.minor) {
-                    if(patch == o.patch) {
-                        return cmp(hotfix, o.hotfix);
-                    } else {
-                        return cmp(patch, o.patch);
-                    }
+
+        if(major == o.major) {
+            if(minor == o.minor) {
+                if(patch == o.patch) {
+                    return cmp(hotfix, o.hotfix);
                 } else {
-                    return cmp(minor, o.minor);
+                    return cmp(patch, o.patch);
                 }
             } else {
-                return cmp(major, o.major);
+                return cmp(minor, o.minor);
             }
+        } else {
+            return cmp(major, o.major);
         }
     }
 
@@ -169,14 +102,10 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
      * @return
      */
     public boolean compareToAnalysis(CoverityVersion version){
-        if(isCodeName || version.isCodeName){
-            return getEffectiveVersion().compareToAnalysis(version.getEffectiveVersion());
+        if(major == version.major){
+            return minor >= version.minor;
         }else{
-            if(major == version.major){
-                return minor >= version.minor;
-            }else{
-                return major > version.major;
-            }
+            return major > version.major;
         }
     }
 
@@ -194,10 +123,6 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
         }
 
         CoverityVersion other = (CoverityVersion) o;
-
-        if (isCodeName || other.isCodeName) {
-            return getEffectiveVersion().equals(other.getEffectiveVersion());
-        }
 
         if (major != other.major) {
             return false;

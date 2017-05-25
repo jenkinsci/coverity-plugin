@@ -85,9 +85,6 @@ public class CoverityVersionTest {
 
         version2 = CoverityVersion.VERSION_INDIO;
         Assert.assertTrue(version1.compareToAnalysis(version2));
-
-        version2 = new CoverityVersion("lodi");
-        Assert.assertFalse(version1.compareToAnalysis(version2));
     }
 
     @Test
@@ -98,40 +95,26 @@ public class CoverityVersionTest {
         Assert.assertEquals(7, version.minor);
         Assert.assertEquals(0, version.patch);
         Assert.assertEquals(0, version.hotfix);
-        Assert.assertFalse(version.isCodeName);
 
         version = CoverityVersion.parse("7.7.0.15");
         Assert.assertEquals(7, version.major);
         Assert.assertEquals(7, version.minor);
         Assert.assertEquals(0, version.patch);
         Assert.assertEquals(15, version.hotfix);
-        Assert.assertFalse(version.isCodeName);
 
         version = CoverityVersion.parse("8.7.1");
         Assert.assertEquals(8, version.major);
         Assert.assertEquals(7, version.minor);
         Assert.assertEquals(1, version.patch);
         Assert.assertEquals(0, version.hotfix);
-        Assert.assertFalse(version.isCodeName);
 
         version = CoverityVersion.parse("2017.07");
         Assert.assertEquals(2017, version.major);
         Assert.assertEquals(7, version.minor);
         Assert.assertEquals(0, version.patch);
         Assert.assertEquals(0, version.hotfix);
-        Assert.assertFalse(version.isCodeName);
 
         version = CoverityVersion.parse("lodi");
-        Assert.assertEquals(0, version.major);
-        Assert.assertEquals(0, version.minor);
-        Assert.assertEquals(0, version.patch);
-        Assert.assertEquals(0, version.hotfix);
-        Assert.assertTrue(version.isCodeName);
-        CoverityVersion effectiveLodiVersion = version.getEffectiveVersion();
-        Assert.assertEquals(8, effectiveLodiVersion.major);
-        Assert.assertEquals(6, effectiveLodiVersion.minor);
-        Assert.assertEquals(0, effectiveLodiVersion.patch);
-        Assert.assertEquals(0, effectiveLodiVersion.hotfix);
-        Assert.assertTrue(version.isCodeName);
+        Assert.assertNull(version);
     }
 }
