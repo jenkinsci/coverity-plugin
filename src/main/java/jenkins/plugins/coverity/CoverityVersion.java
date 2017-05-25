@@ -32,8 +32,10 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
     final int minor;
     final int patch;
     final int hotfix;
+    final boolean isSrmVersion;
 
     public CoverityVersion(int major, int minor, int patch, int hotfix) {
+        this.isSrmVersion = false;
         this.hotfix = hotfix;
         this.minor = minor;
         this.patch = patch;
@@ -41,6 +43,7 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
     }
 
     public CoverityVersion(int major, int minor) {
+        this.isSrmVersion = true;
         this.hotfix = 0;
         this.patch = 0;
         this.major = major;
@@ -74,6 +77,10 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
 
     @Override
     public String toString() {
+        if (isSrmVersion) {
+            return String.format("%d.%02d", major, minor);
+        }
+
         return major + "." + minor + "." + patch + (hotfix > 0 ? ("." + hotfix) : "");
     }
 
