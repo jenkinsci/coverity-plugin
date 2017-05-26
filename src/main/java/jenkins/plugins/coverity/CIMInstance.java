@@ -14,7 +14,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -33,19 +32,13 @@ import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.DefectService;
 import com.coverity.ws.v9.GroupIdDataObj;
 import com.coverity.ws.v9.GroupDataObj;
-import com.coverity.ws.v9.MergedDefectDataObj;
-import com.coverity.ws.v9.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v9.MergedDefectsPageDataObj;
-import com.coverity.ws.v9.PageSpecDataObj;
 import com.coverity.ws.v9.PermissionDataObj;
 import com.coverity.ws.v9.ProjectDataObj;
 import com.coverity.ws.v9.ProjectFilterSpecDataObj;
 import com.coverity.ws.v9.RoleAssignmentDataObj;
 import com.coverity.ws.v9.RoleDataObj;
-import com.coverity.ws.v9.SnapshotScopeSpecDataObj;
 import com.coverity.ws.v9.StreamDataObj;
 import com.coverity.ws.v9.StreamFilterSpecDataObj;
-import com.coverity.ws.v9.StreamIdDataObj;
 import com.coverity.ws.v9.UserDataObj;
 import com.google.common.collect.ImmutableList;
 
@@ -57,12 +50,6 @@ import jenkins.plugins.coverity.ws.WebServiceFactory;
  */
 public class CIMInstance {
     private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
-
-    /**
-     * Pattern to ignore streams - this is used to filter out internal DA streams, which are irrelevant to this plugin
-     */
-    public static final String STREAM_NAME_IGNORE_PATTERN = "__internal_.*";
-
     /**
      * The id for this instance, used as a key in CoverityPublisher
      */
