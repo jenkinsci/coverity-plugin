@@ -12,10 +12,7 @@ package jenkins.plugins.coverity;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
@@ -35,8 +32,6 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.ws.CimCache;
 
 public class CIMStream extends AbstractDescribableImpl<CIMStream> {
-    private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
-
     // deprecated field removed in plugin version 1.9 (removed invocation override when multiple streams removed)
     private transient InvocationAssistance invocationAssistanceOverride;
 

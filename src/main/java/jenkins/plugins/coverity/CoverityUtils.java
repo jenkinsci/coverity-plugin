@@ -10,26 +10,18 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.EnvVars;
 import hudson.model.Queue;
-import hudson.remoting.Channel;
 import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.apache.tools.ant.types.Commandline;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 
 public class CoverityUtils {
 
@@ -305,10 +297,6 @@ public class CoverityUtils {
         return build;
     }
 
-    public  static String doubleQuote(String input){
-        return "\"" + input + "\"";
-    }
-
     /**
      * Coverity's parser remove double/single quotes but Jenkins parser does not. When dealing (for instance) with
      * streams with spaces, we would expect [--stream, My Stream]. In order to do this the token "My Stream" must be
@@ -327,19 +315,6 @@ public class CoverityUtils {
      */
     public static EnvVars getBuildEnvVars(TaskListener listener){
         AbstractBuild build = CoverityUtils.getBuild();
-        EnvVars envVars = null;
-        try {
-            envVars = build.getEnvironment(listener);
-        } catch (Exception e) {
-            CoverityUtils.handleException(e.getMessage(), build, listener, e);
-        }
-        return envVars;
-    }
-
-    /**
-     * Gets environment variables from the given build
-     */
-    public static EnvVars getBuildEnvVars(AbstractBuild build, TaskListener listener){
         EnvVars envVars = null;
         try {
             envVars = build.getEnvironment(listener);

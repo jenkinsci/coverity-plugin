@@ -10,8 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import net.sf.json.JSONObject;
-import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class SSLConfigurations {

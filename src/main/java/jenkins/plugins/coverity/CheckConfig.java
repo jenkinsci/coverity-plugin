@@ -44,7 +44,6 @@ import hudson.util.FormValidation.Kind;
  * A configuration checker, and the results of such a check.
  */
 public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
-    private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
     private CoverityPublisher publisher;
     private final List<Status> status;
     private Launcher launcher;
@@ -228,10 +227,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             }
 
             FilePath homePath = new FilePath(launcher.getChannel(), home);
-
-            final TaskListener listen = listener; // Final copy of listner to help print debugging messages
-
-            CoverityVersion version = getVersion(homePath, listen);
+            CoverityVersion version = getVersion(homePath);
 
             if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
                 return new NodeStatus(false,
@@ -278,7 +274,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
      * Gets the {@link CoverityVersion} given a static analysis tools home directory by finding the VERSION file,
      * then reading the version number
      */
-    public static CoverityVersion getVersion(FilePath homePath, final TaskListener listener) throws IOException, InterruptedException {
+    public static CoverityVersion getVersion(FilePath homePath) throws IOException, InterruptedException {
         CoverityVersion version = homePath.child("VERSION").act(new FilePath.FileCallable<CoverityVersion>() {
             @Override
             public void checkRoles(RoleChecker roleChecker) throws SecurityException {
@@ -289,17 +285,18 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
 
                 final String prefix = "externalVersion=";
                 String line, version = "";
-                while ((line = br.readLine()) != null) {
-
-                    if (line.startsWith(prefix)) {
-                        version = line.substring(prefix.length(), line.length());
-                        break;
+                try {
+                    while ((line = br.readLine()) != null) {
+                        if (line.startsWith(prefix)) {
+                            version = line.substring(prefix.length(), line.length());
+                            break;
+                        }
                     }
+                } finally {
+                    br.close();
+
+                    return CoverityVersion.parse(version);
                 }
-
-                br.close();
-
-                return CoverityVersion.parse(version);
             }
         });
 
