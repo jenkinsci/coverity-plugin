@@ -11,15 +11,8 @@
 package jenkins.plugins.coverity;
 
 import hudson.Util;
-import hudson.EnvVars;
-import hudson.model.BuildListener;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.io.File;
-import java.util.*;
-
-
 
 public class ScmOptionBlock {
 

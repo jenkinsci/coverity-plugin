@@ -15,9 +15,7 @@ import java.util.List;
 
 import hudson.EnvVars;
 
-import static jenkins.plugins.coverity.EnvParser.State.DOUBLE_QUOTE;
 import static jenkins.plugins.coverity.EnvParser.State.NORMAL;
-import static jenkins.plugins.coverity.EnvParser.State.SINGLE_QUOTE;
 
 /**
  * Parser for replacing environment variables on a given string and split it into tokens.

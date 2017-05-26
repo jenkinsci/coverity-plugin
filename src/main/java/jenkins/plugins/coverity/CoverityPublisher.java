@@ -10,8 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v9.StreamDataObj;
-import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -417,7 +415,7 @@ public class CoverityPublisher extends Recorder {
                 if(analysisVersionXml.isFile()){
                     try {
                         // check the version file value and validate it is greater than minimum version
-                        CoverityVersion version = CheckConfig.getVersion(new FilePath(analysisDir), null);
+                        CoverityVersion version = CheckConfig.getVersion(new FilePath(analysisDir));
 
                         if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
                             return FormValidation.error("\"Coverity Static Analysis\" version " + version.toString() + " detected. " +
