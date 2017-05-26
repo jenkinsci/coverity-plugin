@@ -11,9 +11,8 @@
 package jenkins.plugins.coverity;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * An abstract representation of a Coverity version number. Conventional version numbers, as well as current and past
@@ -25,15 +24,15 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
 
     public static final CoverityVersion MINIMUM_SUPPORTED_VERSION = VERSION_INDIO;
 
-    // pattern to match format for <major.minor.patch.hotfix> or for <YYYY.MM> version numbers
-    static final Pattern parseRegex = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?|(\\d\\d\\d\\d)\\.(\\d\\d)");
-
     final int major;
     final int minor;
     final int patch;
     final int hotfix;
+    private boolean isSrmVersion;
+    private String srmVersion;
 
     public CoverityVersion(int major, int minor, int patch, int hotfix) {
+        this.isSrmVersion = false;
         this.hotfix = hotfix;
         this.minor = minor;
         this.patch = patch;
@@ -48,32 +47,44 @@ public class CoverityVersion implements Comparable<CoverityVersion>, Serializabl
     }
 
     public static CoverityVersion parse(String s) {
-        Matcher m = parseRegex.matcher(s);
-        if(!m.find()) {
+        if (StringUtils.isEmpty(s)) {
             return null;
         }
 
-        if (m.group(5) != null && m.group(6) != null) {
-            //srm number
-            return new CoverityVersion(gi(m, 5), gi(m, 6));
-        } else {
-            //number
-            return new CoverityVersion(gi(m, 1), gi(m, 2), gi(m, 3), gi(m, 4));
-        }
-    }
+        final String[] parts = s.split("\\.");
 
-    /**
-     * Shorthand method. Return an integer from the given group of the given {@link Matcher}
-     */
-    private static int gi(Matcher m, int group) {
-        if(m.group(group) == null) {
-            return 0;
+        if (parts.length == 2) {
+            //srm number
+            CoverityVersion srmVersion;
+            final String[] srmParts = parts[1].split("-SP|-");
+            if (srmParts.length == 2)
+            {
+                srmVersion =  new CoverityVersion(Integer.parseInt(parts[0]), Integer.parseInt(srmParts[0]), Integer.parseInt(srmParts[1]), 0);
+            } else if (srmParts.length == 3) {
+                srmVersion = new CoverityVersion(Integer.parseInt(parts[0]), Integer.parseInt(srmParts[0]), Integer.parseInt(srmParts[1]), Integer.parseInt(srmParts[2]));
+            } else {
+                srmVersion = new CoverityVersion(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+            }
+            srmVersion.isSrmVersion = true;
+            srmVersion.srmVersion = s;
+            return srmVersion;
+        } else if (parts.length == 3) {
+            //number
+            return new CoverityVersion(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), 0);
+        } else if (parts.length == 4) {
+            //number w/hotfix
+            return new CoverityVersion(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
         }
-        return Integer.parseInt(m.group(group));
+
+        return null;
     }
 
     @Override
     public String toString() {
+        if (isSrmVersion && !StringUtils.isEmpty(srmVersion)) {
+            return srmVersion;
+        }
+
         return major + "." + minor + "." + patch + (hotfix > 0 ? ("." + hotfix) : "");
     }
 
