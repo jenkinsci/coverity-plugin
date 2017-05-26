@@ -289,17 +289,18 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
 
                 final String prefix = "externalVersion=";
                 String line, version = "";
-                while ((line = br.readLine()) != null) {
-
-                    if (line.startsWith(prefix)) {
-                        version = line.substring(prefix.length(), line.length());
-                        break;
+                try {
+                    while ((line = br.readLine()) != null) {
+                        if (line.startsWith(prefix)) {
+                            version = line.substring(prefix.length(), line.length());
+                            break;
+                        }
                     }
+                } finally {
+                    br.close();
+
+                    return CoverityVersion.parse(version);
                 }
-
-                br.close();
-
-                return CoverityVersion.parse(version);
             }
         });
 
