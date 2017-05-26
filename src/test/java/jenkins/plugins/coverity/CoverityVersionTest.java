@@ -95,25 +95,59 @@ public class CoverityVersionTest {
         Assert.assertEquals(7, version.minor);
         Assert.assertEquals(0, version.patch);
         Assert.assertEquals(0, version.hotfix);
+        Assert.assertEquals("7.7.0", version.toString());
 
         version = CoverityVersion.parse("7.7.0.15");
         Assert.assertEquals(7, version.major);
         Assert.assertEquals(7, version.minor);
         Assert.assertEquals(0, version.patch);
         Assert.assertEquals(15, version.hotfix);
+        Assert.assertEquals("7.7.0.15", version.toString());
 
-        version = CoverityVersion.parse("8.7.1");
+        version = CoverityVersion.parse("8.7.1.0");
         Assert.assertEquals(8, version.major);
         Assert.assertEquals(7, version.minor);
         Assert.assertEquals(1, version.patch);
         Assert.assertEquals(0, version.hotfix);
+        Assert.assertEquals("8.7.1", version.toString());
 
+        // SRM versions
         version = CoverityVersion.parse("2017.07");
         Assert.assertEquals(2017, version.major);
         Assert.assertEquals(7, version.minor);
         Assert.assertEquals(0, version.patch);
         Assert.assertEquals(0, version.hotfix);
+        Assert.assertEquals("2017.07", version.toString());
 
+        version = CoverityVersion.parse("2017.12");
+        Assert.assertEquals(2017, version.major);
+        Assert.assertEquals(12, version.minor);
+        Assert.assertEquals(0, version.patch);
+        Assert.assertEquals(0, version.hotfix);
+        Assert.assertEquals("2017.12", version.toString());
+
+        version = CoverityVersion.parse("2017.07-1");
+        Assert.assertEquals(2017, version.major);
+        Assert.assertEquals(7, version.minor);
+        Assert.assertEquals(1, version.patch);
+        Assert.assertEquals(0, version.hotfix);
+        Assert.assertEquals("2017.07-1", version.toString());
+
+        version = CoverityVersion.parse("2017.07-SP1");
+        Assert.assertEquals(2017, version.major);
+        Assert.assertEquals(7, version.minor);
+        Assert.assertEquals(1, version.patch);
+        Assert.assertEquals(0, version.hotfix);
+        Assert.assertEquals("2017.07-SP1", version.toString());
+
+        version = CoverityVersion.parse("2017.07-SP1-2");
+        Assert.assertEquals(2017, version.major);
+        Assert.assertEquals(7, version.minor);
+        Assert.assertEquals(1, version.patch);
+        Assert.assertEquals(2, version.hotfix);
+        Assert.assertEquals("2017.07-SP1-2", version.toString());
+
+        // named versions
         version = CoverityVersion.parse("lodi");
         Assert.assertNull(version);
     }
