@@ -278,7 +278,18 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public List<StreamDataObj> getStreams(StreamFilterSpecDataObj filterSpec) throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            List<StreamDataObj> matchingStreams = new ArrayList<>();
+
+            for (ProjectDataObj project : projects) {
+                for (StreamDataObj stream : project.getStreams()) {
+                    if (!StringUtils.isEmpty(filterSpec.getNamePattern()) && stream.getId().getName().equals(filterSpec.getNamePattern()))
+                        matchingStreams.add(stream);
+                    else
+                        matchingStreams.add(stream);
+                }
+            }
+
+            return matchingStreams;
         }
 
         @Override
