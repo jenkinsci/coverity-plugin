@@ -153,17 +153,10 @@ public class DefectFilters {
     }
 
     public boolean isComponentSelected(String component) {
-        if (ignoredComponents == null) {
-            return false;
-        }
-
         return !ignoredComponents.contains(component);
     }
 
     public boolean isCheckerSelected(String checker) {
-        if(ignoredCheckers == null) {
-            return false;
-        }
         return !ignoredCheckers.contains(checker);
     }
 
