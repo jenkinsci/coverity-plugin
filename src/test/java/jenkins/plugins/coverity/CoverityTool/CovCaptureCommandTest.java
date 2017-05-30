@@ -25,18 +25,53 @@ import static org.junit.Assert.fail;
 public class CovCaptureCommandTest extends CommandTestBase {
 
     @Test
-    public void addTAdvisorConfigurationTest() throws IOException, InterruptedException {
+    public void addTAdvisorConfigurationTest_Java() throws IOException, InterruptedException {
         TaOptionBlock taOptionBlock =
                 new TaOptionBlockBuilder().
                         withJavaOptionBlock(true).
                         withJavaCoverageTool("Jacoco").
                         withJunitFramework(true).
                         withCustomTestCommand("CustomTestCommand").
+                        withJunit4Framework(true).
                         build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
         Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
-        setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit", "CustomTestCommand"});
+        setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--java-coverage", "Jacoco", "--java-test", "junit", "--java-test", "junit4", "CustomTestCommand"});
+        covCaptureCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-capture command line arguments: " + actualArguments.toString());
+    }
+
+    @Test
+    public void addTAdvisorConfigurationTest_Cxx() throws IOException, InterruptedException {
+        TaOptionBlock taOptionBlock =
+                new TaOptionBlockBuilder().
+                        withCoptionBlock(true).
+                        withCxxCoverageTool("bullseye").
+                        withBullsEyeDir("bullseyeDir").
+                        withCustomTestCommand("CustomTestCommand").
+                        build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
+
+        Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--c-coverage", "bullseye", "--bullseye-dir", "bullseyeDir", "CustomTestCommand"});
+        covCaptureCommand.runCommand();
+        consoleLogger.verifyLastMessage("[Coverity] cov-capture command line arguments: " + actualArguments.toString());
+    }
+
+    @Test
+    public void addTAdvisorConfigurationTest_Cs() throws IOException, InterruptedException {
+        TaOptionBlock taOptionBlock =
+                new TaOptionBlockBuilder().
+                        withCsOptionBlock(true).
+                        withCsCoverageTool("opencover").
+                        withCsFramework("nunit").
+                        withCustomTestCommand("CustomTestCommand").
+                        build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
+
+        Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars);
+        setExpectedArguments(new String[] {"cov-capture", "--dir", "TestDir", "--cs-coverage", "opencover", "--cs-test", "nunit", "CustomTestCommand"});
         covCaptureCommand.runCommand();
         consoleLogger.verifyLastMessage("[Coverity] cov-capture command line arguments: " + actualArguments.toString());
     }

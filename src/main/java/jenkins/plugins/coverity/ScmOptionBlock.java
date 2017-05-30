@@ -76,12 +76,12 @@ public class ScmOptionBlock {
 
         String errorText = StringUtils.EMPTY;
         Boolean delim = true;
-        if(this.scmSystem.equals("accurev") && this.accRevRepo == null){
+        if(this.scmSystem.equals("accurev") && StringUtils.isEmpty(this.accRevRepo)){
             errorText += "[SCM] Please specify AccuRev's source control repository under 'Advanced' \n";
             delim = false;
         }
 
-        if(this.scmSystem.equals("perforce") && this.p4Port == null){
+        if(this.scmSystem.equals("perforce") && StringUtils.isEmpty(this.p4Port)){
             errorText += "[SCM] Please specify Perforce's port environment variable under 'Advanced'\n ";
             delim = false;
         }

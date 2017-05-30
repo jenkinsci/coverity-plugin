@@ -219,7 +219,7 @@ public class TaOptionBlock {
         }
 
         // Making sure that a policy file is specified
-        if(this.policyFile == null){
+        if(StringUtils.isEmpty(this.policyFile)){
             errorText += "[Test Advisor] Policy file is not specified. \n";
             delim = false;
         }
@@ -233,7 +233,7 @@ public class TaOptionBlock {
 
         // Checking required field for bullseye
         if(this.cOptionBlock){
-            if(this.cxxCoverageTool.equals("bullseye") && this.bullsEyeDir == null){
+            if(this.cxxCoverageTool.equals("bullseye") && StringUtils.isEmpty(this.bullsEyeDir)){
                 errorText += "[Test Advisor] Bulls eye requires the installation directory. \n";
                 delim = false;
             }

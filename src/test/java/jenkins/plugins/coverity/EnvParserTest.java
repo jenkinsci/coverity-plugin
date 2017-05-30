@@ -10,12 +10,8 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-import jenkins.plugins.coverity.EnvParser;
-import jenkins.plugins.coverity.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
