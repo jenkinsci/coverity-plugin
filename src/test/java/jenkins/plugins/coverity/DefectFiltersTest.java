@@ -214,4 +214,32 @@ public class DefectFiltersTest {
         XMLGregorianCalendar expectedXmlDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(calender);
         assertEquals(expectedXmlDate, filters.getXMLCutOffDate());
     }
+
+    @Test
+    public void isComponentSelected_withNoIgnoredComponents() throws FormException {
+        DefectFilters filters = new DefectFilters(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            StringUtils.EMPTY);
+
+        assertTrue(filters.isComponentSelected("Default"));
+    }
+
+    @Test
+    public void isCheckerSelected_withNoIgnoredCheckers() throws FormException {
+        DefectFilters filters = new DefectFilters(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            StringUtils.EMPTY);
+
+        assertTrue(filters.isCheckerSelected("CHECKER"));
+    }
 }

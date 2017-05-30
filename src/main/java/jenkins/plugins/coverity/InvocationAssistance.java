@@ -204,7 +204,7 @@ public class InvocationAssistance {
     public String checkIAConfig() {
         boolean delim = true;
         String errorText = "Errors with your \"Perform Coverity build/analyze/commit\" options: \n";
-        // Making sure they pick a test language
+        // Making sure they specified misra config
         if (getIsUsingMisra()) {
             if (getMisraConfigFile() == null) {
                 delim = false;

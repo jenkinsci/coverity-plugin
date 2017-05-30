@@ -11,6 +11,8 @@
 package jenkins.plugins.coverity;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -35,6 +37,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.thoughtworks.xstream.XStream;
+
+import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
@@ -137,6 +142,27 @@ public class CoverityPublisherDescriptorImplTests {
         } finally {
             responseOutputStream.close();
         }
+    }
+
+    @Test
+    public void getSslConfigurations_forPre192Settings() {
+        String oldXml = "<jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl plugin=\"coverity@1.8.1\">\n" +
+            "      <sslConfigurations>\n" +
+            "        <trustNewSelfSignedCert>true</trustNewSelfSignedCert>\n" +
+            "        <certFileName>C:\\customcerts\\mycertifcate.cer</certFileName>\n" +
+            "      </sslConfigurations>\n" +
+            "    </jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl>";
+
+        XStream xstream = new XStream2();
+
+        final CoverityPublisher.DescriptorImpl descriptor = (CoverityPublisher.DescriptorImpl)xstream.fromXML(oldXml);
+        assertNotNull(descriptor);
+
+        final SSLConfigurations sslConfigurations = descriptor.getSslConfigurations();
+        assertNotNull(sslConfigurations);
+
+        assertTrue(sslConfigurations.isTrustNewSelfSignedCert());
+        assertEquals("C:\\customcerts\\mycertifcate.cer", sslConfigurations.getCertFileName());
     }
 
     private ServletOutputStream getServletOutputStream(final ByteArrayOutputStream testableStream) {

@@ -14,11 +14,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import com.thoughtworks.xstream.XStream;
 
 import hudson.util.XStream2;
+import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 
 public class CoverityPublisherTest {
     @Test
@@ -285,5 +287,38 @@ public class CoverityPublisherTest {
         assertEquals("post cov build", invocationAssistance.getPostCovBuildCmd());
         assertTrue(invocationAssistance.getIsUsingPostCovAnalyzeCmd());
         assertEquals("post cov analyze", invocationAssistance.getPostCovAnalyzeCmd());
+        assertEquals("Pass", invocationAssistance.checkIAConfig());
     }
+
+    @Test
+    public void checkIAConfig_withEmptyMisraConfig() {
+        final String expectedOkMessage = "Pass";
+        final String expectedErrorMessage =
+            "Errors with your \"Perform Coverity build/analyze/commit\" options: \n" +
+                "[Error] No MISRA configuration file was specified. \n";
+
+        final InvocationAssistanceBuilder builder = new InvocationAssistanceBuilder();
+
+        InvocationAssistance invocationAssistance = builder.build();
+
+        assertEquals(expectedOkMessage, invocationAssistance.checkIAConfig());
+
+        builder.withMisraConfigFile(null);
+        invocationAssistance = builder.build();
+
+        assertEquals(expectedErrorMessage, invocationAssistance.checkIAConfig());
+
+        builder.withMisraConfigFile(StringUtils.EMPTY);
+        invocationAssistance = builder.build();
+        assertEquals(expectedErrorMessage, invocationAssistance.checkIAConfig());
+
+        builder.withMisraConfigFile("   ");
+        invocationAssistance = builder.build();
+        assertEquals(expectedErrorMessage, invocationAssistance.checkIAConfig());
+
+        builder.withMisraConfigFile("MISRA_cpp2008_1.config");
+        invocationAssistance = builder.build();
+        assertEquals(expectedOkMessage, invocationAssistance.checkIAConfig());
+    }
+
 }
