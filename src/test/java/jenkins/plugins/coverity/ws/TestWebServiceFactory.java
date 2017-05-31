@@ -282,9 +282,9 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
             for (ProjectDataObj project : projects) {
                 for (StreamDataObj stream : project.getStreams()) {
-                    if (!StringUtils.isEmpty(filterSpec.getNamePattern()) && stream.getId().getName().equals(filterSpec.getNamePattern()))
+                    if (stream.getId().getName().equals(filterSpec.getNamePattern()))
                         matchingStreams.add(stream);
-                    else
+                    else if (StringUtils.isEmpty(filterSpec.getNamePattern()))
                         matchingStreams.add(stream);
                 }
             }
