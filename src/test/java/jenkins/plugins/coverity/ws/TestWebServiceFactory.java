@@ -126,6 +126,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
         private URL url;
         private List<SnapshotIdDataObj> snapshotList;
         private List<ProjectDataObj> projects;
+        private String externalVersion;
 
         public TestConfigurationService(URL url) {
 
@@ -159,6 +160,10 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
                 projects.add(projectDataObj);
             }
+        }
+
+        public void setupExternalVersion(String version) {
+            this.externalVersion = version;
         }
 
         @Override
@@ -524,7 +529,9 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public VersionDataObj getVersion() throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            VersionDataObj version = new VersionDataObj();
+            version.setExternalVersion(this.externalVersion);
+            return version;
         }
 
         @Override

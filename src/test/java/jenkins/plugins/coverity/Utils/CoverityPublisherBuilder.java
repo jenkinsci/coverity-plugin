@@ -15,7 +15,6 @@ import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.ScmOptionBlock;
 import jenkins.plugins.coverity.TaOptionBlock;
-import java.util.List;
 
 public class CoverityPublisherBuilder {
 
