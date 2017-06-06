@@ -31,10 +31,10 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.mockito.Mockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -138,9 +138,9 @@ public abstract class CommandTestBase {
                         Matchers.anyBoolean())).thenAnswer(doubleQuote);
     }
 
-    protected void setCoverityUtils_listFilesAsArray(File[] expectedFiles) {
+    protected void setCoverityUtils_listFiles(Collection<File> expectedFiles) {
         when(
-                CoverityUtils.listFilesAsArray(
+                CoverityUtils.listFiles(
                         Matchers.any(File.class),
                         Matchers.any(FilenameFilter.class),
                         Matchers.anyBoolean())).thenReturn(expectedFiles);

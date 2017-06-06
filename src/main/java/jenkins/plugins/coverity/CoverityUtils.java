@@ -346,14 +346,4 @@ public class CoverityUtils {
 
         return files;
     }
-
-    public static File[] listFilesAsArray(
-            File directory,
-            FilenameFilter filter,
-            boolean recurse) {
-        Collection<File> files = listFiles(directory, filter, recurse);
-
-        File[] arr = new File[files.size()];
-        return files.toArray(arr);
-    }
 }
