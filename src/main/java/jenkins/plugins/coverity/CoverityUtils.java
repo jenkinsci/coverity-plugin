@@ -329,6 +329,10 @@ public class CoverityUtils {
             FilenameFilter filter,
             boolean recurse) {
         Vector<File> files = new Vector<File>();
+        if (directory == null) {
+            return files;
+        }
+
         File[] entries = directory.listFiles();
         if (entries == null) {
             return files;
