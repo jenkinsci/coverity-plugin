@@ -329,6 +329,10 @@ public class CoverityUtils {
             FilenameFilter filter,
             boolean recurse) {
         Vector<File> files = new Vector<File>();
+        if (directory == null) {
+            return files;
+        }
+
         File[] entries = directory.listFiles();
         if (entries == null) {
             return files;
@@ -345,15 +349,5 @@ public class CoverityUtils {
         }
 
         return files;
-    }
-
-    public static File[] listFilesAsArray(
-            File directory,
-            FilenameFilter filter,
-            boolean recurse) {
-        Collection<File> files = listFiles(directory, filter, recurse);
-
-        File[] arr = new File[files.size()];
-        return files.toArray(arr);
     }
 }

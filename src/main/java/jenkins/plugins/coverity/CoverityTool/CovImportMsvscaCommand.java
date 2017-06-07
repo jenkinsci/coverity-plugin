@@ -21,6 +21,7 @@ import jenkins.plugins.coverity.InvocationAssistance;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Collection;
 
 public class CovImportMsvscaCommand extends CoverityCommand {
 
@@ -68,10 +69,12 @@ public class CovImportMsvscaCommand extends CoverityCommand {
         listener.getLogger().println("[Coverity] Searching for Microsoft Code Analysis results...");
         File dir = new File(dirName);
 
-        return CoverityUtils.listFilesAsArray(dir, new FilenameFilter() {
+        Collection<File> files = CoverityUtils.listFiles(dir, new FilenameFilter() {
             public boolean accept(File dir, String filename) {
                 return filename.endsWith("CodeAnalysisLog.xml");
             }
         }, true);
+
+        return files.toArray(new File[files.size()]);
     }
 }
