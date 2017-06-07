@@ -75,9 +75,6 @@ public class CovImportMsvscaCommand extends CoverityCommand {
             }
         }, true);
 
-        if (files == null) {
-            return new File[]{};
-        }
         return files.toArray(new File[files.size()]);
     }
 }
