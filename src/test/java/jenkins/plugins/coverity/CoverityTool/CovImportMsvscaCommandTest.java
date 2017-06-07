@@ -20,6 +20,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 public class CovImportMsvscaCommandTest extends CommandTestBase {
 
@@ -28,9 +31,9 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
 
         File analysisLog1 = new File("CodeAnalysisLog1.xml");
         File analysisLog2 = new File("CodeAnalysisLog2.xml");
-        File[] outputFiles = new File[] {analysisLog1, analysisLog2};
+        Collection<File> outputFiles = Arrays.asList(analysisLog1, analysisLog2);
         
-        setCoverityUtils_listFilesAsArray(outputFiles);
+        setCoverityUtils_listFiles(outputFiles);
 
         FilePath workspace = new FilePath(new File("."));
 
@@ -69,7 +72,7 @@ public class CovImportMsvscaCommandTest extends CommandTestBase {
     @Test
     public void doesNotExecute_WithoutAnalysisConfigFiles() throws IOException, InterruptedException {
         FilePath workspace = new FilePath(new File("."));
-        setCoverityUtils_listFilesAsArray(null);
+        setCoverityUtils_listFiles(new ArrayList<File>());
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCSharpMsvsca(true).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();

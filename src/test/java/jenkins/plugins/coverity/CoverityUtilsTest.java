@@ -11,9 +11,13 @@
 package jenkins.plugins.coverity;
 
 import hudson.EnvVars;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -115,5 +119,58 @@ public class CoverityUtilsTest {
         assertprepareCmds(Arrays.asList("$key"), new String[]{"key=value=with=equals"}, true, Arrays.asList("value=with=equals"));
         assertprepareCmds(Arrays.asList("$key"), new String[]{"key="}, true, new ArrayList<String>());
         assertprepareCmds(Arrays.asList("$key"), new String[]{"=key=value"}, true, new ArrayList<String>());
+    }
+
+    @Test
+    public void listFilesTest() throws IOException {
+        Collection<File> result = CoverityUtils.listFiles(null, null, false);
+        assertNotNull(result);
+        assertThat(result.size(), is(0));
+
+        File testDir = createTestDirectoryWithFiles("TestDirectory", true);
+        System.out.println(testDir.getAbsolutePath());
+        result = CoverityUtils.listFiles(testDir, new FilenameFilter() {
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(".txt");
+            }
+        }, true);
+        assertNotNull(result);
+        assertThat(result.size(), is(2));
+
+        FileUtils.deleteDirectory(testDir);
+        assertFalse(testDir.exists());
+    }
+
+    private File createTestDirectoryWithFiles(String rootDirectory, boolean subDirectory) throws IOException {
+        File rootDir = new File(rootDirectory);
+        if (!rootDir.exists()) {
+            if (rootDir.mkdir()) {
+                assertTrue(rootDir.exists());
+                File file1 = new File(rootDir, "file1.txt");
+                File file2 = new File(rootDir, "file2.java");
+
+                if (file1.createNewFile() && file2.createNewFile()) {
+                    assertTrue(file1.exists());
+                    assertTrue(file2.exists());
+                }
+
+                if (subDirectory) {
+                    File subDir = new File(rootDir, "subFolder");
+                    if (subDir.mkdir()) {
+                        assertTrue(subDir.exists());
+                    }
+
+                    File subFile1 = new File(subDir, "subFile1.txt");
+                    File subFile2 = new File(subDir, "subFile2.java");
+
+                    if (subFile1.createNewFile() && subFile2.createNewFile()) {
+                        assertTrue(subFile1.exists());
+                        assertTrue(subFile2.exists());
+                    }
+                }
+            }
+        }
+
+        return rootDir;
     }
 }
