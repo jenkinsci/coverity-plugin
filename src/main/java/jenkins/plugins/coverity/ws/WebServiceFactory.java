@@ -10,7 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.ws;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -136,8 +138,43 @@ public class WebServiceFactory {
      * @return a url
      * @throws MalformedURLException should not happen if host is valid
      */
-    public URL getURL(CIMInstance cimInstance) throws MalformedURLException {
+    protected URL getURL(CIMInstance cimInstance) throws MalformedURLException {
         return new URL(cimInstance.isUseSSL() ? "https" : "http", cimInstance.getHost(), cimInstance.getPort(), "/");
+    }
+
+    /**
+     * Gets the response code for the {@link CIMInstance} V9 Web Services WSDL
+     * @param cimInstance the CIM instance to get response for
+     * @return the HTTP Status-Code from the WSDL, or -1
+     */
+    public int getWSResponseCode(CIMInstance cimInstance) {
+        try {
+            int responseCode = getWSResponseCode(new URL(getURL(cimInstance), WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL));
+            return responseCode;
+        } catch (MalformedURLException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * The response code for the given {@link URL}
+     * It will return 200 and 401 respectively.
+     * Returns -1 if no code can be discerned
+     * @param url to check response
+     * @return the HTTP Status-Code, or -1
+     */
+    private int getWSResponseCode(URL url) {
+        try {
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+            conn.getInputStream();
+            return conn.getResponseCode();
+        } catch(FileNotFoundException e) {
+            return 404;
+        } catch (IOException e) {
+            return -1;
+        }
     }
 
     /**

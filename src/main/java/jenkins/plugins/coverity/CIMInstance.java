@@ -10,12 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.net.HttpURLConnection;
 import java.net.SocketException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -213,13 +210,12 @@ public class CIMInstance {
         }
     }
 
-    public FormValidation doCheck() throws IOException {
+    public FormValidation doCheck() {
         StringBuilder errorMessage = new StringBuilder();
         errorMessage.append("\"" + user + "\" does not have following permission(s): ");
 
         try {
-            URL url = WebServiceFactory.getInstance().getURL(this);
-            int responseCode = getURLResponseCode(new URL(url, WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL));
+            int responseCode = WebServiceFactory.getInstance().getWSResponseCode(this);
             if(responseCode != 200) {
                 return FormValidation.error("Coverity web services were not detected. Connection attempt responded with " +
                     responseCode + ", check Coverity Connect version (minimum supported version is " +
@@ -270,18 +266,6 @@ public class CIMInstance {
                 }
             }
             return FormValidation.error(e, "An unexpected error occurred.");
-        }
-    }
-
-    private int getURLResponseCode(URL url) throws IOException {
-        try {
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.connect();
-            conn.getInputStream();
-            return conn.getResponseCode();
-        } catch(FileNotFoundException e) {
-            return 404;
         }
     }
 

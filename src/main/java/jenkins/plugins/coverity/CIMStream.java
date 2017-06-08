@@ -128,7 +128,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
-        public FormValidation doCheckInstance(@QueryParameter String instance) throws IOException, CovRemoteServiceException_Exception {
+        public FormValidation doCheckInstance(@QueryParameter String instance) {
             CIMInstance cimInstance = getInstance(instance);
 
             if (cimInstance != null) {

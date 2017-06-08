@@ -404,7 +404,7 @@ public class CoverityPublisher extends Recorder {
             return "Coverity";
         }
 
-        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter String user, @QueryParameter String password, @QueryParameter boolean useSSL, @QueryParameter int dataPort) throws IOException {
+        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter String user, @QueryParameter String password, @QueryParameter boolean useSSL, @QueryParameter int dataPort) {
             return new CIMInstance("", host, port, user, password, useSSL, dataPort).doCheck();
         }
 
