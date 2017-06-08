@@ -163,7 +163,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return projects;
         }
 
-        public boolean checkProjectIsValid(@QueryParameter String instance, @QueryParameter String project) throws IOException, CovRemoteServiceException_Exception {
+        public boolean checkProjectIsValid(@QueryParameter String instance, @QueryParameter String project) {
             // allow initial empty project selection
             if (StringUtils.isEmpty(project))
                 return true;
@@ -201,7 +201,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return streams;
         }
 
-        public boolean checkStreamIsValid(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) throws IOException, CovRemoteServiceException_Exception {
+        public boolean checkStreamIsValid(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) {
             // allow initial empty stream selection
             if (StringUtils.isEmpty(stream))
                 return true;
@@ -247,7 +247,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
-        public ListBoxModel doFillImpactDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) throws IOException, CovRemoteServiceException_Exception {
+        public ListBoxModel doFillImpactDefectFilterItems(@QueryParameter(value = "../cimInstance") String cimInstance) {
             ListBoxModel result = new ListBoxModel();
             result.add("High");
             result.add("Medium");
