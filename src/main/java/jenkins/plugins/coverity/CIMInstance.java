@@ -327,6 +327,15 @@ public class CIMInstance {
                 // The user still has direct role assignments or a few more were added from a group
                 if (!roleAssignments.isEmpty()) {
                     final RoleAssignmentDataObj roleAssignment = roleAssignments.removeFirst();
+
+                    // first check for built-in roles which contain required permissions
+                    if (roleAssignment.getRoleId().getName().equals("serverAdmin") ||
+                        roleAssignment.getRoleId().getName().equals("streamOwner") ||
+                        roleAssignment.getRoleId().getName().equals("projectOwner")) {
+                        canCommit = canViewIssues = true;
+                        continue;
+                    }
+
                     final RoleDataObj roleData = getConfigurationService().getRole(roleAssignment.getRoleId());
                     if (onlyCheckGlobal && !roleAssignment.getType().equals("global"))
                         continue;
