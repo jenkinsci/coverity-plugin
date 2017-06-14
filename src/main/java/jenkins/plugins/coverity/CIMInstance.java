@@ -88,6 +88,13 @@ public class CIMInstance {
      */
     private transient ConfigurationServiceService configurationServiceService;
 
+    /**
+     * Cached result of user permissions check for this instance. This value is not saved and only updated as a result of
+     * checking user permissions.
+     * This is a part of fixing the issue in BZ 105657 (JENKINS-44724)
+     */
+    private transient FormValidation userPermissionsCheck;
+
     @DataBoundConstructor
     public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort) {
         this.name = name;
@@ -259,6 +266,9 @@ public class CIMInstance {
      * a list of missing permissions.
      */
     private FormValidation checkUserPermissions() throws IOException, CovRemoteServiceException_Exception {
+        if (userPermissionsCheck != null)
+            return userPermissionsCheck;
+
         StringBuilder errorMessage = new StringBuilder();
         errorMessage.append("\"" + user + "\" does not have following permission(s): ");
 
@@ -270,7 +280,8 @@ public class CIMInstance {
             if (userData != null){
 
                 if (userData.isSuperUser()){
-                    return FormValidation.ok();
+                    userPermissionsCheck = FormValidation.ok();
+                    return userPermissionsCheck;
                 }
 
                 // Start the queue with direct role assignments to the user
@@ -354,6 +365,7 @@ public class CIMInstance {
             return FormValidation.error(e, "An unexpected error occurred.");
         }
 
+        userPermissionsCheck = FormValidation.ok();
         return FormValidation.ok();
     }
 
