@@ -40,6 +40,7 @@ import com.coverity.ws.v9.UserDataObj;
 import com.google.common.collect.ImmutableList;
 
 import hudson.util.FormValidation;
+import hudson.util.FormValidation.Kind;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
 
 /**
@@ -211,9 +212,6 @@ public class CIMInstance {
     }
 
     public FormValidation doCheck() {
-        StringBuilder errorMessage = new StringBuilder();
-        errorMessage.append("\"" + user + "\" does not have following permission(s): ");
-
         try {
             int responseCode = WebServiceFactory.getInstance().getWSResponseCode(this);
             if(responseCode != 200) {
@@ -222,25 +220,10 @@ public class CIMInstance {
                     CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ").");
             }
 
-            List<String> missingPermission = new ArrayList<String>();
-            if (!checkUserPermission(missingPermission, false) && !missingPermission.isEmpty()){
-                for (String permission : missingPermission){
-                    errorMessage.append("\"" + permission + "\" ");
-                }
-                return FormValidation.error(errorMessage.toString());
-            }
+            FormValidation userPermissionsValidation = checkUserPermissions();
 
-            // check for missing global permissions to warn users
-            //   in some cases users could have group permissions but only a specific project, stream, etc.
-            List<String> missingGlobalPermission = new ArrayList<String>();
-            if (!checkUserPermission(missingGlobalPermission, true) && !missingGlobalPermission.isEmpty()) {
-                StringBuilder warningMessage = new StringBuilder();
-                warningMessage.append("\"" + user + "\" does not have following global permission(s): ");
-                for (String permission : missingGlobalPermission){
-                    warningMessage.append("\"" + permission + "\" ");
-                }
-                return FormValidation.warning(warningMessage.toString());
-            }
+            if (!userPermissionsValidation.kind.equals(Kind.OK))
+                return userPermissionsValidation;
 
             return FormValidation.ok("Successfully connected to the instance.");
         } catch(UnknownHostException e) {
@@ -249,14 +232,6 @@ public class CIMInstance {
             return FormValidation.error("Connection refused");
         } catch(SocketException e) {
             return FormValidation.error("Error connecting to CIM. Please check your connection settings.");
-        } catch(SOAPFaultException e){
-            if (StringUtils.isNotEmpty(e.getMessage())){
-                if (e.getMessage().contains("User " + user + " Doesn't have permissions to perform {invokeWS}")) {
-                    return FormValidation.error(errorMessage.append("\"Access web services\"").toString());
-                }
-                return FormValidation.error(e.getMessage());
-            }
-            return FormValidation.error(e, "An unexpected error occurred.");
         } catch (Throwable e) {
             String javaVersion = System.getProperty("java.version");
             if(javaVersion.startsWith("1.6.0_")) {
@@ -283,70 +258,105 @@ public class CIMInstance {
      * Returns true if the user have all the permissions, otherwise, return false with
      * a list of missing permissions.
      */
-    private boolean checkUserPermission(List<String> missingPermissions, boolean onlyCheckGlobal) throws IOException, com.coverity.ws.v9.CovRemoteServiceException_Exception{
+    private FormValidation checkUserPermissions() throws IOException, CovRemoteServiceException_Exception {
+        StringBuilder errorMessage = new StringBuilder();
+        errorMessage.append("\"" + user + "\" does not have following permission(s): ");
 
-        boolean canCommit = false;
-        boolean canViewIssues = false;
+        try {
 
-        UserDataObj userData = getConfigurationService().getUser(user);
-        if (userData != null){
+            boolean canCommit = false, canViewIssues = false, canCommitGlobal = false, canViewIssuesGlobal = false;
 
-            if (userData.isSuperUser()){
-                return true;
-            }
+            UserDataObj userData = getConfigurationService().getUser(user);
+            if (userData != null){
 
-            // Start the queue with direct role assignments to the user
-            final LinkedList<RoleAssignmentDataObj> roleAssignments = new LinkedList<>(userData.getRoleAssignments());
-            final Iterator<String> groupNameIterator = userData.getGroups().iterator();
-            while (!(canCommit && canViewIssues) && (!roleAssignments.isEmpty() || groupNameIterator.hasNext())) {
-                // No more role assignments, add more from the next available group
-                if (roleAssignments.isEmpty()) {
-                    final GroupIdDataObj groupId = new GroupIdDataObj();
-                    groupId.setName(groupNameIterator.next());
-                    final GroupDataObj group = getConfigurationService().getGroup(groupId);
-                    if (group != null) {
-                        roleAssignments.addAll(group.getRoleAssignments());
-                    }
+                if (userData.isSuperUser()){
+                    return FormValidation.ok();
                 }
-                // The user still has direct role assignments or a few more were added from a group
-                if (!roleAssignments.isEmpty()) {
-                    final RoleAssignmentDataObj roleAssignment = roleAssignments.removeFirst();
 
-                    if (onlyCheckGlobal && !roleAssignment.getType().equals("global"))
-                        continue;
-
-                    // first check for built-in roles which contain required permissions
-                    if (roleAssignment.getRoleId().getName().equals("serverAdmin") ||
-                        roleAssignment.getRoleId().getName().equals("streamOwner") ||
-                        roleAssignment.getRoleId().getName().equals("projectOwner")) {
-                        canCommit = canViewIssues = true;
-                        continue;
+                // Start the queue with direct role assignments to the user
+                final LinkedList<RoleAssignmentDataObj> roleAssignments = new LinkedList<>(userData.getRoleAssignments());
+                final Iterator<String> groupNameIterator = userData.getGroups().iterator();
+                while (!(canCommitGlobal && canViewIssuesGlobal) && (!roleAssignments.isEmpty() || groupNameIterator.hasNext())) {
+                    // No more role assignments, add more from the next available group
+                    if (roleAssignments.isEmpty()) {
+                        final GroupIdDataObj groupId = new GroupIdDataObj();
+                        groupId.setName(groupNameIterator.next());
+                        final GroupDataObj group = getConfigurationService().getGroup(groupId);
+                        if (group != null) {
+                            roleAssignments.addAll(group.getRoleAssignments());
+                        }
                     }
+                    // The user still has direct role assignments or a few more were added from a group
+                    if (!roleAssignments.isEmpty()) {
+                        final RoleAssignmentDataObj roleAssignment = roleAssignments.removeFirst();
 
-                    final RoleDataObj roleData = getConfigurationService().getRole(roleAssignment.getRoleId());
+                        // first check for built-in roles which contain required permissions
+                        if (roleAssignment.getRoleId().getName().equals("serverAdmin") ||
+                            roleAssignment.getRoleId().getName().equals("streamOwner") ||
+                            roleAssignment.getRoleId().getName().equals("projectOwner")) {
+                            if (roleAssignment.getType().equals("global"))
+                                canCommit = canCommitGlobal = canViewIssues = canViewIssuesGlobal = true;
+                            else
+                                canCommit = canViewIssues = true;
+                            continue;
+                        }
 
-                    if (roleData != null) {
-                        for (PermissionDataObj permission : roleData.getPermissionDataObjs()) {
-                            if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")) {
-                                canCommit = true;
-                            } else if (permission.getPermissionValue().equalsIgnoreCase("viewDefects")) {
-                                canViewIssues = true;
+                        final RoleDataObj roleData = getConfigurationService().getRole(roleAssignment.getRoleId());
+
+                        if (roleData != null) {
+                            for (PermissionDataObj permission : roleData.getPermissionDataObjs()) {
+                                if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")) {
+                                    if (roleAssignment.getType().equals("global"))
+                                        canCommit = canCommitGlobal = true;
+                                    else
+                                        canCommit = true;
+                                } else if (permission.getPermissionValue().equalsIgnoreCase("viewDefects")) {
+                                    if (roleAssignment.getType().equals("global"))
+                                        canViewIssues = canViewIssuesGlobal = true;
+                                    else
+                                        canViewIssues = true;
+                                }
                             }
                         }
                     }
                 }
             }
+
+            if (!canCommit){
+                errorMessage.append("\"Commit to a stream\" ");
+            }
+            if (!canViewIssues){
+                errorMessage.append("\"View issues\" ");
+            }
+
+            if (!canCommit || !canViewIssues)
+                return FormValidation.error(errorMessage.toString());
+
+            // check for missing global permissions to warn users
+            if (!canCommitGlobal || !canViewIssuesGlobal) {
+                StringBuilder warningMessage = new StringBuilder();
+                warningMessage.append("\"" + user + "\" does not have following global permission(s): ");
+                if (!canCommitGlobal){
+                    warningMessage.append("\"Commit to a stream\" ");
+                }
+                if (!canViewIssuesGlobal){
+                    warningMessage.append("\"View issues\" ");
+                }
+                return FormValidation.warning(warningMessage.toString());
+            }
+        } catch(SOAPFaultException e){
+            if (StringUtils.isNotEmpty(e.getMessage())){
+                if (e.getMessage().contains("User " + user + " Doesn't have permissions to perform {invokeWS}")) {
+                    return FormValidation.error(errorMessage.append("\"Access web services\"").toString());
+                }
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.error(e, "An unexpected error occurred.");
         }
 
-        if (!canCommit){
-            missingPermissions.add("Commit to a stream");
-        }
-        if (!canViewIssues){
-            missingPermissions.add("View issues");
-        }
-
-        return canCommit && canViewIssues;
+        return FormValidation.ok();
     }
+
 
     @Override
     public int hashCode() {
