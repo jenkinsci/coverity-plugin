@@ -128,6 +128,10 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             return result;
         }
 
+        /**
+         * Validate the selected cim instance on the job configuration page.
+         * This is called automatically when loading the configuration and when changing the instance value is changed.
+         */
         public FormValidation doCheckInstance(@QueryParameter String instance) {
             CIMInstance cimInstance = getInstance(instance);
 
