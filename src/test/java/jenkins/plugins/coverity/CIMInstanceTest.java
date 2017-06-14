@@ -302,4 +302,22 @@ public class CIMInstanceTest {
         assertEquals(Kind.WARNING, result.kind);
         assertEquals(expectedWarningMessage, StringEscapeUtils.unescapeHtml(result.getMessage()));
     }
+
+    @Test
+    public void doCheck_nonGlobalBuiltInRole() throws IOException {
+        final String expectedWarningMessage ="\"cim-user\" does not have following global permission(s): \"Commit to a stream\" \"View issues\" ";
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("serverAdmin", new String[]{"invokeWS"});
+        Map<String, String[]> groupRoles = new HashMap<>();
+        groupRoles.put("Administrator", new String[]{"serverAdmin"});
+        testConfigurationService.setupUser(cimInstance.getUser(), groupRoles, rolePermissions, false);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.WARNING, result.kind);
+        assertEquals(expectedWarningMessage, StringEscapeUtils.unescapeHtml(result.getMessage()));
+    }
 }

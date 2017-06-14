@@ -224,6 +224,10 @@ public class TestWebServiceFactory extends WebServiceFactory {
         }
 
         public void setupUser(String userName, Map<String, String[]> groupRoles,  Map<String, String[]> rolePermissions) {
+            setupUser(userName, groupRoles, rolePermissions, true);
+        }
+
+        public void setupUser(String userName, Map<String, String[]> groupRoles,  Map<String, String[]> rolePermissions, Boolean useGlobal) {
             setupUser(userName, false, rolePermissions, false);
             user.getRoleAssignments().clear();
 
@@ -240,7 +244,10 @@ public class TestWebServiceFactory extends WebServiceFactory {
                     RoleIdDataObj roleId = new RoleIdDataObj();
                     roleId.setName(rolename);
                     roleAssignment.setRoleId(roleId);
-                    roleAssignment.setType("global");
+                    if (useGlobal)
+                        roleAssignment.setType("global");
+                    else
+                        roleAssignment.setType("component");
                     group.getRoleAssignments().add(roleAssignment);
                 }
                 groups.add(group);
