@@ -250,4 +250,56 @@ public class CIMInstanceTest {
         assertEquals(Kind.OK, result.kind);
         assertEquals(expectedSuccessMessage, result.getMessage());
     }
+
+    @Test
+    public void doCheck_allGroupRoleAssignments() throws IOException {
+        final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("groupRole", new String[]{"invokeWS", "commitToStream", "viewDefects"});
+        Map<String, String[]> groupRoles = new HashMap<>();
+        groupRoles.put("userGroup", new String[]{"groupRole"});
+        testConfigurationService.setupUser(cimInstance.getUser(), groupRoles, rolePermissions);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.OK, result.kind);
+        assertEquals(expectedSuccessMessage, result.getMessage());
+    }
+
+    @Test
+    public void doCheck_groupBuiltInRoleServerAdmin() throws IOException {
+        final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("serverAdmin", new String[]{"invokeWS"});
+        Map<String, String[]> groupRoles = new HashMap<>();
+        groupRoles.put("userGroup", new String[]{"serverAdmin"});
+        testConfigurationService.setupUser(cimInstance.getUser(), groupRoles, rolePermissions);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.OK, result.kind);
+        assertEquals(expectedSuccessMessage, result.getMessage());
+    }
+
+    @Test
+    public void doCheck_nonGlobalRoleAssignments() throws IOException {
+        final String expectedWarningMessage ="\"cim-user\" does not have following global permission(s): \"Commit to a stream\" \"View issues\" ";
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("someRole", new String[]{"invokeWS", "commitToStream", "viewDefects"});
+        testConfigurationService.setupUser(cimInstance.getUser(), false, rolePermissions, false);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.WARNING, result.kind);
+        assertEquals(expectedWarningMessage, StringEscapeUtils.unescapeHtml(result.getMessage()));
+    }
 }

@@ -30,6 +30,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.xpath.operations.Bool;
 
 import com.coverity.ws.v9.AttributeDefinitionDataObj;
 import com.coverity.ws.v9.AttributeDefinitionIdDataObj;
@@ -147,12 +148,15 @@ public class TestWebServiceFactory extends WebServiceFactory {
         private String externalVersion;
         private UserDataObj user;
         private List<RoleDataObj> roles;
+        private List<GroupDataObj> groups;
 
         public TestConfigurationService(URL url) {
 
             this.url = url;
             this.projects = new ArrayList<>();
             this.roles = new ArrayList<>();
+            this.groups = new ArrayList<>();
+            this.user = new UserDataObj();
         }
 
         public URL getUrl() {
@@ -188,17 +192,22 @@ public class TestWebServiceFactory extends WebServiceFactory {
         }
 
         public void setupUser(String userName, Boolean isSuper, Map<String, String[]> rolePermissions) {
-            user = new UserDataObj();
+            setupUser(userName, isSuper, rolePermissions, true);
+        }
+
+        public void setupUser(String userName, Boolean isSuper, Map<String, String[]> rolePermissions, Boolean useGlobal) {
             user.setUsername(userName);
             user.setSuperUser(isSuper);
 
             for (String rolename : rolePermissions.keySet()) {
-
                 RoleAssignmentDataObj roleAssignment = new RoleAssignmentDataObj();
                 RoleIdDataObj roleId = new RoleIdDataObj();
                 roleId.setName(rolename);
                 roleAssignment.setRoleId(roleId);
-                roleAssignment.setType("global");
+                if (useGlobal)
+                    roleAssignment.setType("global");
+                else
+                    roleAssignment.setType("component");
                 user.getRoleAssignments().add(roleAssignment);
 
                 RoleDataObj roleData = new RoleDataObj();
@@ -211,6 +220,30 @@ public class TestWebServiceFactory extends WebServiceFactory {
                 }
 
                 roles.add(roleData);
+            }
+        }
+
+        public void setupUser(String userName, Map<String, String[]> groupRoles,  Map<String, String[]> rolePermissions) {
+            setupUser(userName, false, rolePermissions, false);
+            user.getRoleAssignments().clear();
+
+            for (String groupName : groupRoles.keySet()) {
+                user.getGroups().add(groupName);
+
+                GroupDataObj group = new GroupDataObj();
+                GroupIdDataObj groupId = new GroupIdDataObj();
+                groupId.setName(groupName);
+                group.setName(groupId);
+
+                for (String rolename : groupRoles.get(groupName)) {
+                    RoleAssignmentDataObj roleAssignment = new RoleAssignmentDataObj();
+                    RoleIdDataObj roleId = new RoleIdDataObj();
+                    roleId.setName(rolename);
+                    roleAssignment.setRoleId(roleId);
+                    roleAssignment.setType("global");
+                    group.getRoleAssignments().add(roleAssignment);
+                }
+                groups.add(group);
             }
         }
 
@@ -645,7 +678,12 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public GroupDataObj getGroup(GroupIdDataObj groupId) throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            for (GroupDataObj group : groups) {
+                if (group.getName().getName().equals(groupId.getName()))
+                    return group;
+            }
+
+            return null;
         }
 
         @Override

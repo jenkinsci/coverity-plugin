@@ -312,6 +312,9 @@ public class CIMInstance {
                 if (!roleAssignments.isEmpty()) {
                     final RoleAssignmentDataObj roleAssignment = roleAssignments.removeFirst();
 
+                    if (onlyCheckGlobal && !roleAssignment.getType().equals("global"))
+                        continue;
+
                     // first check for built-in roles which contain required permissions
                     if (roleAssignment.getRoleId().getName().equals("serverAdmin") ||
                         roleAssignment.getRoleId().getName().equals("streamOwner") ||
@@ -321,8 +324,7 @@ public class CIMInstance {
                     }
 
                     final RoleDataObj roleData = getConfigurationService().getRole(roleAssignment.getRoleId());
-                    if (onlyCheckGlobal && !roleAssignment.getType().equals("global"))
-                        continue;
+
                     if (roleData != null) {
                         for (PermissionDataObj permission : roleData.getPermissionDataObjs()) {
                             if (permission.getPermissionValue().equalsIgnoreCase("commitToStream")) {
