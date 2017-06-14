@@ -16,7 +16,10 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,6 +32,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.StreamDataObj;
 
+import hudson.util.FormValidation;
+import hudson.util.FormValidation.Kind;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
@@ -37,13 +42,15 @@ import jenkins.plugins.coverity.ws.WebServiceFactory;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(WebServiceFactory.class)
 public class CIMInstanceTest {
+    private TestWebServiceFactory testWsFactory;
+
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setup() throws IOException {
         // setup web service factory
-        final WebServiceFactory testWsFactory = new TestWebServiceFactory();
+        testWsFactory = new TestWebServiceFactory();
         PowerMockito.mockStatic(WebServiceFactory.class);
         when(WebServiceFactory.getInstance()).thenReturn(testWsFactory);
     }
@@ -99,5 +106,148 @@ public class CIMInstanceTest {
         exception.expect(IOException.class);
         exception.expectMessage("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
         cimInstance.getStream(streamId);
+    }
+
+    @Test
+    public void doCheck_invalidWSResponseCode() {
+        testWsFactory.setWSResponseCode(401);
+        final String expectedErrorMessage = "Coverity web services were not detected. Connection attempt responded with 401, check Coverity Connect version (minimum supported version is " +
+            CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ").";
+
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "admin", "password", false, 9080);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.ERROR, result.kind);
+        assertEquals(expectedErrorMessage, result.getMessage());
+    }
+
+    @Test
+    public void doCheck_superUser() throws IOException {
+        final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        testConfigurationService.setupUser("cim-user", true, new HashMap<String, String[]>());
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.OK, result.kind);
+        assertEquals(expectedSuccessMessage, result.getMessage());
+    }
+
+    @Test
+    public void doCheck_missingCommitPermission() throws IOException {
+        final String expectedErrorMessage ="\"cim-user\" does not have following permission(s): \"Commit to a stream\" ";
+
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("someRole", new String[]{"invokeWS", "viewDefects"});
+        testConfigurationService.setupUser("cim-user", false, rolePermissions);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.ERROR, result.kind);
+        assertEquals(expectedErrorMessage, StringEscapeUtils.unescapeHtml(result.getMessage()));
+    }
+
+    @Test
+    public void doCheck_missingViewIssuesPermission() throws IOException {
+        final String expectedErrorMessage ="\"cim-user\" does not have following permission(s): \"View issues\" ";
+
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("someRole", new String[]{"invokeWS", "commitToStream"});
+        testConfigurationService.setupUser("cim-user", false, rolePermissions);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.ERROR, result.kind);
+        assertEquals(expectedErrorMessage, StringEscapeUtils.unescapeHtml(result.getMessage()));
+    }
+
+    @Test
+    public void doCheck_missingInvokeWebServicesPermission() throws IOException, CovRemoteServiceException_Exception {
+        final String expectedErrorMessage ="\"cim-user\" does not have following permission(s): \"Access web services\"";
+
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("someRole", new String[]{});
+        testConfigurationService.setupUser("cim-user", false, rolePermissions);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.ERROR, result.kind);
+        assertEquals(expectedErrorMessage, StringEscapeUtils.unescapeHtml(result.getMessage()));
+    }
+
+    @Test
+    public void doCheck_allRoleAssignments() throws IOException {
+        final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("someRole", new String[]{"invokeWS", "commitToStream", "viewDefects"});
+        testConfigurationService.setupUser("cim-user", false, rolePermissions);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.OK, result.kind);
+        assertEquals(expectedSuccessMessage, result.getMessage());
+    }
+
+    @Test
+    public void doCheck_builtInRoleServerAdmin() throws IOException {
+        final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("serverAdmin", new String[]{"invokeWS"});
+        testConfigurationService.setupUser("cim-user", false, rolePermissions);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.OK, result.kind);
+        assertEquals(expectedSuccessMessage, result.getMessage());
+    }
+
+    @Test
+    public void doCheck_builtInRoleProjectOwner() throws IOException {
+        final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("projectOwner", new String[]{"invokeWS"});
+        testConfigurationService.setupUser("cim-user", false, rolePermissions);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.OK, result.kind);
+        assertEquals(expectedSuccessMessage, result.getMessage());
+    }
+
+    @Test
+    public void doCheck_builtInRoleStreamOwner() throws IOException {
+        final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "cim-user", "password", false, 9080);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        Map<String, String[]> rolePermissions = new HashMap<>();
+        rolePermissions.put("streamOwner", new String[]{"invokeWS"});
+        testConfigurationService.setupUser("cim-user", false, rolePermissions);
+
+        FormValidation result = cimInstance.doCheck();
+
+        assertEquals(Kind.OK, result.kind);
+        assertEquals(expectedSuccessMessage, result.getMessage());
     }
 }

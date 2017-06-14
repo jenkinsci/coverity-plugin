@@ -10,6 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.ws;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -17,10 +20,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.soap.SOAPFault;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
@@ -77,6 +83,7 @@ import com.coverity.ws.v9.ProjectScopeDefectFilterSpecDataObj;
 import com.coverity.ws.v9.ProjectSpecDataObj;
 import com.coverity.ws.v9.ProjectTrendRecordFilterSpecDataObj;
 import com.coverity.ws.v9.PropertySpecDataObj;
+import com.coverity.ws.v9.RoleAssignmentDataObj;
 import com.coverity.ws.v9.RoleDataObj;
 import com.coverity.ws.v9.RoleIdDataObj;
 import com.coverity.ws.v9.RoleSpecDataObj;
@@ -110,6 +117,8 @@ import com.coverity.ws.v9.VersionDataObj;
 import jenkins.plugins.coverity.CIMInstance;
 
 public class TestWebServiceFactory extends WebServiceFactory {
+    private int wsResponseCode = 200;
+
     @Override
     protected DefectService createDefectService(CIMInstance cimInstance) throws MalformedURLException {
         return new TestDefectService(
@@ -121,17 +130,29 @@ public class TestWebServiceFactory extends WebServiceFactory {
         return new TestConfigurationService(
             new URL(getURL(cimInstance), CONFIGURATION_SERVICE_V9_WSDL));
     }
-    
+
+    @Override
+    public int getWSResponseCode(CIMInstance cimInstance) {
+        return wsResponseCode;
+    }
+
+    public void setWSResponseCode(int wsResponseCode) {
+        this.wsResponseCode = wsResponseCode;
+    }
+
     public static class TestConfigurationService implements ConfigurationService {
         private URL url;
         private List<SnapshotIdDataObj> snapshotList;
         private List<ProjectDataObj> projects;
         private String externalVersion;
+        private UserDataObj user;
+        private List<RoleDataObj> roles;
 
         public TestConfigurationService(URL url) {
 
             this.url = url;
             this.projects = new ArrayList<>();
+            this.roles = new ArrayList<>();
         }
 
         public URL getUrl() {
@@ -164,6 +185,33 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         public void setupExternalVersion(String version) {
             this.externalVersion = version;
+        }
+
+        public void setupUser(String userName, Boolean isSuper, Map<String, String[]> rolePermissions) {
+            user = new UserDataObj();
+            user.setUsername(userName);
+            user.setSuperUser(isSuper);
+
+            for (String rolename : rolePermissions.keySet()) {
+
+                RoleAssignmentDataObj roleAssignment = new RoleAssignmentDataObj();
+                RoleIdDataObj roleId = new RoleIdDataObj();
+                roleId.setName(rolename);
+                roleAssignment.setRoleId(roleId);
+                roleAssignment.setType("global");
+                user.getRoleAssignments().add(roleAssignment);
+
+                RoleDataObj roleData = new RoleDataObj();
+                roleData.setRoleId(roleId);
+
+                for (String rolePerm : rolePermissions.get(rolename)) {
+                    PermissionDataObj permission = new PermissionDataObj();
+                    permission.setPermissionValue(rolePerm);
+                    roleData.getPermissionDataObjs().add(permission);
+                }
+
+                roles.add(roleData);
+            }
         }
 
         @Override
@@ -278,7 +326,23 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public UserDataObj getUser(String username) throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            Boolean canAccessWS = user.isSuperUser();
+            rolesloop:
+            for (RoleDataObj role : roles) {
+                for (PermissionDataObj permission : role.getPermissionDataObjs()) {
+                    if (permission.getPermissionValue().equals("invokeWS"))
+                        canAccessWS = true;
+                        break rolesloop;
+                }
+            }
+
+            if (!canAccessWS) {
+                SOAPFault fault = mock(SOAPFault.class);
+                when(fault.getFaultString()).thenReturn("User " + username + " Doesn't have permissions to perform {invokeWS}");
+                throw new SOAPFaultException(fault);
+            }
+
+            return user;
         }
 
         @Override
@@ -571,7 +635,12 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public RoleDataObj getRole(RoleIdDataObj roleId) throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            for (RoleDataObj role : roles) {
+                if (role.getRoleId().getName().equals(roleId.getName()))
+                    return role;
+            }
+
+            return null;
         }
 
         @Override
