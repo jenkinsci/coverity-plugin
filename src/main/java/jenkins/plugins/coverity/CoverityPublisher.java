@@ -404,7 +404,11 @@ public class CoverityPublisher extends Recorder {
             return "Coverity";
         }
 
-        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter String user, @QueryParameter String password, @QueryParameter boolean useSSL, @QueryParameter int dataPort) throws IOException {
+        /**
+         * Validate the configured global cim instance..
+         * This is called when the user clicks the 'Validate' button for an instance.
+         */
+        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter String user, @QueryParameter String password, @QueryParameter boolean useSSL, @QueryParameter int dataPort) {
             return new CIMInstance("", host, port, user, password, useSSL, dataPort).doCheck();
         }
 
@@ -523,6 +527,10 @@ public class CoverityPublisher extends Recorder {
             return null;
         }
 
+        /**
+         * Validate the publisher for a job.
+         * This is called when the user clicks the 'Check Configuration' button for on the publisher.
+         */
         public void doCheckConfig(StaplerRequest req, StaplerResponse rsp) throws ServletException, IOException {
             JSONObject json = getJSONClassObject(req.getSubmittedForm(), getId());
 
