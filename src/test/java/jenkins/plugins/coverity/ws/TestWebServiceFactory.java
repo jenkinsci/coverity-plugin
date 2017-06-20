@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -30,7 +31,6 @@ import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.xpath.operations.Bool;
 
 import com.coverity.ws.v9.AttributeDefinitionDataObj;
 import com.coverity.ws.v9.AttributeDefinitionIdDataObj;
@@ -199,10 +199,10 @@ public class TestWebServiceFactory extends WebServiceFactory {
             user.setUsername(userName);
             user.setSuperUser(isSuper);
 
-            for (String rolename : rolePermissions.keySet()) {
+            for (Entry<String, String[]> rolePermission : rolePermissions.entrySet()) {
                 RoleAssignmentDataObj roleAssignment = new RoleAssignmentDataObj();
                 RoleIdDataObj roleId = new RoleIdDataObj();
-                roleId.setName(rolename);
+                roleId.setName(rolePermission.getKey());
                 roleAssignment.setRoleId(roleId);
                 if (useGlobal)
                     roleAssignment.setType("global");
@@ -213,7 +213,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
                 RoleDataObj roleData = new RoleDataObj();
                 roleData.setRoleId(roleId);
 
-                for (String rolePerm : rolePermissions.get(rolename)) {
+                for (String rolePerm : rolePermission.getValue()) {
                     PermissionDataObj permission = new PermissionDataObj();
                     permission.setPermissionValue(rolePerm);
                     roleData.getPermissionDataObjs().add(permission);
@@ -231,15 +231,15 @@ public class TestWebServiceFactory extends WebServiceFactory {
             setupUser(userName, false, rolePermissions, false);
             user.getRoleAssignments().clear();
 
-            for (String groupName : groupRoles.keySet()) {
-                user.getGroups().add(groupName);
+            for (Entry<String, String[]> groupRole : groupRoles.entrySet()) {
+                user.getGroups().add(groupRole.getKey());
 
                 GroupDataObj group = new GroupDataObj();
                 GroupIdDataObj groupId = new GroupIdDataObj();
-                groupId.setName(groupName);
+                groupId.setName(groupRole.getKey());
                 group.setName(groupId);
 
-                for (String rolename : groupRoles.get(groupName)) {
+                for (String rolename : groupRole.getValue()) {
                     RoleAssignmentDataObj roleAssignment = new RoleAssignmentDataObj();
                     RoleIdDataObj roleId = new RoleIdDataObj();
                     roleId.setName(rolename);
