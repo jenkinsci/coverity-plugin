@@ -370,9 +370,10 @@ public class TestWebServiceFactory extends WebServiceFactory {
             rolesloop:
             for (RoleDataObj role : roles) {
                 for (PermissionDataObj permission : role.getPermissionDataObjs()) {
-                    if (permission.getPermissionValue().equals("invokeWS"))
+                    if (permission.getPermissionValue().equals("invokeWS")) {
                         canAccessWS = true;
                         break rolesloop;
+                    }
                 }
             }
 
