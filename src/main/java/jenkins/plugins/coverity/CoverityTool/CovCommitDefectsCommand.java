@@ -126,7 +126,7 @@ public class CovCommitDefectsCommand extends CoverityCommand {
     }
 
     private void addSsl() {
-        if (version.compareTo(CoverityVersion.VERSION_INDIO) > 0 && cimInstance.isUseSSL()) {
+        if (version.compareTo(CoverityVersion.VERSION_JASPER) >= 0 && cimInstance.isUseSSL()) {
             addArgument(useSslArg);
         }
     }
