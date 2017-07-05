@@ -49,12 +49,16 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     private String cimInstance;
     private String connectView;
     private String projectId;
+    private boolean failPipeline;
+    private boolean unstable;
 
     @DataBoundConstructor
     public CoverityViewResultsPublisher(String cimInstance, String connectView, String projectId) {
         this.cimInstance = cimInstance;
         this.connectView = connectView;
         this.projectId = projectId;
+        failPipeline = false;
+        unstable = false;
     }
 
     @Override
@@ -98,6 +102,24 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     @DataBoundSetter
     public void setProjectId(String projectId) {
         this.projectId = projectId;
+    }
+
+    public boolean isFailPipeline() {
+        return failPipeline;
+    }
+
+    @DataBoundSetter
+    public void setFailPipeline(boolean failPipeline) {
+        this.failPipeline = failPipeline;
+    }
+
+    public boolean isUnstable() {
+        return unstable;
+    }
+
+    @DataBoundSetter
+    public void setUnstable(boolean unstable) {
+        this.unstable = unstable;
     }
 
     @Symbol("coverityResults")
