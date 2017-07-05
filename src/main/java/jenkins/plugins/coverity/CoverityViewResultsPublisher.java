@@ -182,14 +182,8 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
                 projectFilterSpec.setNamePattern(projectId);
                 List<ProjectDataObj> projects = instance.getConfigurationService().getProjects(projectFilterSpec);
                 if (projects.size() != 1) {
-
                     StringBuilder missingProjectMessage = new StringBuilder();
-                    missingProjectMessage.append("Unable to find project '");
-                    missingProjectMessage.append(projectId);
-                    missingProjectMessage.append("' on instance '");
-                    missingProjectMessage.append(cimInstance);
-                    missingProjectMessage.append("'.");
-
+                    missingProjectMessage.append("Unable to find project '" + projectId + "' on instance '" + cimInstance + "'.");
 
                     projectFilterSpec.setNamePattern(null);
                     projects = instance.getConfigurationService().getProjects(projectFilterSpec);
@@ -199,7 +193,8 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
                             missingProjectMessage.append(project.getId().getName());
                             missingProjectMessage.append(", ");
                         }
-                        missingProjectMessage.delete(missingProjectMessage.length() - 2, missingProjectMessage.length() + 1);
+                        // removes trailing comma and space
+                        missingProjectMessage.delete(missingProjectMessage.length() - 2, missingProjectMessage.length());
                     }
 
                     return FormValidation.error(missingProjectMessage.toString());

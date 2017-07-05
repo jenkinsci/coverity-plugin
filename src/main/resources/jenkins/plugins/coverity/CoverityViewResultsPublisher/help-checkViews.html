@@ -1,0 +1,34 @@
+<!--
+ /*******************************************************************************
+ * Copyright (c) 2017 Synopsys, Inc
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Synopsys, Inc - initial implementation and documentation
+ *******************************************************************************/
+-->
+<div>
+    Checks the Coverity Connect Instance, Project, and View to ensure valid configuration. This checks the following:
+    <ul>
+        <li>
+            The Coverity Connect Instance value is a valid configured global instance
+        </li>
+        <li>
+            The Coverity Connect Instance user has permissions to fetch defects
+        </li>
+        <li>
+            The Project specified exists on that Coverity Connect Instance
+        </li>
+        <li>
+            The View is configured in that Coverity Connect Instance
+            <ul>
+                <li>
+                    Will provide warnings in the case where the view is missing required information
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>

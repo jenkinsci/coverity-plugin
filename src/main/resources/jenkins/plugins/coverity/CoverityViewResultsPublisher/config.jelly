@@ -16,7 +16,6 @@
         <f:select/>
     </f:entry>
 
-
     <f:entry title="Coverity Connect Project" field="projectId">
         <f:combobox/>
     </f:entry>
