@@ -12,6 +12,8 @@ package jenkins.plugins.coverity;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -25,6 +27,7 @@ import org.kohsuke.stapler.QueryParameter;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.ProjectDataObj;
 import com.coverity.ws.v9.ProjectFilterSpecDataObj;
+import com.google.common.collect.ImmutableSortedMap;
 
 import hudson.Extension;
 import hudson.FilePath;
@@ -174,17 +177,21 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
          * Third, checks that the projectId exists
          */
         public FormValidation doCheckViews(@QueryParameter String cimInstance, @QueryParameter String connectView, @QueryParameter String projectId) {
+            Collection<FormValidation> validations = new ArrayList<>();
             if (StringUtils.isEmpty(cimInstance)) {
-                return FormValidation.error("Coverity Connect Instance is required");
+                validations.add(FormValidation.error("Coverity Connect Instance is required"));
             }
 
             if (StringUtils.isEmpty(connectView)) {
-                return FormValidation.error("Coverity Connect View is required");
+                validations.add(FormValidation.error("Coverity Connect View is required"));
             }
 
             if (StringUtils.isEmpty(projectId)) {
-                return FormValidation.error("Coverity Connect Project is required");
+                validations.add(FormValidation.error("Coverity Connect Project is required"));
             }
+
+            if (validations.size() > 0)
+                return FormValidation.aggregate(validations);
 
 
             CIMInstance instance = getInstance(cimInstance);
@@ -219,11 +226,44 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
                         missingProjectMessage.delete(missingProjectMessage.length() - 2, missingProjectMessage.length());
                     }
 
-                    return FormValidation.error(missingProjectMessage.toString());
+                    validations.add(FormValidation.error(missingProjectMessage.toString()));
                 }
             } catch (CovRemoteServiceException_Exception | IOException e) {
                 return FormValidation.error("Unexpected error occurred when checking project");
             }
+
+            try {
+                final ImmutableSortedMap<Long, String> views = instance.getViews();
+
+                if (!views.containsValue(connectView)) {
+                    Long connectViewIdentifier = null;
+                    try {
+                        connectViewIdentifier = Long.parseLong(connectView);
+                    } catch (NumberFormatException e) {
+                    }
+
+                    if (!views.containsKey(connectViewIdentifier)) {
+                        StringBuilder missingViewMessage = new StringBuilder();
+                        missingViewMessage.append("Unable to find the view '" + connectView + "' on instance '" + cimInstance + "'.");
+                        if (views.size() > 0) {
+                            missingViewMessage.append(" Available views include: ");
+                            for (String viewName : views.values()) {
+                                missingViewMessage.append(viewName);
+                                missingViewMessage.append(", ");
+                            }
+                            // removes trailing comma and space
+                            missingViewMessage.delete(missingViewMessage.length() - 2, missingViewMessage.length());
+                        }
+
+                        validations.add(FormValidation.error(missingViewMessage.toString()));
+                    }
+                }
+            } catch (Exception e) {
+                return FormValidation.error("Unexpected error occurred when checking views");
+            }
+
+            if (validations.size() > 0)
+                return FormValidation.aggregate(validations);
 
             return FormValidation.ok("Successfully configured");
         }

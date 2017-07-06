@@ -15,11 +15,14 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
@@ -28,6 +31,11 @@ import com.coverity.ws.v9.ConfigurationService;
 import com.coverity.ws.v9.ConfigurationServiceService;
 import com.coverity.ws.v9.DefectService;
 import com.coverity.ws.v9.DefectServiceService;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
 import jenkins.plugins.coverity.CIMInstance;
 
@@ -130,6 +138,24 @@ public class WebServiceFactory {
         } finally {
             Thread.currentThread().setContextClassLoader(cl);
         }
+    }
+
+    /**
+     * Returns a new Views Service client
+     */
+    public ViewsService getViewService(CIMInstance instance) throws MalformedURLException, NoSuchAlgorithmException {
+        URL baseUrl = getURL(instance);
+
+        ClientConfig config = new DefaultClientConfig();
+        if (instance.isUseSSL()) {
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            final HTTPSProperties httpsProperties = new HTTPSProperties(HttpsURLConnection.getDefaultHostnameVerifier(), sslContext);
+            config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, httpsProperties);
+        }
+        Client restClient = Client.create();
+        restClient.addFilter(new HTTPBasicAuthFilter(instance.getUser(), instance.getPassword()));
+
+        return new ViewsService(baseUrl, restClient);
     }
 
     /**
