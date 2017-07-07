@@ -40,24 +40,22 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
-import jenkins.plugins.coverity.ws.CimCache;
 import jenkins.tasks.SimpleBuildStep;
 
 public class CoverityViewResultsPublisher extends Recorder implements SimpleBuildStep {
-    private String cimInstance;
+    private String connectInstance;
     private String connectView;
     private String projectId;
     private boolean failPipeline;
     private boolean unstable;
 
     @DataBoundConstructor
-    public CoverityViewResultsPublisher(String cimInstance, String connectView, String projectId) {
-        this.cimInstance = cimInstance;
+    public CoverityViewResultsPublisher(String connectInstance, String connectView, String projectId) {
+        this.connectInstance = connectInstance;
         this.connectView = connectView;
         this.projectId = projectId;
         failPipeline = false;
@@ -76,13 +74,13 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     }
 
 
-    public String getCimInstance() {
-        return cimInstance;
+    public String getConnectInstance() {
+        return connectInstance;
     }
 
     @DataBoundSetter
-    public void setCimInstance(String cimInstance) {
-        this.cimInstance = Util.fixNull(cimInstance);
+    public void setConnectInstance(String connectInstance) {
+        this.connectInstance = Util.fixNull(connectInstance);
     }
 
     public String getConnectView() {
@@ -139,16 +137,16 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
             return "Publish Coverity View Results";
         }
 
-        public CoverityPublisher.DescriptorImpl getPublisherDescriptor() {
+        private CoverityPublisher.DescriptorImpl getPublisherDescriptor() {
             return Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
         }
 
-        public List<CIMInstance> getCimInstances() {
+        private List<CIMInstance> getConnectInstances() {
             return getPublisherDescriptor().getInstances();
         }
 
-        public CIMInstance getInstance(String name) {
-            for(CIMInstance instance : getCimInstances()) {
+        private CIMInstance getInstance(String name) {
+            for(CIMInstance instance : getConnectInstances()) {
                 if(instance.getName().equals(name)) {
                     return instance;
                 }
@@ -156,52 +154,44 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
             return null;
         }
 
-        public ListBoxModel doFillCimInstanceItems() {
+        /**
+         * Returns a list of names of available {@link CIMInstance} for connectInstance select items
+         */
+        public ListBoxModel doFillConnectInstanceItems() {
             ListBoxModel result = new ListBoxModel();
-            for(CIMInstance instance : getCimInstances()) {
+            for(CIMInstance instance : getConnectInstances()) {
                 result.add(instance.getName());
             }
             return result;
         }
 
-        public ComboBoxModel doFillProjectIdItems(@QueryParameter(value = "../cimInstance") String cimInstance) {
-            ComboBoxModel items = new ComboBoxModel();
-            CIMInstance instance = getInstance(cimInstance);
-            if (instance != null) {
-                final List<String> projects = CimCache.getInstance().getProjects(instance);
-                items.addAll(projects);
-            }
-
-            return items;
-        }
-
         /**
          * Checks the instance, view and project. To ensure valid configuration.
-         * First, this check that the cimInstance string value is a configured global instance, then it checks that instance is valid.
+         * First, this check that the connectInstance string value is a configured global instance, then it checks that instance is valid.
          * Second, checks that the view is configured in that coverity connect instance and will provide warnings if the view is not.
          * Third, checks that the projectId exists
          */
-        public FormValidation doCheckViews(@QueryParameter String cimInstance, @QueryParameter String connectView, @QueryParameter String projectId) {
+        public FormValidation doCheckViews(@QueryParameter String connectInstance, @QueryParameter String projectId, @QueryParameter String connectView) {
             Collection<FormValidation> validations = new ArrayList<>();
-            if (StringUtils.isEmpty(cimInstance)) {
+            if (StringUtils.isEmpty(connectInstance)) {
                 validations.add(FormValidation.error("Coverity Connect Instance is required"));
-            }
-
-            if (StringUtils.isEmpty(connectView)) {
-                validations.add(FormValidation.error("Coverity Connect View is required"));
             }
 
             if (StringUtils.isEmpty(projectId)) {
                 validations.add(FormValidation.error("Coverity Connect Project is required"));
             }
 
+            if (StringUtils.isEmpty(connectView)) {
+                validations.add(FormValidation.error("Coverity Connect View is required"));
+            }
+
             if (validations.size() > 0)
                 return FormValidation.aggregate(validations);
 
 
-            CIMInstance instance = getInstance(cimInstance);
+            CIMInstance instance = getInstance(connectInstance);
             if (instance == null) {
-                return FormValidation.error("Unable to find Coverity Connect instance: " + cimInstance);
+                return FormValidation.error("Unable to find Coverity Connect instance: " + connectInstance);
             }
 
             FormValidation instanceCheck = instance.doCheck();
@@ -217,7 +207,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
                 List<ProjectDataObj> projects = instance.getConfigurationService().getProjects(projectFilterSpec);
                 if (projects.size() != 1) {
                     StringBuilder missingProjectMessage = new StringBuilder();
-                    missingProjectMessage.append("Unable to find project '" + projectId + "' on instance '" + cimInstance + "'.");
+                    missingProjectMessage.append("Unable to find project '" + projectId + "' on instance '" + connectInstance + "'.");
 
                     projectFilterSpec.setNamePattern(null);
                     projects = instance.getConfigurationService().getProjects(projectFilterSpec);
@@ -249,7 +239,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
 
                     if (!views.containsKey(connectViewIdentifier)) {
                         StringBuilder missingViewMessage = new StringBuilder();
-                        missingViewMessage.append("Unable to find the view '" + connectView + "' on instance '" + cimInstance + "'.");
+                        missingViewMessage.append("Unable to find the view '" + connectView + "' on instance '" + connectInstance + "'.");
                         if (views.size() > 0) {
                             missingViewMessage.append(" Available views include: ");
                             for (String viewName : views.values()) {
