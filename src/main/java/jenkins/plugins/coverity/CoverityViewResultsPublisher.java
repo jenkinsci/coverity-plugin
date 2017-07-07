@@ -134,6 +134,11 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
             return true;
         }
 
+        @Override
+        public String getDisplayName() {
+            return "Publish Coverity View Results";
+        }
+
         public CoverityPublisher.DescriptorImpl getPublisherDescriptor() {
             return Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
         }
