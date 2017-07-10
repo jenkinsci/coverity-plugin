@@ -11,9 +11,21 @@
  *******************************************************************************/
 -->
 <div>
-    <span style="font-weight: bold; font-size: 1.5em">How to configure the Coverity View Results Publisher</span>
     <p>
-        You must specify a view from the coverity connect instance. This view will be used to get issues
-        for the pipeline run.
+        The Publish Coverity View Results step will retrieve issues from the configured Coverity Connect Instance, Project,
+        and View.  This step does not run any Coverity Analysis tools, it only retrieves the latest values for the configured
+        Project and View.  It is recommended to run Coverity analyze and commit as prior step(s) in the pipeline to retrieve
+        up to date results.
+    </p>
+    <p>
+        The Instance is configured in the Global Configuration, use the name of the instance or this step.  The
+        Project is the string name identifier of the Coverity Connect project.  The View is the name or numeric ID of the
+        view to retrieve issues from.  Any filtering details of which issues this pipeline step should use can be configured
+        in the Coverity Connect UI, it is recommended to use a custom "Issues: By Snapshot" view for this pipeline.
+    </p>
+    <p>
+        <b>Note:</b> if the are multiple streams in the project the view should be configured so the view filter uses only the
+        stream for this pipeline.  Additionally, it is recommended to filter the status value to not retrieve any Fixed or
+        Dismissed issues.
     </p>
 </div>
