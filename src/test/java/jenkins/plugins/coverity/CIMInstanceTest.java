@@ -14,8 +14,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -41,12 +39,12 @@ import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.StreamDataObj;
 import com.google.common.collect.ImmutableSortedMap;
 import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
 
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
+import jenkins.plugins.coverity.ws.TestableViewsService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
 
 
@@ -65,15 +63,6 @@ public class CIMInstanceTest {
         testWsFactory = new TestWebServiceFactory();
         PowerMockito.mockStatic(WebServiceFactory.class);
         when(WebServiceFactory.getInstance()).thenReturn(testWsFactory);
-    }
-
-    private void SetupMockViewService(String viewApiJsonResult) {
-        Client restClient = mock(Client.class);
-        PowerMockito.mockStatic(Client.class);
-        when(Client.create()).thenReturn(restClient);
-        WebResource webResource = mock(WebResource.class);
-        when(webResource.get(String.class)).thenReturn(viewApiJsonResult);
-        when(restClient.resource(any(String.class))).thenReturn(webResource);
     }
 
     @Test
@@ -418,7 +407,7 @@ public class CIMInstanceTest {
             "        ]" +
             "    }" +
             "]}";
-        SetupMockViewService(viewApiJsonResult);
+        TestableViewsService.setupWithViewApi(viewApiJsonResult);
         CIMInstance cimInstance = new CIMInstance("instance", "host", 8080, "user", "password", false, 9090);
 
         final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
@@ -484,7 +473,7 @@ public class CIMInstanceTest {
             "        ]" +
             "    }" +
             "]}";
-        SetupMockViewService(viewApiJsonResult);
+        TestableViewsService.setupWithViewApi(viewApiJsonResult);
         CIMInstance cimInstance = new CIMInstance("instance", "ssl-host", 8443, "user", "password", true, 9090);
 
         final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
