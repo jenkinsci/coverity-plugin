@@ -190,61 +190,10 @@ public class CoverityViewResultsDescriptorTest {
     public void doCheck_withInvalidConnectView_suggestsKnownViews() {
         final TestConfigurationService testConfigurationService = setupConfigurationService(cimInstance);
         testConfigurationService.setupProjects("pipeline-project", 1, "s", 1);
-        final String viewApiJsonResult = "{\"views\": [" +
-            "    {" +
-            "        \"id\": 54321," +
-            "        \"type\": \"issues\"," +
-            "        \"name\": \"Custom View\"," +
-            "        \"groupBy\":false," +
-            "        \"columns\": [" +
-            "            {" +
-            "                \"name\": \"cid\"," +
-            "                \"label\": \"CID\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"checker\"," +
-            "                \"label\": \"Checker\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayFunction\"," +
-            "                \"label\": \"Function\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayFile\"," +
-            "                \"label\": \"File\"" +
-            "            }" +
-            "        ]" +
-            "    }" +
-            "    {" +
-            "        \"id\": 67890," +
-            "        \"type\": \"issues\"," +
-            "        \"name\": \"All Defects\"," +
-            "        \"groupBy\":false," +
-            "        \"columns\": [" +
-            "            {" +
-            "                \"name\": \"cid\"," +
-            "                \"label\": \"CID\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayType\"," +
-            "                \"label\": \"Type\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayImpact\"," +
-            "                \"label\": \"Impact\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"firstDetected\"," +
-            "                \"label\": \"First Detected\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"owner\"," +
-            "                \"label\": \"Owner\"" +
-            "            }       " +
-            "        ]" +
-            "    }" +
-            "]}";
-        TestableViewsService.setupWithViewApi(viewApiJsonResult);
+        final HashMap<Long, String> views = new HashMap<>();
+        views.put(54321L, "Custom View");
+        views.put(67890L, "All Defects");
+        TestableViewsService.setupWithViews(views);
         final CoverityViewResultsDescriptor descriptor = new CoverityViewResultsDescriptor();
 
         FormValidation result = descriptor.doCheckViews(cimInstance.getName(), "pipeline-project0", "viewName");
@@ -261,33 +210,9 @@ public class CoverityViewResultsDescriptorTest {
     public void doCheck_withValidConfiguration() {
         final TestConfigurationService testConfigurationService = setupConfigurationService(cimInstance);
         testConfigurationService.setupProjects("pipeline-project", 1, "s", 1);
-        final String viewApiJsonResult = "{\"views\": [" +
-            "    {" +
-            "        \"id\": 54321," +
-            "        \"type\": \"issues\"," +
-            "        \"name\": \"Custom View\"," +
-            "        \"groupBy\":false," +
-            "        \"columns\": [" +
-            "            {" +
-            "                \"name\": \"cid\"," +
-            "                \"label\": \"CID\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"checker\"," +
-            "                \"label\": \"Checker\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayFunction\"," +
-            "                \"label\": \"Function\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayFile\"," +
-            "                \"label\": \"File\"" +
-            "            }" +
-            "        ]" +
-            "    }" +
-            "]}";
-        TestableViewsService.setupWithViewApi(viewApiJsonResult);
+        final HashMap<Long, String> views = new HashMap<>();
+        views.put(54321L, "Custom View");
+        TestableViewsService.setupWithViews(views);
         final CoverityViewResultsDescriptor descriptor = new CoverityViewResultsDescriptor();
 
         FormValidation result = descriptor.doCheckViews(cimInstance.getName(), "pipeline-project0", "Custom View");
@@ -300,33 +225,9 @@ public class CoverityViewResultsDescriptorTest {
     public void doCheck_withValidConfiguration_usingConnectViewId() {
         final TestConfigurationService testConfigurationService = setupConfigurationService(cimInstance);
         testConfigurationService.setupProjects("pipeline-project", 1, "s", 1);
-        final String viewApiJsonResult = "{\"views\": [" +
-            "    {" +
-            "        \"id\": 54321," +
-            "        \"type\": \"issues\"," +
-            "        \"name\": \"Custom View\"," +
-            "        \"groupBy\":false," +
-            "        \"columns\": [" +
-            "            {" +
-            "                \"name\": \"cid\"," +
-            "                \"label\": \"CID\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"checker\"," +
-            "                \"label\": \"Checker\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayFunction\"," +
-            "                \"label\": \"Function\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayFile\"," +
-            "                \"label\": \"File\"" +
-            "            }" +
-            "        ]" +
-            "    }" +
-            "]}";
-        TestableViewsService.setupWithViewApi(viewApiJsonResult);
+        final HashMap<Long, String> views = new HashMap<>();
+        views.put(54321L, "Custom View");
+        TestableViewsService.setupWithViews(views);
         final CoverityViewResultsDescriptor descriptor = new CoverityViewResultsDescriptor();
 
         FormValidation result = descriptor.doCheckViews(cimInstance.getName(), "pipeline-project0", "54321");
