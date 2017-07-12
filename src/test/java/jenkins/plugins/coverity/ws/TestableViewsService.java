@@ -23,8 +23,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 
-import javafx.util.Pair;
-
 /**
  * Utility for setting up (mocking) the required classes to return values from the views service REST API.
  * You must have {@link PrepareForTest} set for {@link Client}.class in order to use this (it requires PowerMockito
