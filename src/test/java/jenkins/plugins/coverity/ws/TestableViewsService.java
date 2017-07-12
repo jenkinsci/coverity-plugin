@@ -40,7 +40,7 @@ public final class TestableViewsService {
 
     public static void setupWithViews(Map<Long, String> views) {
         StringBuilder viewApiJsonBuilder = new StringBuilder();
-        viewApiJsonBuilder.append("{\"views\": [ {");
+        viewApiJsonBuilder.append("{\"views\": [");
         for (Entry<Long, String> e : views.entrySet()) {
             viewApiJsonBuilder.append("{");
             viewApiJsonBuilder.append("\"id\": " + e.getKey() + ",");
@@ -55,7 +55,7 @@ public final class TestableViewsService {
             viewApiJsonBuilder.append("]");
             viewApiJsonBuilder.append("}");
         }
-        viewApiJsonBuilder.append("} ] }");
+        viewApiJsonBuilder.append("] }");
         setupWithViewApi(viewApiJsonBuilder.toString());
     }
 }
