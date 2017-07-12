@@ -12,6 +12,7 @@ package jenkins.plugins.coverity;
 
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import javax.annotation.Nonnull;
 
@@ -46,6 +47,13 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         // todo: get CIMInstance and call web service to find view matching connectView
+
+        final PrintStream logger = listener.getLogger();
+        logger.println("[Coverity] Publish Coverity View Results { "+
+            "connectInstance:'" + connectInstance + "', " +
+            "projectId:'" + projectId + "', " +
+            "connectView:'" + connectView + "' " +
+            "}");
 
     }
 
