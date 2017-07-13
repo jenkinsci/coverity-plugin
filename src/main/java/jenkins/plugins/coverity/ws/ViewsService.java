@@ -59,7 +59,11 @@ public class ViewsService {
             JSONObject jsonView = (JSONObject)view;
             String type = (String)jsonView.get("type");
             if (type != null && type.equals("issues")) {
-                views.put((Long)jsonView.get("id"), (String)jsonView.get("name"));
+                final Long viewId = (Long)jsonView.get("id");
+                final String viewName = (String)jsonView.get("name");
+                if (viewId != null && viewName != null) {
+                    views.put(viewId, viewName);
+                }
             }
         }
 
