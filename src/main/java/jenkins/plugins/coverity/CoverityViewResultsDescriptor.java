@@ -147,13 +147,16 @@ public class CoverityViewResultsDescriptor extends BuildStepDescriptor<Publisher
         try {
             final ImmutableSortedMap<Long, String> views = instance.getViews();
 
+            // first check if any view names match connectView value
             if (!views.containsValue(connectView)) {
                 Long connectViewIdentifier = null;
                 try {
                     connectViewIdentifier = Long.parseLong(connectView);
                 } catch (NumberFormatException e) {
+                    // exception ignored here since connectView was not a numeric id value
                 }
 
+                // next check if the connectView value is a view numeric id which matches any view ids
                 if (!views.containsKey(connectViewIdentifier)) {
                     StringBuilder missingViewMessage = new StringBuilder();
                     missingViewMessage.append("Unable to find the view '" + connectView + "' on instance '" + connectInstance + "'.");
