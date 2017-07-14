@@ -13,11 +13,16 @@ package jenkins.plugins.coverity;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
@@ -26,21 +31,26 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.StreamDataObj;
+import com.google.common.collect.ImmutableSortedMap;
+import com.sun.jersey.api.client.Client;
 
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
+import jenkins.plugins.coverity.ws.TestableViewsService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(WebServiceFactory.class)
+@PrepareForTest({WebServiceFactory.class, Client.class, SSLContext.class})
+@PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
 public class CIMInstanceTest {
     private TestWebServiceFactory testWsFactory;
 
@@ -319,5 +329,171 @@ public class CIMInstanceTest {
 
         assertEquals(Kind.WARNING, result.kind);
         assertEquals(expectedWarningMessage, StringEscapeUtils.unescapeHtml(result.getMessage()));
+    }
+
+    @Test
+    public void getViews_returnsAvailableIssuesViews() throws MalformedURLException, NoSuchAlgorithmException {
+        final String viewApiJsonResult = "{\"views\": [" +
+            "    {" +
+            "        \"id\": 12345," +
+            "        \"type\": \"files\"," +
+            "        \"name\": \"All Files\"," +
+            "        \"groupBy\":false,        " +
+            "        \"columns\": [" +
+            "            {" +
+            "                \"name\": \"cid\"," +
+            "                \"label\": \"CID\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"displayType\"," +
+            "                \"label\": \"Type\"" +
+            "            }" +
+            "        ]" +
+            "    }," +
+            "    {" +
+            "        \"id\": 54321," +
+            "        \"type\": \"issuesByProject\"," +
+            "        \"name\": \"All In Project\"," +
+            "        \"groupBy\":false," +
+            "        \"columns\": [" +
+            "            {" +
+            "                \"name\": \"cid\"," +
+            "                \"label\": \"CID\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"displayType\"," +
+            "                \"label\": \"Type\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"displayImpact\"," +
+            "                \"label\": \"Impact\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"firstDetected\"," +
+            "                \"label\": \"First Detected\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"owner\"," +
+            "                \"label\": \"Owner\"" +
+            "            }       " +
+            "        ]" +
+            "    }" +
+            "    {" +
+            "        \"id\": 67890," +
+            "        \"type\": \"issues\"," +
+            "        \"name\": \"All Defects\"," +
+            "        \"groupBy\":false," +
+            "        \"columns\": [" +
+            "            {" +
+            "                \"name\": \"cid\"," +
+            "                \"label\": \"CID\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"displayType\"," +
+            "                \"label\": \"Type\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"displayImpact\"," +
+            "                \"label\": \"Impact\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"firstDetected\"," +
+            "                \"label\": \"First Detected\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"owner\"," +
+            "                \"label\": \"Owner\"" +
+            "            }       " +
+            "        ]" +
+            "    }" +
+            "]}";
+        TestableViewsService.setupWithViewApi(viewApiJsonResult);
+        CIMInstance cimInstance = new CIMInstance("instance", "host", 8080, "user", "password", false, 9090);
+
+        final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
+
+        assertEquals(1, result.size());
+        assertTrue(result.containsKey(Long.valueOf(67890)));
+        assertEquals("All Defects", result.get(Long.valueOf(67890)));
+    }
+
+    @Test
+    public void getViews_withSSL_returnsAvailableIssuesViews() throws MalformedURLException, NoSuchAlgorithmException {
+        final String viewApiJsonResult = "{\"views\": [" +
+            "    {" +
+            "        \"id\": 54321," +
+            "        \"type\": \"issues\"," +
+            "        \"name\": \"Custom View\"," +
+            "        \"groupBy\":false," +
+            "        \"columns\": [" +
+            "            {" +
+            "                \"name\": \"cid\"," +
+            "                \"label\": \"CID\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"checker\"," +
+            "                \"label\": \"Checker\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"displayFunction\"," +
+            "                \"label\": \"Function\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"displayFile\"," +
+            "                \"label\": \"File\"" +
+            "            }" +
+            "        ]" +
+            "    }" +
+            "    {" +
+            "        \"id\": 67890," +
+            "        \"type\": \"issues\"," +
+            "        \"name\": \"All Defects\"," +
+            "        \"groupBy\":false," +
+            "        \"columns\": [" +
+            "            {" +
+            "                \"name\": \"cid\"," +
+            "                \"label\": \"CID\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"displayType\"," +
+            "                \"label\": \"Type\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"displayImpact\"," +
+            "                \"label\": \"Impact\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"firstDetected\"," +
+            "                \"label\": \"First Detected\"" +
+            "            }," +
+            "            {" +
+            "                \"name\": \"owner\"," +
+            "                \"label\": \"Owner\"" +
+            "            }       " +
+            "        ]" +
+            "    }" +
+            "]}";
+        TestableViewsService.setupWithViewApi(viewApiJsonResult);
+        CIMInstance cimInstance = new CIMInstance("instance", "ssl-host", 8443, "user", "password", true, 9090);
+
+        final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
+
+        assertEquals(2, result.size());
+        assertTrue(result.containsKey(Long.valueOf(54321)));
+        assertEquals("Custom View", result.get(Long.valueOf(54321)));
+        assertTrue(result.containsKey(Long.valueOf(67890)));
+        assertEquals("All Defects", result.get(Long.valueOf(67890)));
+    }
+
+    @Test
+    public void getViews_handlesExceptions() throws NoSuchAlgorithmException {
+        PowerMockito.mockStatic(SSLContext.class);
+        when(SSLContext.getInstance("SSL")).thenThrow(new NoSuchAlgorithmException());
+
+        CIMInstance cimInstance = new CIMInstance("instance", "host", 8080, "user", "password", true, 9090);
+
+        final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
+
+        assertEquals(0, result.size());
     }
 }

@@ -12,8 +12,10 @@ package jenkins.plugins.coverity;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -38,6 +40,7 @@ import com.coverity.ws.v9.StreamDataObj;
 import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import com.coverity.ws.v9.UserDataObj;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedMap;
 
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
@@ -256,6 +259,20 @@ public class CIMInstance {
         Collections.sort(checkerNames);
 
         return ImmutableList.copyOf(checkerNames);
+    }
+
+    /**
+     * Returns a Map of available Coverity connect views for this instance, using the numeric identifier as the key
+     * and name as value
+     */
+    public ImmutableSortedMap<Long, String> getViews() {
+        Map<? extends Long, ? extends String> views;
+        try {
+            views = WebServiceFactory.getInstance().getViewService(this).getViews();
+        } catch (MalformedURLException | NoSuchAlgorithmException e) {
+            return ImmutableSortedMap.of();
+        }
+        return ImmutableSortedMap.copyOf(views);
     }
 
     /**
