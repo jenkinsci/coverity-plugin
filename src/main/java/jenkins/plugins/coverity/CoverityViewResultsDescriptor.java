@@ -62,7 +62,7 @@ public class CoverityViewResultsDescriptor extends BuildStepDescriptor<Publisher
         return getPublisherDescriptor().getInstances();
     }
 
-    private CIMInstance getInstance(String name) {
+    public CIMInstance getInstance(String name) {
         for(CIMInstance instance : getConnectInstances()) {
             if(instance.getName().equals(name)) {
                 return instance;

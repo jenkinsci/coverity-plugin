@@ -10,10 +10,14 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.ws;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import javax.ws.rs.core.UriBuilder;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -68,5 +72,31 @@ public class ViewsService {
         }
 
         return views;
+    }
+
+    public ViewContents getViewContents(String projectId, String connectView, int pageSize, int offset) {
+        try {
+            final UriBuilder uriBuilder = UriBuilder.fromUri(coverityConnectUrl.toURI())
+                .path("api/viewContents/issues/v1/")
+                .path(connectView)
+                .queryParam("projectId", projectId)
+                .queryParam("rowCount", pageSize)
+                .queryParam("offset", offset);
+
+            final URI viewContentsUri = uriBuilder.build();
+            logger.info("Retrieving View contents from " + viewContentsUri);
+
+            WebResource resource = restClient.resource(viewContentsUri);
+
+            String response = resource.get(String.class);
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject)parser.parse(response);
+
+            return new ViewContents((JSONObject)json.get("viewContentsV1"));
+
+        } catch (ParseException | URISyntaxException e) {
+            logger.throwing(ViewsService.class.getName(), "getViews", e);
+            return new ViewContents(new JSONObject());
+        }
     }
 }

@@ -14,6 +14,7 @@ import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
+import hudson.model.Run;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
@@ -33,13 +34,13 @@ public class CoverityBuildAction implements Action {
     // deprecated defectIds field
     private transient List<Long> defectIds;
 
-    private final AbstractBuild build;
+    private final Run<?, ?>  build;
     private final String projectId;
     private final String streamId;
     private final String cimInstance;
     private final List<CoverityDefect> defects;
 
-    public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<CoverityDefect> defects) {
+    public CoverityBuildAction(Run<?, ?> build, String projectId, String streamId, String cimInstance, List<CoverityDefect> defects) {
         this.build = build;
         this.projectId = projectId;
         this.streamId = streamId;
@@ -51,7 +52,7 @@ public class CoverityBuildAction implements Action {
      * The owning build
      */
     public AbstractBuild getBuild() {
-        return build;
+        return (AbstractBuild)build;
     }
 
     /**
