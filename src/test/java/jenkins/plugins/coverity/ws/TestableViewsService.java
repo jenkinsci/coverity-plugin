@@ -11,12 +11,18 @@
 package jenkins.plugins.coverity.ws;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
@@ -35,7 +41,7 @@ public final class TestableViewsService {
         when(Client.create()).thenReturn(restClient);
         WebResource webResource = mock(WebResource.class);
         when(webResource.get(String.class)).thenReturn(viewApiJsonResult);
-        when(restClient.resource(any(String.class))).thenReturn(webResource);
+        when(restClient.resource(argThat(matchUriPath("/api/views/v1")))).thenReturn(webResource);
     }
 
     public static void setupWithViews(Map<Long, String> views) {
@@ -57,5 +63,32 @@ public final class TestableViewsService {
         }
         viewApiJsonBuilder.append("] }");
         setupWithViewApi(viewApiJsonBuilder.toString());
+    }
+
+    public static void setupViewContentsApi(String viewName, String viewContentsApiJsonResult) {
+        Client restClient = mock(Client.class);
+        PowerMockito.mockStatic(Client.class);
+        when(Client.create()).thenReturn(restClient);
+        WebResource webResource = mock(WebResource.class);
+        when(webResource.get(String.class)).thenReturn(viewContentsApiJsonResult);
+        when(restClient.resource(argThat(matchUriPath("/api/viewContents/issues/v1/" + viewName)))).thenReturn(webResource);
+    }
+
+    /**
+     * Gets a {@link TypeSafeMatcher} which will only check the {@link URI} getPath value.
+     * Currently this is sufficient enough for verify the View service behaviors
+     */
+    private static Matcher<URI> matchUriPath(final String path) {
+        return new TypeSafeMatcher<URI>() {
+            @Override
+            protected boolean matchesSafely(URI item) {
+                return item.getPath().equals(path);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("URI should have path ").appendValue(path);
+            }
+        };
     }
 }

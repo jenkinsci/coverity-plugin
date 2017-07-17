@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -42,6 +43,7 @@ import com.sun.jersey.api.client.Client;
 
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
+import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
 import jenkins.plugins.coverity.ws.TestableViewsService;
@@ -495,5 +497,91 @@ public class CIMInstanceTest {
         final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
 
         assertEquals(0, result.size());
+    }
+
+    @Test
+    public void getIssuesForView_returnIssues() throws Exception {
+        final TestableConsoleLogger testableConsoleLogger = new TestableConsoleLogger();
+        final String viewContentsApiJsonResult = "{\"viewContentsV1\": {" +
+            "    \"offset\": 0," +
+            "    \"totalRows\": 2," +
+            "    \"columns\": [" +
+            "        {" +
+            "            \"name\": \"cid\"," +
+            "            \"label\": \"CID\"" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"displayType\"," +
+            "            \"label\": \"Type\"" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"displayImpact\"," +
+            "            \"label\": \"Impact\"" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"status\"," +
+            "            \"label\": \"Status\"" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"checker\"," +
+            "            \"label\": \"Checker\"" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"owner\"," +
+            "            \"label\": \"Owner\"" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"classification\"," +
+            "            \"label\": \"Classification\"" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"displayFile\"," +
+            "            \"label\": \"File\"" +
+            "        }" +
+            "        {" +
+            "            \"name\": \"displayFunction\"," +
+            "            \"label\": \"Function\"" +
+            "        }" +
+            "    ]," +
+            "    \"rows\": [" +
+            "        {" +
+            "            \"cid\": 12345," +
+            "            \"displayType\": \"Insufficient function coverage\"," +
+            "            \"displayImpact\": \"Low\"," +
+            "            \"status\": \"New\"," +
+            "            \"checker\": \"TA.FUNCTION_INSUFFICIENTLY_TESTED\"," +
+            "            \"owner\": \"Unassigned\"," +
+            "            \"classification\": \"Unclassified\"," +
+            "            \"displayFile\": \"source.cpp\"" +
+            "            \"displayFunction\": \"main\"" +
+            "        }," +
+            "        {" +
+            "            \"cid\": 54321," +
+            "            \"displayType\": \"Insufficient function coverage\"," +
+            "            \"displayImpact\": \"Low\"," +
+            "            \"status\": \"New\"," +
+            "            \"checker\": \"TA.FUNCTION_INSUFFICIENTLY_TESTED\"," +
+            "            \"owner\": \"Unassigned\"," +
+            "            \"classification\": \"Unclassified\"," +
+            "            \"displayFile\": \"sourceTest.cpp\"" +
+            "            \"displayFunction\": \"test\"" +
+            "        }" +
+            "    ]" +
+            "}}";
+        TestableViewsService.setupViewContentsApi("view0", viewContentsApiJsonResult);
+        CIMInstance cimInstance = new CIMInstance("instance", "host", 8080, "user", "password", false, 9090);
+
+        final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
+
+        assertEquals(2, issuesVorView.size());
+        assertEquals(12345L, (long)issuesVorView.get(0).getCid());
+        assertEquals("TA.FUNCTION_INSUFFICIENTLY_TESTED", issuesVorView.get(0).getCheckerName());
+        assertEquals("source.cpp", issuesVorView.get(0).getFilePathname());
+        assertEquals("main", issuesVorView.get(0).getFunctionDisplayName());
+
+        assertEquals(54321L, (long)issuesVorView.get(1).getCid());
+        assertEquals("TA.FUNCTION_INSUFFICIENTLY_TESTED", issuesVorView.get(1).getCheckerName());
+        assertEquals("sourceTest.cpp", issuesVorView.get(1).getFilePathname());
+        assertEquals("test", issuesVorView.get(1).getFunctionDisplayName());
     }
 }
