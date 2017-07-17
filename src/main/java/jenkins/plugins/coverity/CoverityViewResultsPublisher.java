@@ -85,11 +85,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
         } catch (Exception e) {
             logger.println("[Coverity] Error Publishing Coverity View Results");
             logger.println(e.toString());
-            if (failPipeline) {
-                run.setResult(Result.FAILURE);
-            } else if (unstable) {
-                run.setResult(Result.UNSTABLE);
-            }
+            run.setResult(Result.FAILURE);
         }
 
         logger.println("[Coverity] Finished Publish Coverity View Results");
@@ -103,7 +99,6 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
-
 
     public String getConnectInstance() {
         return connectInstance;
