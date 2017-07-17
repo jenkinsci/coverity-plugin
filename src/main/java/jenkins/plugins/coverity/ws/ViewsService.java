@@ -46,14 +46,17 @@ public class ViewsService {
      */
     public Map<Long, String> getViews() {
         Map<Long, String> views = new HashMap<>();
-
-        WebResource resource = restClient.resource(coverityConnectUrl.toString() + "api/views/v1");
-        String response = resource.get(String.class);
-        JSONParser parser = new JSONParser();
         JSONObject json;
+
         try {
+            final UriBuilder uriBuilder = UriBuilder.fromUri(coverityConnectUrl.toURI())
+                .path("api/views/v1");
+
+            WebResource resource = restClient.resource(uriBuilder.build());
+            String response = resource.get(String.class);
+            JSONParser parser = new JSONParser();
             json = (JSONObject)parser.parse(response);
-        } catch (ParseException e) {
+        } catch (ParseException | URISyntaxException e) {
             logger.throwing(ViewsService.class.getName(), "getViews", e);
             return views;
         }
