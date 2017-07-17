@@ -16,9 +16,12 @@ import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.Run;
 import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep.LastBuildAction;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +31,7 @@ import org.apache.commons.lang.StringUtils;
  * filtered list of defects. This shows a link on the left side of each build page, which goes to a list of defects from
  * that build.
  */
-public class CoverityBuildAction implements Action {
+public class CoverityBuildAction implements LastBuildAction {
     public static final String BUILD_ACTION_IDENTIFIER = "coverity_defects";
 
     // deprecated defectIds field
@@ -101,5 +104,10 @@ public class CoverityBuildAction implements Action {
 
     public String getUrlName() {
         return BUILD_ACTION_IDENTIFIER;
+    }
+
+    @Override
+    public Collection<? extends Action> getProjectActions() {
+        return Collections.singleton(new CoverityProjectAction(build.getParent()));
     }
 }
