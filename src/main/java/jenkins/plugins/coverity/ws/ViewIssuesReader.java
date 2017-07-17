@@ -41,7 +41,7 @@ public class ViewIssuesReader {
     public void getIssuesFromConnectView() throws Exception {
         CIMInstance instance = publisher.getInstance();
 
-        List<CoverityDefect> issuesFromView = instance.getIssuesVorView(publisher.getProjectId(), publisher.getConnectView());
+        List<CoverityDefect> issuesFromView = instance.getIssuesVorView(publisher.getProjectId(), publisher.getConnectView(), outputLogger);
 
         CoverityBuildAction action = new CoverityBuildAction(run, publisher.getProjectId(), publisher.getConnectView(), publisher.getConnectInstance(), issuesFromView);
         run.addAction(action);

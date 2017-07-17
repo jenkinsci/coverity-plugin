@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -283,7 +284,7 @@ public class CIMInstance {
         return ImmutableSortedMap.copyOf(views);
     }
 
-    public List<CoverityDefect> getIssuesVorView(String projectId, String connectView) throws Exception {
+    public List<CoverityDefect> getIssuesVorView(String projectId, String connectView, PrintStream outputLogger) throws Exception {
         final ArrayList<CoverityDefect> coverityDefects = new ArrayList<>();
 
         try {
@@ -292,24 +293,24 @@ public class CIMInstance {
             pageSize = defectSize = 1000; // Size of page to be pulled
             for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
                 if (pageStart >= pageSize) {
-                    logger.info(MessageFormat.format("[Coverity] Retrieving issues for project \"{0}\" and view \"{1}\" (fetched {2} of {3})", projectId, connectView, pageStart, defectSize));
+                    outputLogger.println(MessageFormat.format("[Coverity] Retrieving issues for project \"{0}\" and view \"{1}\" (fetched {2} of {3})", projectId, connectView, pageStart, defectSize));
                 }
 
                 final ViewContents viewContents = viewService.getViewContents(projectId, connectView, pageSize, pageStart);
                 if (!viewContents.getColumns().contains("cid")) {
-                    logger.warning(MessageFormat.format("[Coverity] Issues view \"{0}\" is missing column \"cid\"", connectView));
+                    outputLogger.println(MessageFormat.format("[Coverity] Warning: Issues view \"{0}\" is missing column \"cid\"", connectView));
                 }
 
                 if (!viewContents.getColumns().contains("checker")) {
-                    logger.warning(MessageFormat.format("[Coverity] Issues view \"{0}\" is missing column \"checker\"", connectView));
+                    outputLogger.println(MessageFormat.format("[Coverity] Warning: Issues view \"{0}\" is missing column \"checker\"", connectView));
                 }
 
                 if (!viewContents.getColumns().contains("displayFile")) {
-                    logger.warning(MessageFormat.format("[Coverity] Issues view \"{0}\" is missing column \"displayFile\"", connectView));
+                    outputLogger.println(MessageFormat.format("[Coverity] Warning: Issues view \"{0}\" is missing column \"displayFile\"", connectView));
                 }
 
                 if (!viewContents.getColumns().contains("displayFunction")) {
-                    logger.warning(MessageFormat.format("[Coverity] Issues view \"{0}\" is missing column \"displayFunction\"", connectView));
+                    outputLogger.println(MessageFormat.format("[Coverity] Warning: Issues view \"{0}\" is missing column \"displayFunction\"", connectView));
                 }
 
                 for (Map<String, Object> row : viewContents.getRows()){
