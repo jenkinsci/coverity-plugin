@@ -584,4 +584,90 @@ public class CIMInstanceTest {
         assertEquals("sourceTest.cpp", issuesVorView.get(1).getFilePathname());
         assertEquals("test", issuesVorView.get(1).getFunctionDisplayName());
     }
+
+    @Test
+    public void getIssuesForView_logsMissingColumns() throws Exception {
+        final TestableConsoleLogger testableConsoleLogger = new TestableConsoleLogger();
+        final String viewContentsApiJsonResult = "{\"viewContentsV1\": {" +
+            "    \"offset\": 0," +
+            "    \"totalRows\": 1," +
+            "    \"columns\": [" +
+            "        {" +
+            "            \"name\": \"displayType\"," +
+            "            \"label\": \"Type\"" +
+            "        }," +
+            "    ]," +
+            "    \"rows\": [" +
+            "        {" +
+            "            \"displayType\": \"Insufficient function coverage\"," +
+            "        }," +
+            "    ]" +
+            "}}";
+        TestableViewsService.setupViewContentsApi("view0", viewContentsApiJsonResult);
+        CIMInstance cimInstance = new CIMInstance("instance", "host", 8080, "user", "password", false, 9090);
+
+        final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
+
+        assertEquals(1, issuesVorView.size());
+        assertNull(issuesVorView.get(0).getCid());
+        assertNull(issuesVorView.get(0).getCheckerName());
+        assertNull(issuesVorView.get(0).getFilePathname());
+        assertNull(issuesVorView.get(0).getFunctionDisplayName());
+        testableConsoleLogger.verifyMessages("[Coverity] Warning: Issues view \"view0\" is missing column \"cid\"",
+            "[Coverity] Warning: Issues view \"view0\" is missing column \"checker\"",
+            "[Coverity] Warning: Issues view \"view0\" is missing column \"displayFile\"",
+            "[Coverity] Warning: Issues view \"view0\" is missing column \"displayFunction\"");
+    }
+
+    @Test
+    public void getIssuesForView_handlesPagingAndLogsProgess() throws Exception {
+        final TestableConsoleLogger testableConsoleLogger = new TestableConsoleLogger();
+        int rowCount = 3000;
+        int pageSize = 1000;
+
+        final StringBuilder viewContentsApiJsonResult = new StringBuilder("{\"viewContentsV1\": {" +
+            "    \"offset\": 0," +
+            "    \"totalRows\": " + rowCount + "," +
+            "    \"columns\": [" +
+            "        {" +
+            "            \"name\": \"cid\"," +
+            "            \"label\": \"CID\"" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"checker\"," +
+            "            \"label\": \"Checker\"" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"displayFile\"," +
+            "            \"label\": \"File\"" +
+            "        }" +
+            "        {" +
+            "            \"name\": \"displayFunction\"," +
+            "            \"label\": \"Function\"" +
+            "        }" +
+            "    ]," +
+            "    \"rows\": [");
+
+        for (int i = 0; i < pageSize; i++) {
+            viewContentsApiJsonResult.append(
+                "        {" +
+                "            \"cid\": " + i + "," +
+                "            \"checker\": \"FORWARD_NULL\"," +
+                "            \"displayFile\": \"source.cpp\"" +
+                "            \"displayFunction\": \"test" + i + "\"" +
+                "        },");
+        }
+
+        viewContentsApiJsonResult.append(
+            "    ]" +
+            "}}");
+        TestableViewsService.setupViewContentsApi("view0", viewContentsApiJsonResult.toString());
+        CIMInstance cimInstance = new CIMInstance("instance", "host", 8080, "user", "password", false, 9090);
+
+        final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
+
+        assertEquals(rowCount, issuesVorView.size());
+        testableConsoleLogger.verifyMessages("[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 1,000 of 3,000)",
+            "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 2,000 of 3,000)");
+    }
 }

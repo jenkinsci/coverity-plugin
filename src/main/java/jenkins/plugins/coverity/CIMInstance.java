@@ -320,6 +320,8 @@ public class CIMInstance {
                     final String displayFile = row.get("displayFile") != null ? row.get("displayFile").toString() : null;
                     coverityDefects.add(new CoverityDefect(cid, checker, displayFunction, displayFile));
                 }
+
+                defectSize = viewContents.getTotalRows().intValue();
             }
 
             } catch (MalformedURLException | NoSuchAlgorithmException e) {
