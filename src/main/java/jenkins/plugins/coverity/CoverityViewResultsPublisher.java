@@ -11,7 +11,6 @@
 package jenkins.plugins.coverity;
 
 
-import java.io.IOException;
 import java.io.PrintStream;
 
 import javax.annotation.Nonnull;
@@ -48,7 +47,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
         final PrintStream logger = listener.getLogger();
         logger.println("[Coverity] Publish Coverity View Results { "+
             "connectInstance:'" + connectInstance + "', " +
@@ -74,6 +73,12 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
         try {
             ViewIssuesReader reader = new ViewIssuesReader(run, listener.getLogger(), this);
             reader.getIssuesFromConnectView();
+            final CoverityBuildAction buildAction = run.getAction(CoverityBuildAction.class);
+            if (failPipeline && buildAction.getDefects().size() > 0) {
+                run.setResult(Result.FAILURE);
+            } else if (unstable && buildAction.getDefects().size() > 0) {
+                run.setResult(Result.UNSTABLE);
+            }
         } catch (Exception e) {
             logger.println("[Coverity] Error Publishing Coverity View Results");
             logger.println(e.toString());

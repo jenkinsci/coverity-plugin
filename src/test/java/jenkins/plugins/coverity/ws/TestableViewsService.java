@@ -27,6 +27,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.WebResource;
 
 /**
@@ -71,6 +72,15 @@ public final class TestableViewsService {
         when(Client.create()).thenReturn(restClient);
         WebResource webResource = mock(WebResource.class);
         when(webResource.get(String.class)).thenReturn(viewContentsApiJsonResult);
+        when(restClient.resource(argThat(matchUriPath("/api/viewContents/issues/v1/" + viewName)))).thenReturn(webResource);
+    }
+
+    public static void setupViewContentsApiThrows(ClientHandlerException exception, String viewName) {
+        Client restClient = mock(Client.class);
+        PowerMockito.mockStatic(Client.class);
+        when(Client.create()).thenReturn(restClient);
+        WebResource webResource = mock(WebResource.class);
+        when(webResource.get(String.class)).thenThrow(exception);
         when(restClient.resource(argThat(matchUriPath("/api/viewContents/issues/v1/" + viewName)))).thenReturn(webResource);
     }
 
