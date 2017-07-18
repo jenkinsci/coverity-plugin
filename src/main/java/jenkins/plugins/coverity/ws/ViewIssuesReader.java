@@ -16,6 +16,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang.StringUtils;
+
 import hudson.model.Run;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CIMInstance;
@@ -48,7 +50,7 @@ public class ViewIssuesReader {
             run.addAction(action);
 
             String rootUrl = Jenkins.getInstance().getRootUrl();
-            if(rootUrl != null) {
+            if(StringUtils.isNotEmpty(rootUrl)) {
                 outputLogger.println("Coverity details: " + rootUrl + run.getUrl() + action.getUrlName());
             }
         }
