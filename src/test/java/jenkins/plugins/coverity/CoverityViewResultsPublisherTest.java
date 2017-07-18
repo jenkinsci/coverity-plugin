@@ -87,6 +87,36 @@ public class CoverityViewResultsPublisherTest {
         verify(run).setResult(Result.FAILURE);
     }
 
+    @Test
+    public void perform_emptyProject_logsError() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "";
+        final String view = "my connect view";
+
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            "[Coverity] Coverity Connect project and view are required. But was Project: '" + projectId +"' View: '" + view + "'");
+        verify(run).setResult(Result.FAILURE);
+    }
+
+    @Test
+    public void perform_emptyView_logsError() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "my projectId";
+        final String view = null;
+
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            "[Coverity] Coverity Connect project and view are required. But was Project: '" + projectId +"' View: '" + view + "'");
+        verify(run).setResult(Result.FAILURE);
+    }
+
     public String getInformationMessage(String instance, String projectId, String view) {
         return "[Coverity] Publish Coverity View Results { "+
             "connectInstance:'" + instance + "', " +

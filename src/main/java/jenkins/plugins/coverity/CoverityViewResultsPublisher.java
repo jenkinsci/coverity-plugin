@@ -67,11 +67,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
         if (StringUtils.isEmpty(projectId) || StringUtils.isEmpty(connectView)) {
             logger.println("[Coverity] Coverity Connect project and view are required. But was Project: '" + projectId +
                 "' View: '" + connectView + "'");
-            if (failPipeline) {
-                run.setResult(Result.FAILURE);
-            } else if (unstable) {
-                run.setResult(Result.UNSTABLE);
-            }
+            run.setResult(Result.FAILURE);
             return;
         }
 
