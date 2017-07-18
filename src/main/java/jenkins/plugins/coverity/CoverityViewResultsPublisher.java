@@ -60,11 +60,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
 
         if (instance == null) {
             logger.println("[Coverity] Unable to find Coverity Connect instance: " + connectInstance);
-            if (failPipeline) {
-                run.setResult(Result.FAILURE);
-            } else if (unstable) {
-                run.setResult(Result.UNSTABLE);
-            }
+            run.setResult(Result.FAILURE);
             return;
         }
 
