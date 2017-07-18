@@ -41,14 +41,16 @@ public class ViewIssuesReader {
     public void getIssuesFromConnectView() throws Exception {
         CIMInstance instance = publisher.getInstance();
 
-        List<CoverityDefect> issuesFromView = instance.getIssuesVorView(publisher.getProjectId(), publisher.getConnectView(), outputLogger);
+        if (instance != null) {
+            List<CoverityDefect> issuesFromView = instance.getIssuesVorView(publisher.getProjectId(), publisher.getConnectView(), outputLogger);
 
-        CoverityBuildAction action = new CoverityBuildAction(run, publisher.getProjectId(), publisher.getConnectView(), publisher.getConnectInstance(), issuesFromView);
-        run.addAction(action);
+            CoverityBuildAction action = new CoverityBuildAction(run, publisher.getProjectId(), publisher.getConnectView(), publisher.getConnectInstance(), issuesFromView);
+            run.addAction(action);
 
-        String rootUrl = Jenkins.getInstance().getRootUrl();
-        if(rootUrl != null) {
-            outputLogger.println("Coverity details: " + rootUrl + run.getUrl() + action.getUrlName());
+            String rootUrl = Jenkins.getInstance().getRootUrl();
+            if(rootUrl != null) {
+                outputLogger.println("Coverity details: " + rootUrl + run.getUrl() + action.getUrlName());
+            }
         }
     }
 }

@@ -12,8 +12,10 @@ package jenkins.plugins.coverity.ws;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -40,8 +42,9 @@ public class ViewContents {
         for (Object row : viewRows) {
             JSONObject jsonRow = (JSONObject)row;
             Map<String, Object> rowDetail = new HashMap<>();
-            for (Object key : jsonRow.keySet()) {
-                rowDetail.put((String)key, jsonRow.get(key));
+            for (Iterator iterator = jsonRow.entrySet().iterator(); iterator.hasNext();) {
+                Map.Entry entry = (Map.Entry)iterator.next();
+                rowDetail.put(String.valueOf(entry.getKey()), entry.getValue());
             }
             rows.add(rowDetail);
         }

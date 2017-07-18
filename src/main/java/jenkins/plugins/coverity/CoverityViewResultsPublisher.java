@@ -10,7 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-
 import java.io.PrintStream;
 
 import javax.annotation.Nonnull;
