@@ -84,7 +84,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
             run.setResult(Result.FAILURE);
         }
 
-        logger.println("[Coverity] Finished Publish Coverity View Results");
+        logger.println("[Coverity] Finished Publishing Coverity View Results");
     }
 
     public CIMInstance getInstance() {

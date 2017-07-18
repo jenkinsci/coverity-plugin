@@ -54,7 +54,7 @@ public class CoverityViewResultsPublisherTest {
     private FilePath workspace;
     private Launcher launcher;
     private String expectedUrlMessage;
-    private static final String expectedFinishedMessage = "[Coverity] Finished Publish Coverity View Results";
+    private static final String expectedFinishedMessage = "[Coverity] Finished Publishing Coverity View Results";
     public Object lastBuildAction;
 
     @Before
