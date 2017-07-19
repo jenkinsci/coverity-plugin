@@ -11,8 +11,9 @@
 package jenkins.plugins.coverity;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.util.DataSetBuilder;
 import hudson.util.Graph;
 import hudson.util.ShiftedCategoryAxis;
@@ -38,13 +39,13 @@ import java.util.List;
  */
 public class CoverityProjectAction implements Action {
 
-    private final AbstractProject<?, ?> project;
+    private final Job<?, ?> project;
 
-    public CoverityProjectAction(AbstractProject<?, ?> project) {
+    public CoverityProjectAction(Job<?, ?> project) {
         this.project = project;
     }
 
-    public AbstractProject<?, ?> getProject() {
+    public Job<?, ?> getProject() {
         return project;
     }
 
@@ -71,7 +72,7 @@ public class CoverityProjectAction implements Action {
 
         protected DataSetBuilder<String, ChartLabel> createDataSet() {
             DataSetBuilder<String, ChartLabel> data = new DataSetBuilder<String, ChartLabel>();
-            AbstractBuild<?, ?> build = project.getLastCompletedBuild();
+            Run<?, ?> build = project.getLastCompletedBuild();
             while(build != null) {
                 final List<CoverityBuildAction> actions = build.getActions(CoverityBuildAction.class);
 
@@ -195,9 +196,9 @@ public class CoverityProjectAction implements Action {
     }
 
     private static class ChartLabel implements Comparable<ChartLabel> {
-        private AbstractBuild build;
+        private Run build;
 
-        public ChartLabel(AbstractBuild build) {
+        public ChartLabel(Run build) {
             this.build = build;
         }
 
@@ -230,10 +231,12 @@ public class CoverityProjectAction implements Action {
         @Override
         public String toString() {
             String l = build.getDisplayName();
-            
-            String s = build.getBuiltOnStr();
-            if(s != null)
-                l += ' ' + s;
+
+            if (build instanceof AbstractBuild) {
+                String s = ((AbstractBuild)build).getBuiltOnStr();
+                if(s != null)
+                    l += ' ' + s;
+            }
             return l;
         }
 

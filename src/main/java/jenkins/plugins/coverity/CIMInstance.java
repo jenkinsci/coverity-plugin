@@ -11,12 +11,19 @@
 package jenkins.plugins.coverity;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -29,8 +36,8 @@ import com.coverity.ws.v9.ConfigurationService;
 import com.coverity.ws.v9.ConfigurationServiceService;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.DefectService;
-import com.coverity.ws.v9.GroupIdDataObj;
 import com.coverity.ws.v9.GroupDataObj;
+import com.coverity.ws.v9.GroupIdDataObj;
 import com.coverity.ws.v9.PermissionDataObj;
 import com.coverity.ws.v9.ProjectDataObj;
 import com.coverity.ws.v9.ProjectFilterSpecDataObj;
@@ -44,6 +51,8 @@ import com.google.common.collect.ImmutableSortedMap;
 
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
+import jenkins.plugins.coverity.ws.ViewContents;
+import jenkins.plugins.coverity.ws.ViewsService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
 
 /**
@@ -275,6 +284,53 @@ public class CIMInstance {
         return ImmutableSortedMap.copyOf(views);
     }
 
+    public List<CoverityDefect> getIssuesVorView(String projectId, String connectView, PrintStream outputLogger) throws Exception {
+        final ArrayList<CoverityDefect> coverityDefects = new ArrayList<>();
+
+        try {
+            final ViewsService viewService = WebServiceFactory.getInstance().getViewService(this);
+            int pageSize, defectSize;
+            pageSize = defectSize = 1000; // Size of page to be pulled
+            for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
+                if (pageStart >= pageSize) {
+                    outputLogger.println(MessageFormat.format("[Coverity] Retrieving issues for project \"{0}\" and view \"{1}\" (fetched {2} of {3})", projectId, connectView, pageStart, defectSize));
+                }
+
+                final ViewContents viewContents = viewService.getViewContents(projectId, connectView, pageSize, pageStart);
+                if (!viewContents.getColumns().contains("cid")) {
+                    outputLogger.println(MessageFormat.format("[Coverity] Warning: Issues view \"{0}\" is missing column \"cid\"", connectView));
+                }
+
+                if (!viewContents.getColumns().contains("checker")) {
+                    outputLogger.println(MessageFormat.format("[Coverity] Warning: Issues view \"{0}\" is missing column \"checker\"", connectView));
+                }
+
+                if (!viewContents.getColumns().contains("displayFile")) {
+                    outputLogger.println(MessageFormat.format("[Coverity] Warning: Issues view \"{0}\" is missing column \"displayFile\"", connectView));
+                }
+
+                if (!viewContents.getColumns().contains("displayFunction")) {
+                    outputLogger.println(MessageFormat.format("[Coverity] Warning: Issues view \"{0}\" is missing column \"displayFunction\"", connectView));
+                }
+
+                for (Map<String, Object> row : viewContents.getRows()){
+                    final Long cid = row.get("cid") != null ? Long.parseLong(row.get("cid").toString()) : null;
+                    final String checker = row.get("checker") != null ? row.get("checker").toString() : null;
+                    final String displayFunction = row.get("displayFunction") != null ? row.get("displayFunction").toString() : null;
+                    final String displayFile = row.get("displayFile") != null ? row.get("displayFile").toString() : null;
+                    coverityDefects.add(new CoverityDefect(cid, checker, displayFunction, displayFile));
+                }
+
+                defectSize = viewContents.getTotalRows().intValue();
+            }
+
+            } catch (MalformedURLException | NoSuchAlgorithmException e) {
+                throw new Exception(e);
+        }
+
+        return coverityDefects;
+    }
+
     /**
      * A user requires 3 sets of permissions in order to use Coverity plugin.
      * The required permissions are "WebService Access", "Commit To a Stream", and "View Issues".
@@ -385,7 +441,6 @@ public class CIMInstance {
         userPermissionsCheck = FormValidation.ok();
         return FormValidation.ok();
     }
-
 
     @Override
     public int hashCode() {

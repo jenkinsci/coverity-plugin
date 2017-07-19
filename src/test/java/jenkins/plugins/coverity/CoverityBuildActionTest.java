@@ -10,15 +10,17 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -34,6 +36,8 @@ import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.thoughtworks.xstream.XStream;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Action;
+import hudson.model.Run;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
@@ -117,4 +121,13 @@ public class CoverityBuildActionTest {
         assertEquals(StringUtils.EMPTY, defects.get(1).getFilePathname());
     }
 
+    @Test
+    public void getProjectActions_includesCoverityProjectAction() {
+        CoverityBuildAction coverityBuildAction = new CoverityBuildAction(mock(Run.class), "project0", "stream1", cimInstance.getName(), new ArrayList<CoverityDefect>());
+
+        final Collection<? extends Action> result = coverityBuildAction.getProjectActions();
+
+        assertEquals(1, result.size());
+        assertThat(result.iterator().next(), instanceOf(CoverityProjectAction.class));
+    }
 }

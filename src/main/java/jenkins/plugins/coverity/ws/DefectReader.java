@@ -108,7 +108,7 @@ public class DefectReader {
             build.addAction(action);
 
             String rootUrl = Jenkins.getInstance().getRootUrl();
-            if(rootUrl != null) {
+            if(StringUtils.isNotEmpty(rootUrl)) {
                 listener.getLogger().println("Coverity details: " + rootUrl + build.getUrl() + action.getUrlName());
             }
         } catch (IOException e) {

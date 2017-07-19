@@ -59,6 +59,6 @@ public class TestableConsoleLogger {
     }
 
     public void verifyMessages(String... expectedMessages) {
-        assertArrayEquals(allMessages.toArray(), expectedMessages);
+        assertArrayEquals(expectedMessages, allMessages.toArray());
     }
 }

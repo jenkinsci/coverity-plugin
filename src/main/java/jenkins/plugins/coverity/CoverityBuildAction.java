@@ -14,10 +14,14 @@ import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
+import hudson.model.Run;
 import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep.LastBuildAction;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -27,19 +31,19 @@ import org.apache.commons.lang.StringUtils;
  * filtered list of defects. This shows a link on the left side of each build page, which goes to a list of defects from
  * that build.
  */
-public class CoverityBuildAction implements Action {
+public class CoverityBuildAction implements LastBuildAction {
     public static final String BUILD_ACTION_IDENTIFIER = "coverity_defects";
 
     // deprecated defectIds field
     private transient List<Long> defectIds;
 
-    private final AbstractBuild build;
+    private final Run<?, ?>  build;
     private final String projectId;
     private final String streamId;
     private final String cimInstance;
     private final List<CoverityDefect> defects;
 
-    public CoverityBuildAction(AbstractBuild build, String projectId, String streamId, String cimInstance, List<CoverityDefect> defects) {
+    public CoverityBuildAction(Run<?, ?> build, String projectId, String streamId, String cimInstance, List<CoverityDefect> defects) {
         this.build = build;
         this.projectId = projectId;
         this.streamId = streamId;
@@ -51,7 +55,7 @@ public class CoverityBuildAction implements Action {
      * The owning build
      */
     public AbstractBuild getBuild() {
-        return build;
+        return (AbstractBuild)build;
     }
 
     /**
@@ -100,5 +104,10 @@ public class CoverityBuildAction implements Action {
 
     public String getUrlName() {
         return BUILD_ACTION_IDENTIFIER;
+    }
+
+    @Override
+    public Collection<? extends Action> getProjectActions() {
+        return Collections.singleton(new CoverityProjectAction(build.getParent()));
     }
 }

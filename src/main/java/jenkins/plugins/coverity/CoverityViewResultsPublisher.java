@@ -10,22 +10,23 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-
-import java.io.IOException;
 import java.io.PrintStream;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Recorder;
+import jenkins.plugins.coverity.ws.ViewIssuesReader;
 import jenkins.tasks.SimpleBuildStep;
 
 public class CoverityViewResultsPublisher extends Recorder implements SimpleBuildStep {
@@ -45,23 +46,55 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
-        // todo: get CIMInstance and call web service to find view matching connectView
-
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
         final PrintStream logger = listener.getLogger();
         logger.println("[Coverity] Publish Coverity View Results { "+
             "connectInstance:'" + connectInstance + "', " +
             "projectId:'" + projectId + "', " +
-            "connectView:'" + connectView + "' " +
+            "connectView:'" + connectView +
             "}");
 
+        CIMInstance instance = getInstance();
+
+        if (instance == null) {
+            logger.println("[Coverity] Unable to find Coverity Connect instance: " + connectInstance);
+            run.setResult(Result.FAILURE);
+            return;
+        }
+
+        if (StringUtils.isEmpty(projectId) || StringUtils.isEmpty(connectView)) {
+            logger.println("[Coverity] Coverity Connect project and view are required. But was Project: '" + projectId +
+                "' View: '" + connectView + "'");
+            run.setResult(Result.FAILURE);
+            return;
+        }
+
+        try {
+            ViewIssuesReader reader = new ViewIssuesReader(run, listener.getLogger(), this);
+            reader.getIssuesFromConnectView();
+            final CoverityBuildAction buildAction = run.getAction(CoverityBuildAction.class);
+            if (failPipeline && buildAction.getDefects().size() > 0) {
+                run.setResult(Result.FAILURE);
+            } else if (unstable && buildAction.getDefects().size() > 0) {
+                run.setResult(Result.UNSTABLE);
+            }
+        } catch (Exception e) {
+            logger.println("[Coverity] Error Publishing Coverity View Results");
+            logger.println(e.toString());
+            run.setResult(Result.FAILURE);
+        }
+
+        logger.println("[Coverity] Finished Publishing Coverity View Results");
+    }
+
+    public CIMInstance getInstance() {
+        return getDescriptor().getInstance(connectInstance);
     }
 
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
-
 
     public String getConnectInstance() {
         return connectInstance;
