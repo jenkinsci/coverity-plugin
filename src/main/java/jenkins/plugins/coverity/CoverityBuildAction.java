@@ -10,18 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v9.CovRemoteServiceException_Exception;
-
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.Describable;
-import hudson.model.Job;
-import hudson.model.Run;
-import jenkins.model.Jenkins;
-import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
-import jenkins.tasks.SimpleBuildStep.LastBuildAction;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +17,16 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.Job;
+import hudson.model.Run;
+import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep.LastBuildAction;
 
 /**
  * Captures Coverity information for a single build, including a snapshot of cim instance, project and stream, and a
