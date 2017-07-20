@@ -246,11 +246,6 @@ public class CoverityPublisher extends Recorder {
     }
 
     @Override
-    public Action getProjectAction(AbstractProject<?, ?> project) {
-        return hideChart ? super.getProjectAction(project) : new CoverityProjectAction(project);
-    }
-
-    @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         // set initial state for unstable build to false
         this.unstableBuild = false;
