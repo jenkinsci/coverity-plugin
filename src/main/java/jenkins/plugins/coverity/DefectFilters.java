@@ -120,7 +120,7 @@ public class DefectFilters {
     }
 
     public boolean isClassificationSelected(String action) {
-        return classifications.contains(action);
+        return classifications != null && classifications.contains(action);
     }
 
     public List<String> getCheckersList(){
@@ -128,10 +128,13 @@ public class DefectFilters {
     }
 
     public boolean isActionSelected(String action) {
-        return actions.contains(action);
+        return actions != null && actions.contains(action);
     }
 
     public boolean isImpactsSelected(String impact){
+        if (impacts == null)
+            return false;
+
         Map<String, String> mapWithJapaneseTranslations;
         mapWithJapaneseTranslations = new HashMap<String, String>();
         mapWithJapaneseTranslations.put("High", "高");
@@ -149,15 +152,15 @@ public class DefectFilters {
     }
 
     public boolean isSeveritySelected(String severity) {
-        return severities.contains(severity);
+        return severities != null && severities.contains(severity);
     }
 
     public boolean isComponentSelected(String component) {
-        return !ignoredComponents.contains(component);
+        return ignoredComponents != null && !ignoredComponents.contains(component);
     }
 
     public boolean isCheckerSelected(String checker) {
-        return !ignoredCheckers.contains(checker);
+        return ignoredCheckers != null && !ignoredCheckers.contains(checker);
     }
 
     public String getCutOffDate() {
