@@ -13,13 +13,17 @@ package jenkins.plugins.coverity;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -37,10 +41,16 @@ import com.thoughtworks.xstream.XStream;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
+import hudson.model.Descriptor;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.model.Run;
+import hudson.tasks.Publisher;
+import hudson.util.DescribableList;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
@@ -129,5 +139,65 @@ public class CoverityBuildActionTest {
 
         assertEquals(1, result.size());
         assertThat(result.iterator().next(), instanceOf(CoverityProjectAction.class));
+    }
+
+    @Test
+    public void getProjectActions_withNullBuild() {
+        CoverityBuildAction coverityBuildAction = new CoverityBuildAction(null, "project0", "stream1", cimInstance.getName(), new ArrayList<CoverityDefect>());
+
+        final Collection<? extends Action> result = coverityBuildAction.getProjectActions();
+
+        assertTrue(result.isEmpty());
+        assertNull(coverityBuildAction.getBuild());
+    }
+
+    @Test
+    public void getProjectActions_withJobMissingPublisher() {
+        final FreeStyleBuild freeStyleBuild = getFreeStyleBuild();
+
+        CoverityBuildAction coverityBuildAction = new CoverityBuildAction(freeStyleBuild, "project0", "stream1", cimInstance.getName(), new ArrayList<CoverityDefect>());
+
+        final Collection<? extends Action> result = coverityBuildAction.getProjectActions();
+
+        assertEquals(1, result.size());
+        assertThat(result.iterator().next(), instanceOf(CoverityProjectAction.class));
+    }
+
+    @Test
+    public void getProjectActions_withJobPublisher() {
+        final CoverityPublisherBuilder publisherBuilder = new CoverityPublisherBuilder();
+        publisherBuilder.withHideChart(false);
+        final FreeStyleBuild freeStyleBuild = getFreeStyleBuild(publisherBuilder.build());
+
+        CoverityBuildAction coverityBuildAction = new CoverityBuildAction(freeStyleBuild, "project0", "stream1", cimInstance.getName(), new ArrayList<CoverityDefect>());
+
+        final Collection<? extends Action> result = coverityBuildAction.getProjectActions();
+
+        assertEquals(1, result.size());
+        assertThat(result.iterator().next(), instanceOf(CoverityProjectAction.class));
+    }
+
+    @Test
+    public void getProjectActions_withPublisherHidesChart() {
+        final CoverityPublisherBuilder publisherBuilder = new CoverityPublisherBuilder();
+        publisherBuilder.withHideChart(true);
+
+        final FreeStyleBuild freeStyleBuild = getFreeStyleBuild(publisherBuilder.build());
+
+        CoverityBuildAction coverityBuildAction = new CoverityBuildAction(freeStyleBuild, "project0", "stream1", cimInstance.getName(), new ArrayList<CoverityDefect>());
+
+        final Collection<? extends Action> result = coverityBuildAction.getProjectActions();
+
+        assertTrue(result.isEmpty());
+        assertSame(freeStyleBuild, coverityBuildAction.getBuild());
+    }
+
+    public FreeStyleBuild getFreeStyleBuild(CoverityPublisher... publishers) {
+        final FreeStyleBuild freeStyleBuild = mock(FreeStyleBuild.class);
+        final FreeStyleProject freeStyleProject = mock(FreeStyleProject.class);
+        final DescribableList<Publisher, Descriptor<Publisher>> publisherList = new DescribableList<Publisher, Descriptor<Publisher>>(freeStyleProject, Arrays.asList(publishers));
+        when(freeStyleProject.getPublishersList()).thenReturn(publisherList);
+        when(freeStyleBuild.getProject()).thenReturn(freeStyleProject);
+        return freeStyleBuild;
     }
 }

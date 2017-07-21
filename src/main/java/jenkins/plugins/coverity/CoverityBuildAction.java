@@ -10,14 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import com.coverity.ws.v9.CovRemoteServiceException_Exception;
-
-import hudson.model.AbstractBuild;
-import hudson.model.Action;
-import hudson.model.Run;
-import jenkins.model.Jenkins;
-import jenkins.tasks.SimpleBuildStep.LastBuildAction;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +17,16 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.Job;
+import hudson.model.Run;
+import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep.LastBuildAction;
 
 /**
  * Captures Coverity information for a single build, including a snapshot of cim instance, project and stream, and a
@@ -108,6 +110,20 @@ public class CoverityBuildAction implements LastBuildAction {
 
     @Override
     public Collection<? extends Action> getProjectActions() {
-        return Collections.singleton(new CoverityProjectAction(build.getParent()));
+        if (build != null) {
+            final Job<?, ?> parent = this.build.getParent();
+            if (parent instanceof AbstractProject) {
+                AbstractProject project = (AbstractProject)parent;
+                final CoverityPublisher coverityPublisher = (CoverityPublisher)project.getPublishersList().get(CoverityPublisher.class);
+                // project builds with Coverity Publisher can hide the chart
+                if (coverityPublisher != null &&
+                    coverityPublisher.isHideChart())
+                    return Collections.emptyList();
+            }
+
+            return Collections.singleton(new CoverityProjectAction(build.getParent()));
+        }
+
+        return Collections.emptyList();
     }
 }
