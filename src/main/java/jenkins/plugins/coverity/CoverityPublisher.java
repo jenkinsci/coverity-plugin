@@ -308,6 +308,7 @@ public class CoverityPublisher extends Recorder {
         private List<CIMInstance> instances = new ArrayList<CIMInstance>();
         private String home;
         private SSLConfigurations sslConfigurations;
+        private CoverityToolInstallation[] installations = new CoverityToolInstallation[0];
 
         public DescriptorImpl() {
             super(CoverityPublisher.class);
@@ -392,6 +393,15 @@ public class CoverityPublisher extends Recorder {
                 }
             }
             return null;
+        }
+
+        public CoverityToolInstallation[] getInstallations() {
+            return Arrays.copyOf(installations, installations.length);
+        }
+
+        public void setInstallations(CoverityToolInstallation... installations) {
+            this.installations = installations;
+            this.save();
         }
 
         @Override
