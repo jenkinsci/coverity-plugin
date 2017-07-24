@@ -27,20 +27,17 @@ public class CovCommitDefectsCommand extends CoverityCommand {
     private static final String streamArg = "--stream";
     private static final String userArg = "--user";
     private static final String coverity_passphrase = "COVERITY_PASSPHRASE";
-    private static final String misraOnly = "--misra-only";
 
     private CIMInstance cimInstance;
     private CIMStream cimStream;
-    private CoverityVersion version;
     private InvocationAssistance invocationAssistance;
 
     public CovCommitDefectsCommand(
             AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars,
-            CIMStream cimStream, CIMInstance cimInstance, CoverityVersion version) {
+            CIMStream cimStream, CIMInstance cimInstance) {
         super(command, build, launcher, listener, publisher, home, envVars);
         this.cimStream = cimStream;
         this.cimInstance = cimInstance;
-        this.version = version;
 
         if (publisher != null && publisher.getInvocationAssistance() != null) {
             invocationAssistance = publisher.getInvocationAssistance();
@@ -54,18 +51,17 @@ public class CovCommitDefectsCommand extends CoverityCommand {
         if (cimInstance.getDataPort() != 0){
             addSsl();
             addDataPort();
-            addSslConfiguration(cimInstance, version);
+            addSslConfiguration(cimInstance);
         } else if (cimInstance.isUseSSL()) {
             addSsl();
             addHtppsPort();
-            addSslConfiguration(cimInstance, version);
+            addSslConfiguration(cimInstance);
         } else {
             addPort();
         }
 
         addStream();
         addUserInfo();
-        addMisraOnly();
         addCommitArguments();
         listener.getLogger().println("[Coverity] cov-commit-defects command line arguments: " + commandLine.toString());
     }
@@ -109,12 +105,6 @@ public class CovCommitDefectsCommand extends CoverityCommand {
         envVars.put(coverity_passphrase, cimInstance.getPassword());
     }
 
-    private void addMisraOnly() {
-        if (version.compareTo(CoverityVersion.VERSION_JASPER) < 0 && publisher.getInvocationAssistance().getIsUsingMisra()) {
-            addArgument(misraOnly);
-        }
-    }
-
     private void addCommitArguments() {
         if (!StringUtils.isEmpty(invocationAssistance.getCommitArguments())) {
             try{
@@ -126,7 +116,7 @@ public class CovCommitDefectsCommand extends CoverityCommand {
     }
 
     private void addSsl() {
-        if (version.compareTo(CoverityVersion.VERSION_JASPER) >= 0 && cimInstance.isUseSSL()) {
+        if (cimInstance.isUseSSL()) {
             addArgument(useSslArg);
         }
     }

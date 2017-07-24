@@ -19,10 +19,10 @@ import org.apache.commons.lang.StringUtils;
  * codenames are all valid and comparable.
  */
 public class CoverityVersion implements Comparable<CoverityVersion>, Serializable {
-    public static final CoverityVersion VERSION_INDIO = new CoverityVersion(7, 7, 0, 0);
     public static final CoverityVersion VERSION_JASPER = new CoverityVersion(8, 0, 0, 0);
+    public static final CoverityVersion VERSION_JASPER1 = new CoverityVersion(8, 1, 0,0);
 
-    public static final CoverityVersion MINIMUM_SUPPORTED_VERSION = VERSION_INDIO;
+    public static final CoverityVersion MINIMUM_SUPPORTED_VERSION = VERSION_JASPER;
 
     final int major;
     final int minor;

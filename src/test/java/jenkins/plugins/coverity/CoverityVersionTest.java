@@ -40,7 +40,7 @@ public class CoverityVersionTest {
         Assert.assertTrue(version1.equals(version2));
 
         version1 = CoverityVersion.VERSION_JASPER;
-        version2 = CoverityVersion.VERSION_INDIO;
+        version2 = CoverityVersion.VERSION_JASPER1;
         Assert.assertFalse(version1.equals(version2));
     }
 
@@ -62,8 +62,8 @@ public class CoverityVersionTest {
         version2 = new CoverityVersion(8, 7, 7, 1);
         Assert.assertEquals(-1, version1.compareTo(version2));
 
-        version1 = CoverityVersion.VERSION_JASPER;
-        version2 = CoverityVersion.VERSION_INDIO;
+        version1 = CoverityVersion.VERSION_JASPER1;
+        version2 = CoverityVersion.VERSION_JASPER;
         Assert.assertEquals(1, version1.compareTo(version2));
     }
 
@@ -83,28 +83,14 @@ public class CoverityVersionTest {
         version2 = CoverityVersion.VERSION_JASPER;
         Assert.assertTrue(version1.compareToAnalysis(version2));
 
-        version2 = CoverityVersion.VERSION_INDIO;
+        version1 = CoverityVersion.VERSION_JASPER1;
         Assert.assertTrue(version1.compareToAnalysis(version2));
     }
 
     @Test
     public void parseTest() {
         // test supported versions
-        CoverityVersion version = CoverityVersion.parse("7.7.0");
-        Assert.assertEquals(7, version.major);
-        Assert.assertEquals(7, version.minor);
-        Assert.assertEquals(0, version.patch);
-        Assert.assertEquals(0, version.hotfix);
-        Assert.assertEquals("7.7.0", version.toString());
-
-        version = CoverityVersion.parse("7.7.0.15");
-        Assert.assertEquals(7, version.major);
-        Assert.assertEquals(7, version.minor);
-        Assert.assertEquals(0, version.patch);
-        Assert.assertEquals(15, version.hotfix);
-        Assert.assertEquals("7.7.0.15", version.toString());
-
-        version = CoverityVersion.parse("8.7.1.0");
+        CoverityVersion version = CoverityVersion.parse("8.7.1.0");
         Assert.assertEquals(8, version.major);
         Assert.assertEquals(7, version.minor);
         Assert.assertEquals(1, version.patch);

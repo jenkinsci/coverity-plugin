@@ -10,7 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.SnapshotIdDataObj;
 import hudson.EnvVars;
 import hudson.Launcher;
@@ -20,7 +19,6 @@ import jenkins.plugins.coverity.*;
 import com.coverity.ws.v9.StreamIdDataObj;
 import com.coverity.ws.v9.SnapshotFilterSpecDataObj;
 
-import java.io.IOException;
 import java.util.List;
 
 public class CovManageHistoryCommand extends CoverityCommand {
@@ -36,15 +34,13 @@ public class CovManageHistoryCommand extends CoverityCommand {
 
     private CIMInstance cimInstance;
     private CIMStream cimStream;
-    private CoverityVersion version;
 
     public CovManageHistoryCommand(
             AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher,
-            String home, EnvVars envVars, CIMStream cimStream, CIMInstance cimInstance, CoverityVersion version) {
+            String home, EnvVars envVars, CIMStream cimStream, CIMInstance cimInstance) {
         super(command, build, launcher, listener, publisher, home, envVars);
         this.cimStream = cimStream;
         this.cimInstance = cimInstance;
-        this.version = version;
     }
 
     @Override
@@ -54,7 +50,7 @@ public class CovManageHistoryCommand extends CoverityCommand {
         if (cimInstance.isUseSSL()){
             addArgument(useSslArg);
         }
-        addSslConfiguration(cimInstance, version);
+        addSslConfiguration(cimInstance);
         addUserInfo();
         addArgument(mergeArg);
         listener.getLogger().println("[Coverity] cov-manage-history command line arguments: " + commandLine.toString());

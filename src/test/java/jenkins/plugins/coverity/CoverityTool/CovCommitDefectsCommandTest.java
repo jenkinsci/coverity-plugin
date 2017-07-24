@@ -17,8 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -38,31 +36,10 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
                 new CoverityPublisherBuilder().withCimStream(cimStream).
                         withInvocationAssistance(invocationAssistance).build();
 
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--port", "8080", "--stream", "TestStream", "--user", "TestUser"
-        });
-        covCommitDefectsCommand.runCommand();
-        assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
-        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
-    }
-
-    @Test
-    public void addMisraTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
-
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
-
-        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withMisraConfigFile("MISRA_cpp1008_1.config").build();
-        CoverityPublisher publisher =
-                new CoverityPublisherBuilder().withCimStream(cimStream).
-                        withInvocationAssistance(invocationAssistance).build();
-
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_INDIO);
-        setExpectedArguments(new String[] {
-                "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
-                "--port", "8080", "--stream", "TestStream", "--user", "TestUser", "--misra-only"
         });
         covCommitDefectsCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
@@ -79,7 +56,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
                 new CoverityPublisherBuilder().withCimStream(cimStream).
                         withInvocationAssistance(invocationAssistance).build();
 
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--dataport", "1234", "--stream", "TestStream", "--user", "TestUser"
@@ -107,39 +84,11 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
         when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
 
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--ssl", "--dataport", "1234", "--on-new-cert", "trust", "--certs", "TestCertFile",
                  "--stream", "TestStream", "--user", "TestUser"
-        });
-        covCommitDefectsCommand.runCommand();
-        assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
-        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
-    }
-
-    @Test
-    public void addDataPortTest_WithIndio() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
-
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 1234);
-
-        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
-        SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
-
-        CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
-        CoverityPublisher publisher = mock(CoverityPublisher.class);
-
-        when(publisher.getDescriptor()).thenReturn(descriptor);
-        when(publisher.getCimStream()).thenReturn(cimStream);
-        when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
-        when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
-
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_INDIO);
-        setExpectedArguments(new String[] {
-                "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost", "--dataport", "1234",
-                "--stream", "TestStream", "--user", "TestUser"
         });
         covCommitDefectsCommand.runCommand();
         assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
@@ -165,39 +114,10 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
         when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
 
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--ssl", "--https-port", "8080", "--on-new-cert", "trust", "--certs", "TestCertFile",
-                "--stream", "TestStream", "--user", "TestUser"
-        });
-        covCommitDefectsCommand.runCommand();
-        assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
-        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
-    }
-
-    @Test
-    public void addHttpsPortTest_WithIndio() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
-
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true, 0);
-
-        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
-        SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
-        sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
-
-        CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
-        CoverityPublisher publisher = mock(CoverityPublisher.class);
-
-        when(publisher.getDescriptor()).thenReturn(descriptor);
-        when(publisher.getCimStream()).thenReturn(cimStream);
-        when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
-        when(publisher.getInvocationAssistance()).thenReturn(invocationAssistance);
-        when(descriptor.getSslConfigurations()).thenReturn(sslConfigurations);
-
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_INDIO);
-        setExpectedArguments(new String[] {
-                "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost", "--https-port", "8080",
                 "--stream", "TestStream", "--user", "TestUser"
         });
         covCommitDefectsCommand.runCommand();
@@ -216,7 +136,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
                 new CoverityPublisherBuilder().withCimStream(cimStream).
                         withInvocationAssistance(invocationAssistance).build();
 
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
         setExpectedArguments(new String[] {
                 "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
                 "--port", "8080", "--stream", "TestStream", "--user", "TestUser", "AdditionalCommitArguments"
@@ -236,7 +156,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
                 new CoverityPublisherBuilder().withCimStream(cimStream).
                         withInvocationAssistance(invocationAssistance).build();
 
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
         try{
             covCommitDefectsCommand.runCommand();
             fail("RuntimeException should have been thrown");
@@ -251,7 +171,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, 0);
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
-        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance, CoverityVersion.VERSION_JASPER);
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
         covCommitDefectsCommand.runCommand();
         verifyNumberOfExecutedCommands(0);
     }
