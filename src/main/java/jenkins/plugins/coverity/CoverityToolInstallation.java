@@ -38,6 +38,12 @@ import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
+/**
+ * Coverity Static Analysis Tool {@link ToolInstallation}, this represents a named tool configuration with a path to
+ * the install directory.
+ * This was added to improve pipeline support for pipeline script which will use the built in tool step to get the
+ * tool installation, then manually invoke Coverity tools.
+ */
 public class CoverityToolInstallation extends ToolInstallation implements NodeSpecific<CoverityToolInstallation>, EnvironmentSpecific<CoverityToolInstallation> {
 
     @DataBoundConstructor
@@ -63,6 +69,9 @@ public class CoverityToolInstallation extends ToolInstallation implements NodeSp
             return "Coverity Static Analysis Tools";
         }
 
+        /**
+         * Override in order to remove the default "install automatically" checkbox for tool installation
+         */
         @Override
         public List<ToolPropertyDescriptor> getPropertyDescriptors() {
             return Collections.emptyList();
