@@ -61,8 +61,12 @@ public class CoverityToolInstallation extends ToolInstallation implements NodeSp
         return new CoverityToolInstallation(getName(), environment.expand(getHome()));
     }
 
-    @Extension @Symbol("coverity")
-    public static final class Descriptor extends ToolDescriptor<CoverityToolInstallation> {
+    /**\
+     * {@link ToolDescriptor} for {@link CoverityToolInstallation}
+     */
+    @Extension
+    @Symbol("coverity")
+    public static final class CoverityToolInstallationDescriptor extends ToolDescriptor<CoverityToolInstallation> {
 
         @Override
         public String getDisplayName() {
@@ -93,12 +97,7 @@ public class CoverityToolInstallation extends ToolInstallation implements NodeSp
         }
 
         private CoverityPublisher.DescriptorImpl getDescriptor() {
-            Jenkins jenkins = Jenkins.getInstance();
-            if (jenkins != null) {
-                return jenkins.getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
-            } else {
-                return null;
-            }
+            return Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
         }
 
         @Override
