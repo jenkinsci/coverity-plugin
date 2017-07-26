@@ -103,7 +103,7 @@ public class CoverityToolInstallationTest extends TestCase {
 
         result = toolDescriptor.doCheckHome(tempJenkinsRoot.newFolder("cov-install"));
         assertEquals(Kind.ERROR, result.kind);
-        assertEquals("The specified \"Coverity Static Analysis\" directory doesn't contain a VERSION.xml file.",
+        assertEquals("The specified Analysis installation directory doesn't contain a VERSION.xml file.",
             StringEscapeUtils.unescapeHtml(result.getMessage()));
 
         final URL resource =  this.getClass().getResource("/VERSION.xml");

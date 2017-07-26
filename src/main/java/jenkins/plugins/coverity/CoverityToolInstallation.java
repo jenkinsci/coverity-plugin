@@ -12,16 +12,12 @@ package jenkins.plugins.coverity;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.EnvironmentSpecific;
@@ -36,7 +32,6 @@ import hudson.tools.ToolPropertyDescriptor;
 import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
 
 /**
  * Coverity Static Analysis Tool {@link ToolInstallation}, this represents a named tool configuration with a path to
@@ -102,11 +97,7 @@ public class CoverityToolInstallation extends ToolInstallation implements NodeSp
 
         @Override
         protected FormValidation checkHomeDirectory(File home) {
-            try {
-                return getDescriptor().doCheckAnalysisLocation(home.getAbsolutePath());
-            } catch (IOException e) {
-                return FormValidation.error("Unable to verify the \"Coverity Static Analysis\" directory version.");
-            }
+            return getDescriptor().doCheckAnalysisLocation(home.getAbsolutePath());
         }
     }
 }
