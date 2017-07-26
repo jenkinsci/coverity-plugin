@@ -16,7 +16,7 @@
         <f:textbox/>
     </f:entry>
 
-    <f:entry title="${%Home Directory}" field="home">
+    <f:entry title="${%Installation Directory}" field="home">
         <f:textbox/>
     </f:entry>
 
