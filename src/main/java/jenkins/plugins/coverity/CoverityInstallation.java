@@ -62,5 +62,15 @@ public class CoverityInstallation extends NodeProperty<Node> implements Environm
         public boolean isApplicable(Class<? extends Node> targetType) {
             return targetType != Hudson.class;
         }
+
+        public FormValidation doCheckHome(@QueryParameter String home) {
+            if (StringUtils.isNotEmpty(home)) {
+                return FormValidation.warning("Static Analysis Location is deprecated in Coverity plugin version 1.10 and later. " +
+                    "Please use the Coverity Static Analysis Tool global configuration instead " +
+                    "(you can override the global path with a node specific values if necessary).");
+            }
+
+            return FormValidation.ok();
+        }
     }
 }

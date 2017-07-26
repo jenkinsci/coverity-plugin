@@ -444,6 +444,15 @@ public class CoverityPublisher extends Recorder {
             }
         }
 
+        public FormValidation doCheckHome(@QueryParameter String home) {
+            if (StringUtils.isNotEmpty(home)) {
+                return FormValidation.warning("Static Analysis Location is deprecated in Coverity plugin version 1.10 and later. " +
+                    "Please use the Coverity Static Analysis Tools global configuration instead.");
+            }
+
+            return FormValidation.ok();
+        }
+
         public FormValidation doCheckCutOffDate(@QueryParameter String value) throws FormException {
             try {
                 if(!StringUtils.isEmpty(value)) new SimpleDateFormat("yyyy-MM-dd").parse(value);
