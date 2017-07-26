@@ -1,0 +1,28 @@
+<!--
+ /*******************************************************************************
+ * Copyright (c) 2017 Synopsys, Inc
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Synopsys, Inc - initial implementation and documentation
+ *******************************************************************************/
+-->
+<div>
+    <p>
+        The full path to a Coverity Static Analysis install (it has subdirectories "bin", "config", etc.).
+        This tool installation can be used with the `tool` step to invoke any Coverity Static Analysis tools in a pipeline.
+    </p>
+
+    <p>
+        The Coverity Static Analysis tools must already be configured with the necessary compilers using cov-configure,
+        and the license file must already be in the "bin" directory.
+    </p>
+
+    <p>
+        When running analysis for multiple platforms it is recommended to configure the platform specific tools here by
+        path or to add node specific Tool configuration. Node specific tools will need to be configured per pipeline.
+    </p>
+</div>

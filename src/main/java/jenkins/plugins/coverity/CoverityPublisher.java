@@ -308,6 +308,7 @@ public class CoverityPublisher extends Recorder {
         private List<CIMInstance> instances = new ArrayList<CIMInstance>();
         private String home;
         private SSLConfigurations sslConfigurations;
+        private CoverityToolInstallation[] installations = new CoverityToolInstallation[0];
 
         public DescriptorImpl() {
             super(CoverityPublisher.class);
@@ -394,6 +395,15 @@ public class CoverityPublisher extends Recorder {
             return null;
         }
 
+        public CoverityToolInstallation[] getInstallations() {
+            return Arrays.copyOf(installations, installations.length);
+        }
+
+        public void setInstallations(CoverityToolInstallation... installations) {
+            this.installations = installations;
+            this.save();
+        }
+
         @Override
         public String getDisplayName() {
             return "Coverity";
@@ -407,30 +417,30 @@ public class CoverityPublisher extends Recorder {
             return new CIMInstance("", host, port, user, password, useSSL, dataPort).doCheck();
         }
 
-        public FormValidation doCheckAnalysisLocation(@QueryParameter String home) throws IOException {
-            File analysisDir = new File(home);
-            File analysisVersionXml = new File(home, "VERSION.xml");
-            if(analysisDir.exists()){
-                if(analysisVersionXml.isFile()){
-                    try {
+        public FormValidation doCheckAnalysisLocation(@QueryParameter String home) {
+            try {
+                File analysisDir = new File(home);
+                File analysisVersionXml = new File(home, "VERSION.xml");
+                if(analysisDir.exists()){
+                    if(analysisVersionXml.isFile()){
+
                         // check the version file value and validate it is greater than minimum version
                         CoverityVersion version = CheckConfig.getVersion(new FilePath(analysisDir));
 
                         if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
-                            return FormValidation.error("\"Coverity Static Analysis\" version " + version.toString() + " detected. " +
+                            return FormValidation.error("Analysis version " + version.toString() + " detected. " +
                                 "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString());
                         }
 
-                    } catch (InterruptedException e) {
-                        return FormValidation.error("Unable to verify the \"Coverity Static Analysis\" directory version.");
+                        return FormValidation.ok("Analysis installation directory has been verified.");
+                    } else{
+                        return FormValidation.error("The specified Analysis installation directory doesn't contain a VERSION.xml file.");
                     }
-
-                    return FormValidation.ok("Analysis installation directory has been verified.");
                 } else{
-                    return FormValidation.error("The specified \"Coverity Static Analysis\" directory doesn't contain a VERSION.xml file.");
+                    return FormValidation.error("The specified Analysis installation directory doesn't exists.");
                 }
-            } else{
-                return FormValidation.error("The specified \"Coverity Static Analysis\" directory doesn't exists.");
+            } catch (InterruptedException | IOException e) {
+                return FormValidation.error("Unable to verify the Analysis installation directory.");
             }
         }
 
