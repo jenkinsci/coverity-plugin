@@ -59,7 +59,7 @@ public abstract class CoverityCommand extends Command {
                 commandLine.add(tempDir.getTempDir().getRemote());
             } else {
                 // This is fall-back logic since when the command is invoked through launcher,
-                // the launcher checks the intermeidate directory with the $COV_IDIR environment variable
+                // the launcher checks the intermediate directory with the $COV_IDIR environment variable
                 commandLine.add("$COV_IDIR");
             }
 
@@ -76,24 +76,22 @@ public abstract class CoverityCommand extends Command {
         }
     }
 
-    protected void addSslConfiguration(CIMInstance cimInstance, CoverityVersion version) {
+    protected void addSslConfiguration(CIMInstance cimInstance) {
         if (cimInstance.isUseSSL()){
-            if (version.compareTo(CoverityVersion.VERSION_JASPER) >= 0) {
-                boolean isTrustNewSelfSignedCert = false;
-                String certFileName = null;
-                SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
-                if(sslConfigurations != null){
-                    isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
-                    certFileName = sslConfigurations.getCertFileName();
+            boolean isTrustNewSelfSignedCert = false;
+            String certFileName = null;
+            SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
+            if(sslConfigurations != null){
+                isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
+                certFileName = sslConfigurations.getCertFileName();
 
-                    if(isTrustNewSelfSignedCert){
-                        addArgument(onNewCertArg);
-                        addArgument(trustArg);
-                    }
-                    if(certFileName != null){
-                        addArgument(certArg);
-                        addArgument(certFileName);
-                    }
+                if(isTrustNewSelfSignedCert){
+                    addArgument(onNewCertArg);
+                    addArgument(trustArg);
+                }
+                if(certFileName != null){
+                    addArgument(certArg);
+                    addArgument(certFileName);
                 }
             }
         }

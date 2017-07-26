@@ -10,9 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
-import java.io.File;
-import java.io.FilenameFilter;
-
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -29,8 +26,6 @@ import jenkins.plugins.coverity.CoverityTempDir;
 import jenkins.plugins.coverity.CoverityUtils;
 import jenkins.plugins.coverity.CoverityVersion;
 import jenkins.plugins.coverity.InvocationAssistance;
-import jenkins.plugins.coverity.ScmOptionBlock;
-import jenkins.plugins.coverity.TaOptionBlock;
 import jenkins.plugins.coverity.ws.DefectReader;
 
 /**
@@ -148,7 +143,7 @@ public class CoverityToolHandler {
         try {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
 
-            Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+            Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim);
             int result = covManageHistoryCommand.runCommand();
 
             if(result != 0) {
@@ -229,7 +224,7 @@ public class CoverityToolHandler {
         //run cov-commit-defects
         try {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
-            Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim, version);
+            Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, home, envVars, cimStream, cim);
             int result = covCommitDefectsCommand.runCommand();
 
             if(result != 0) {
