@@ -331,7 +331,7 @@ public class CoverityPublisher extends Recorder {
                 boolean defaultExists = false;
                 if (installations.length > 0) {
                     for (CoverityToolInstallation installation : installations) {
-                        if (CoverityToolInstallation.DEFAULT_NAME.equals(installation.getName()) ||
+                        if (CoverityToolInstallation.DEFAULT_NAME.equalsIgnoreCase(installation.getName()) ||
                             home.equals(installation.getHome())) {
                             defaultExists = true;
                         }
@@ -413,7 +413,7 @@ public class CoverityPublisher extends Recorder {
             try {
                 // next try to use the 'default' migrated value
                 for (CoverityToolInstallation installation : installations) {
-                    if (CoverityToolInstallation.DEFAULT_NAME.equals(installation.getName())) {
+                    if (CoverityToolInstallation.DEFAULT_NAME.equalsIgnoreCase(installation.getName())) {
                         return installation.translate(node, environment, listener).getHome();
                     }
                 }
