@@ -88,7 +88,7 @@ public class CoverityUtils {
 		if(invocationAssistance != null){
 			if(invocationAssistance.getSaOverride() != null) {
 				try {
-					home = new CoverityToolInstallation(CoverityToolInstallation.GLOBAL_OVERRIDE_NAME, invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+					home = new CoverityToolInstallation("global-override", invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
 					CoverityUtils.checkDir(node.getChannel(), home);
 				} catch(IOException e) {
 					e.printStackTrace();
@@ -240,7 +240,7 @@ public class CoverityUtils {
     public static InvocationAssistance getInvocationAssistance(AbstractBuild<?, ?> build){
         AbstractProject project = build.getProject();
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-        return publisher != null ? publisher.getInvocationAssistance() : null;
+        return publisher.getInvocationAssistance();
     }
 
     /**
