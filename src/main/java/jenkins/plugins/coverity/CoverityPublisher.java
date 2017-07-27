@@ -337,7 +337,7 @@ public class CoverityPublisher extends Recorder {
                 }
 
                 if (!defaultExists) {
-                    final List<CoverityToolInstallation> installationList = Arrays.asList(installations);
+                    final List<CoverityToolInstallation> installationList = new ArrayList<>(Arrays.asList(installations));
                     installationList.add(new CoverityToolInstallation("default", home));
                     setInstallations(installationList.toArray(new CoverityToolInstallation[installationList.size()]));
                 }
