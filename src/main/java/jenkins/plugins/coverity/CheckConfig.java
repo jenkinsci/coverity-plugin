@@ -211,7 +211,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
             InvocationAssistance ia = publisher.getInvocationAssistance();
             if(ia != null && ia.getSaOverride() != null && !ia.getSaOverride().isEmpty()) {
-                home = new CoverityInstallation(ia.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
+                home = new CoverityToolInstallation("global-override", ia.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
             }
 
             if(home == null) {

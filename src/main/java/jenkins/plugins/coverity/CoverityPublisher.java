@@ -400,6 +400,7 @@ public class CoverityPublisher extends Recorder {
             }
         }
 
+        @SuppressWarnings("deprecation")
         public String getHome(Node node, EnvVars environment) {
             // first try to use the node property
             CoverityInstallation nodeInstall = node.getNodeProperties().get(CoverityInstallation.class);
@@ -420,7 +421,7 @@ public class CoverityPublisher extends Recorder {
 
             // finally fall back to using the global home value
             if(home != null) {
-                return new CoverityInstallation(home).forEnvironment(environment).getHome();
+                return new CoverityToolInstallation("global", home).forEnvironment(environment).getHome();
             }
 
             return null;

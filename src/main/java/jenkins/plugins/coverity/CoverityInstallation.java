@@ -10,6 +10,10 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
@@ -18,14 +22,16 @@ import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.NodePropertyDescriptor;
-import org.kohsuke.stapler.DataBoundConstructor;
+import hudson.util.FormValidation;
 
 /**
  * Node-specific location for the Coverity Static Analysis tools.
  */
+@Deprecated
 public class CoverityInstallation extends NodeProperty<Node> implements EnvironmentSpecific<CoverityInstallation> {
 
-    private final String home;
+    @Deprecated
+    private String home;
 
     @DataBoundConstructor
     public CoverityInstallation(String home) {
