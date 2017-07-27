@@ -23,6 +23,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import hudson.tools.ToolInstallation;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
@@ -49,6 +50,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -401,27 +403,33 @@ public class CoverityPublisher extends Recorder {
         }
 
         @SuppressWarnings("deprecation")
-        public String getHome(Node node, EnvVars environment) {
+        public String getHome(Node node, EnvVars environment, TaskListener listener) {
             // first try to use the node property
             CoverityInstallation nodeInstall = node.getNodeProperties().get(CoverityInstallation.class);
             if(nodeInstall != null) {
                 return nodeInstall.forEnvironment(environment).getHome();
             }
 
-            // next try to use the 'default' migrated value
-            for (CoverityToolInstallation installation : installations) {
-                if ("default".equals(installation.getName()))
-                    return installation.forEnvironment(environment).getHome();
-            }
+            try {
+                // next try to use the 'default' migrated value
+                for (CoverityToolInstallation installation : installations) {
+                    if ("default".equals(installation.getName())) {
+                        return installation.translate(node, environment, listener).getHome();
+                    }
+                }
 
-            // otherwise use the first tool installation found
-            if (installations.length > 0) {
-                return installations[0].forEnvironment(environment).getHome();
-            }
+                // otherwise use the first tool installation found
+                if (installations.length > 0) {
+                    return installations[0].translate(node, environment, listener).getHome();
+                }
 
-            // finally fall back to using the global home value
-            if(home != null) {
-                return new CoverityToolInstallation("global", home).forEnvironment(environment).getHome();
+                // finally fall back to using the global home value
+                if (home != null) {
+                    final CoverityToolInstallation installation = new CoverityToolInstallation("global", home);
+                    return installation.translate(node, environment, listener).getHome();
+                }
+            } catch (IOException | InterruptedException e) {
+                logger.log(Level.WARNING, "Error occurred getting Coverity Analysis installation directory", e);
             }
 
             return null;

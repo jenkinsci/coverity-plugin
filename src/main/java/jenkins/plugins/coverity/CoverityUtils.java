@@ -77,7 +77,7 @@ public class CoverityUtils {
 		String covBuild = "cov-build";
 		String home = null;
 		try {
-			home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
+			home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener), listener);
 		} catch(Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

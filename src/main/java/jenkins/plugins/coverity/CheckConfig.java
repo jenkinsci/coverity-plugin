@@ -208,7 +208,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
     public static NodeStatus checkNode(CoverityPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener) {
         Node node = Executor.currentExecutor().getOwner().getNode();
         try {
-            String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
+            String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener), listener);
             InvocationAssistance ia = publisher.getInvocationAssistance();
             if(ia != null && ia.getSaOverride() != null && !ia.getSaOverride().isEmpty()) {
                 home = new CoverityToolInstallation("global-override", ia.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();

@@ -45,7 +45,7 @@ public class CoverityToolHandler {
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
-        String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
+        String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener), listener);
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         CIMStream cimStream = publisher.getCimStream();
         CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
