@@ -56,7 +56,7 @@ public class CoverityToolHandler {
         }
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityToolInstallation("global-override", CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars, useAdvancedParser)).forEnvironment(build.getEnvironment(listener)).getHome();
+            home = new CoverityToolInstallation(CoverityToolInstallation.GLOBAL_OVERRIDE_NAME, CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars, useAdvancedParser)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         CoverityUtils.checkDir(launcher.getChannel(), home);

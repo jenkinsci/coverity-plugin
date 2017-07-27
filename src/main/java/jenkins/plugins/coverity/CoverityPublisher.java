@@ -331,7 +331,7 @@ public class CoverityPublisher extends Recorder {
                 boolean defaultExists = false;
                 if (installations.length > 0) {
                     for (CoverityToolInstallation installation : installations) {
-                        if ("default".equals(installation.getName()) ||
+                        if (CoverityToolInstallation.DEFAULT_NAME.equals(installation.getName()) ||
                             home.equals(installation.getHome())) {
                             defaultExists = true;
                         }
@@ -340,7 +340,7 @@ public class CoverityPublisher extends Recorder {
 
                 if (!defaultExists) {
                     final List<CoverityToolInstallation> installationList = new ArrayList<>(Arrays.asList(installations));
-                    installationList.add(new CoverityToolInstallation("default", home));
+                    installationList.add(new CoverityToolInstallation(CoverityToolInstallation.DEFAULT_NAME, home));
                     setInstallations(installationList.toArray(new CoverityToolInstallation[installationList.size()]));
                 }
             }
@@ -413,7 +413,7 @@ public class CoverityPublisher extends Recorder {
             try {
                 // next try to use the 'default' migrated value
                 for (CoverityToolInstallation installation : installations) {
-                    if ("default".equals(installation.getName())) {
+                    if (CoverityToolInstallation.DEFAULT_NAME.equals(installation.getName())) {
                         return installation.translate(node, environment, listener).getHome();
                     }
                 }

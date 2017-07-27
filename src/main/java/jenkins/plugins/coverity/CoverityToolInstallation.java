@@ -41,6 +41,9 @@ import jenkins.model.Jenkins;
  */
 public class CoverityToolInstallation extends ToolInstallation implements NodeSpecific<CoverityToolInstallation>, EnvironmentSpecific<CoverityToolInstallation> {
 
+    public static final String DEFAULT_NAME= "default";
+    public static final String GLOBAL_OVERRIDE_NAME= "global-override";
+
     @DataBoundConstructor
     public CoverityToolInstallation(String name, String home) {
         super(name, home, new DescribableList<ToolProperty<?>,ToolPropertyDescriptor>(Saveable.NOOP));

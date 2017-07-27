@@ -108,7 +108,7 @@ public class CoverityLauncher extends Launcher {
             InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance();
             String home = publisher.getDescriptor().getHome(node, envVars, listener);
             if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-                home = new CoverityToolInstallation("global-override",
+                home = new CoverityToolInstallation(CoverityToolInstallation.GLOBAL_OVERRIDE_NAME,
                         CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars, invocationAssistance.getUseAdvancedParser())).forEnvironment(envVars).getHome();
             }
 
