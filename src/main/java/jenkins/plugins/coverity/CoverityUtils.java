@@ -60,18 +60,17 @@ public class CoverityUtils {
 	 * @return  string of cov-build's path
 	 */
 	public static String getCovBuild(TaskListener listener, Node node) {
+        if(listener == null){
+            logger.warning("Listener used by getCovBuild() is null.");
+            return null;
+        }
+
 		AbstractBuild build = getBuild();
 		AbstractProject project = build.getProject();
 		CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-		InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-
-        if(listener == null){
-            try{
-                throw new Exception("Listener used by getCovBuild() is null.");
-            } catch (Exception e){
-                e.printStackTrace();
-                return null;
-            }
+		if (publisher == null) {
+		    logger.warning("CoverityPublisher used by getCovBuild() is null.");
+		    return null;
         }
 
 		String covBuild = "cov-build";
@@ -85,7 +84,9 @@ public class CoverityUtils {
             listener.getLogger().println("[Error] " + pw.toString());
 			e.printStackTrace();
 		}
-		if(invocationAssistance != null){
+
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        if(invocationAssistance != null){
 			if(invocationAssistance.getSaOverride() != null) {
 				try {
 					home = new CoverityInstallation(invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
@@ -240,7 +241,7 @@ public class CoverityUtils {
     public static InvocationAssistance getInvocationAssistance(AbstractBuild<?, ?> build){
         AbstractProject project = build.getProject();
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-        return publisher.getInvocationAssistance();
+        return publisher != null ? publisher.getInvocationAssistance() : null;
     }
 
     /**
