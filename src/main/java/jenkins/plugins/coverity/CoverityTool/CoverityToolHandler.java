@@ -19,10 +19,10 @@ import hudson.model.Node;
 import hudson.model.Result;
 import jenkins.plugins.coverity.CIMInstance;
 import jenkins.plugins.coverity.CIMStream;
-import jenkins.plugins.coverity.CoverityInstallation;
 import jenkins.plugins.coverity.CoverityLauncherDecorator;
 import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityTempDir;
+import jenkins.plugins.coverity.CoverityToolInstallation;
 import jenkins.plugins.coverity.CoverityUtils;
 import jenkins.plugins.coverity.CoverityVersion;
 import jenkins.plugins.coverity.InvocationAssistance;
@@ -45,7 +45,7 @@ public class CoverityToolHandler {
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
-        String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener));
+        String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener), listener);
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         CIMStream cimStream = publisher.getCimStream();
         CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
@@ -56,7 +56,7 @@ public class CoverityToolHandler {
         }
 
         if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityInstallation(CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars, useAdvancedParser)).forEnvironment(build.getEnvironment(listener)).getHome();
+            home = new CoverityToolInstallation(CoverityToolInstallation.GLOBAL_OVERRIDE_NAME, CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars, useAdvancedParser)).forEnvironment(build.getEnvironment(listener)).getHome();
         }
 
         CoverityUtils.checkDir(launcher.getChannel(), home);

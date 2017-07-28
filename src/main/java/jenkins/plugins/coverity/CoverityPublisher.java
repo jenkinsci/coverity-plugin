@@ -11,6 +11,8 @@
 package jenkins.plugins.coverity;
 
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
+import com.iwombat.util.StringUtil;
+
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -21,6 +23,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import hudson.tools.ToolInstallation;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
@@ -47,6 +50,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -305,14 +309,43 @@ public class CoverityPublisher extends Recorder {
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
-        private List<CIMInstance> instances = new ArrayList<CIMInstance>();
+        @Deprecated
         private String home;
+
+        private List<CIMInstance> instances = new ArrayList<CIMInstance>();
         private SSLConfigurations sslConfigurations;
         private CoverityToolInstallation[] installations = new CoverityToolInstallation[0];
 
         public DescriptorImpl() {
             super(CoverityPublisher.class);
             load();
+        }
+
+        /**
+         * Implement readResolve to update the Publisher object to migrate an existing home directory to a default tool
+         * installation.
+         */
+        protected Object readResolve() {
+            // add new "default" tool installation for home if it does not yet exist
+            if (StringUtils.isNotEmpty(home)) {
+                boolean defaultExists = false;
+                if (installations.length > 0) {
+                    for (CoverityToolInstallation installation : installations) {
+                        if (CoverityToolInstallation.DEFAULT_NAME.equalsIgnoreCase(installation.getName()) ||
+                            home.equals(installation.getHome())) {
+                            defaultExists = true;
+                        }
+                    }
+                }
+
+                if (!defaultExists) {
+                    final List<CoverityToolInstallation> installationList = new ArrayList<>(Arrays.asList(installations));
+                    installationList.add(new CoverityToolInstallation(CoverityToolInstallation.DEFAULT_NAME, home));
+                    setInstallations(installationList.toArray(new CoverityToolInstallation[installationList.size()]));
+                }
+            }
+
+            return this;
         }
 
         public CIMStream.DescriptorImpl getCIMStreamDescriptor() {
@@ -341,10 +374,12 @@ public class CoverityPublisher extends Recorder {
             return true;
         }
 
+        @Deprecated
         public String getHome() {
             return home;
         }
 
+        @Deprecated
         public void setHome(String home) {
             this.home = home;
         }
@@ -367,15 +402,37 @@ public class CoverityPublisher extends Recorder {
             }
         }
 
-        public String getHome(Node node, EnvVars environment) {
-            CoverityInstallation install = node.getNodeProperties().get(CoverityInstallation.class);
-            if(install != null) {
-                return install.forEnvironment(environment).getHome();
-            } else if(home != null) {
-                return new CoverityInstallation(home).forEnvironment(environment).getHome();
-            } else {
-                return null;
+        @SuppressWarnings("deprecation")
+        public String getHome(Node node, EnvVars environment, TaskListener listener) {
+            // first try to use the node property
+            CoverityInstallation nodeInstall = node.getNodeProperties().get(CoverityInstallation.class);
+            if(nodeInstall != null) {
+                return nodeInstall.forEnvironment(environment).getHome();
             }
+
+            try {
+                // next try to use the 'default' migrated value
+                for (CoverityToolInstallation installation : installations) {
+                    if (CoverityToolInstallation.DEFAULT_NAME.equalsIgnoreCase(installation.getName())) {
+                        return installation.translate(node, environment, listener).getHome();
+                    }
+                }
+
+                // otherwise use the first tool installation found
+                if (installations.length > 0) {
+                    return installations[0].translate(node, environment, listener).getHome();
+                }
+
+                // finally fall back to using the global home value
+                if (home != null) {
+                    final CoverityToolInstallation installation = new CoverityToolInstallation("global", home);
+                    return installation.translate(node, environment, listener).getHome();
+                }
+            } catch (IOException | InterruptedException e) {
+                logger.log(Level.WARNING, "Error occurred getting Coverity Analysis installation directory", e);
+            }
+
+            return null;
         }
 
         public List<CIMInstance> getInstances() {
@@ -442,6 +499,15 @@ public class CoverityPublisher extends Recorder {
             } catch (InterruptedException | IOException e) {
                 return FormValidation.error("Unable to verify the Analysis installation directory.");
             }
+        }
+
+        public FormValidation doCheckHome(@QueryParameter String home) {
+            if (StringUtils.isNotEmpty(home)) {
+                return FormValidation.warning("Static Analysis Location is deprecated in Coverity plugin version 1.10 and later. " +
+                    "Please use the Coverity Static Analysis Tools global configuration instead.");
+            }
+
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckCutOffDate(@QueryParameter String value) throws FormException {

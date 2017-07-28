@@ -12,17 +12,16 @@
 -->
 <div>
     <p>
-        Note: The Static Analysis Location is deprecated in Coverity plugin version 1.10 and later. Please use the
-        Coverity Static Analysis Tools global configuration instead. Configured global tools installations will be
-        used instead of this value, the installation named 'default' will take priority, otherwise the first
-        installation would be used.
+        Note: The node specific Static Analysis Location property is deprecated in Coverity plugin version 1.10 and later.
+        Please use the Coverity Static Analysis Tools global configuration instead and override the tools for this node
+        if necessary. For backward compatibility this value will still be used for build jobs run on this node; clear
+        the value in order to leverage the global tool configuration(s).
     </p>
 
     <p>
-        The default path to the Coverity Static Analysis install (it has
+        A node specific path to the Coverity Static Analysis install (it has
         subdirectories "bin", "config", etc.). This is used when running
-        Coverity Static Analysis on the master node. Please specify a full path to this installation. For other slaves,
-        the location can be overridden on the slave configuration page. If no
+        Coverity Static Analysis on this node. Please specify a full path to this installation. If no
         location is set, you should make sure the Coverity Static Analysis
         tools can be found on the PATH.
     </p>

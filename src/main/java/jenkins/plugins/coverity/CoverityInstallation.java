@@ -10,6 +10,10 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
@@ -18,14 +22,16 @@ import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.NodePropertyDescriptor;
-import org.kohsuke.stapler.DataBoundConstructor;
+import hudson.util.FormValidation;
 
 /**
  * Node-specific location for the Coverity Static Analysis tools.
  */
+@Deprecated
 public class CoverityInstallation extends NodeProperty<Node> implements EnvironmentSpecific<CoverityInstallation> {
 
-    private final String home;
+    @Deprecated
+    private String home;
 
     @DataBoundConstructor
     public CoverityInstallation(String home) {
@@ -61,6 +67,16 @@ public class CoverityInstallation extends NodeProperty<Node> implements Environm
         @Override
         public boolean isApplicable(Class<? extends Node> targetType) {
             return targetType != Hudson.class;
+        }
+
+        public FormValidation doCheckHome(@QueryParameter String home) {
+            if (StringUtils.isNotEmpty(home)) {
+                return FormValidation.warning("Static Analysis Location is deprecated in Coverity plugin version 1.10 and later. " +
+                    "Please use the Coverity Static Analysis Tool global configuration instead " +
+                    "(you can override the global path with a node specific values if necessary).");
+            }
+
+            return FormValidation.ok();
         }
     }
 }
