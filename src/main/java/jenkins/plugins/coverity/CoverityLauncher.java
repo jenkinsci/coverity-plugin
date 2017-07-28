@@ -71,6 +71,8 @@ public class CoverityLauncher extends Launcher {
         AbstractProject project = build.getProject();
 
         CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
+        if (publisher == null)
+            return decorated.launch(starter);
 
         // Setup(or resolve) intermediate directory
         setupIntermediateDirectory(build, this.getListener(), node);

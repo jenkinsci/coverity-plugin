@@ -33,12 +33,6 @@ import jenkins.plugins.coverity.ws.DefectReader;
  */
 public class CoverityToolHandler {
 
-    private CoverityVersion version;
-
-    public CoverityToolHandler(CoverityVersion version) {
-        this.version = version;
-    }
-
     public void perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, CoverityPublisher publisher) throws Exception {
         EnvVars envVars = build.getEnvironment(listener);
 
