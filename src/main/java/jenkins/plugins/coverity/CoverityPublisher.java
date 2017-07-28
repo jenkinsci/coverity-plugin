@@ -259,7 +259,7 @@ public class CoverityPublisher extends Recorder {
                 throw new Exception("Coverity Version is null. Please verify the version file under your Coverity Analysis installation.");
             }
 
-            CoverityToolHandler cth = new CoverityToolHandler(version);
+            CoverityToolHandler cth = new CoverityToolHandler();
             cth.perform(build, launcher, listener, this);
             
             if(isUnstableBuild()){
