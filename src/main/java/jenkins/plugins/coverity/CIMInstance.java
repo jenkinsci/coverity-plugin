@@ -83,11 +83,13 @@ public class CIMInstance {
     /**
      * Username for connecting to the CIM server
      */
+    @Deprecated
     private final String user;
 
     /**
      * Password for connecting to the CIM server
      */
+    @Deprecated
     private final String password;
 
     /**

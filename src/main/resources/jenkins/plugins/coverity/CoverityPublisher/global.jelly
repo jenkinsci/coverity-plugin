@@ -32,10 +32,10 @@
 					<f:entry title="Use SSL" field="useSSL">
 					    <f:checkbox/>
                     </f:entry>
-					<f:entry title="User" field="user">
+					<f:entry title="Username (Deprecated)" field="user">
 						<f:textbox/>
 					</f:entry>
-					<f:entry title="Password" field="password">
+					<f:entry title="Password (Deprecated)" field="password">
 						<f:password/>
 					</f:entry>
 
