@@ -748,5 +748,21 @@ public class CoverityPublisher extends Recorder {
                                     new ArrayList<DomainRequirement>())
                     );
         }
+
+        public FormValidation doCheckUser(@QueryParameter String user){
+            if (StringUtils.isEmpty(user)) {
+                return FormValidation.ok();
+            }
+
+            return FormValidation.warning("User is deprecated in Coverity plugin version 1.10 and later. Please use Credentials above for more secure username.");
+        }
+
+        public FormValidation doCheckPassword(@QueryParameter String password) {
+            if (StringUtils.isEmpty(password)) {
+                return FormValidation.ok();
+            }
+
+            return FormValidation.warning("User is deprecated in Coverity plugin version 1.10 and later. Please use Credentials above for more secure password.");
+        }
     }
 }
