@@ -99,7 +99,7 @@ public class CheckConfigTest {
     @Test
     public void checkStreamTest_NoStreamConfiguredForCIMStream() {
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-        CIMInstance cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8080, "admin", "password", false, 9080);
+        CIMInstance cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8080, "admin", "password", false, 9080, "");
         CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, StringUtils.EMPTY, null);
         when(descriptor.getInstance(any(String.class))).thenReturn(cimInstance);
 

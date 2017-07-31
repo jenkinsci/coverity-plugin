@@ -10,6 +10,12 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.iwombat.util.StringUtil;
 
@@ -19,6 +25,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.model.*;
+import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -33,10 +40,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import javax.annotation.CheckForNull;
@@ -470,8 +474,11 @@ public class CoverityPublisher extends Recorder {
          * Validate the configured global cim instance..
          * This is called when the user clicks the 'Validate' button for an instance.
          */
-        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port, @QueryParameter String user, @QueryParameter String password, @QueryParameter boolean useSSL, @QueryParameter int dataPort) {
-            return new CIMInstance("", host, port, user, password, useSSL, dataPort).doCheck();
+        public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port,
+                                              @QueryParameter String user, @QueryParameter String password,
+                                              @QueryParameter boolean useSSL, @QueryParameter int dataPort,
+                                              @QueryParameter String credentialId) {
+            return new CIMInstance("", host, port, user, password, useSSL, dataPort, credentialId).doCheck();
         }
 
         public FormValidation doCheckAnalysisLocation(@QueryParameter String home) {
@@ -726,6 +733,20 @@ public class CoverityPublisher extends Recorder {
                     outputStream.write(jsonString.getBytes("UTF-8"));
                 }
             }
+        }
+
+        public ListBoxModel doFillCredentialIdItems(@AncestorInPath Jenkins context) {
+            return new StandardListBoxModel()
+                    .withEmptySelection()
+                    .withMatching(
+                            CredentialsMatchers.anyOf(
+                                    CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class)
+                            ),
+                            CredentialsProvider.lookupCredentials(StandardCredentials.class,
+                                    context,
+                                    ACL.SYSTEM,
+                                    new ArrayList<DomainRequirement>())
+                    );
         }
     }
 }

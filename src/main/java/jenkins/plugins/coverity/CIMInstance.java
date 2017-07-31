@@ -98,6 +98,11 @@ public class CIMInstance {
     private final boolean useSSL;
 
     /**
+     * Credential ID from configured Credentials to use
+     */
+    private final String credentialId;
+
+    /**
      * cached webservice port for Configuration service
      */
     private transient ConfigurationServiceService configurationServiceService;
@@ -110,7 +115,7 @@ public class CIMInstance {
     private transient FormValidation userPermissionsCheck;
 
     @DataBoundConstructor
-    public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort) {
+    public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort, String credentialId) {
         this.name = name;
         this.host = host;
         this.port = port;
@@ -118,6 +123,7 @@ public class CIMInstance {
         this.password = password;
         this.useSSL = useSSL;
         this.dataPort = dataPort;
+        this.credentialId = credentialId;
     }
 
     public String getHost() {
@@ -132,10 +138,12 @@ public class CIMInstance {
         return name;
     }
 
+    @Deprecated
     public String getUser() {
         return user;
     }
 
+    @Deprecated
     public String getPassword() {
         return password;
     }
@@ -147,6 +155,8 @@ public class CIMInstance {
     public int getDataPort() {
         return dataPort;
     }
+
+    public String getCredentialId() { return credentialId; }
 
     /**
      * Returns a Defect service client using v9 web services.

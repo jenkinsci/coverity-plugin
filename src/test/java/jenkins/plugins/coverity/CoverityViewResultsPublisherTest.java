@@ -65,7 +65,7 @@ public class CoverityViewResultsPublisherTest {
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
         final DescriptorImpl globalDescriptor = mock(CoverityPublisher.DescriptorImpl.class);
-        cimInstance = new CIMInstance("pipeline-instance", "test-cim-instance", 8080, "admin", "password", false, 9080);
+        cimInstance = new CIMInstance("pipeline-instance", "test-cim-instance", 8080, "admin", "password", false, 9080, "");
         final List<CIMInstance> cimInstances = Arrays.asList(cimInstance);
         when(globalDescriptor.getInstances()).thenReturn(cimInstances);
         when(jenkins.getDescriptorByType(CoverityPublisher.DescriptorImpl.class)).thenReturn(globalDescriptor);
