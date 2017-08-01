@@ -29,6 +29,13 @@ import java.util.logging.Logger;
 
 import javax.xml.ws.soap.SOAPFaultException;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import hudson.security.ACL;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -362,14 +369,15 @@ public class CIMInstance {
         if (userPermissionsCheck != null)
             return userPermissionsCheck;
 
+        String username = getCoverityUser();
         StringBuilder errorMessage = new StringBuilder();
-        errorMessage.append("\"" + user + "\" does not have following permission(s): ");
+        errorMessage.append("\"" + username + "\" does not have following permission(s): ");
 
         try {
 
             boolean canCommit = false, canViewIssues = false, canCommitGlobal = false, canViewIssuesGlobal = false;
 
-            UserDataObj userData = getConfigurationService().getUser(user);
+            UserDataObj userData = getConfigurationService().getUser(username);
             if (userData != null){
 
                 if (userData.isSuperUser()){
@@ -439,7 +447,7 @@ public class CIMInstance {
             // check for missing global permissions to warn users
             if (!canCommitGlobal || !canViewIssuesGlobal) {
                 StringBuilder warningMessage = new StringBuilder();
-                warningMessage.append("\"" + user + "\" does not have following global permission(s): ");
+                warningMessage.append("\"" + username + "\" does not have following global permission(s): ");
                 if (!canCommitGlobal){
                     warningMessage.append("\"Commit to a stream\" ");
                 }
@@ -450,7 +458,7 @@ public class CIMInstance {
             }
         } catch(SOAPFaultException e){
             if (StringUtils.isNotEmpty(e.getMessage())){
-                if (e.getMessage().contains("User " + user + " Doesn't have permissions to perform {invokeWS}")) {
+                if (e.getMessage().contains("User " + username + " Doesn't have permissions to perform {invokeWS}")) {
                     return FormValidation.error(errorMessage.append("\"Access web services\"").toString());
                 }
                 return FormValidation.error(e.getMessage());
@@ -463,11 +471,34 @@ public class CIMInstance {
     }
 
     public String getCoverityUser(){
-        return this.user;
+        String username = retrieveCredentialInfo(true);
+        return !StringUtils.isEmpty(username) ? username : this.user;
     }
 
     public String getCoverityPassword(){
-        return this.password;
+        String password = retrieveCredentialInfo(false);
+        return !StringUtils.isEmpty(password) ? password : this.password;
+    }
+
+    private String retrieveCredentialInfo(boolean getUsername){
+        if (!StringUtils.isEmpty(this.credentialId)){
+            StandardCredentials credentials = CredentialsMatchers.firstOrNull(
+                    CredentialsProvider.lookupCredentials(
+                            StandardCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()
+                    ), CredentialsMatchers.withId(this.credentialId)
+            );
+
+            if (credentials != null && credentials instanceof UsernamePasswordCredentials) {
+                UsernamePasswordCredentials c = (UsernamePasswordCredentials)credentials;
+                if (getUsername){
+                    return c.getUsername();
+                } else{
+                    return c.getPassword().getPlainText();
+                }
+            }
+        }
+
+        return StringUtils.EMPTY;
     }
 
     @Override
