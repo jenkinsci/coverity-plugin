@@ -70,7 +70,7 @@ public class CoverityViewResultsDescriptorTest {
             final TestWebServiceFactory testWsFactory = new TestWebServiceFactory();
             final TestConfigurationService testConfigurationService;
             testConfigurationService = (TestConfigurationService)testWsFactory.getConfigurationService(instance);
-            testConfigurationService.setupUser(cimInstance.getUser(), true, new HashMap<String, String[]>());
+            testConfigurationService.setupUser(cimInstance.getCoverityUser(), true, new HashMap<String, String[]>());
 
             PowerMockito.mockStatic(WebServiceFactory.class);
             when(WebServiceFactory.getInstance()).thenReturn(testWsFactory);
@@ -132,14 +132,14 @@ public class CoverityViewResultsDescriptorTest {
     public void doCheck_withInvalidConnectInstance() {
         final TestConfigurationService testConfigurationService = setupConfigurationService(cimInstance);
         // set up the user to have no permissions at all
-        testConfigurationService.setupUser(cimInstance.getUser(), false, new HashMap<String, String[]>());
+        testConfigurationService.setupUser(cimInstance.getCoverityUser(), false, new HashMap<String, String[]>());
         final CoverityViewResultsDescriptor descriptor = new CoverityViewResultsDescriptor();
 
         FormValidation result = descriptor.doCheckViews(cimInstance.getName(), "projectId", "viewName");
 
         assertEquals(Kind.ERROR, result.kind);
         assertThat(StringEscapeUtils.unescapeHtml(result.toString()),
-            CoreMatchers.containsString("\"" + cimInstance.getUser() + "\" does not have following permission(s): \"Access web services\""));
+            CoreMatchers.containsString("\"" + cimInstance.getCoverityUser() + "\" does not have following permission(s): \"Access web services\""));
     }
 
     @Test

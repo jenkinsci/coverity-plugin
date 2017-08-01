@@ -82,12 +82,14 @@ public class CIMInstance {
 
     /**
      * Username for connecting to the CIM server
+     * Deprecated since 1.10
      */
     @Deprecated
     private final String user;
 
     /**
      * Password for connecting to the CIM server
+     * Deprecated since 1.10
      */
     @Deprecated
     private final String password;
@@ -138,11 +140,17 @@ public class CIMInstance {
         return name;
     }
 
+    /*
+     * Deprecated since 1.10
+     */
     @Deprecated
     public String getUser() {
         return user;
     }
 
+    /*
+     * Deprecated since 1.10
+     */
     @Deprecated
     public String getPassword() {
         return password;
@@ -452,6 +460,14 @@ public class CIMInstance {
 
         userPermissionsCheck = FormValidation.ok();
         return FormValidation.ok();
+    }
+
+    public String getCoverityUser(){
+        return this.user;
+    }
+
+    public String getCoverityPassword(){
+        return this.password;
     }
 
     @Override

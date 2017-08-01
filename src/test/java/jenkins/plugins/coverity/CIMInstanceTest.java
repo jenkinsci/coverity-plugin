@@ -273,7 +273,7 @@ public class CIMInstanceTest {
         rolePermissions.put("groupRole", new String[]{"invokeWS", "commitToStream", "viewDefects"});
         Map<String, String[]> groupRoles = new HashMap<>();
         groupRoles.put("userGroup", new String[]{"groupRole"});
-        testConfigurationService.setupUser(cimInstance.getUser(), groupRoles, rolePermissions);
+        testConfigurationService.setupUser(cimInstance.getCoverityUser(), groupRoles, rolePermissions);
 
         FormValidation result = cimInstance.doCheck();
 
@@ -291,7 +291,7 @@ public class CIMInstanceTest {
         rolePermissions.put("serverAdmin", new String[]{"invokeWS"});
         Map<String, String[]> groupRoles = new HashMap<>();
         groupRoles.put("userGroup", new String[]{"serverAdmin"});
-        testConfigurationService.setupUser(cimInstance.getUser(), groupRoles, rolePermissions);
+        testConfigurationService.setupUser(cimInstance.getCoverityUser(), groupRoles, rolePermissions);
 
         FormValidation result = cimInstance.doCheck();
 
@@ -307,7 +307,7 @@ public class CIMInstanceTest {
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
         rolePermissions.put("someRole", new String[]{"invokeWS", "commitToStream", "viewDefects"});
-        testConfigurationService.setupUser(cimInstance.getUser(), false, rolePermissions, false);
+        testConfigurationService.setupUser(cimInstance.getCoverityUser(), false, rolePermissions, false);
 
         FormValidation result = cimInstance.doCheck();
 
@@ -325,7 +325,7 @@ public class CIMInstanceTest {
         rolePermissions.put("serverAdmin", new String[]{"invokeWS"});
         Map<String, String[]> groupRoles = new HashMap<>();
         groupRoles.put("Administrator", new String[]{"serverAdmin"});
-        testConfigurationService.setupUser(cimInstance.getUser(), groupRoles, rolePermissions, false);
+        testConfigurationService.setupUser(cimInstance.getCoverityUser(), groupRoles, rolePermissions, false);
 
         FormValidation result = cimInstance.doCheck();
 

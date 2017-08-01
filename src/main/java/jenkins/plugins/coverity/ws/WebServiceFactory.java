@@ -153,7 +153,7 @@ public class WebServiceFactory {
             config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, httpsProperties);
         }
         Client restClient = Client.create();
-        restClient.addFilter(new HTTPBasicAuthFilter(instance.getUser(), instance.getPassword()));
+        restClient.addFilter(new HTTPBasicAuthFilter(instance.getCoverityUser(), instance.getCoverityPassword()));
 
         return new ViewsService(baseUrl, restClient);
     }
@@ -207,6 +207,7 @@ public class WebServiceFactory {
      * Attach an authentication handler to the web service, that uses the configured user and password
      */
     private void attachAuthenticationHandler(BindingProvider service, CIMInstance cimInstance) {
-        service.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(cimInstance.getUser(), cimInstance.getPassword())));
+        service.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(
+                cimInstance.getCoverityUser(), cimInstance.getCoverityPassword())));
     }
 }
