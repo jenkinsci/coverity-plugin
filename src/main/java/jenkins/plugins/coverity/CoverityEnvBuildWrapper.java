@@ -39,8 +39,8 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
     private final String coverityToolName;
 
     @DataBoundConstructor
-    public CoverityEnvBuildWrapper(String coverityToolInstallationName) {
-        this.coverityToolName = coverityToolInstallationName;
+    public CoverityEnvBuildWrapper(String coverityToolName) {
+        this.coverityToolName = coverityToolName;
     }
 
     public String getCoverityToolName() {
