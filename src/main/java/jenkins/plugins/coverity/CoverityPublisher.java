@@ -762,7 +762,7 @@ public class CoverityPublisher extends Recorder {
                 return FormValidation.ok();
             }
 
-            return FormValidation.warning("User is deprecated in Coverity plugin version 1.10 and later. Please use Credentials above for more secure password.");
+            return FormValidation.warning("Password is deprecated in Coverity plugin version 1.10 and later. Please use Credentials above for more secure password.");
         }
     }
 }
