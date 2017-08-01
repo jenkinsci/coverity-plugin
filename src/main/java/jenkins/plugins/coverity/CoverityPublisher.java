@@ -742,7 +742,7 @@ public class CoverityPublisher extends Recorder {
                             CredentialsMatchers.anyOf(
                                     CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class)
                             ),
-                            CredentialsProvider.lookupCredentials(StandardCredentials.class,
+                            CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class,
                                     context,
                                     ACL.SYSTEM,
                                     new ArrayList<DomainRequirement>())

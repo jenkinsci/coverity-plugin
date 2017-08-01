@@ -32,7 +32,7 @@
 					<f:entry title="Use SSL" field="useSSL">
 					    <f:checkbox/>
                     </f:entry>
-                    <f:entry title="Credentials" field="credentialId">
+                    <f:entry title="Credentials (Recommended)" field="credentialId">
                         <c:select/>
                     </f:entry>
 					<f:entry title="Username (Deprecated)" field="user">
