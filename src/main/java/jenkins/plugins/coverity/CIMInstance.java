@@ -148,7 +148,7 @@ public class CIMInstance {
     }
 
     /*
-     * Deprecated since 1.10
+     * Deprecated since 1.10. Use credentialId
      */
     @Deprecated
     public String getUser() {
@@ -156,7 +156,7 @@ public class CIMInstance {
     }
 
     /*
-     * Deprecated since 1.10
+     * Deprecated since 1.10. Use credentialId
      */
     @Deprecated
     public String getPassword() {
@@ -458,7 +458,7 @@ public class CIMInstance {
             }
         } catch(SOAPFaultException e){
             if (StringUtils.isNotEmpty(e.getMessage())){
-                if (e.getMessage().contains("User " + username + " Doesn't have permissions to perform {invokeWS}")) {
+                if (e.getMessage().contains("User " + username + " doesn't have permission to perform {invokeWS}")) {
                     return FormValidation.error(errorMessage.append("\"Access web services\"").toString());
                 }
                 return FormValidation.error(e.getMessage());
@@ -472,12 +472,12 @@ public class CIMInstance {
 
     public String getCoverityUser(){
         String username = retrieveCredentialInfo(true);
-        return !StringUtils.isEmpty(username) ? username : this.user;
+        return StringUtils.isNotEmpty(username) ? username : this.user;
     }
 
     public String getCoverityPassword(){
         String password = retrieveCredentialInfo(false);
-        return !StringUtils.isEmpty(password) ? password : this.password;
+        return StringUtils.isNotEmpty(password) ? password : this.password;
     }
 
     private String retrieveCredentialInfo(boolean getUsername){
