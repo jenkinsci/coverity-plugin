@@ -76,7 +76,7 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
 
     public CoverityToolInstallation getCoverityToolInstallation() {
         final DescriptorImpl descriptor = this.getDescriptor();
-        if (this.getDescriptor() != null) {
+        if (this.getDescriptor() != null && coverityToolName != null) {
             for (CoverityToolInstallation toolInstallation : descriptor.getInstallations()) {
                 if (coverityToolName.equalsIgnoreCase(toolInstallation.getName()))
                     return toolInstallation;
