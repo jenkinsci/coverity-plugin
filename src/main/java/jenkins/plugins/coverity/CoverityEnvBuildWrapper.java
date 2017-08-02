@@ -27,6 +27,7 @@ import hudson.model.Node;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildWrapperDescriptor;
+import hudson.tools.ToolInstallation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CoverityToolInstallation.CoverityToolInstallationDescriptor;
@@ -49,9 +50,9 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
 
     @Override
     public void setUp(Context context, Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, EnvVars initialEnvironment) throws IOException, InterruptedException {
-        CoverityToolInstallation covTools = getCoverityToolInstallation();
+        ToolInstallation covTools = getCoverityToolInstallation();
         if (covTools == null) {
-            throw new IOException("Unable to find Coverity tools installation: [" + "]. Please configure one for this Jenkins instance.");
+            throw new IOException("Unable to find Coverity tools installation: [" + coverityToolName +"]. Please configure one for this Jenkins instance.");
         }
 
         final Computer computer = workspace.toComputer();
@@ -64,8 +65,7 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
             throw new AbortException("Cannot get Coverity tools installation");
         }
 
-        covTools = covTools.forNode(node, listener);
-        covTools = covTools.forEnvironment(initialEnvironment);
+        covTools = covTools.translate(node, initialEnvironment, listener);
         final EnvVars covEnvVars = new EnvVars();
         covTools.buildEnvVars(covEnvVars);
 
