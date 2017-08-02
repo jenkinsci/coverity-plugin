@@ -29,6 +29,13 @@ import java.util.logging.Logger;
 
 import javax.xml.ws.soap.SOAPFaultException;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import hudson.security.ACL;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -82,18 +89,27 @@ public class CIMInstance {
 
     /**
      * Username for connecting to the CIM server
+     * Deprecated since 1.10
      */
+    @Deprecated
     private final String user;
 
     /**
      * Password for connecting to the CIM server
+     * Deprecated since 1.10
      */
+    @Deprecated
     private final String password;
 
     /**
      * Use SSL
      */
     private final boolean useSSL;
+
+    /**
+     * Credential ID from configured Credentials to use
+     */
+    private final String credentialId;
 
     /**
      * cached webservice port for Configuration service
@@ -108,7 +124,7 @@ public class CIMInstance {
     private transient FormValidation userPermissionsCheck;
 
     @DataBoundConstructor
-    public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort) {
+    public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort, String credentialId) {
         this.name = name;
         this.host = host;
         this.port = port;
@@ -116,6 +132,7 @@ public class CIMInstance {
         this.password = password;
         this.useSSL = useSSL;
         this.dataPort = dataPort;
+        this.credentialId = credentialId;
     }
 
     public String getHost() {
@@ -130,10 +147,18 @@ public class CIMInstance {
         return name;
     }
 
+    /*
+     * Deprecated since 1.10. Use credentialId
+     */
+    @Deprecated
     public String getUser() {
         return user;
     }
 
+    /*
+     * Deprecated since 1.10. Use credentialId
+     */
+    @Deprecated
     public String getPassword() {
         return password;
     }
@@ -145,6 +170,8 @@ public class CIMInstance {
     public int getDataPort() {
         return dataPort;
     }
+
+    public String getCredentialId() { return credentialId; }
 
     /**
      * Returns a Defect service client using v9 web services.
@@ -342,14 +369,15 @@ public class CIMInstance {
         if (userPermissionsCheck != null)
             return userPermissionsCheck;
 
+        String username = getCoverityUser();
         StringBuilder errorMessage = new StringBuilder();
-        errorMessage.append("\"" + user + "\" does not have following permission(s): ");
+        errorMessage.append("\"" + username + "\" does not have following permission(s): ");
 
         try {
 
             boolean canCommit = false, canViewIssues = false, canCommitGlobal = false, canViewIssuesGlobal = false;
 
-            UserDataObj userData = getConfigurationService().getUser(user);
+            UserDataObj userData = getConfigurationService().getUser(username);
             if (userData != null){
 
                 if (userData.isSuperUser()){
@@ -419,7 +447,7 @@ public class CIMInstance {
             // check for missing global permissions to warn users
             if (!canCommitGlobal || !canViewIssuesGlobal) {
                 StringBuilder warningMessage = new StringBuilder();
-                warningMessage.append("\"" + user + "\" does not have following global permission(s): ");
+                warningMessage.append("\"" + username + "\" does not have following global permission(s): ");
                 if (!canCommitGlobal){
                     warningMessage.append("\"Commit to a stream\" ");
                 }
@@ -430,7 +458,7 @@ public class CIMInstance {
             }
         } catch(SOAPFaultException e){
             if (StringUtils.isNotEmpty(e.getMessage())){
-                if (e.getMessage().contains("User " + user + " Doesn't have permissions to perform {invokeWS}")) {
+                if (StringUtils.containsIgnoreCase(e.getMessage(), "User " + username + " Doesn't have permissions to perform {invokeWS}")) {
                     return FormValidation.error(errorMessage.append("\"Access web services\"").toString());
                 }
                 return FormValidation.error(e.getMessage());
@@ -440,6 +468,37 @@ public class CIMInstance {
 
         userPermissionsCheck = FormValidation.ok();
         return FormValidation.ok();
+    }
+
+    public String getCoverityUser(){
+        String username = retrieveCredentialInfo(true);
+        return StringUtils.isNotEmpty(username) ? username : this.user;
+    }
+
+    public String getCoverityPassword(){
+        String password = retrieveCredentialInfo(false);
+        return StringUtils.isNotEmpty(password) ? password : this.password;
+    }
+
+    private String retrieveCredentialInfo(boolean getUsername){
+        if (!StringUtils.isEmpty(this.credentialId)){
+            StandardCredentials credentials = CredentialsMatchers.firstOrNull(
+                    CredentialsProvider.lookupCredentials(
+                            StandardCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()
+                    ), CredentialsMatchers.withId(this.credentialId)
+            );
+
+            if (credentials != null && credentials instanceof UsernamePasswordCredentials) {
+                UsernamePasswordCredentials c = (UsernamePasswordCredentials)credentials;
+                if (getUsername){
+                    return c.getUsername();
+                } else{
+                    return c.getPassword().getPlainText();
+                }
+            }
+        }
+
+        return StringUtils.EMPTY;
     }
 
     @Override

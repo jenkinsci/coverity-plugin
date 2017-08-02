@@ -11,7 +11,7 @@
  *******************************************************************************/
 -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
 	<f:section title="Coverity">
 		<f:entry title="Coverity Connect instances" field="instances">
 			<f:repeatable var="instance" name="instances" items="${descriptor.instances}" add="Add"
@@ -32,15 +32,18 @@
 					<f:entry title="Use SSL" field="useSSL">
 					    <f:checkbox/>
                     </f:entry>
-					<f:entry title="User" field="user">
+                    <f:entry title="Credentials (Recommended)" field="credentialId">
+                        <c:select/>
+                    </f:entry>
+					<f:entry title="Username (Deprecated)" field="user">
 						<f:textbox/>
 					</f:entry>
-					<f:entry title="Password" field="password">
+					<f:entry title="Password (Deprecated)" field="password">
 						<f:password/>
 					</f:entry>
 
 					<f:validateButton method="checkInstance" title="Check" progress="Checking..."
-									  with="host,port,user,password,useSSL"/>
+									  with="host,port,user,password,useSSL,credentialId"/>
 					<f:entry title="">
 						<div align="right">
 							<f:repeatableDeleteButton value="Delete"/>

@@ -82,8 +82,8 @@ public class CovManageHistoryCommand extends CoverityCommand {
 
     private void addUserInfo() {
         addArgument(userArg);
-        addArgument(cimInstance.getUser());
-        envVars.put(coverity_passphrase, cimInstance.getPassword());
+        addArgument(cimInstance.getCoverityUser());
+        envVars.put(coverity_passphrase, cimInstance.getCoverityPassword());
     }
 
     private boolean checkSnapshot() {

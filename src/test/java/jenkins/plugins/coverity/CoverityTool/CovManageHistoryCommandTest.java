@@ -56,8 +56,8 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
-        when(cimInstance.getUser()).thenReturn("TestUser");
-        when(cimInstance.getPassword()).thenReturn("TestPassword");
+        when(cimInstance.getCoverityUser()).thenReturn("TestUser");
+        when(cimInstance.getCoverityPassword()).thenReturn("TestPassword");
         when(cimInstance.isUseSSL()).thenReturn(false);
         when(cimInstance.getDataPort()).thenReturn(0);
 
@@ -85,8 +85,8 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
-        when(cimInstance.getUser()).thenReturn("TestUser");
-        when(cimInstance.getPassword()).thenReturn("TestPassword");
+        when(cimInstance.getCoverityUser()).thenReturn("TestUser");
+        when(cimInstance.getCoverityPassword()).thenReturn("TestPassword");
         when(cimInstance.isUseSSL()).thenReturn(true);
         when(cimInstance.getDataPort()).thenReturn(0);
 
