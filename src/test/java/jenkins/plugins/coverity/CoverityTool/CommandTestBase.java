@@ -10,16 +10,29 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.CoverityTool;
 
+import com.cloudbees.plugins.credentials.Credentials;
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.ItemGroup;
 import hudson.model.TaskListener;
+import hudson.util.Secret;
 import jenkins.plugins.coverity.CoverityUtils;
 import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
+import org.acegisecurity.Authentication;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -38,7 +51,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(CoverityUtils.class)
+@PrepareForTest({CoverityUtils.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public abstract class CommandTestBase {
 
     @Mock
@@ -49,6 +62,10 @@ public abstract class CommandTestBase {
 
     @Mock
     protected TaskListener listener;
+
+    @Mock
+    UsernamePasswordCredentials credentials;
+
     protected EnvVars envVars;
     protected String[] expectedArguments;
     protected List<String> actualArguments;
@@ -148,5 +165,26 @@ public abstract class CommandTestBase {
 
     protected boolean verifyNumberOfExecutedCommands(int expectedNum) {
         return expectedNum == noExecutedCommands;
+    }
+
+    protected void setCredentialManager(String username, String password){
+        PowerMockito.mockStatic(CredentialsMatchers.class);
+        PowerMockito.mockStatic(CredentialsProvider.class);
+        credentials = Mockito.mock(UsernamePasswordCredentialsImpl.class);
+
+        Secret secret = PowerMockito.mock(Secret.class);
+        when(secret.getPlainText()).thenReturn(password);
+        when(credentials.getPassword()).thenReturn(secret);
+        when(credentials.getUsername()).thenReturn(username);
+
+        when(CredentialsProvider.lookupCredentials(
+                Matchers.<Class<Credentials>>any(),
+                Matchers.any(ItemGroup.class),
+                Matchers.any(Authentication.class),
+                Matchers.anyListOf(DomainRequirement.class)
+        )).thenReturn(new ArrayList<Credentials>() {});
+
+        when(CredentialsMatchers.firstOrNull(Matchers.anyListOf(StandardCredentials.class),
+                Matchers.any(CredentialsMatcher.class))).thenReturn((StandardUsernamePasswordCredentials) credentials);
     }
 }

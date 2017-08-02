@@ -147,6 +147,29 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     }
 
     @Test
+    public void addCommitArgumentsTest_WithCredentials() throws IOException, InterruptedException {
+
+        setCredentialManager("TestUser", "TestPassword");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+
+        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "", "", false, 0, "TestCredentialId");
+
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCommitArguments("AdditionalCommitArguments").build();
+        CoverityPublisher publisher =
+                new CoverityPublisherBuilder().withCimStream(cimStream).
+                        withInvocationAssistance(invocationAssistance).build();
+
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
+        setExpectedArguments(new String[] {
+                "cov-commit-defects", "--dir", "TestDir", "--host", "Localhost",
+                "--port", "8080", "--stream", "TestStream", "--user", "TestUser", "AdditionalCommitArguments"
+        });
+        covCommitDefectsCommand.runCommand();
+        assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
+    }
+
+    @Test
     public void addCommitArgumentsTest_WithParseException() throws IOException, InterruptedException {
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
 
