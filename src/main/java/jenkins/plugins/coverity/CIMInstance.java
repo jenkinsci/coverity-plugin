@@ -458,7 +458,7 @@ public class CIMInstance {
             }
         } catch(SOAPFaultException e){
             if (StringUtils.isNotEmpty(e.getMessage())){
-                if (e.getMessage().contains("User " + username + " doesn't have permission to perform {invokeWS}")) {
+                if (StringUtils.containsIgnoreCase(e.getMessage(), "User " + username + " Doesn't have permissions to perform {invokeWS}")) {
                     return FormValidation.error(errorMessage.append("\"Access web services\"").toString());
                 }
                 return FormValidation.error(e.getMessage());
