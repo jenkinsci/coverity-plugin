@@ -10,7 +10,7 @@
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
 -->
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
     <j:set var="javaOption" value="${instance.javaOptionBlock}"/>
 	<script type="text/javascript">
     document.observe("dom:loaded", function() {
@@ -338,41 +338,41 @@
 							</f:entry>
 
 							<f:entry title="Project" field="project">
-                <select id="project" name="project" class="setting-input" onchange="validateProjectSelection();loadStreams()">
-                  <j:forEach var="proj" items="${descriptor.loadProjects(instance.instance, instance.project)}">
-                    <j:choose>
-                      <j:when test="${proj == instance.project}">
-                        <option value="${proj}" selected="selected">${proj}</option>
-                      </j:when>
-                      <j:otherwise>
-                        <option value="${proj}">${proj}</option>
-                      </j:otherwise>
-                    </j:choose>
-                  </j:forEach>
-                </select>
-                <j:set var="initialProjectIsValid" value="${descriptor.checkProjectIsValid(instance.instance, instance.project)}"/>
-                <j:if test="${!initialProjectIsValid}">
-                  <input type="hidden" id="invalidProject" value="${instance.project}" />
-                </j:if>
+                                <select id="project" name="project" class="setting-input" onchange="validateProjectSelection();loadStreams()">
+                                  <j:forEach var="proj" items="${descriptor.loadProjects(instance.instance, instance.project)}">
+                                    <j:choose>
+                                      <j:when test="${proj == instance.project}">
+                                        <option value="${proj}" selected="selected">${proj}</option>
+                                      </j:when>
+                                      <j:otherwise>
+                                        <option value="${proj}">${proj}</option>
+                                      </j:otherwise>
+                                    </j:choose>
+                                  </j:forEach>
+                                </select>
+                                <j:set var="initialProjectIsValid" value="${descriptor.checkProjectIsValid(instance.instance, instance.project)}"/>
+                                <j:if test="${!initialProjectIsValid}">
+                                  <input type="hidden" id="invalidProject" value="${instance.project}" />
+                                </j:if>
 							</f:entry>
 
 							<f:entry title="Stream" field="stream">
 								<select id="stream" name="stream" class="setting-input" onchange="validateStreamSelection();loadDefectFilters()">
-                  <j:forEach var="str" items="${descriptor.loadStreams(instance.instance, instance.project, instance.stream)}">
-                    <j:choose>
-                      <j:when test="${str == instance.stream}">
-                        <option value="${str}" selected="selected">${str}</option>
-                      </j:when>
-                      <j:otherwise>
-                        <option value="${str}">${str}</option>
-                      </j:otherwise>
-                    </j:choose>
-                  </j:forEach>
-                </select>
-                <j:set var="initialStreamIsValid" value="${descriptor.checkStreamIsValid(instance.instance, instance.project, instance.stream)}"/>
-                <j:if test="${!initialStreamIsValid}">
-                  <input type="hidden" id="invalidStream" value="${instance.stream}" />
-                </j:if>
+                                  <j:forEach var="str" items="${descriptor.loadStreams(instance.instance, instance.project, instance.stream)}">
+                                    <j:choose>
+                                      <j:when test="${str == instance.stream}">
+                                        <option value="${str}" selected="selected">${str}</option>
+                                      </j:when>
+                                      <j:otherwise>
+                                        <option value="${str}">${str}</option>
+                                      </j:otherwise>
+                                    </j:choose>
+                                  </j:forEach>
+                                </select>
+                                <j:set var="initialStreamIsValid" value="${descriptor.checkStreamIsValid(instance.instance, instance.project, instance.stream)}"/>
+                                <j:if test="${!initialStreamIsValid}">
+                                  <input type="hidden" id="invalidStream" value="${instance.stream}" />
+                                </j:if>
 							</f:entry>
 
 							<f:entry title="" field="defectFilters">
@@ -404,6 +404,12 @@
 									<f:helpArea/>
 								</tr>
 							</f:entry>
+
+                            <j:set var="descriptor" value="${descriptor.getPublisherDescriptor()}" />
+							<f:entry title="Credentials (Recommended)" field="credentialId">
+                                <c:select/>
+                            </f:entry>
+
 						</table>
 				</f:entry>
 

@@ -109,7 +109,9 @@ public class CIMInstance {
     /**
      * Credential ID from configured Credentials to use
      */
-    private final String credentialId;
+    private String credentialId;
+
+    private String overrideCredentialId;
 
     /**
      * cached webservice port for Configuration service
@@ -117,11 +119,11 @@ public class CIMInstance {
     private transient ConfigurationServiceService configurationServiceService;
 
     /**
-     * Cached result of user permissions check for this instance. This value is not saved and only updated as a result of
+     * Cached last username that was check for this instance. This value is not saved and only updated as a result of
      * checking user permissions.
      * This is a part of fixing the issue in BZ 105657 (JENKINS-44724)
      */
-    private transient FormValidation userPermissionsCheck;
+    private transient String lastCoverityUser;
 
     @DataBoundConstructor
     public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort, String credentialId) {
@@ -172,6 +174,10 @@ public class CIMInstance {
     }
 
     public String getCredentialId() { return credentialId; }
+
+    public void setOverrideCredentialId(String overrideCredentialId){
+        this.overrideCredentialId = overrideCredentialId;
+    }
 
     /**
      * Returns a Defect service client using v9 web services.
@@ -366,10 +372,13 @@ public class CIMInstance {
      * a list of missing permissions.
      */
     private FormValidation checkUserPermissions() throws IOException, CovRemoteServiceException_Exception {
-        if (userPermissionsCheck != null)
-            return userPermissionsCheck;
-
         String username = getCoverityUser();
+
+        if (StringUtils.isNotEmpty(lastCoverityUser)
+                && lastCoverityUser.equalsIgnoreCase(username)){
+            return FormValidation.ok();
+        }
+
         StringBuilder errorMessage = new StringBuilder();
         errorMessage.append("\"" + username + "\" does not have following permission(s): ");
 
@@ -381,8 +390,8 @@ public class CIMInstance {
             if (userData != null){
 
                 if (userData.isSuperUser()){
-                    userPermissionsCheck = FormValidation.ok();
-                    return userPermissionsCheck;
+                    lastCoverityUser = username;
+                    return FormValidation.ok();
                 }
 
                 // Start the queue with direct role assignments to the user
@@ -466,7 +475,8 @@ public class CIMInstance {
             return FormValidation.error(e, "An unexpected error occurred.");
         }
 
-        userPermissionsCheck = FormValidation.ok();
+        lastCoverityUser = username;
+        logger.info(username + " has all the permissions!");
         return FormValidation.ok();
     }
 
@@ -481,11 +491,12 @@ public class CIMInstance {
     }
 
     private String retrieveCredentialInfo(boolean getUsername){
-        if (!StringUtils.isEmpty(this.credentialId)){
+        String credential = StringUtils.isNotEmpty(overrideCredentialId) ? overrideCredentialId : credentialId;
+        if (!StringUtils.isEmpty(credential)){
             StandardCredentials credentials = CredentialsMatchers.firstOrNull(
                     CredentialsProvider.lookupCredentials(
                             StandardCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()
-                    ), CredentialsMatchers.withId(this.credentialId)
+                    ), CredentialsMatchers.withId(credential)
             );
 
             if (credentials != null && credentials instanceof UsernamePasswordCredentials) {
@@ -509,6 +520,8 @@ public class CIMInstance {
         result = 31 * result + dataPort;
         result = 31 * result + (user != null ? user.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (credentialId != null ? credentialId.hashCode() : 0);
+        result = 31 * result + (overrideCredentialId != null ? overrideCredentialId.hashCode() : 0);
         return result;
     }
 }

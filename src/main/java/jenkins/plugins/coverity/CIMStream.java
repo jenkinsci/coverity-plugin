@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
@@ -38,6 +39,7 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
     private final String instance;
     private final String project;
     private final String stream;
+    private String credentialId;
 
     /**
      * Defines how to filter discovered defects. Null for no filtering.
@@ -50,6 +52,21 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         this.project = Util.fixEmpty(project);
         this.stream = Util.fixEmpty(stream);
         this.defectFilters = defectFilters;
+    }
+
+    @DataBoundSetter
+    public void setCredentialId(String credentialId){
+        this.credentialId = credentialId;
+        CoverityPublisher.DescriptorImpl publisherDescriptor =
+                Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
+        if (publisherDescriptor != null){
+            CIMInstance instance = publisherDescriptor.getInstance(this.instance);
+            instance.setOverrideCredentialId(this.credentialId);
+        }
+    }
+
+    public String getCredentialId(){
+        return this.credentialId;
     }
 
     public String getInstance() {
