@@ -764,5 +764,21 @@ public class CoverityPublisher extends Recorder {
 
             return FormValidation.warning("Password is deprecated in Coverity plugin version 1.10 and later. Please use Credentials above for more secure password.");
         }
+
+        public FormValidation doCheckPostCovBuildCmd(@QueryParameter String postCovBuildCmd){
+            if (StringUtils.isEmpty(postCovBuildCmd)){
+                return FormValidation.error("Post cov-build command cannot be empty!");
+            }
+
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckPostCovAnalyzeCmd(@QueryParameter String postCovAnalyzeCmd){
+            if (StringUtils.isEmpty(postCovAnalyzeCmd)){
+                return FormValidation.error("Post cov-analyze command cannot be empty!");
+            }
+
+            return FormValidation.ok();
+        }
     }
 }
