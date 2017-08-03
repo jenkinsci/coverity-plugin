@@ -46,6 +46,12 @@ public class PostCovAnalyzeCommand extends Command {
         if (invocationAssistance == null || !invocationAssistance.getIsUsingPostCovAnalyzeCmd()) {
             return false;
         }
+
+        if (StringUtils.isEmpty(invocationAssistance.getPostCovAnalyzeCmd())){
+            listener.getLogger().println("[Coverity] Post cov-analyze command is empty. Skipping post cov-analyze step");
+            return false;
+        }
+
         return true;
     }
 }
