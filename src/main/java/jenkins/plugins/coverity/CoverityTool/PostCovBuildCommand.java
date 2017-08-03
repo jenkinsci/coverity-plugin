@@ -44,6 +44,11 @@ public class PostCovBuildCommand extends Command {
             return false;
         }
 
+        if (StringUtils.isEmpty(invocationAssistance.getPostCovBuildCmd())){
+            listener.getLogger().println("[Coverity] Post cov-build command is empty. Skipping post cov-build step");
+            return false;
+        }
+
         return true;
     }
 }
