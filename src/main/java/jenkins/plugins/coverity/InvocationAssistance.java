@@ -27,13 +27,16 @@ public class InvocationAssistance {
     private transient boolean isUsingPostCovAnalyzeCmd;
     private transient String postCovAnalyzeCmd;
 
+    // deprecated fields which were removed in plugin version 1.10
+    private transient String saOverride;
+
     private final String buildArguments;
     private final String analyzeArguments;
     private final String commitArguments;
     private List<String> javaWarFilesNames;
     private final List<JavaWarFile> javaWarFiles;
     private final boolean csharpMsvsca;
-    private final String saOverride;
+    private ToolsOverride toolsOverride;
     private MisraConfig misraConfig;
     private final boolean isScriptSrc;
     private PostCovBuild postCovBuild;
@@ -61,7 +64,7 @@ public class InvocationAssistance {
                                 MisraConfig misraConfig,
                                 List<JavaWarFile> javaWarFiles,
                                 boolean csharpMsvsca,
-                                String saOverride,
+                                ToolsOverride toolsOverride,
                                 boolean useAdvancedParser) {
         this.postCovBuild = postCovBuild;
         this.postCovAnalyze = postCovAnalyze;
@@ -80,7 +83,7 @@ public class InvocationAssistance {
         this.javaWarFilesNames = tempJavaWarFilesPaths;
         this.javaWarFiles = javaWarFiles;
         this.csharpMsvsca = csharpMsvsca;
-        this.saOverride = Util.fixEmpty(saOverride);
+        this.toolsOverride = toolsOverride;
         this.useAdvancedParser = useAdvancedParser;
     }
 
@@ -102,6 +105,13 @@ public class InvocationAssistance {
         // Check for existing postCovAnalyze
         if (isUsingPostCovAnalyzeCmd && postCovAnalyzeCmd != null) {
             this.postCovAnalyze = new PostCovAnalyze(postCovAnalyzeCmd);
+        }
+
+        // Check for existing saOverride
+        if (saOverride != null) {
+            toolsOverride = new ToolsOverride(null);
+            toolsOverride.setToolsLocation(saOverride);
+            saOverride = null;
         }
 
         return this;
@@ -156,7 +166,11 @@ public class InvocationAssistance {
     }
 
     public String getSaOverride() {
-        return saOverride;
+        return toolsOverride != null ? toolsOverride.getToolsLocation() : null;
+    }
+
+    public ToolsOverride getToolsOverride() {
+        return toolsOverride;
     }
 
     public boolean getIsUsingMisra() {
@@ -179,7 +193,13 @@ public class InvocationAssistance {
         String commitArguments = override.getCommitArguments() != null ? override.getCommitArguments() : getCommitArguments();
         String intermediateDir = override.getIntermediateDir() != null ? override.getIntermediateDir() : getIntermediateDir();
         boolean csharpMsvsca = override.getCsharpMsvsca();
-        String saOverride = override.getSaOverride() != null ? override.getSaOverride() : getSaOverride();
+        ToolsOverride toolsOverrideOverride;
+        if (override.getSaOverride() != null) {
+            toolsOverrideOverride = new ToolsOverride(null);
+            toolsOverrideOverride.setToolsLocation(override.getSaOverride());
+        } else {
+            toolsOverrideOverride = this.toolsOverride;
+        }
         MisraConfig misraConfig = override.isUsingMisra ? new MisraConfig(override.misraConfigFile) : null;
         boolean isScriptSrc = override.getIsScriptSrc();
         PostCovBuild postBuild = override.isUsingPostCovBuildCmd ? new PostCovBuild(override.postCovBuildCmd) : null;
@@ -197,7 +217,7 @@ public class InvocationAssistance {
             misraConfig,
             javaWarFiles,
             csharpMsvsca,
-            saOverride,
+            toolsOverrideOverride,
             useAdvancedParser);
     }
 

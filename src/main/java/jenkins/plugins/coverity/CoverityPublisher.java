@@ -35,6 +35,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CoverityTool.CoverityToolHandler;
+import jenkins.plugins.coverity.CoverityToolInstallation.CoverityToolInstallationDescriptor;
 import jenkins.plugins.coverity.ws.CimCache;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -763,6 +764,14 @@ public class CoverityPublisher extends Recorder {
             }
 
             return FormValidation.warning("Password is deprecated in Coverity plugin version 1.10 and later. Please use Credentials above for more secure password.");
+        }
+
+        public ListBoxModel doFillToolInstallationNameItems() {
+            ListBoxModel result = new ListBoxModel();
+            for(CoverityToolInstallation toolInstallation : getInstallations()) {
+                result.add(toolInstallation.getName());
+            }
+            return result;
         }
     }
 }
