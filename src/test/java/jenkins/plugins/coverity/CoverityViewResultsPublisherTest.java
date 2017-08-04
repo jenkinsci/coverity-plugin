@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -223,6 +224,30 @@ public class CoverityViewResultsPublisherTest {
         verify(run).setResult(Result.FAILURE);
     }
 
+    @Test
+    public void perform_handles400Error_logsMessage_failsPipeline() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String view = "group-by-view";
+        final int httpStatus = 400;
+        final String jsonResult = "{ \"message\": \"Exporting of group-by tables is not supported\"}";
+
+        TestableViewsService.setupViewContentsApi(view, httpStatus, jsonResult);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+
+        publisher.perform(run, workspace, launcher, listener);
+
+        final RuntimeException exception = new RuntimeException(
+            MessageFormat.format(
+                "GET http://{0}:{1}/api/viewContents/issues/v1/{2}?projectId={3}&rowCount=1000&offset=0 returned a response status of {4}: {5}",
+                cimInstance.getHost(), String.valueOf(cimInstance.getPort()), view, projectId, httpStatus, jsonResult));
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            "[Coverity] Error Publishing Coverity View Results",
+            exception.toString(),
+            expectedFinishedMessage);
+        verify(run).setResult(Result.FAILURE);
+    }
+
     public void setupIssues(String view, int count) {
         final StringBuilder viewContentsApiJsonResult = new StringBuilder("{\"viewContentsV1\": {" +
             "    \"offset\": 0," +
@@ -260,7 +285,7 @@ public class CoverityViewResultsPublisherTest {
         viewContentsApiJsonResult.append(
             "    ]" +
             "}}");
-        TestableViewsService.setupViewContentsApi(view, viewContentsApiJsonResult.toString());
+        TestableViewsService.setupViewContentsApi(view, 200, viewContentsApiJsonResult.toString());
     }
 
     public String getInformationMessage(String instance, String projectId, String view) {
