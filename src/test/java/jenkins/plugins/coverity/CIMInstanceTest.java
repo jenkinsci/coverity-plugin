@@ -568,7 +568,7 @@ public class CIMInstanceTest {
             "        }" +
             "    ]" +
             "}}";
-        TestableViewsService.setupViewContentsApi("view0", viewContentsApiJsonResult);
+        TestableViewsService.setupViewContentsApi("view0", 200, viewContentsApiJsonResult);
         CIMInstance cimInstance = new CIMInstance("instance", "host", 8080, "user", "password", false, 9090, "");
 
         final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
@@ -603,7 +603,7 @@ public class CIMInstanceTest {
             "        }," +
             "    ]" +
             "}}";
-        TestableViewsService.setupViewContentsApi("view0", viewContentsApiJsonResult);
+        TestableViewsService.setupViewContentsApi("view0", 200, viewContentsApiJsonResult);
         CIMInstance cimInstance = new CIMInstance("instance", "host", 8080, "user", "password", false, 9090, "");
 
         final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
@@ -661,7 +661,7 @@ public class CIMInstanceTest {
         viewContentsApiJsonResult.append(
             "    ]" +
             "}}");
-        TestableViewsService.setupViewContentsApi("view0", viewContentsApiJsonResult.toString());
+        TestableViewsService.setupViewContentsApi("view0", 200, viewContentsApiJsonResult.toString());
         CIMInstance cimInstance = new CIMInstance("instance", "host", 8080, "user", "password", false, 9090, "");
 
         final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());

@@ -28,6 +28,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 /**
@@ -66,12 +67,15 @@ public final class TestableViewsService {
         setupWithViewApi(viewApiJsonBuilder.toString());
     }
 
-    public static void setupViewContentsApi(String viewName, String viewContentsApiJsonResult) {
+    public static void setupViewContentsApi(String viewName, int httpStatus, String viewContentsApiJsonResult) {
         Client restClient = mock(Client.class);
         PowerMockito.mockStatic(Client.class);
         when(Client.create()).thenReturn(restClient);
         WebResource webResource = mock(WebResource.class);
-        when(webResource.get(String.class)).thenReturn(viewContentsApiJsonResult);
+        ClientResponse response = mock(ClientResponse.class);
+        when(response.getStatus()).thenReturn(httpStatus);
+        when(response.getEntity(String.class)).thenReturn(viewContentsApiJsonResult);
+        when(webResource.get(ClientResponse.class)).thenReturn(response);
         when(restClient.resource(argThat(matchUriPath("/api/viewContents/issues/v1/" + viewName)))).thenReturn(webResource);
     }
 
@@ -80,7 +84,7 @@ public final class TestableViewsService {
         PowerMockito.mockStatic(Client.class);
         when(Client.create()).thenReturn(restClient);
         WebResource webResource = mock(WebResource.class);
-        when(webResource.get(String.class)).thenThrow(exception);
+        when(webResource.get(ClientResponse.class)).thenThrow(exception);
         when(restClient.resource(argThat(matchUriPath("/api/viewContents/issues/v1/" + viewName)))).thenReturn(webResource);
     }
 
