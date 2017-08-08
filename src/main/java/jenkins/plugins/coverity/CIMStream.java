@@ -57,12 +57,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
     @DataBoundSetter
     public void setCredentialId(String credentialId){
         this.credentialId = credentialId;
-        CoverityPublisher.DescriptorImpl publisherDescriptor =
-                Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
-        if (publisherDescriptor != null){
-            CIMInstance instance = publisherDescriptor.getInstance(this.instance);
-            instance.setOverrideCredentialId(this.credentialId);
-        }
     }
 
     public String getCredentialId(){

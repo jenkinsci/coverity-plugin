@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.remoting.RoleChecker;
 
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
@@ -147,7 +146,7 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                     "Verify that a Coverity instance has been configured for this job", cs, null);
         }
 
-        CIMInstance ci = publisher.getDescriptor().getInstance(cs.getInstance());
+        CIMInstance ci = publisher.getDescriptor().getInstance(publisher);
 
         if(ci == null){
             return new StreamStatus(false, "Could not connect to a Coverity instance. \n " +

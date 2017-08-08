@@ -101,7 +101,7 @@ public class CheckConfigTest {
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
         CIMInstance cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8080, "admin", "password", false, 9080, "");
         CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, StringUtils.EMPTY, null);
-        when(descriptor.getInstance(any(String.class))).thenReturn(cimInstance);
+        when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
 
         CheckConfig.StreamStatus status = CheckConfig.checkStream(publisher, cimStream);
         assertNotNull(status);
@@ -117,7 +117,7 @@ public class CheckConfigTest {
     public void checkStreamTest_WhenCIMInstance_DoCheckFail() throws IOException {
         CIMInstance cimInstance = Mockito.mock(CIMInstance.class);
         when(cimInstance.doCheck()).thenReturn(FormValidation.error(StringUtils.EMPTY));
-        when(descriptor.getInstance(any(String.class))).thenReturn(cimInstance);
+        when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
         CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, "test-stream", null);
 
@@ -139,7 +139,7 @@ public class CheckConfigTest {
         testConfigurationService.setupProjects(StringUtils.EMPTY, 0, StringUtils.EMPTY, 0);
         when(cimInstance.doCheck()).thenReturn(FormValidation.ok());
         when(cimInstance.getConfigurationService()).thenReturn(testConfigurationService);
-        when(descriptor.getInstance(any(String.class))).thenReturn(cimInstance);
+        when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
         CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, "test-stream", null);
 
         CheckConfig.StreamStatus status = CheckConfig.checkStream(publisher, cimStream);

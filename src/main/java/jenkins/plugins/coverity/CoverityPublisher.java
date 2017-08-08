@@ -456,6 +456,20 @@ public class CoverityPublisher extends Recorder {
             return null;
         }
 
+        public CIMInstance getInstance(CoverityPublisher publisher) {
+            CIMStream stream = publisher.getCimStream();
+            if (stream != null) {
+                CIMInstance instance = getInstance(stream.getInstance());
+                if (instance != null && StringUtils.isNotEmpty(stream.getCredentialId())) {
+                    return instance.cloneWithCredential(stream.getCredentialId());
+                }
+
+                return instance;
+            }
+
+            return null;
+        }
+
         public CoverityToolInstallation[] getInstallations() {
             return Arrays.copyOf(installations, installations.length);
         }
@@ -563,7 +577,8 @@ public class CoverityPublisher extends Recorder {
                 if(cimStream.isValid()) {
                     DefectFilters defectFilters = cimStream.getDefectFilters();
                     if(defectFilters != null) {
-                        List<String> allCheckers = getInstance(cimStream.getInstance()).getCimInstanceCheckers();
+                        CIMInstance instance = getInstance(publisher);
+                        List<String> allCheckers = instance != null ? instance.getCimInstanceCheckers() : new ArrayList<String>();
                         List<String> allComponents = toStrings(cimStreamDescriptor.doFillComponentDefectFilterItems(cimInstance, cimStream.getStream()));
                         defectFilters.invertCheckers(allCheckers);
                         defectFilters.invertComponents(allComponents);
@@ -644,7 +659,8 @@ public class CoverityPublisher extends Recorder {
                     } else {
                         //initialize 'new' defectFilters item with default values selected
 
-                        List<String> allCheckers = getInstance(cimStream.getInstance()).getCimInstanceCheckers();
+                        CIMInstance instance = getInstance(publisher);
+                        List<String> allCheckers = instance != null ? instance.getCimInstanceCheckers() : new ArrayList<String>();
                         DefectFilters defectFilters = cimStream.getDefectFilters();
                         if (defectFilters != null) {
                             try {
@@ -677,8 +693,10 @@ public class CoverityPublisher extends Recorder {
                 CIMStream cimStream = publisher.getCimStream();
 
                 if (cimStream != null) {
-                    CIMInstance cimInstance = publisher.getDescriptor().getInstance(cimStream.getInstance());
-                    final List<String> projects = new ArrayList<>(CimCache.getInstance().getProjects(cimInstance));
+                    CIMInstance cimInstance = getInstance(publisher);
+                    final List<String> projects = cimInstance != null
+                            ? new ArrayList<>(CimCache.getInstance().getProjects(cimInstance))
+                            : new ArrayList<String>();
                     final String selectedProject = cimStream.getProject();
                     boolean selectedProjectIsvalid = true;
                     if (!StringUtils.isEmpty(selectedProject) && !projects.contains(selectedProject)) {
@@ -711,8 +729,10 @@ public class CoverityPublisher extends Recorder {
                 CIMStream cimStream = publisher.getCimStream();
 
                 if (cimStream != null) {
-                    CIMInstance cimInstance = publisher.getDescriptor().getInstance(cimStream.getInstance());
-                    final List<String> streams = new ArrayList<>(CimCache.getInstance().getStreams(cimInstance ,cimStream.getProject()));
+                    CIMInstance cimInstance = getInstance(publisher);
+                    final List<String> streams = cimInstance != null
+                            ? new ArrayList<>(CimCache.getInstance().getStreams(cimInstance ,cimStream.getProject()))
+                            : new ArrayList<String>();
                     final String selectedStream = cimStream.getStream();
                     boolean selectedStreamIsvalid = true;
 

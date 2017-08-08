@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity.ws;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -81,7 +82,7 @@ public class DefectReaderTest {
         CIMInstance cimInstance = mock(CIMInstance.class);
         defectService = (TestDefectService)new TestWebServiceFactory().getDefectService(cimInstance);
         when(cimInstance.getDefectService()).thenReturn(defectService);
-        when(descriptor.getInstance(cimInstanceName)).thenReturn(cimInstance);
+        when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
         when(jenkins.getDescriptorOrDie(CoverityPublisher.class)).thenReturn(descriptor);
     }
 

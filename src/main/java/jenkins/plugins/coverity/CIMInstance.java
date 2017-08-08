@@ -111,19 +111,17 @@ public class CIMInstance {
      */
     private String credentialId;
 
-    private String overrideCredentialId;
-
     /**
      * cached webservice port for Configuration service
      */
     private transient ConfigurationServiceService configurationServiceService;
 
     /**
-     * Cached last username that was check for this instance. This value is not saved and only updated as a result of
+     * Cached last username that was successfully check for this instance. This value is not saved and only updated as a result of
      * checking user permissions.
      * This is a part of fixing the issue in BZ 105657 (JENKINS-44724)
      */
-    private transient String lastCoverityUser;
+    private transient String lastSuccessfulUser;
 
     @DataBoundConstructor
     public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort, String credentialId) {
@@ -174,10 +172,6 @@ public class CIMInstance {
     }
 
     public String getCredentialId() { return credentialId; }
-
-    public void setOverrideCredentialId(String overrideCredentialId){
-        this.overrideCredentialId = overrideCredentialId;
-    }
 
     /**
      * Returns a Defect service client using v9 web services.
@@ -374,8 +368,8 @@ public class CIMInstance {
     private FormValidation checkUserPermissions() throws IOException, CovRemoteServiceException_Exception {
         String username = getCoverityUser();
 
-        if (StringUtils.isNotEmpty(lastCoverityUser)
-                && lastCoverityUser.equalsIgnoreCase(username)){
+        if (StringUtils.isNotEmpty(lastSuccessfulUser)
+                && lastSuccessfulUser.equalsIgnoreCase(username)){
             return FormValidation.ok();
         }
 
@@ -390,7 +384,7 @@ public class CIMInstance {
             if (userData != null){
 
                 if (userData.isSuperUser()){
-                    lastCoverityUser = username;
+                    lastSuccessfulUser = username;
                     return FormValidation.ok();
                 }
 
@@ -475,7 +469,7 @@ public class CIMInstance {
             return FormValidation.error(e, "An unexpected error occurred.");
         }
 
-        lastCoverityUser = username;
+        lastSuccessfulUser = username;
         logger.info(username + " has all the permissions!");
         return FormValidation.ok();
     }
@@ -491,12 +485,11 @@ public class CIMInstance {
     }
 
     private String retrieveCredentialInfo(boolean getUsername){
-        String credential = StringUtils.isNotEmpty(overrideCredentialId) ? overrideCredentialId : credentialId;
-        if (!StringUtils.isEmpty(credential)){
+        if (!StringUtils.isEmpty(credentialId)){
             StandardCredentials credentials = CredentialsMatchers.firstOrNull(
                     CredentialsProvider.lookupCredentials(
                             StandardCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()
-                    ), CredentialsMatchers.withId(credential)
+                    ), CredentialsMatchers.withId(credentialId)
             );
 
             if (credentials != null && credentials instanceof UsernamePasswordCredentials) {
@@ -512,6 +505,10 @@ public class CIMInstance {
         return StringUtils.EMPTY;
     }
 
+    public CIMInstance cloneWithCredential(String credentialId) {
+        return new CIMInstance(name, host, port, user, password, useSSL, dataPort, credentialId);
+    }
+
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
@@ -521,7 +518,6 @@ public class CIMInstance {
         result = 31 * result + (user != null ? user.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (credentialId != null ? credentialId.hashCode() : 0);
-        result = 31 * result + (overrideCredentialId != null ? overrideCredentialId.hashCode() : 0);
         return result;
     }
 }
