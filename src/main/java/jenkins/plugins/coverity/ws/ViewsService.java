@@ -25,6 +25,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 /**
@@ -91,9 +92,16 @@ public class ViewsService {
 
             WebResource resource = restClient.resource(viewContentsUri);
 
-            String response = resource.get(String.class);
+            ClientResponse response = resource.get(ClientResponse.class);
+            if (response.getStatus() != 200) {
+                throw new RuntimeException("GET " + viewContentsUri +
+                    " returned a response status of " + response.getStatus() +
+                    ": " + response.getEntity(String.class));
+            }
+
+            String output = response.getEntity(String.class);
             JSONParser parser = new JSONParser();
-            JSONObject json = (JSONObject)parser.parse(response);
+            JSONObject json = (JSONObject)parser.parse(output);
 
             return new ViewContents((JSONObject)json.get("viewContentsV1"));
 

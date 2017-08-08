@@ -14,6 +14,7 @@ import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -67,5 +68,17 @@ public class PostCovAnalyzeCommandTest extends CommandTestBase {
         Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
         postCovAnalyzeCommand.runCommand();
         verifyNumberOfExecutedCommands(0);
+    }
+
+    @Test
+    public void doesNotExecute_WithEmptyCommand() throws IOException, InterruptedException {
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().
+                withPostAnalyzeCmd(StringUtils.EMPTY).build();
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withInvocationAssistance(invocationAssistance).build();
+
+        Command postCovAnalyzeCommand = new PostCovAnalyzeCommand(build, launcher, listener, publisher, envVars);
+        postCovAnalyzeCommand.runCommand();
+        verifyNumberOfExecutedCommands(0);
+        consoleLogger.verifyLastMessage("[Coverity] Post cov-analyze command is empty. Skipping post cov-analyze step");
     }
 }
