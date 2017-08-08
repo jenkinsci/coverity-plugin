@@ -215,6 +215,8 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
                 return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + installation.getHome() + "]", node, null);
             }
 
+            listener.getLogger().println("[Coverity] Tools installation '" + installation.getName() + "' with directory '" + installation.getHome() + "'");
+
             try {
                 CoverityUtils.checkDir(launcher.getChannel(), installation.getHome());
             } catch (Exception e) {

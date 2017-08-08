@@ -44,6 +44,8 @@ public class CoverityToolHandler {
         String home = installation != null ? installation.getHome() : null;
         CoverityUtils.checkDir(launcher.getChannel(), home);
 
+        listener.getLogger().println("[Coverity] Tools installation '" + installation.getName() + "' with directory '" + installation.getHome() + "'");
+
         CIMStream cimStream = publisher.getCimStream();
         CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
 
