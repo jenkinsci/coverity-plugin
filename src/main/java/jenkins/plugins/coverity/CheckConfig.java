@@ -211,8 +211,8 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
         try {
             final CoverityToolInstallation installation = CoverityUtils.findToolInstallationForBuild(node, build.getEnvironment(listener), listener);
 
-            if(installation == null && StringUtils.isNotEmpty(installation.getHome())) {
-                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + installation.getHome() + "]", node, null);
+            if(installation == null) {
+                return new NodeStatus(false, "Could not find Coverity Analysis tools installation.", node, null);
             }
 
             listener.getLogger().println("[Coverity] Tools installation '" + installation.getName() + "' with directory '" + installation.getHome() + "'");
