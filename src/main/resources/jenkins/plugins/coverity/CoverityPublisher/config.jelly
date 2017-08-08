@@ -476,7 +476,7 @@
 
                             <f:optionalBlock title="Static analysis tools override" field="toolsOverride" checked="${instance.toolsOverride != null}">
                                 <j:set var="instance" value="${instance.toolsOverride}"/>
-                                <f:entry title="Static Analysis Tool Installation:" field="toolInstallationName">
+                                <f:entry title="Static analysis tool installation:" field="toolInstallationName">
                                     <f:select/>
                                 </f:entry>
                                 <f:entry title="Static analysis location override:" field="toolsLocation">
