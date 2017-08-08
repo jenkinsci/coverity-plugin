@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.remoting.RoleChecker;
 
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
@@ -208,24 +209,20 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
     public static NodeStatus checkNode(CoverityPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener) {
         Node node = Executor.currentExecutor().getOwner().getNode();
         try {
-            String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener), listener);
-            InvocationAssistance ia = publisher.getInvocationAssistance();
-            if(ia != null && ia.getSaOverride() != null && !ia.getSaOverride().isEmpty()) {
-                home = new CoverityToolInstallation(CoverityToolInstallation.GLOBAL_OVERRIDE_NAME, ia.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
-            }
+            final CoverityToolInstallation installation = CoverityUtils.findToolInstallationForBuild(node, build.getEnvironment(listener), listener);
 
-            if(home == null) {
-                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + home + "]", node, null);
+            if(installation == null && StringUtils.isNotEmpty(installation.getHome())) {
+                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + installation.getHome() + "]", node, null);
             }
 
             try {
-                CoverityUtils.checkDir(launcher.getChannel(), home);
+                CoverityUtils.checkDir(launcher.getChannel(), installation.getHome());
             } catch (Exception e) {
                 e.printStackTrace();
-                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + home + "]", node, null);
+                return new NodeStatus(false, "Could not find Coverity Analysis home directory. [" + installation.getHome() + "]", node, null);
             }
 
-            FilePath homePath = new FilePath(launcher.getChannel(), home);
+            FilePath homePath = new FilePath(launcher.getChannel(), installation.getHome());
             CoverityVersion version = getVersion(homePath);
 
             if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {

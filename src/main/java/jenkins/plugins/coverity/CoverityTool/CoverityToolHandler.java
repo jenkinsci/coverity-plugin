@@ -24,7 +24,6 @@ import jenkins.plugins.coverity.CoverityPublisher;
 import jenkins.plugins.coverity.CoverityTempDir;
 import jenkins.plugins.coverity.CoverityToolInstallation;
 import jenkins.plugins.coverity.CoverityUtils;
-import jenkins.plugins.coverity.CoverityVersion;
 import jenkins.plugins.coverity.InvocationAssistance;
 import jenkins.plugins.coverity.ws.DefectReader;
 
@@ -39,21 +38,21 @@ public class CoverityToolHandler {
         CoverityTempDir temp = build.getAction(CoverityTempDir.class);
 
         Node node = Executor.currentExecutor().getOwner().getNode();
-        String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener), listener);
-        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+
+        // find the tool installation and check home
+        CoverityToolInstallation installation = CoverityUtils.findToolInstallationForBuild(node, build.getEnvironment(listener), listener);
+        String home = installation != null ? installation.getHome() : null;
+        CoverityUtils.checkDir(launcher.getChannel(), home);
+
         CIMStream cimStream = publisher.getCimStream();
         CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
 
         boolean useAdvancedParser = false;
+        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
             useAdvancedParser = true;
         }
 
-        if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-            home = new CoverityToolInstallation(CoverityToolInstallation.GLOBAL_OVERRIDE_NAME, CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars, useAdvancedParser)).forEnvironment(build.getEnvironment(listener)).getHome();
-        }
-
-        CoverityUtils.checkDir(launcher.getChannel(), home);
 
         /**
          * Fix Bug 84077

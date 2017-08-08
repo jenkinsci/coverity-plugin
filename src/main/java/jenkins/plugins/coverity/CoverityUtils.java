@@ -17,10 +17,13 @@ import hudson.EnvVars;
 import hudson.model.Queue;
 import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CoverityUtils {
@@ -65,47 +68,89 @@ public class CoverityUtils {
             return null;
         }
 
-		AbstractBuild build = getBuild();
-		AbstractProject project = build.getProject();
-		CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
-		if (publisher == null) {
-		    logger.warning("CoverityPublisher used by getCovBuild() is null.");
-		    return null;
+        try {
+            String covBuild = "cov-build";
+            final AbstractBuild build = getBuild();
+            CoverityToolInstallation toolInstallation = findToolInstallationForBuild(node, build.getEnvironment(listener), listener);
+            if (toolInstallation != null && StringUtils.isNotEmpty(toolInstallation.getHome())) {
+                checkDir(node.getChannel(), toolInstallation.getHome());
+                covBuild = new FilePath(node.getChannel(), toolInstallation.getHome()).child("bin").child(covBuild).getRemote();
+                return covBuild;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-		String covBuild = "cov-build";
-		String home = null;
-		try {
-			home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener), listener);
-		} catch(Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            listener.getLogger().println("[Error] " + pw.toString());
-			e.printStackTrace();
-		}
-
-        InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
-        if(invocationAssistance != null){
-			if(invocationAssistance.getSaOverride() != null) {
-				try {
-					home = new CoverityToolInstallation(CoverityToolInstallation.GLOBAL_OVERRIDE_NAME, invocationAssistance.getSaOverride()).forEnvironment(build.getEnvironment(listener)).getHome();
-					CoverityUtils.checkDir(node.getChannel(), home);
-				} catch(IOException e) {
-					e.printStackTrace();
-				} catch(InterruptedException e) {
-					e.printStackTrace();
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		if(home != null) {
-			covBuild = new FilePath(node.getChannel(), home).child("bin").child(covBuild).getRemote();
-		}
-
-		return covBuild;
+        return null;
 	}
+
+    /**
+     * Finds a tools installation for the running build. This method handles all behavior related to overriding tools
+     * location at either the build or node level.
+     */
+	@SuppressWarnings("deprecation")
+	public static CoverityToolInstallation findToolInstallationForBuild(Node node, EnvVars environment, TaskListener listener) {
+        final AbstractBuild build = getBuild();
+        final AbstractProject project = build.getProject();
+        final CoverityPublisher publisher = (CoverityPublisher) project.getPublishersList().get(CoverityPublisher.class);
+        if (publisher == null) {
+            logger.warning("CoverityPublisher is null, cannot find Coverity Analysis installation for build.");
+            return null;
+        }
+
+        final CoverityToolInstallation[] coverityToolInstallations = publisher.getDescriptor().getInstallations();
+
+        try {
+            // first try to use a tools override from the publisher (job configuration)
+            final InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+            if (invocationAssistance != null) {
+                final ToolsOverride toolsOverride = invocationAssistance.getToolsOverride();
+                if (toolsOverride != null) {
+                    String toolName = StringUtils.isNotEmpty(toolsOverride.getToolInstallationName()) ? toolsOverride.getToolInstallationName() : CoverityToolInstallation.DEFAULT_NAME;
+                    for (CoverityToolInstallation installation : coverityToolInstallations) {
+                        if (toolName.equalsIgnoreCase(installation.getName())) {
+                            if (StringUtils.isNotEmpty(toolsOverride.getToolsLocation())) {
+                                final String overrideToolsLocation = evaluateEnvVars(toolsOverride.getToolsLocation(), environment, invocationAssistance.getUseAdvancedParser());
+                                final CoverityToolInstallation installOverride = new CoverityToolInstallation(installation.getName() + "-" + CoverityToolInstallation.JOB_OVERRIDE_NAME, overrideToolsLocation);
+                                return installOverride.forEnvironment(environment);
+                            }
+
+                            return (CoverityToolInstallation)installation.translate(node, environment, listener);
+                        }
+                    }
+                }
+            }
+
+            // next try to use the node property
+            CoverityInstallation nodeInstall = node.getNodeProperties().get(CoverityInstallation.class);
+            if(nodeInstall != null) {
+                final CoverityToolInstallation install = new CoverityToolInstallation(CoverityToolInstallation.JOB_OVERRIDE_NAME, nodeInstall.getHome());
+                return install.forEnvironment(environment);
+            }
+
+            // next try to use the 'default' migrated value
+            for (CoverityToolInstallation installation : coverityToolInstallations) {
+                if (CoverityToolInstallation.DEFAULT_NAME.equalsIgnoreCase(installation.getName())) {
+                    return (CoverityToolInstallation)installation.translate(node, environment, listener);
+                }
+            }
+
+            // otherwise use the first tool installation found
+            if (coverityToolInstallations.length > 0) {
+                return (CoverityToolInstallation)coverityToolInstallations[0].translate(node, environment, listener);
+            }
+
+            // finally fall back to using the global home value
+            if (publisher.getDescriptor().getHome() != null) {
+                final CoverityToolInstallation installation = new CoverityToolInstallation("global", publisher.getDescriptor().getHome());
+                return (CoverityToolInstallation)installation.translate(node, environment, listener);
+            }
+        } catch (IOException | InterruptedException e) {
+            logger.log(Level.WARNING, "Error occurred getting Coverity Analysis installation", e);
+        }
+
+        return null;
+    }
 
     /**
      * Calls intepolate() in order to evaluate environment variables. In the case that a substitution took place, it

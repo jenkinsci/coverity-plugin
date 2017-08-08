@@ -165,10 +165,6 @@ public class InvocationAssistance {
         return csharpMsvsca;
     }
 
-    public String getSaOverride() {
-        return toolsOverride != null ? toolsOverride.getToolsLocation() : null;
-    }
-
     public ToolsOverride getToolsOverride() {
         return toolsOverride;
     }
@@ -194,9 +190,9 @@ public class InvocationAssistance {
         String intermediateDir = override.getIntermediateDir() != null ? override.getIntermediateDir() : getIntermediateDir();
         boolean csharpMsvsca = override.getCsharpMsvsca();
         ToolsOverride toolsOverrideOverride;
-        if (override.getSaOverride() != null) {
+        if (override.saOverride!= null) {
             toolsOverrideOverride = new ToolsOverride(null);
-            toolsOverrideOverride.setToolsLocation(override.getSaOverride());
+            toolsOverrideOverride.setToolsLocation(override.saOverride);
         } else {
             toolsOverrideOverride = this.toolsOverride;
         }
