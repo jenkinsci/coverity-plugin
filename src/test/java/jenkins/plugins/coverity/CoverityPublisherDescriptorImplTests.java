@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -68,10 +69,7 @@ public class CoverityPublisherDescriptorImplTests {
         // setup jenkins
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
-        DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8080, "admin", "password", false, 9080, "");
-        when(descriptor.getInstance(any(String.class))).thenReturn(cimInstance);
-        when(jenkins.getDescriptorOrDie(CoverityPublisher.class)).thenReturn(descriptor);
     }
 
     @Test
@@ -85,6 +83,7 @@ public class CoverityPublisherDescriptorImplTests {
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(stream).build();
 
         DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+        descriptor.setInstances(Arrays.asList(cimInstance));
 
         StaplerRequest request = mock(StaplerRequest.class);
         when(request.getSubmittedForm()).thenReturn(PUBLISHER_FORM_OBJECT_JSON);
@@ -120,6 +119,7 @@ public class CoverityPublisherDescriptorImplTests {
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(stream).build();
 
         DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+        descriptor.setInstances(Arrays.asList(cimInstance));
 
         StaplerRequest request = mock(StaplerRequest.class);
         when(request.getSubmittedForm()).thenReturn(PUBLISHER_FORM_OBJECT_JSON);

@@ -65,7 +65,7 @@ public class DefectReader {
         }
 
         CIMStream cimStream = publisher.getCimStream();
-        CIMInstance cimInstance = publisher.getDescriptor().getInstance(cimStream.getInstance());
+        CIMInstance cimInstance = publisher.getDescriptor().getInstance(publisher);
 
         if (StringUtils.isEmpty(cimStream.getStream())) {
             listener.getLogger().println("[Coverity] Stream has not been configured. Skipping fetching defects.");

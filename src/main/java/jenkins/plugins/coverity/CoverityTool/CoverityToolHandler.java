@@ -42,7 +42,7 @@ public class CoverityToolHandler {
         String home = publisher.getDescriptor().getHome(node, build.getEnvironment(listener), listener);
         InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
         CIMStream cimStream = publisher.getCimStream();
-        CIMInstance cim = publisher.getDescriptor().getInstance(cimStream.getInstance());
+        CIMInstance cim = publisher.getDescriptor().getInstance(publisher);
 
         boolean useAdvancedParser = false;
         if(invocationAssistance != null && invocationAssistance.getUseAdvancedParser()){
