@@ -406,7 +406,8 @@
 							</f:entry>
 
                             <j:set var="descriptor" value="${descriptor.getPublisherDescriptor()}" />
-							<f:entry title="Credentials (Recommended)" field="credentialId">
+							<f:entry title="Override Credentials" field="credentialId"
+							    help="/plugin/coverity/help-overrideCredentialId.html">
                                 <c:select/>
                             </f:entry>
 
