@@ -11,7 +11,8 @@ Plugin version | Coverity Connect / Static Analysis version
 --- | ---
 **1.3.0** to **1.6.0** | **7.5.1** to **7.7.0**
 **1.7.0** to **1.8.1** | **7.5.1** to **8.7.0**
-**1.9.0+** | **7.7.0** to **8.7.1**
+**1.9.0** to **1.9.1** | **7.7.0** to **8.7.1**
+**1.9.2+** | **7.7.0** to **2017.07**
 
 
 ## Functions
@@ -163,6 +164,13 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 *   When upgrading, make sure that all jobs using the Coverity plugin are finished and not running during upgrade. For best results, restart your Jenkins after upgrade.
 
 ## Changelog
+
+#### Version 1.9.2 (July 6, 2017)
+
+*   Added compatibility for 2017.07 Coverity Connect and Analysis tools. (Note: Older Coverity plugin versions will not work with the Coverity Connect 2017.07 and newer releases) (BZ 104760)
+*   Fixed an issue where special password characters caused an error establishing a connection with Coverity Connect. (BZ 104837)
+*   Fixed an issue where setting extra CA certificate was using the argument --cert, instead of --certs. (BZ 104659)
+*   Improved user permission checking which should reduce validation delays introduced in 1.9.1. (BZ 105657)
 
 #### Version 1.9.1 (April 19, 2017)
 
