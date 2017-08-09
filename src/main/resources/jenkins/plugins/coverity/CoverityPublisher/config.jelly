@@ -719,6 +719,45 @@
                                     <j:otherwise>
                                         <option value="hg">Mercuial</option>
                                     </j:otherwise>
+                                </j:choose><j:choose>
+                                    <j:when test="${instance.scmSystem eq 'perforce' }">
+                                        <option value="perforce" selected="selected">Perforce</option>
+                                    </j:when>
+                                    <j:otherwise>
+                                        <option value="perforce">Perforce</option>
+                                    </j:otherwise>
+                                </j:choose>
+                                <j:choose>
+                                    <j:when test="${instance.scmSystem eq 'perforce2009' }">
+                                        <option value="perforce2009" selected="selected">Perforce 2009</option>
+                                    </j:when>
+                                    <j:otherwise>
+                                        <option value="perforce2009">Perforce 2009</option>
+                                    </j:otherwise>
+                                </j:choose>
+                                <j:choose>
+                                    <j:when test="${instance.scmSystem eq 'plastic' }">
+                                        <option value="plastic" selected="selected">Plastic</option>
+                                    </j:when>
+                                    <j:otherwise>
+                                        <option value="plastic">Plastic</option>
+                                    </j:otherwise>
+                                </j:choose>
+                                <j:choose>
+                                    <j:when test="${instance.scmSystem eq 'plastic-distributed' }">
+                                        <option value="plastic-distributed" selected="selected">Plastic (fully distributed)</option>
+                                    </j:when>
+                                    <j:otherwise>
+                                        <option value="plastic-distributed">Plastic (fully distributed)</option>
+                                    </j:otherwise>
+                                </j:choose>
+                                <j:choose>
+                                    <j:when test="${instance.scmSystem eq 'svn' }">
+                                        <option value="svn" selected="selected">Subversion</option>
+                                    </j:when>
+                                    <j:otherwise>
+                                        <option value="svn">Subversion</option>
+                                    </j:otherwise>
                                 </j:choose>
                                 <j:choose>
                                     <j:when test="${instance.scmSystem eq 'tfs2008' }">
@@ -753,27 +792,19 @@
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'perforce' }">
-                                        <option value="perforce" selected="selected">Perforce</option>
+                                    <j:when test="${instance.scmSystem eq 'tfs2015' }">
+                                        <option value="tfs2015" selected="selected">Team Foundation Server 2015</option>
                                     </j:when>
                                     <j:otherwise>
-                                        <option value="perforce">Perforce</option>
+                                        <option value="tfs2015">Team Foundation Server 2015</option>
                                     </j:otherwise>
                                 </j:choose>
                                 <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'perforce2009' }">
-                                        <option value="perforce2009" selected="selected">Perforce 2009</option>
+                                    <j:when test="${instance.scmSystem eq 'tfs2017' }">
+                                        <option value="tfs2017" selected="selected">Team Foundation Server 2017</option>
                                     </j:when>
                                     <j:otherwise>
-                                        <option value="perforce2009">Perforce 2009</option>
-                                    </j:otherwise>
-                                </j:choose>
-                                <j:choose>
-                                    <j:when test="${instance.scmSystem eq 'svn' }">
-                                        <option value="svn" selected="selected">Subversion</option>
-                                    </j:when>
-                                    <j:otherwise>
-                                        <option value="svn">Subversion</option>
+                                        <option value="tfs2017">Team Foundation Server 2017</option>
                                     </j:otherwise>
                                 </j:choose>
                             </select>
