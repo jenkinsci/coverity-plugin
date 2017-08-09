@@ -15,6 +15,7 @@ import jenkins.plugins.coverity.JavaWarFile;
 import jenkins.plugins.coverity.MisraConfig;
 import jenkins.plugins.coverity.PostCovAnalyze;
 import jenkins.plugins.coverity.PostCovBuild;
+import jenkins.plugins.coverity.ToolsOverride;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class InvocationAssistanceBuilder {
     private String commitArguments;
     private List<JavaWarFile> javaWarFiles;
     private boolean csharpMsvsca;
-    private String saOverride;
+    private ToolsOverride toolsOverride;
     private MisraConfig misraConfig;
     private boolean isScriptSrc;
     private PostCovBuild postCovBuild;
@@ -63,8 +64,9 @@ public class InvocationAssistanceBuilder {
         return this;
     }
 
-    public InvocationAssistanceBuilder withSaOverride(String saOverride) {
-        this.saOverride = saOverride;
+    public InvocationAssistanceBuilder withToolsLocationOverride(String saOverride) {
+        this.toolsOverride = new ToolsOverride(null);
+        this.toolsOverride.setToolsLocation(saOverride);
         return this;
     }
 
@@ -105,7 +107,7 @@ public class InvocationAssistanceBuilder {
             misraConfig,
             javaWarFiles,
             csharpMsvsca,
-            saOverride,
+            toolsOverride,
             useAdvancedParser);
     }
 }

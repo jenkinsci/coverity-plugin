@@ -480,9 +480,15 @@
                                 </f:repeatable>
                             </f:entry>
 
-                            <f:entry title="Static analysis location override:" field="saOverride">
-                                <f:textbox/>
-                            </f:entry>
+                            <f:optionalBlock title="Static analysis tools override" field="toolsOverride" checked="${instance.toolsOverride != null}">
+                                <j:set var="instance" value="${instance.toolsOverride}"/>
+                                <f:entry title="Static analysis tool installation:" field="toolInstallationName">
+                                    <f:select/>
+                                </f:entry>
+                                <f:entry title="Static analysis location override:" field="toolsLocation">
+                                    <f:textbox/>
+                                </f:entry>
+                            </f:optionalBlock>
                         </table>
                     </f:block>
 				</f:optionalBlock>

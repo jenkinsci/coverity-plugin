@@ -107,20 +107,18 @@ public class CoverityLauncher extends Launcher {
         if (!isCoverityBuildStepEnabled
                 || (isCoverityBuildStepEnabled && CoverityLauncherDecorator.CoverityBuildStep.get())) {
 
-            InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance();
-            String home = publisher.getDescriptor().getHome(node, envVars, listener);
-            if(invocationAssistance != null && invocationAssistance.getSaOverride() != null) {
-                home = new CoverityToolInstallation(CoverityToolInstallation.GLOBAL_OVERRIDE_NAME,
-                        CoverityUtils.evaluateEnvVars(invocationAssistance.getSaOverride(), envVars, invocationAssistance.getUseAdvancedParser())).forEnvironment(envVars).getHome();
-            }
-
             List<String> cmds = starter.cmds();
-            if (invocationAssistance != null) {
-                List<String> args = new CovBuildCompileCommand(build, decorated, decorated.getListener(), publisher, home, envVars).constructArguments();
-                prefix = args.toArray(new String[args.size()]);
-                cmds.addAll(0, args);
-            } else {
-                prefix = new String[0];
+            final InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance();
+            final CoverityToolInstallation installation = CoverityUtils.findToolInstallationForBuild(node, envVars, this.getListener());
+            if (installation != null) {
+                String home = installation.getHome();
+                if (invocationAssistance != null) {
+                    List<String> args = new CovBuildCompileCommand(build, decorated, decorated.getListener(), publisher, home, envVars).constructArguments();
+                    prefix = args.toArray(new String[args.size()]);
+                    cmds.addAll(0, args);
+                } else {
+                    prefix = new String[0];
+                }
             }
 
             boolean useAdvancedParser = false;
