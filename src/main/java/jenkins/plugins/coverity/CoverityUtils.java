@@ -112,9 +112,11 @@ public class CoverityUtils {
                             if (StringUtils.isNotEmpty(toolsOverride.getToolsLocation())) {
                                 final String overrideToolsLocation = evaluateEnvVars(toolsOverride.getToolsLocation(), environment, invocationAssistance.getUseAdvancedParser());
                                 final CoverityToolInstallation installOverride = new CoverityToolInstallation(installation.getName() + "-" + CoverityToolInstallation.JOB_OVERRIDE_NAME, overrideToolsLocation);
+                                logger.info("Found tools installation '" + installation.getName() + "' with directory '" + installation.getHome() + "' from Job tools override (with optional location override).");
                                 return installOverride.forEnvironment(environment);
                             }
 
+                            logger.info("Found tools installation '" + installation.getName() + "' with directory '" + installation.getHome() + "' from Job tools override.");
                             return (CoverityToolInstallation)installation.translate(node, environment, listener);
                         }
                     }
@@ -141,18 +143,22 @@ public class CoverityUtils {
             // next try to use the 'default' migrated value
             for (CoverityToolInstallation installation : coverityToolInstallations) {
                 if (CoverityToolInstallation.DEFAULT_NAME.equalsIgnoreCase(installation.getName())) {
+                    logger.info("Found tools installation '" + installation.getName() + "' with directory '" + installation.getHome() + "' from default installation");
                     return (CoverityToolInstallation)installation.translate(node, environment, listener);
                 }
             }
 
             // otherwise use the first tool installation found
             if (coverityToolInstallations.length > 0) {
-                return (CoverityToolInstallation)coverityToolInstallations[0].translate(node, environment, listener);
+                final CoverityToolInstallation installation = coverityToolInstallations[0];
+                logger.info("Found tools installation '" + installation.getName() + "' with directory '" + installation.getHome() + "' from first fallback installation");
+                return (CoverityToolInstallation)installation.translate(node, environment, listener);
             }
 
             // finally fall back to using the global home value
             if (publisher.getDescriptor().getHome() != null) {
                 final CoverityToolInstallation installation = new CoverityToolInstallation("global", publisher.getDescriptor().getHome());
+                logger.info("Found tools installation '" + installation.getName() + "' with directory '" + installation.getHome() + "' from existing global configuration");
                 return (CoverityToolInstallation)installation.translate(node, environment, listener);
             }
         } catch (IOException | InterruptedException e) {
