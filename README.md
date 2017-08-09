@@ -209,6 +209,8 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 *   The Coverity plugin will display the invalid project and error message to indicate that the select project cannot be found in Coverity Connect. (BZ 55377)
 *   Resolved a NullPointerException on the CoverityTempDir (idir) (BZ 101589)
 
+<details>
+  <summary>Changelog for older versions</summary>
 #### Version 1.8.1 (January 9, 2017)
 
 *   Support for Coverity Connect v6 web services is deprecated, and in a future release support for Coverity Analysis and Coverity Connect versions 7.6.x and earlier will be removed. (BZ 98801)
@@ -299,7 +301,8 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 
 *   User input in configuration now resolves environment variables
 *   Added new checkers to the defect list for each language. List has been updated to all checkers present to 7.6.0 
-*   New C/C++ Checkers</span>
+*   <details>
+      <summary>New C/C++ Checkers</summary>
 
 	```
     ASSIGN_NOT_RETURNING_STAR_THIS
@@ -374,9 +377,9 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
     VOLATILE_ATOMICITY
     WRAPPER_ESCAPE
 	```
-
-
-*   New Java Checkers
+    </details>
+*   <details>
+      <summary>New Java Checkers</summary>
 
 	```
     ATOMICITY
@@ -472,8 +475,9 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
     XPATH_INJECTION
     XSS
 	```
-
-*   New C# Checkers
+    </details>
+*   <details>
+      <summary>New C# Checker</summary>
 
 	```
     ALLOC_FREE_MISMATCH
@@ -582,6 +586,7 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
     VOLATILE_ATOMICITY
     WRAPPER_ESCAPE
 	```
+    </details>
 
 *   Fixed SSL issue with cov-manage-history  
 *   Fixed issue where cov-build was run when "Perform Coverity build, analysis and commit" was not selected
@@ -669,3 +674,4 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 
 *   Add an option to not fetch defects after commit (BZ 47226)
 *   Allow static analysis binaries to be specified on a per-job basis (BZ 47224)
+</details>
