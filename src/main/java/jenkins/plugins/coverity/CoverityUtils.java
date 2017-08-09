@@ -123,9 +123,19 @@ public class CoverityUtils {
 
             // next try to use the node property
             CoverityInstallation nodeInstall = node.getNodeProperties().get(CoverityInstallation.class);
-            if(nodeInstall != null) {
-                final CoverityToolInstallation install = new CoverityToolInstallation(CoverityToolInstallation.JOB_OVERRIDE_NAME, nodeInstall.getHome());
-                return install.forEnvironment(environment);
+            if(nodeInstall != null && nodeInstall.getHome() != null) {
+                // check for node property override before attempting to use
+                final FilePath nodePath = new FilePath(node.getChannel(), nodeInstall.getHome());
+                if (!nodePath.exists()) {
+                    final String warnMsg = "Attempted to use path to Coverity Static Analysis directory '" + nodePath + "' from '" + node.getDisplayName() + "' node property. " +
+                        "The path was not found, will continue to try to find alternate installation.";
+                    logger.warning(warnMsg);
+                    listener.getLogger().println("[Coverity] Warning: " + warnMsg);
+                } else {
+                    final CoverityToolInstallation install = new CoverityToolInstallation(CoverityToolInstallation.JOB_OVERRIDE_NAME, nodeInstall.getHome());
+                    logger.info("Found tools installation '" + install.getName() + "' with directory '" + install.getHome() + "' from Node property");
+                    return install.forEnvironment(environment);
+                }
             }
 
             // next try to use the 'default' migrated value
