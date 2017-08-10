@@ -210,7 +210,8 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 *   Resolved a NullPointerException on the CoverityTempDir (idir) (BZ 101589)
 
 <details>
-  <summary>Changelog for older versions</summary>
+  <summary><b>Changelog for older versions</b></summary>
+  
 #### Version 1.8.1 (January 9, 2017)
 
 *   Support for Coverity Connect v6 web services is deprecated, and in a future release support for Coverity Analysis and Coverity Connect versions 7.6.x and earlier will be removed. (BZ 98801)
