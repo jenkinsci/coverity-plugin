@@ -163,6 +163,10 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 
 *   When upgrading, make sure that all jobs using the Coverity plugin are finished and not running during upgrade. For best results, restart your Jenkins after upgrade.
 
+## Support
+
+If you have any questions or issues with the Coverity plugin, contact <coverity-support@synopsys.com>
+
 ## Changelog
 
 #### Version 1.9.2 (July 6, 2017)
