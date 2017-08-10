@@ -1,5 +1,4 @@
-Coverity Jenkins Plugin
-=======================
+# Coverity Jenkins Plugin
 
 *   [Overview](#overview)
 *   [Compatibility](#compatibility)
