@@ -94,7 +94,11 @@ Coverity-specific settings are available under the **Build** and **Post-build Ac
 
 #### Coverity Build Action Settings
 
-Click **Add build step** and select **Invoke Coverity Capture Build**. You can use the Coverity Capture Build step to specify which build steps are wrapped with **cov-build**. If the Coverity Capture Build step is not added, then all build steps are wrapped.
+The Coverity build action has the following options:
+
+Option | Description
+--- | ---
+Builder | Select the build step which will be wrapped with **cov-build**. Note that if Coverity Capture Build step is not added, then all build steps are wrapped.
 
 #### Coverity Post-build Action Settings
 
