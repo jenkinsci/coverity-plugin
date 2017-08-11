@@ -47,24 +47,45 @@ The Coverity plugin for Jenkins performs four functions:
 
 ### Getting Started
 
-1.  Install the plugin using the **Plugin Manager**, and restart Jenkins.
-1.  Go to the global configuration page (**Manage Jenkins** > **Configure System**).
-1.  If the Coverity Static Analysis tools are not on the PATH, configure the location (for the master) here.
-1.  Add connection details for any number of Coverity Connect instances you want to use. Click **Check configuration** to validate your settings.
-1.  For any node where Coverity Static Analysis is not on the PATH (and is at a different location than on the master), configure the location on the node configuration page.
+1. Install the plugin using the **Plugin Manager**, and restart Jenkins.
+1. Configure Coverity tools (**Manage Jenkins** > **Global Tool Configuration**)
+   * Add Coverity Static Analysis Tools:
+   ![Screenshot of Coverity Global Tool Configuration](screenshots/global-tool-configuration.png)
+     * Add one or more tools, configuring tools for multiple platforms can be managed here. The tools named 'default' will take priority, otherwise the tools path can be configured (or overwritten) per node and/or job configuration.
+     * If the Coverity Static Analysis tools are on the PATH, this can be skipped
+     * Note: In Jenkins prior to Jenkins 2, global tools are in **Configure System**
+1. Configure Coverity global settins (**Manage Jenkins** > **Configure System**)
+    * Add connection details for the Coverity Connect instance
+    ![Screenshot of Coverity Connect Configuration](screenshots/configure-coverity-connect.png)
+      * Add Credential to store Coverity Connect username and password (managed through [Credentials Plugin](https://wiki.jenkins.io/display/JENKINS/Credentials+Plugin)). Coverity plugin supports only the "Username with Password" credential kind.
+      * Click **Check** to validate your settings and Coverity user account permissions
+1. Configure Node specific tools (if necessary)
+   * If preferred, the 'default' tools path can be overridden by setting a Tools Location in the Node configuration settings
+   ![Screenshot of Node Tool Locations Configuration](screenshots/node-tool-configuration.png)
+     * The tools used can also be configured (or overwritten) per job configuration if this works better for your distributed build architecture
+     * If the Coverity Static Analysis tools are on the Node PATH, and there are no global Coverity tools configured, this can be skipped.
 
 ### Job Setup
 
 1.  Create the job, by creating it from scratch or copying from an existing job.
 1.  Under **Build**, select **Add build step** and select **Invoke Coverity Capture Build**, if needed.
+    ![Screenshot of Invoke Coverity Capture Build Step](screenshots/coverity-build-step.png)
+    * If no Invoke Coverity Capture Build is provided, the Coverity Plugin will transparently invoke the build capture for all build steps during your build.
 1.  Under **Post-build Actions**, select **Add post-build action** and select **Coverity**.
 1.  Select the Coverity Connect instance, project and stream relevant for this job.
+    ![Screenshot of Coverity Post-Build Step Stream](screenshots/coverity-post-build-stream.png)
 1.  If you want the plugin to invoke **cov-build/cov-analyze/cov-commit-defects** for you, check **Perform Coverity build, analysis and commit**. You can add additional arguments for each of these tools, and configure the intermediate directory used (all optional).
 1.  If your build already invokes Coverity, leave the checkbox unchecked.
 1.  If you want to fail the build when defects are found, check the corresponding checkbox. By default all defects are considered, but you can specify filters. Every filter should match for a defect to be included.
 1.  If you want the plugin to invoke test and Test Advisor functions for you, check **Perform Coverity Test Advisor and Commit**. You can add additional arguments and functionality to the build by entering your source control configurations (optional).
 
-Start your build. After the build has completed, a link to Coverity Defects will be available on the build page. On the project page, a graph with historical defect counts will be visible (as soon as more than one build has been performed).
+Start your build. After the build has completed, a link to Coverity Defects will be available on the build page.
+
+![Screenshot of Coverity Defects Link](screenshots/coverity-defect-action.png)
+
+On the project page, a graph with historical defect counts will be visible (as soon as more than one build has been performed).
+
+![Screenshot of Coverity Defects Chart](screenshots/coverity-defect-chart.png)
 
 ### Project Configuration Settings
 
