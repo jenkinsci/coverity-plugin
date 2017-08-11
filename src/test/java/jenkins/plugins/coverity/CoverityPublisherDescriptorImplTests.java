@@ -69,7 +69,7 @@ public class CoverityPublisherDescriptorImplTests {
         // setup jenkins
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
-        cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8080, "admin", "password", false, 9080, "");
+        cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8080, "admin", "password", false, "");
     }
 
     @Test

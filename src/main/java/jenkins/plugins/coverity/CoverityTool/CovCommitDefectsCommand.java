@@ -48,11 +48,7 @@ public class CovCommitDefectsCommand extends CoverityCommand {
     protected void prepareCommand() {
         addHost();
 
-        if (cimInstance.getDataPort() != 0){
-            addSsl();
-            addDataPort();
-            addSslConfiguration(cimInstance);
-        } else if (cimInstance.isUseSSL()) {
+        if (cimInstance.isUseSSL()) {
             addSsl();
             addHtppsPort();
             addSslConfiguration(cimInstance);
@@ -77,11 +73,6 @@ public class CovCommitDefectsCommand extends CoverityCommand {
     private void addHost() {
         addArgument(hostArg);
         addArgument(cimInstance.getHost());
-    }
-
-    private void addDataPort() {
-        addArgument(dataPort);
-        addArgument(Integer.toString(cimInstance.getDataPort()));
     }
 
     private void addHtppsPort() {
