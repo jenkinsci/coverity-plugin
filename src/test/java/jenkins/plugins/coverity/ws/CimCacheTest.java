@@ -41,7 +41,7 @@ public class CimCacheTest {
 
     @Test
     public void getProjects_returnsProjectsForInstances() throws IOException {
-        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "admin", "password", false, 9080, "");
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "admin", "password", false, "");
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 1);
@@ -54,7 +54,7 @@ public class CimCacheTest {
         projects = CimCache.getInstance().getProjects(cimInstance);
         assertEquals(expectedProjectNames, projects);
 
-        cimInstance = new CIMInstance("test-instance-2", "test.coverity2.", 8080, "admin", "password", false, 9080, "");
+        cimInstance = new CIMInstance("test-instance-2", "test.coverity2.", 8080, "admin", "password", false, "");
         testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 2, "stream", 1);
 
@@ -65,7 +65,7 @@ public class CimCacheTest {
 
     @Test
     public void getStreams_returnsStreamsForInstances() throws IOException {
-        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "admin", "password", false, 9080, "");
+        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "admin", "password", false, "");
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 2);
@@ -78,7 +78,7 @@ public class CimCacheTest {
         streams = CimCache.getInstance().getStreams(cimInstance, "project0");
         assertEquals(expectedStreamNames, streams);
 
-        cimInstance = new CIMInstance("test-instance-2", "test.coverity2.", 8080, "admin", "password", false, 9080, "");
+        cimInstance = new CIMInstance("test-instance-2", "test.coverity2.", 8080, "admin", "password", false, "");
         testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 1, "stream", 4);
 

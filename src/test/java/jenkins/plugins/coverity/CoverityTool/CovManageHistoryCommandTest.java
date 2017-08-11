@@ -59,7 +59,6 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         when(cimInstance.getCoverityUser()).thenReturn("TestUser");
         when(cimInstance.getCoverityPassword()).thenReturn("TestPassword");
         when(cimInstance.isUseSSL()).thenReturn(false);
-        when(cimInstance.getDataPort()).thenReturn(0);
 
         TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
@@ -88,7 +87,6 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
         when(cimInstance.getCoverityUser()).thenReturn("TestUser");
         when(cimInstance.getCoverityPassword()).thenReturn("TestPassword");
         when(cimInstance.isUseSSL()).thenReturn(true);
-        when(cimInstance.getDataPort()).thenReturn(0);
 
         TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
