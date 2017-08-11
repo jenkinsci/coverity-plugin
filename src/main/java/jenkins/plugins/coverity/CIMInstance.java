@@ -83,11 +83,6 @@ public class CIMInstance {
     private final int port;
 
     /**
-     * The commit port for the CIM server. This is only for cov-commit-defects.
-     */
-    private final int dataPort;
-
-    /**
      * Username for connecting to the CIM server
      * Deprecated since 1.10
      */
@@ -124,14 +119,13 @@ public class CIMInstance {
     private transient String lastSuccessfulUser;
 
     @DataBoundConstructor
-    public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, int dataPort, String credentialId) {
+    public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, String credentialId) {
         this.name = name;
         this.host = host;
         this.port = port;
         this.user = user;
         this.password = password;
         this.useSSL = useSSL;
-        this.dataPort = dataPort;
         this.credentialId = credentialId;
     }
 
@@ -165,10 +159,6 @@ public class CIMInstance {
 
     public boolean isUseSSL() {
         return useSSL;
-    }
-
-    public int getDataPort() {
-        return dataPort;
     }
 
     public String getCredentialId() { return credentialId; }
@@ -506,7 +496,7 @@ public class CIMInstance {
     }
 
     public CIMInstance cloneWithCredential(String credentialId) {
-        return new CIMInstance(name, host, port, user, password, useSSL, dataPort, credentialId);
+        return new CIMInstance(name, host, port, user, password, useSSL, credentialId);
     }
 
     @Override
@@ -514,7 +504,6 @@ public class CIMInstance {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (host != null ? host.hashCode() : 0);
         result = 31 * result + port;
-        result = 31 * result + dataPort;
         result = 31 * result + (user != null ? user.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (credentialId != null ? credentialId.hashCode() : 0);
