@@ -321,6 +321,8 @@ public class CIMInstance {
             for(int pageStart = 0; pageStart < defectSize; pageStart += pageSize){
                 if (pageStart >= pageSize) {
                     outputLogger.println(MessageFormat.format("[Coverity] Retrieving issues for project \"{0}\" and view \"{1}\" (fetched {2} of {3})", projectId, connectView, pageStart, defectSize));
+                } else {
+                    outputLogger.println(MessageFormat.format("[Coverity] Retrieving issues for project \"{0}\" and view \"{1}\"", projectId, connectView));
                 }
 
                 final ViewContents viewContents = viewService.getViewContents(projectId, connectView, pageSize, pageStart);
@@ -350,6 +352,8 @@ public class CIMInstance {
 
                 defectSize = viewContents.getTotalRows().intValue();
             }
+
+            outputLogger.println(MessageFormat.format("[Coverity] Found {0} issues for project \"{1}\" and view \"{2}\"", coverityDefects.size(), projectId, connectView));
 
             } catch (MalformedURLException | NoSuchAlgorithmException e) {
                 throw new Exception(e);
