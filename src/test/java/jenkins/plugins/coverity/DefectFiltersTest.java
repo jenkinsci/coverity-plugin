@@ -42,14 +42,7 @@ public class DefectFiltersTest {
 
     @Test
     public void initializeFilter_setsExpectedAttributes() throws FormException {
-        DefectFilters filters = new DefectFilters(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            StringUtils.EMPTY);
+        DefectFilters filters = new DefectFilters();
 
         filters.initializeFilter(checkers,
             allClassifications,
@@ -89,14 +82,9 @@ public class DefectFiltersTest {
 
     @Test
     public void initializeFilter_invertChecker_maintainsComponentsAndCheckersNotSelected() throws FormException {
-        DefectFilters filters = new DefectFilters(
-            null,
-            null,
-            null,
-            null,
-            components,
-            checkers,
-            null);
+        DefectFilters filters = new DefectFilters();
+        filters.setComponents(components);
+        filters.setCheckers(checkers);
 
         // verify component / checker selections
         assertTrue(filters.isComponentSelected("Default"));
@@ -172,40 +160,22 @@ public class DefectFiltersTest {
     @Test
     public void defectCutOffDates() throws FormException, java.text.ParseException, DatatypeConfigurationException {
         String cutOffDate = null;
-        DefectFilters filters = new DefectFilters(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            cutOffDate);
+        DefectFilters filters = new DefectFilters();
+        filters.setCutOffDate(cutOffDate);
 
         assertNull(filters.getCutOffDate());
         assertNull(filters.getXMLCutOffDate());
 
         cutOffDate = "unparsable-date-format";
-        filters = new DefectFilters(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            cutOffDate);
+        filters = new DefectFilters();
+        filters.setCutOffDate(cutOffDate);
 
         assertNull(filters.getCutOffDate());
         assertNull(filters.getXMLCutOffDate());
 
         cutOffDate = "2010-01-31";
-        filters = new DefectFilters(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            cutOffDate);
+        filters = new DefectFilters();
+        filters.setCutOffDate(cutOffDate);
 
         assertEquals(cutOffDate, filters.getCutOffDate());
 
@@ -217,29 +187,13 @@ public class DefectFiltersTest {
 
     @Test
     public void isComponentSelected_withNoIgnoredComponents() throws FormException {
-        DefectFilters filters = new DefectFilters(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            StringUtils.EMPTY);
-
+        DefectFilters filters = new DefectFilters();
         assertTrue(filters.isComponentSelected("Default"));
     }
 
     @Test
     public void isCheckerSelected_withNoIgnoredCheckers() throws FormException {
-        DefectFilters filters = new DefectFilters(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            StringUtils.EMPTY);
-
+        DefectFilters filters = new DefectFilters();
         assertTrue(filters.isCheckerSelected("CHECKER"));
     }
 }

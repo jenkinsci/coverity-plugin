@@ -30,6 +30,7 @@ import com.coverity.ws.v9.MergedDefectFilterSpecDataObj;
 
 import hudson.Util;
 import hudson.model.Descriptor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Responsible for filtering the full list of defects to determine if a build should fail or not. Filters are inclusive:
@@ -47,16 +48,13 @@ public class DefectFilters {
     private List<String> impacts;
 
     @DataBoundConstructor
-    public DefectFilters(List<String> actions, List<String> impacts, List<String> classifications, List<String> severities, List<String> components, List<String> checkers, String cutOffDate) throws Descriptor.FormException {
-        this.classifications = Util.fixNull(classifications);
-        this.actions = Util.fixNull(actions);
-        this.impacts = Util.fixNull(impacts);
-        this.severities = Util.fixNull(severities);
-        this.components = Util.fixNull(components);
+    public DefectFilters() {
         this.ignoredComponents = new ArrayList<String>();
-        this.checkers = Util.fixNull(checkers);
         this.ignoredCheckers = new ArrayList<String>();
+    }
 
+    @DataBoundSetter
+    public void setCutOffDate(String cutOffDate) throws Descriptor.FormException {
         cutOffDate = Util.fixEmpty(cutOffDate);
         if(cutOffDate != null) {
             try {
@@ -67,6 +65,63 @@ public class DefectFilters {
         } else {
             this.cutOffDate = null;
         }
+    }
+
+    public String getCutOffDate() {
+        if(cutOffDate == null) return null;
+        return new SimpleDateFormat("yyyy-MM-dd").format(cutOffDate);
+    }
+
+    @DataBoundSetter
+    public void setClassifications(List<String> classifications){
+        this.classifications = Util.fixNull(classifications);
+    }
+
+    public List<String> getClassifications(){return classifications;}
+
+    @DataBoundSetter
+    public void setActions(List<String> actions){
+        this.actions = Util.fixNull(actions);
+    }
+
+    public List<String> getActions(){return actions;}
+
+    @DataBoundSetter
+    public void setSeverities(List<String> severities){
+        this.severities = Util.fixNull(severities);
+    }
+
+    public List<String> getSeverities(){return severities;}
+
+    @DataBoundSetter
+    public void setImpacts(List<String> impacts){
+        this.impacts = Util.fixNull(impacts);
+    }
+
+    public List<String> getImpacts(){return impacts;}
+
+    @DataBoundSetter
+    public void setComponents(List<String> components){
+        this.components = Util.fixNull(components);
+    }
+
+    public List<String> getComponents(){
+        return components;
+    }
+
+    public List<String> getIgnoredComponents() {
+        return ignoredComponents;
+    }
+
+    public List<String> getIgnoredChecker(){return ignoredCheckers;}
+
+    @DataBoundSetter
+    public void setCheckers(List<String> checkers){
+        this.checkers = Util.fixNull(checkers);
+    }
+
+    public List<String> getCheckersList(){
+        return checkers;
     }
 
     /**
@@ -93,7 +148,9 @@ public class DefectFilters {
      */
     public void invertCheckers(List<String> allCheckers) {
         ignoredCheckers = new ArrayList<>(allCheckers);
-        ignoredCheckers.removeAll(checkers);
+        if (checkers != null){
+            ignoredCheckers.removeAll(checkers);
+        }
     }
 
     /**
@@ -102,7 +159,9 @@ public class DefectFilters {
      */
     public void invertComponents(List<String> allComponents) {
         ignoredComponents = new ArrayList<>(allComponents);
-        ignoredComponents.removeAll(components);
+        if (components != null){
+            ignoredComponents.removeAll(components);
+        }
     }
 
     /**
@@ -121,10 +180,6 @@ public class DefectFilters {
 
     public boolean isClassificationSelected(String action) {
         return classifications != null && classifications.contains(action);
-    }
-
-    public List<String> getCheckersList(){
-        return checkers;
     }
 
     public boolean isActionSelected(String action) {
@@ -163,29 +218,6 @@ public class DefectFilters {
         return ignoredCheckers != null && !ignoredCheckers.contains(checker);
     }
 
-    public String getCutOffDate() {
-        if(cutOffDate == null) return null;
-        return new SimpleDateFormat("yyyy-MM-dd").format(cutOffDate);
-    }
-
-    public List<String> getClassifications(){return classifications;}
-
-    public List<String> getActions(){return actions;}
-
-    public List<String> getSeverities(){return severities;}
-
-    public List<String> getImpacts(){return impacts;}
-
-    public List<String> getComponents(){
-        return components;
-    }
-
-    public List<String> getIgnoredComponents() {
-        return ignoredComponents;
-    }
-
-    public List<String> getIgnoredChecker(){return ignoredCheckers;}
-
     public XMLGregorianCalendar getXMLCutOffDate(){
         if (cutOffDate != null) {
             GregorianCalendar calender = new GregorianCalendar();
@@ -206,12 +238,17 @@ public class DefectFilters {
         filterSpecDataObj.getClassificationNameList().addAll(classifications);
         filterSpecDataObj.getSeverityNameList().addAll(severities);
         filterSpecDataObj.getImpactList().addAll(impacts);
-        for (String component : components) {
-            ComponentIdDataObj componentIdDataObj = new ComponentIdDataObj();
-            componentIdDataObj.setName(component);
-            filterSpecDataObj.getComponentIdList().add(componentIdDataObj);
+        if (components != null){
+            for (String component : components) {
+                ComponentIdDataObj componentIdDataObj = new ComponentIdDataObj();
+                componentIdDataObj.setName(component);
+                filterSpecDataObj.getComponentIdList().add(componentIdDataObj);
+            }
         }
-        filterSpecDataObj.getCheckerList().addAll(checkers);
+
+        if (checkers != null){
+            filterSpecDataObj.getCheckerList().addAll(checkers);
+        }
         XMLGregorianCalendar xmlCutOffDate = getXMLCutOffDate();
         if (xmlCutOffDate != null) {
             filterSpecDataObj.setFirstDetectedStartDate(xmlCutOffDate);

@@ -88,14 +88,16 @@ public class DefectReaderTest {
 
     private DefectFilters getMatchingDefectFilters(){
         try {
-            return new DefectFilters(
-                Arrays.asList("Undecided"),
-                new ArrayList<>(Arrays.asList("High", "Medium", "Low")),
-                Arrays.asList("Unclassified"),
-                Arrays.asList("Unspecified", "Major", "Moderate", "Minor"),
-                Arrays.asList("Default.Other"),
-                Arrays.asList("TEST_CHECKER"),
-                "2017-01-01");
+            DefectFilters defectFilters = new DefectFilters();
+            defectFilters.setActions(Arrays.asList("Undecided"));
+            defectFilters.setImpacts(Arrays.asList("High", "Medium", "Low"));
+            defectFilters.setClassifications(Arrays.asList("Unclassified"));
+            defectFilters.setSeverities(Arrays.asList("Unspecified", "Major", "Moderate", "Minor"));
+            defectFilters.setComponents(Arrays.asList("Default.Other"));
+            defectFilters.setCheckers(Arrays.asList("TEST_CHECKER"));
+            defectFilters.setCutOffDate("2017-01-01");
+
+            return defectFilters;
         } catch(Descriptor.FormException e) {
             return null;
         }
