@@ -28,7 +28,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
                                     .withUser("TestUser").withPassword("TestPassword").withUseSSL(false).withCredentialId("")
                                     .build();
@@ -50,7 +50,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void addHttpsPortTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
                 .withUser("TestUser").withPassword("TestPassword").withUseSSL(true).withCredentialId("")
                 .build();
@@ -81,7 +81,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void addCommitArgumentsTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
                 .withUser("TestUser").withPassword("TestPassword").withUseSSL(false).withCredentialId("")
                 .build();
@@ -105,7 +105,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     public void addCommitArgumentsTest_WithCredentials() throws IOException, InterruptedException {
 
         setCredentialManager("TestUser", "TestPassword");
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
                 .withUser("").withPassword("").withUseSSL(false).withCredentialId("TestCredentialId")
                 .build();
@@ -127,7 +127,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void addCommitArgumentsTest_WithParseException() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
                 .withUser("TestUser").withPassword("TestPassword").withUseSSL(false).withCredentialId("")
                 .build();
@@ -148,7 +148,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void doesNotExecute_WithoutInvocationAssistance() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
                 .withUser("TestUser").withPassword("TestPassword").withUseSSL(false).withCredentialId("")
                 .build();

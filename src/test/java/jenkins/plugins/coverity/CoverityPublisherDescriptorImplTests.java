@@ -79,7 +79,7 @@ public class CoverityPublisherDescriptorImplTests {
     public void doLoadProjectsForInstance_returnsJsonReponse() throws ServletException, IOException, org.json.simple.parser.ParseException {
         final String projectName = "test-cim-project";
         final String streamName = "test-cim-stream";
-        CIMStream stream = new CIMStream("test-cim-instance", projectName, streamName, null);
+        CIMStream stream = new CIMStream("test-cim-instance", projectName, streamName);
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects(projectName, 2, streamName, 3);
 
@@ -115,7 +115,7 @@ public class CoverityPublisherDescriptorImplTests {
     public void doLoadStreamsForProject_returnsJsonResponse() throws ServletException, IOException, org.json.simple.parser.ParseException {
         final String projectName = "test-cim-project";
         final String streamName = "test-cim-stream";
-        CIMStream stream = new CIMStream("test-cim-instance", projectName + 1, streamName, null);
+        CIMStream stream = new CIMStream("test-cim-instance", projectName + 1, streamName);
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects(projectName, 2, streamName, 3);
 

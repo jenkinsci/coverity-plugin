@@ -69,7 +69,7 @@ public class CheckConfigTest {
     @Test
     public void checkStreamTest_NoCIMStream() {
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-        CIMStream cimStream = new CIMStream(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, null);
+        CIMStream cimStream = new CIMStream(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
 
         CheckConfig.StreamStatus status = CheckConfig.checkStream(publisher, cimStream);
         assertNotNull(status);
@@ -85,7 +85,7 @@ public class CheckConfigTest {
     public void checkStreamTest_NoCIMInstance() {
         when(descriptor.getInstance(any(String.class))).thenReturn(null);
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-        CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, StringUtils.EMPTY, null);
+        CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, StringUtils.EMPTY);
 
         CheckConfig.StreamStatus status = CheckConfig.checkStream(publisher, cimStream);
         assertNotNull(status);
@@ -103,7 +103,7 @@ public class CheckConfigTest {
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
                 .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
                 .build();
-        CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, StringUtils.EMPTY, null);
+        CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, StringUtils.EMPTY);
         when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
 
         CheckConfig.StreamStatus status = CheckConfig.checkStream(publisher, cimStream);
@@ -122,7 +122,7 @@ public class CheckConfigTest {
         when(cimInstance.doCheck()).thenReturn(FormValidation.error(StringUtils.EMPTY));
         when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-        CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, "test-stream", null);
+        CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, "test-stream");
 
         CheckConfig.StreamStatus status = CheckConfig.checkStream(publisher, cimStream);
         assertNotNull(status);
@@ -143,7 +143,7 @@ public class CheckConfigTest {
         when(cimInstance.doCheck()).thenReturn(FormValidation.ok());
         when(cimInstance.getConfigurationService()).thenReturn(testConfigurationService);
         when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
-        CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, "test-stream", null);
+        CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, "test-stream");
 
         CheckConfig.StreamStatus status = CheckConfig.checkStream(publisher, cimStream);
         assertNotNull(status);

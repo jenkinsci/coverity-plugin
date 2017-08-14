@@ -174,7 +174,8 @@ public class CoverityPublisher extends Recorder {
      * to a {@link CIMStream} object
      */
     private void convertTransientDataFields() {
-        CIMStream newcs = new CIMStream(cimInstance, project, stream, defectFilters);
+        CIMStream newcs = new CIMStream(cimInstance, project, stream);
+        newcs.setDefectFilters(defectFilters);
 
         cimInstance = null;
         project = null;

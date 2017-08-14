@@ -107,7 +107,7 @@ public class DefectReaderTest {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
-        CIMStream cimStream  = new CIMStream(cimInstanceName, "test-project", "test-stream", null);
+        CIMStream cimStream  = new CIMStream(cimInstanceName, "test-project", "test-stream");
 
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
@@ -134,7 +134,8 @@ public class DefectReaderTest {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
-        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", getMatchingDefectFilters());
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream");
+        cimStream.setDefectFilters(getMatchingDefectFilters());
 
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
@@ -161,7 +162,8 @@ public class DefectReaderTest {
         when(jenkins.getRootUrl()).thenReturn("rootUrl/");
         when(build.getUrl()).thenReturn("buildUrl/");
 
-        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", getMatchingDefectFilters());
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream");
+        cimStream.setDefectFilters(getMatchingDefectFilters());
 
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).build();
 
@@ -191,7 +193,8 @@ public class DefectReaderTest {
         // set initial state as success (result can only get worse)
         when(build.getResult()).thenReturn(Result.SUCCESS);
 
-        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream", getMatchingDefectFilters());
+        CIMStream cimStream = new CIMStream(cimInstanceName, "test-project", "test-stream");
+        cimStream.setDefectFilters(getMatchingDefectFilters());
 
         CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(cimStream).withFailBuild(true).build();
 
