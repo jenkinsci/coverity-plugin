@@ -12,6 +12,7 @@ package jenkins.plugins.coverity;
 
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
+import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.Utils.ScmOptionBlockBuilder;
 import jenkins.plugins.coverity.Utils.TaOptionBlockBuilder;
@@ -99,7 +100,9 @@ public class CheckConfigTest {
     @Test
     public void checkStreamTest_NoStreamConfiguredForCIMStream() {
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
-        CIMInstance cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8080, "admin", "password", false, "");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
+                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
+                .build();
         CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, StringUtils.EMPTY, null);
         when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
 

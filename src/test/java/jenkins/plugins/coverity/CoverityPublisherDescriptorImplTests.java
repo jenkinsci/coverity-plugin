@@ -27,6 +27,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 
+import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,7 +70,9 @@ public class CoverityPublisherDescriptorImplTests {
         // setup jenkins
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
-        cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8080, "admin", "password", false, "");
+        cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
+                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
+                .build();
     }
 
     @Test

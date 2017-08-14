@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,7 +25,9 @@ import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationServic
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestDefectService;
 
 public class WebServiceFactoryTest {
-    private CIMInstance cimInstance = new CIMInstance("test", "cim-host", 8080, "test-user", "password", false, "");
+    private CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("cim-host").withPort(8080)
+            .withUser("test-user").withPassword("password").withUseSSL(false).withCredentialId("")
+            .build();
 
     private URL getExpectedUrl(CIMInstance cim, String wsdl) throws MalformedURLException {
         return new URL(cim.isUseSSL() ? "https" : "http", cim.getHost(), cim.getPort(), wsdl);
@@ -61,7 +64,9 @@ public class WebServiceFactoryTest {
 
         Assert.assertNotNull(result);
 
-        cimInstance = new CIMInstance("test instance 2", "other-cim-host", 8443, "test-user", "password", true, "");
+        cimInstance = new CIMInstanceBuilder().withName("test instance 2").withHost("other-cim-host").withPort(8443)
+                .withUser("test-user").withPassword("password").withUseSSL(true).withCredentialId("")
+                .build();
 
         DefectService result2 = factory.getDefectService(cimInstance);
 
@@ -101,7 +106,9 @@ public class WebServiceFactoryTest {
 
         Assert.assertNotNull(result);
 
-        cimInstance = new CIMInstance("test instance 2", "other-cim-host", 8443, "test-user", "password", true, "");
+        cimInstance = new CIMInstanceBuilder().withName("test instance 2").withHost("other-cim-host").withPort(8443)
+                .withUser("test-user").withPassword("password").withUseSSL(true).withCredentialId("")
+                .build();
 
         ConfigurationService result2 = factory.getConfigurationService(cimInstance);
 

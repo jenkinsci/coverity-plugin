@@ -458,7 +458,11 @@ public class CoverityPublisher extends Recorder {
         public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port,
                                               @QueryParameter String user, @QueryParameter String password,
                                               @QueryParameter boolean useSSL, @QueryParameter String credentialId) {
-            return new CIMInstance("", host, port, user, password, useSSL, credentialId).doCheck();
+            CIMInstance instance = new CIMInstance("", host, port, credentialId);
+            instance.setUser(user);
+            instance.setPassword(password);
+            instance.setUseSSL(useSSL);
+            return instance.doCheck();
         }
 
         public FormValidation doCheckAnalysisLocation(@QueryParameter String home) {
