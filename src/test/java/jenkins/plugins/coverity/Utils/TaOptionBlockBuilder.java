@@ -115,22 +115,24 @@ public class TaOptionBlockBuilder {
     }
 
     public TaOptionBlock build() {
-        return new TaOptionBlock(
-                customTestCommand,
-                cOptionBlock,
-                csOptionBlock,
-                javaOptionBlock,
-                customTestTool,
-                logFileLoc,
-                csFramework,
-                csCoverageTool,
-                cxxCoverageTool,
-                javaCoverageTool,
-                junitFramework,
-                junit4Framework,
-                policyFile,
-                taStripPaths,
-                bullsEyeDir,
-                covHistoryCheckbox);
+
+        TaOptionBlock taOptionBlock = new TaOptionBlock(policyFile);
+        taOptionBlock.setCustomTestCommand(customTestCommand);
+        taOptionBlock.setcOptionBlock(cOptionBlock);
+        taOptionBlock.setCsOptionBlock(csOptionBlock);
+        taOptionBlock.setJavaOptionBlock(javaOptionBlock);
+        taOptionBlock.setCustomTestTool(customTestTool);
+        taOptionBlock.setLogFileLoc(logFileLoc);
+        taOptionBlock.setCsFramework(csFramework);
+        taOptionBlock.setCsCoverageTool(csCoverageTool);
+        taOptionBlock.setCxxCoverageTool(cxxCoverageTool);
+        taOptionBlock.setJavaCoverageTool(javaCoverageTool);
+        taOptionBlock.setJunitFramework(junitFramework);
+        taOptionBlock.setJunit4Framework(junit4Framework);
+        taOptionBlock.setTaStripPaths(taStripPaths);
+        taOptionBlock.setBullsEyeDir(bullsEyeDir);
+        taOptionBlock.setCovHistoryCheckbox(covHistoryCheckbox);
+
+        return taOptionBlock;
     }
 }
