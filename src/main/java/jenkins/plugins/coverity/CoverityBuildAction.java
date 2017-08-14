@@ -117,7 +117,7 @@ public class CoverityBuildAction implements LastBuildAction {
                 final CoverityPublisher coverityPublisher = (CoverityPublisher)project.getPublishersList().get(CoverityPublisher.class);
                 // project builds with Coverity Publisher can hide the chart
                 if (coverityPublisher != null &&
-                    coverityPublisher.isHideChart())
+                    coverityPublisher.getHideChart())
                     return Collections.emptyList();
             }
 

@@ -59,7 +59,7 @@ public class DefectReader {
 
     public void getLatestDefectsForBuild()
     {
-        if (publisher.isSkipFetchingDefects()) {
+        if (publisher.getSkipFetchingDefects()) {
             // never get any defects when configured to skip fetching defects
             return;
         }

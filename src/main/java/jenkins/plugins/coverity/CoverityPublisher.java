@@ -12,14 +12,11 @@ package jenkins.plugins.coverity;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
-import com.iwombat.util.StringUtil;
 
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -30,7 +27,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.tools.ToolInstallation;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
@@ -54,7 +50,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -86,29 +81,29 @@ public class CoverityPublisher extends Recorder {
     /**
      * Should the build be marked as failed if defects are present ?
      */
-    private final boolean failBuild;
+    private boolean failBuild;
 
     /**
      * Should the build be marked as unstable if defects are present ?
      */
-    private final boolean unstable;
+    private boolean unstable;
 
     /**
      * Should the intermediate directory be preserved after each build?
      */
-    private final boolean keepIntDir;
+    private boolean keepIntDir;
     /**
      * Should defects be fetched after each build? Enabling this prevents the build from being failed due to defects.
      */
-    private final boolean skipFetchingDefects;
+    private boolean skipFetchingDefects;
     /**
      * Hide the chart to make page loads faster
      */
-    private final boolean hideChart;
+    private boolean hideChart;
 
-    private final TaOptionBlock taOptionBlock;
+    private TaOptionBlock taOptionBlock;
 
-    private final ScmOptionBlock scmOptionBlock;
+    private ScmOptionBlock scmOptionBlock;
 
     /**
      * Internal variable to notify the Publisher that the build should be marked as unstable
@@ -117,24 +112,8 @@ public class CoverityPublisher extends Recorder {
     private boolean unstableBuild;
 
     @DataBoundConstructor
-    public CoverityPublisher(CIMStream cimStream,
-                             InvocationAssistance invocationAssistance,
-                             boolean failBuild,
-                             boolean unstable,
-                             boolean keepIntDir,
-                             boolean skipFetchingDefects,
-                             boolean hideChart,
-                             TaOptionBlock taOptionBlock,
-                             ScmOptionBlock scmOptionBlock) {
+    public CoverityPublisher(CIMStream cimStream) {
         this.cimStream = cimStream;
-        this.invocationAssistance = invocationAssistance;
-        this.failBuild = failBuild;
-        this.unstable = unstable;
-        this.keepIntDir = keepIntDir;
-        this.skipFetchingDefects = skipFetchingDefects;
-        this.hideChart = hideChart;
-        this.taOptionBlock = taOptionBlock;
-        this.scmOptionBlock = scmOptionBlock;
         this.unstableBuild = false;
     }
 
@@ -211,24 +190,54 @@ public class CoverityPublisher extends Recorder {
         return BuildStepMonitor.STEP;
     }
 
+    @DataBoundSetter
+    public void setInvocationAssistance(InvocationAssistance invocationAssistance){
+        this.invocationAssistance = invocationAssistance;
+    }
+
     public InvocationAssistance getInvocationAssistance() {
         return invocationAssistance;
+    }
+
+    @DataBoundSetter
+    public void setFailBuild(boolean failBuild){
+        this.failBuild = failBuild;
     }
 
     public boolean isFailBuild() {
         return failBuild;
     }
 
-    public boolean isKeepIntDir() {
+    @DataBoundSetter
+    public void setKeepIntDir(boolean keepIntDir){
+        this.keepIntDir = keepIntDir;
+    }
+
+    public boolean getKeepIntDir() {
         return keepIntDir;
     }
 
-    public boolean isSkipFetchingDefects() {
+    @DataBoundSetter
+    public void setSkipFetchingDefects(boolean skipFetchingDefects){
+        this.skipFetchingDefects = skipFetchingDefects;
+    }
+
+    public boolean getSkipFetchingDefects() {
         return skipFetchingDefects;
     }
 
-    public boolean isHideChart() {
+    @DataBoundSetter
+    public void setHideChart(boolean hideChart){
+        this.hideChart = hideChart;
+    }
+
+    public boolean getHideChart() {
         return hideChart;
+    }
+
+    @DataBoundSetter
+    public void setUnstable(boolean unstable){
+        this.unstable = unstable;
     }
 
     public boolean isUnstable(){
@@ -243,7 +252,17 @@ public class CoverityPublisher extends Recorder {
         unstableBuild = unstable;
     }
 
+    @DataBoundSetter
+    public void setTaOptionBlock(TaOptionBlock taOptionBlock){
+        this.taOptionBlock = taOptionBlock;
+    }
+
     public TaOptionBlock getTaOptionBlock(){return taOptionBlock;}
+
+    @DataBoundSetter
+    public void setScmOptionBlock(ScmOptionBlock scmOptionBlock){
+        this.scmOptionBlock = scmOptionBlock;
+    }
 
     public ScmOptionBlock getScmOptionBlock(){return scmOptionBlock;}
 
@@ -292,7 +311,7 @@ public class CoverityPublisher extends Recorder {
     public void deleteIntermediateDirectory(BuildListener listener, CoverityTempDir temp) {
         if (temp != null) {
             try{
-                if(!isKeepIntDir() || temp.isDef()) {
+                if(!getKeepIntDir() || temp.isDef()) {
                     listener.getLogger().println("[Coverity] deleting intermediate directory: " + temp.getTempDir());
                     temp.getTempDir().deleteRecursive();
                     listener.getLogger().println("[Coverity] deleting intermediate directory  \"" + temp.getTempDir() + "\" was successful");
