@@ -613,10 +613,12 @@ public class CIMInstanceTest {
         assertNull(issuesVorView.get(0).getCheckerName());
         assertNull(issuesVorView.get(0).getFilePathname());
         assertNull(issuesVorView.get(0).getFunctionDisplayName());
-        testableConsoleLogger.verifyMessages("[Coverity] Warning: Issues view \"view0\" is missing column \"cid\"",
+        testableConsoleLogger.verifyMessages("[Coverity] Retrieving issues for project \"project0\" and view \"view0\"",
+            "[Coverity] Warning: Issues view \"view0\" is missing column \"cid\"",
             "[Coverity] Warning: Issues view \"view0\" is missing column \"checker\"",
             "[Coverity] Warning: Issues view \"view0\" is missing column \"displayFile\"",
-            "[Coverity] Warning: Issues view \"view0\" is missing column \"displayFunction\"");
+            "[Coverity] Warning: Issues view \"view0\" is missing column \"displayFunction\"",
+            "[Coverity] Found 1 issues for project \"project0\" and view \"view0\"");
     }
 
     @Test
@@ -667,7 +669,9 @@ public class CIMInstanceTest {
         final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
 
         assertEquals(rowCount, issuesVorView.size());
-        testableConsoleLogger.verifyMessages("[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 1,000 of 3,000)",
-            "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 2,000 of 3,000)");
+        testableConsoleLogger.verifyMessages("[Coverity] Retrieving issues for project \"project0\" and view \"view0\"",
+            "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 1,000 of 3,000)",
+            "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 2,000 of 3,000)",
+            "[Coverity] Found 3,000 issues for project \"project0\" and view \"view0\"");
     }
 }

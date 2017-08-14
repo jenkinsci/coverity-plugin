@@ -142,7 +142,10 @@ public class CoverityViewResultsPublisherTest {
 
         publisher.perform(run, workspace, launcher, listener);
 
-        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+        consoleLogger.verifyMessages(
+            getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(0, projectId, view),
             expectedUrlMessage,
             expectedFinishedMessage);
     }
@@ -160,6 +163,8 @@ public class CoverityViewResultsPublisherTest {
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(10, projectId, view),
             expectedUrlMessage,
             expectedFinishedMessage);
     }
@@ -179,6 +184,8 @@ public class CoverityViewResultsPublisherTest {
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(10, projectId, view),
             expectedUrlMessage,
             expectedFinishedMessage);
         verify(run).setResult(Result.FAILURE);
@@ -199,6 +206,8 @@ public class CoverityViewResultsPublisherTest {
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(20, projectId, view),
             expectedUrlMessage,
             expectedFinishedMessage);
         verify(run).setResult(Result.UNSTABLE);
@@ -218,6 +227,7 @@ public class CoverityViewResultsPublisherTest {
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
             "[Coverity] Error Publishing Coverity View Results",
             exception.toString(),
             expectedFinishedMessage);
@@ -242,6 +252,7 @@ public class CoverityViewResultsPublisherTest {
                 "GET http://{0}:{1}/api/viewContents/issues/v1/{2}?projectId={3}&rowCount=1000&offset=0 returned a response status of {4}: {5}",
                 cimInstance.getHost(), String.valueOf(cimInstance.getPort()), view, projectId, httpStatus, jsonResult));
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
             "[Coverity] Error Publishing Coverity View Results",
             exception.toString(),
             expectedFinishedMessage);
@@ -294,6 +305,18 @@ public class CoverityViewResultsPublisherTest {
             "projectId:'" + projectId + "', " +
             "connectView:'" + view +
             "}";
+    }
+
+    public String getRetrievingMessage(String projectId, String view) {
+        return "[Coverity] Retrieving issues for project \"" +
+            projectId + "\" and view \"" +
+            view + "\"";
+    }
+
+    public String getIssueCountMessage(int count, String projectId, String view) {
+        return "[Coverity] Found " + count + " issues for project \"" +
+            projectId + "\" and view \"" +
+            view + "\"";
     }
 
     public void setupRunToHandleBuildAction() {
