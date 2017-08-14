@@ -28,6 +28,8 @@ This plugin integrates Coverity Connect and Analysis with the Jenkins Continuous
 
 See [https://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin) for more Jenkins Plugin specific information.
 
+![Coverity Scan Build Status](https://img.shields.io/coverity/scan/13458.svg "Coverity Scan Build Status")
+
 ## Compatibility
 
 The following is the plugin version compatability with Coverity Connect server and Coverity Static Analysis Tools.
