@@ -1,11 +1,31 @@
-Coverity Jenkins Plugin
-=======================
+# Coverity Jenkins Plugin
 
-This plugin integrates Coverity Connect and Analysis with the Jenkins Continuous Integration Server. ([Coverity Static Analysis](http://www.coverity.com/products/code-advisor/) information)
+*   [Overview](#overview)
+*   [Compatibility](#compatibility)
+*   [Features](#features)
+*   [How to Use](#how-to-use)
+    *   [Getting Started](#getting-started)
+    *   [Job Setup](#job-setup)
+    *   [Project Configuration Settings](#project-configuration-settings)
+        *   [Coverity Build Action Settings](#coverity-build-action-settings)
+        *   [Coverity Post-build Action Settings](#coverity-post-build-action-settings)
+*   [Troubleshooting](#troubleshooting)
+*   [Known Issues](#known-issues)
+    *   [Compatibility with other Jenkins plugins](#compatibility-with-other-jenkins-plugins)
+*   [Upgrade Notes](#upgrade-notes)
+*   [Support](#support)
+*   [Changelog](#changelog)
+
+
+## Overview
+
+This plugin integrates Coverity Connect and Analysis with the Jenkins Continuous Integration Server. ([Synopsys Static Analysis Tool (Coverity)](https://www.synopsys.com/software-integrity/resources/datasheets/coverity.html))
 
 See [https://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin) for more Jenkins Plugin specific information.
 
-**Compatibility with Coverity Connect**
+## Compatibility
+
+The following is the plugin version compatability with Coverity Connect server and Coverity Static Analysis Tools.
 
 Plugin version | Coverity Connect / Static Analysis version
 --- | ---
@@ -14,8 +34,7 @@ Plugin version | Coverity Connect / Static Analysis version
 **1.9.0** to **1.9.1** | **7.7.0** to **8.7.1**
 **1.9.2+** | **7.7.0** to **2017.07**
 
-
-## Functions
+## Features
 
 The Coverity plugin for Jenkins performs four functions:
 
@@ -24,35 +43,62 @@ The Coverity plugin for Jenkins performs four functions:
 *   It can fail the build if defects are found matching certain criteria
 *   It reports found defects after the build
 
-## Getting Started
+## How to Use
 
-1.  Install the plugin using the **Plugin Manager**, and restart Jenkins.
-1.  Go to the global configuration page (**Manage Jenkins** > **Configure System**).
-1.  If the Coverity Static Analysis tools are not on the PATH, configure the location (for the master) here.
-1.  Add connection details for any number of Coverity Connect instances you want to use. Click **Check configuration** to validate your settings.
-1.  For any node where Coverity Static Analysis is not on the PATH (and is at a different location than on the master), configure the location on the node configuration page.
+### Getting Started
 
-## Job Setup
+1. Install the plugin using the **Plugin Manager**, and restart Jenkins.
+1. Configure Coverity tools (**Manage Jenkins** > **Global Tool Configuration**)
+   * Add Coverity Static Analysis Tools:
+   ![Screenshot of Coverity Global Tool Configuration](screenshots/global-tool-configuration.png)
+     * Add one or more tools, configuring tools for multiple platforms can be managed here. The tools named 'default' will take priority, otherwise the tools path can be configured (or overwritten) per node and/or job configuration.
+     * If the Coverity Static Analysis tools are on the PATH, this can be skipped
+     * Note: In Jenkins prior to Jenkins 2, global tools are in **Configure System**
+1. Configure Coverity global settins (**Manage Jenkins** > **Configure System**)
+    * Add connection details for the Coverity Connect instance
+    ![Screenshot of Coverity Connect Configuration](screenshots/configure-coverity-connect.png)
+      * Add Credential to store Coverity Connect username and password (managed through [Credentials Plugin](https://wiki.jenkins.io/display/JENKINS/Credentials+Plugin)). Coverity plugin supports only the "Username with Password" credential kind.
+      * Click **Check** to validate your settings and Coverity user account permissions
+1. Configure Node specific tools (if necessary)
+   * If preferred, the 'default' tools path can be overridden by setting a Tools Location in the Node configuration settings
+   ![Screenshot of Node Tool Locations Configuration](screenshots/node-tool-configuration.png)
+     * The tools used can also be configured (or overwritten) per job configuration if this works better for your distributed build architecture
+     * If the Coverity Static Analysis tools are on the Node PATH, and there are no global Coverity tools configured, this can be skipped.
+
+### Job Setup
 
 1.  Create the job, by creating it from scratch or copying from an existing job.
 1.  Under **Build**, select **Add build step** and select **Invoke Coverity Capture Build**, if needed.
+    ![Screenshot of Invoke Coverity Capture Build Step](screenshots/coverity-build-step.png)
+    * If no Invoke Coverity Capture Build is provided, the Coverity Plugin will transparently invoke the build capture for all build steps during your build.
 1.  Under **Post-build Actions**, select **Add post-build action** and select **Coverity**.
 1.  Select the Coverity Connect instance, project and stream relevant for this job.
+    ![Screenshot of Coverity Post-Build Step Stream](screenshots/coverity-post-build-stream.png)
 1.  If you want the plugin to invoke **cov-build/cov-analyze/cov-commit-defects** for you, check **Perform Coverity build, analysis and commit**. You can add additional arguments for each of these tools, and configure the intermediate directory used (all optional).
 1.  If your build already invokes Coverity, leave the checkbox unchecked.
 1.  If you want to fail the build when defects are found, check the corresponding checkbox. By default all defects are considered, but you can specify filters. Every filter should match for a defect to be included.
 1.  If you want the plugin to invoke test and Test Advisor functions for you, check **Perform Coverity Test Advisor and Commit**. You can add additional arguments and functionality to the build by entering your source control configurations (optional).
 
-Start your build. After the build has completed, a link to Coverity Defects will be available on the build page. On the project page, a graph with historical defect counts will be visible (as soon as more than one build has been performed).
+Start your build. After the build has completed, a link to Coverity Defects will be available on the build page.
 
-## Project Configuration Settings
+![Screenshot of Coverity Defects Link](screenshots/coverity-defect-action.png)
+
+On the project page, a graph with historical defect counts will be visible (as soon as more than one build has been performed).
+
+![Screenshot of Coverity Defects Chart](screenshots/coverity-defect-chart.png)
+
+### Project Configuration Settings
 
 To access the Coverity Plugin Configuration dialog, first choose a project in your Jenkins server, and select **Configure**.
 Coverity-specific settings are available under the **Build** and **Post-build Actions** sections.
 
 #### Coverity Build Action Settings
 
-Click **Add build step** and select **Invoke Coverity Capture Build**. You can use the Coverity Capture Build step to specify which build steps are wrapped with **cov-build**. If the Coverity Capture Build step is not added, then all build steps are wrapped.
+The Coverity build action has the following options:
+
+Option | Description
+--- | ---
+Builder | Select the build step which will be wrapped with **cov-build**. Note that if Coverity Capture Build step is not added, then all build steps are wrapped.
 
 #### Coverity Post-build Action Settings
 
@@ -74,8 +120,8 @@ Do not fetch defects after the build | Select this if builds are slow or fetchin
 Preserve the intermediate directory after each build | Keep the intermediate directory after a build. This will only have an effect is a non-default intermediate directory is chosen.
 Hide the defects chart on the project page | Hide the defects chart on the project page. This setting can speed up page loads when there are a large number of defects or builds.
 
-
-## Coverity Advanced Parsing
+<details>
+  <summary><b>Coverity Advanced Parsing</b></summary>
 
 The Coverity plugin now provides an optional Coverity parser for interpreting commands that are executed on a Jenkins instance. If **Use advanced parsing mechanism** is selected, the Coverity parser is used instead of the default Jenkins parser. Either parser interprets environmental variables entered on the command line with a Jenkins command. The following rules describe how the Coverity parser interprets environmental variables.
 
@@ -135,6 +181,8 @@ VAR6  - > [Hello, World]
 
 Note that the “Hello World” string, surrounded by unescaped quotes, is placed into the array as a single value, and the quotes are removed. The unquoted Hello World string is split into two array elements. 
 
+</details>
+
 ## Troubleshooting
 
 When you encounter problems while using the plugin, please provide the following information:
@@ -155,7 +203,7 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 1.  Make sure that the environmental variable $keystore points to the Java keystore used by Coverity Connect.
 1.  Restart the Tomcat server.
 
-#### Compatibility with other Jenkins plugins
+### Compatibility with other Jenkins plugins
 
 1.  [Flexible Publisher Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Flexible+Publish+Plugin) (Coverity Post-Build Actions fail to run)
 
