@@ -34,10 +34,10 @@ The following is the plugin version compatability with Coverity Connect server a
 
 Plugin version | Coverity Connect / Static Analysis version
 --- | ---
-**1.3.0** to **1.6.0** | **7.5.1** to **7.7.0**
 **1.7.0** to **1.8.1** | **7.5.1** to **8.7.0**
 **1.9.0** to **1.9.1** | **7.7.0** to **8.7.1**
-**1.9.2+** | **7.7.0** to **2017.07**
+**1.9.2** | **7.7.0** to **2017.07+**
+**1.10.0+** | **8.0.0** to **2017.07+**
 
 ## Features
 
