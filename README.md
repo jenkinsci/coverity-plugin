@@ -5,10 +5,15 @@
 *   [Features](#features)
 *   [How to Use](#how-to-use)
     *   [Getting Started](#getting-started)
-    *   [Job Setup](#job-setup)
+    *   [Freestyle Job Setup](#freestyle-job-setup)
+    *   [Build Results](#build-results)
     *   [Project Configuration Settings](#project-configuration-settings)
         *   [Coverity Build Action Settings](#coverity-build-action-settings)
         *   [Coverity Post-build Action Settings](#coverity-post-build-action-settings)
+    *   [Pipeline Setup](#pipeline-setup)
+        *   [Using Coverity Static Analysis Tools](#using-coverity-static-analysis-tools)
+        *   [Publishing Coverity results](#publishing-coverity-results)
+        *   [Example Script](#example-script)
 *   [Troubleshooting](#troubleshooting)
 *   [Known Issues](#known-issues)
     *   [Compatibility with other Jenkins plugins](#compatibility-with-other-jenkins-plugins)
@@ -29,10 +34,10 @@ The following is the plugin version compatability with Coverity Connect server a
 
 Plugin version | Coverity Connect / Static Analysis version
 --- | ---
-**1.3.0** to **1.6.0** | **7.5.1** to **7.7.0**
 **1.7.0** to **1.8.1** | **7.5.1** to **8.7.0**
 **1.9.0** to **1.9.1** | **7.7.0** to **8.7.1**
-**1.9.2+** | **7.7.0** to **2017.07**
+**1.9.2** | **7.7.0** to **2017.07+**
+**1.10.0+** | **8.0.0** to **2017.07+**
 
 ## Features
 
@@ -65,7 +70,7 @@ The Coverity plugin for Jenkins performs four functions:
      * The tools used can also be configured (or overwritten) per job configuration if this works better for your distributed build architecture
      * If the Coverity Static Analysis tools are on the Node PATH, and there are no global Coverity tools configured, this can be skipped.
 
-### Job Setup
+### Freestyle Job Setup
 
 1.  Create the job, by creating it from scratch or copying from an existing job.
 1.  Under **Build**, select **Add build step** and select **Invoke Coverity Capture Build**, if needed.
@@ -79,7 +84,9 @@ The Coverity plugin for Jenkins performs four functions:
 1.  If you want to fail the build when defects are found, check the corresponding checkbox. By default all defects are considered, but you can specify filters. Every filter should match for a defect to be included.
 1.  If you want the plugin to invoke test and Test Advisor functions for you, check **Perform Coverity Test Advisor and Commit**. You can add additional arguments and functionality to the build by entering your source control configurations (optional).
 
-Start your build. After the build has completed, a link to Coverity Defects will be available on the build page.
+### Build Results
+
+After a build has completed, a link to Coverity Defects will be available on the build page.
 
 ![Screenshot of Coverity Defects Link](screenshots/coverity-defect-action.png)
 
@@ -183,6 +190,100 @@ Note that the “Hello World” string, surrounded by unescaped quotes, is place
 
 </details>
 
+### Pipeline Setup
+
+The Coverity plugin has basic support for some pipeline functionality. It provides a `withCoverityEnv` step to wrap tool invocations and a `coverityResults` step to retrieve issues from a Coverity Connect View. In order to use these steps you will be required to setup Coverity tools in global tool configuration and a Coverity Connect instance in global configuration (see [Getting Started](#getting-started) for details).
+
+#### Using Coverity Static Analysis Tools
+
+*  Recommended usage:
+```
+withCoverityEnv('default') {
+  // execute any coverity commands with either `sh` or `bat` script step
+  //  (all Coverity Tools in /bin available on PATH)
+}
+```
+   *  This will use the Coverity Static Analysis Tools installation named 'default' and add '/bin' directory to PATH within the scope of this Build Wrapper.
+   *  Hint: Use the Pipeline Syntax Snippet Generator for the `withCoverityEnv` to ensure you've selected a configured tool installation
+*  Other usage options using the `tool` step:
+   *  With a variable in the script to access coverity tools directory, example:
+   ```
+   def covHome = tool name: 'default', type: 'coverity'
+   sh "${covHome}/bin/cov-build --dir idir <build-command>"
+   // followed by other coverity commands (using "${covHome}/bin")
+   ```
+   *  Manually update the env.PATH in script
+   ```
+   env.COV_HOME = tool name: 'default', type: 'coverity'
+   env.PATH="${env.COV_HOME }:${env.PATH}" // on windows node use ;
+   sh "cov-build --dir idir <build-command>"
+   // followed by other coverity commands (all in /bin available on PATH)
+   ```
+   * You may also combine `withEnv` with the `tool` step to set a Coverity tools directory to any environment variable
+*  The tools directory will be resolved for the Node which executes the pipeline (see [Getting Started](#getting-started) for details on tools installations and locations per node)
+*  For tools commands which require a Coverity Connect username and password it is recommended to use the `withCredentials` step and access a configured credentialId for username with password
+*  Note that as with any Coverity tools execution the build/analyze/commit steps must share the same intermediate directory value (see the Coverity Analysis User and Administrator Guide for more details)
+
+#### Publishing Coverity results
+
+*  The plugin offers a `coverityResults` step which will retrieve issues from a configured Coverity Connect Instance, Project, and View. By adding this step the pipeline will include any found issue results in the same manner as [Build Results](#build-results) for a pipeline.
+*  Example Usage:
+```
+coverityResults connectInstance: 'cov-connect', connectView: 'JenkinsPipelineView', projectId: 'my project'
+```
+*  Use the Pipeline Syntax Snippet Generator to get help choosing a Coverity Connect Instance and verifying the Project and View values
+![Screenshot of coverityResults Pipeline Syntax Snippet Generator](screenshots/coverityResults-snippet-generator.png)
+*  Advanced options are available to fail the pipeline or mark the pipeline as unstable if any issues were found in the Coverity Connect View (use `failPipeline` or `unstable`, these both default to false).
+*  The View can be configured within the Coverity Connect User Interface (use the same user credentials which will connect during the pipeline run). See the Coverity Platform User and Administrator Guide for information on configuring views.
+   *  The View must be configured as an "Issues: By Snapshot" View Type. This can ensure the most recently committed issues are used, by keeping the default View "Snaphost Scope" of `last()`.
+   *  The view should include the columns "CID", "Checker", "File", and "Function" in order to properly record issues per pipeline run (otherwise just a count may be shown).
+   *  The View Filters should be configured for the issues which the pipeline commits. An example would be filtering on "Classification" of "Unclassified"|"Pending"|"Bug" or on "Status" of "New"|"Triaged"
+   *  The View Group By setting must be set to "None" as retrieving issues with a group by view is not supported.
+*  Note that this pipeline step differs greatly from the freestyle job post-build step in two major ways:
+   1. The results are retrieved per project, not per stream.
+      * In cases where multiple pipelines (or jobs) commit to multiple streams in the same project, different Views must be configured to filter by the proper stream.
+   1. The filtering is configured entirely on Coverity Connect, not in Jenkins configuration
+      *  This allows for filtering on columns which were not offered in the post-build step as well as much more dynamic date filtering capabilities.
+
+#### Example Script
+
+*  The following script uses a Coverity Static Analysis Tools installation named `default`, a configured "Username with Password" Credential with credentialId of `jenkins-cov-user`, and a configured Coverity Connect instance named `cov-connect`. On the Coverity Connect instance there is a project named `my project`(which contains a stream named 'my stream') and an "Issues: By Snapshot" view named `my view`.
+```
+node {
+   stage('Preparation') {
+      // checkout the source code
+      git `<URL to Git Repository>`
+   }
+   stage('Run Coverity') {
+      // use a variable for the shared intermediate directory
+      iDir = 'cov-idir'
+      
+      withCoverityEnv('default') { 
+        // run cov-build capture command
+        sh "cov-build --dir ${iDir} <build-command>"
+      
+        // run cov-analyze command
+        sh "cov-analyze --dir ${iDir}"
+
+        // access Username with Password and set to COVERITY_PASSPHRASE and COV_USER environment variables
+        withCredentials([usernamePassword(credentialsId: 'jenkins-cov-user', passwordVariable: 'COVERITY_PASSPHRASE', usernameVariable: 'COV_USER')]) {
+          // run cov-commit-defects command
+          sh "cov-commit-defects --dir ${iDir} --host <host> --port <port> --stream 'my stream'"
+        }
+      }
+      
+      // cleanup intermediate directory after commit was made (optional space saving step)
+      dir("${iDir}") {
+        deleteDir()
+      }
+   }
+   stage('Coverity Results') {
+      coverityResults connectInstance: 'cov-connect', connectView: 'my view', projectId: 'my project'
+   }
+}
+```
+*  In the example the Coverity execution is kept in a single `Run Coverity` stage, in order to break out Coverity commands into separate stages a shared Intermediate Directory will be needed. It is recommended to use the External Workspace Manager plugin if this is necessary (the Intermediate Directory is usually to large for the stash/unstash steps).
+
 ## Troubleshooting
 
 When you encounter problems while using the plugin, please provide the following information:
@@ -216,6 +317,19 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 If you have any questions or issues with the Coverity plugin, contact <coverity-support@synopsys.com>
 
 ## Changelog
+
+#### Version 1.10.0 (September, 2017)
+
+*   Added support for Jenkins Pipeline by adding the pipeline steps `coverityResults` and `withCoverityEnv`. (BZ 97113)
+*   Coverity plugin supports the usage of Credentials Manager in the global configuration. (BZ 107429)
+*   Added Coverity Static Analysis Tools as a tool installation, configured through Global Tools Configurations in Jenkins 2 and newer (also improves pipeline support).
+*   Added feature to override the Coverity Connect username and password for a Job using a Credentials value. (BZ 92651)
+*   Added feature to override the Coverity Static Analysis Tools for a Job using a global tool installation. (BZ 107178)
+*   The minimum supported version of Coverity Connect and Coverity Analysis tools is 8.0.0. (BZ 106531)
+*   Fixed an issue where a blank Node property for Coverity Static Analysis Location would fail builds with the error "[Node] Jenkins : Could not Find Coverity Analysis Home Directory.". (BZ 101161)
+*   Added SCM drop-down entries for Team Foundation Server 2015 & 2017, Plastic & Plastic (fully distributed). These SCMs are supported in newer Coverity tool version 2017.07 (with the exception of TFS 2015 which was supported in prior versions) (BZ 105111)
+*   The Coverity plugin provides UI validation for "Post cov-build command" and "Post cov-analyze command". Also, if commands for either is not supplied, the "Post cov-build" and "Post cov-analyze" steps will be skipped with warnings on the console output. (BZ 107703)
+*   The "Dataport" field in the global Coverity Connect configuration has been removed. (BZ 108016)
 
 #### Version 1.9.2 (July 6, 2017)
 
