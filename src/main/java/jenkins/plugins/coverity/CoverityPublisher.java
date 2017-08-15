@@ -461,33 +461,6 @@ public class CoverityPublisher extends Recorder {
             return new CIMInstance("", host, port, user, password, useSSL, credentialId).doCheck();
         }
 
-        public FormValidation doCheckAnalysisLocation(@QueryParameter String home) {
-            try {
-                File analysisDir = new File(home);
-                File analysisVersionXml = new File(home, "VERSION.xml");
-                if(analysisDir.exists()){
-                    if(analysisVersionXml.isFile()){
-
-                        // check the version file value and validate it is greater than minimum version
-                        CoverityVersion version = CheckConfig.getVersion(new FilePath(analysisDir));
-
-                        if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
-                            return FormValidation.error("Analysis version " + version.toString() + " detected. " +
-                                "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString());
-                        }
-
-                        return FormValidation.ok("Analysis installation directory has been verified.");
-                    } else{
-                        return FormValidation.error("The specified Analysis installation directory doesn't contain a VERSION.xml file.");
-                    }
-                } else{
-                    return FormValidation.error("The specified Analysis installation directory doesn't exists.");
-                }
-            } catch (InterruptedException | IOException e) {
-                return FormValidation.error("Unable to verify the Analysis installation directory.");
-            }
-        }
-
         public FormValidation doCheckHome(@QueryParameter String home) {
             if (StringUtils.isNotEmpty(home)) {
                 return FormValidation.warning("Static Analysis Location is deprecated in Coverity plugin version 1.10 and later. " +

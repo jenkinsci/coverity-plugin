@@ -20,6 +20,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.EnvironmentSpecific;
 import hudson.model.Node;
 import hudson.model.Saveable;
@@ -108,7 +109,29 @@ public class CoverityToolInstallation extends ToolInstallation implements NodeSp
 
         @Override
         protected FormValidation checkHomeDirectory(File home) {
-            return getDescriptor().doCheckAnalysisLocation(home.getAbsolutePath());
+            try {
+                File analysisVersionXml = new File(home, "VERSION.xml");
+                if(home != null && home.exists()){
+                    if(analysisVersionXml.isFile()){
+
+                        // check the version file value and validate it is greater than minimum version
+                        CoverityVersion version = CheckConfig.getVersion(new FilePath(home));
+
+                        if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
+                            return FormValidation.error("Analysis version " + version.toString() + " detected. " +
+                                "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString());
+                        }
+
+                        return FormValidation.ok("Analysis installation directory has been verified.");
+                    } else{
+                        return FormValidation.error("The specified Analysis installation directory doesn't contain a VERSION.xml file.");
+                    }
+                } else{
+                    return FormValidation.error("The specified Analysis installation directory doesn't exists.");
+                }
+            } catch (InterruptedException | IOException e) {
+                return FormValidation.error("Unable to verify the Analysis installation directory.");
+            }
         }
     }
 }
