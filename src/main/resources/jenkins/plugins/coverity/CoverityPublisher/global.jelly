@@ -74,8 +74,6 @@
         <f:entry title="Coverity Static Analysis location (deprecated)" field="home">
             <f:textbox/>
         </f:entry>
-        <f:validateButton method="checkAnalysisLocation" title="Check" progress="Checking..."
-                          with="home"/>
 		</f:advanced>
 	</f:section>
 </j:jelly>
