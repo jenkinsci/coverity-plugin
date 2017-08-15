@@ -59,7 +59,6 @@ The Coverity plugin for Jenkins performs four functions:
    * Add Coverity Static Analysis Tools:
    ![Screenshot of Coverity Global Tool Configuration](screenshots/global-tool-configuration.png)
      * Add one or more tools, configuring tools for multiple platforms can be managed here. The tools named 'default' will take priority, otherwise the tools path can be configured (or overwritten) per node and/or job configuration.
-     * If the Coverity Static Analysis tools are on the PATH, this can be skipped
      * Note: In Jenkins prior to Jenkins 2, global tools are in **Configure System**
 1. Configure Coverity global settins (**Manage Jenkins** > **Configure System**)
     * Add connection details for the Coverity Connect instance
@@ -70,7 +69,6 @@ The Coverity plugin for Jenkins performs four functions:
    * If preferred, the 'default' tools path can be overridden by setting a Tools Location in the Node configuration settings
    ![Screenshot of Node Tool Locations Configuration](screenshots/node-tool-configuration.png)
      * The tools used can also be configured (or overwritten) per job configuration if this works better for your distributed build architecture
-     * If the Coverity Static Analysis tools are on the Node PATH, and there are no global Coverity tools configured, this can be skipped.
 
 ### Freestyle Job Setup
 
@@ -325,8 +323,10 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 *   Added support for Jenkins Pipeline by adding the pipeline steps `coverityResults` and `withCoverityEnv`. (BZ 97113)
 *   Coverity plugin supports the usage of Credentials Manager in the global configuration. (BZ 107429)
 *   Added Coverity Static Analysis Tools as a tool installation, configured through Global Tools Configurations in Jenkins 2 and newer (also improves pipeline support).
+*   Deprecating the existing Coverity tools location and the location node property, users should instead configure tools using the Global Tool Configuration. These fields will be removed in an upcoming release. (BZ 108096)
 *   Added feature to override the Coverity Connect username and password for a Job using a Credentials value. (BZ 92651)
 *   Added feature to override the Coverity Static Analysis Tools for a Job using a global tool installation. (BZ 107178)
+*   Deprecating the existing Coverity Connect Username and Password fields, users should instead configure a Username with Password Credential (through the Credentials Plugin) to provide Coverity Connect with authentication information. These fields will be removed in an upcoming release. (BZ 108097)
 *   The minimum supported version of Coverity Connect and Coverity Analysis tools is 8.0.0. (BZ 106531)
 *   Fixed an issue where a blank Node property for Coverity Static Analysis Location would fail builds with the error "[Node] Jenkins : Could not Find Coverity Analysis Home Directory.". (BZ 101161)
 *   Added SCM drop-down entries for Team Foundation Server 2015 & 2017, Plastic & Plastic (fully distributed). These SCMs are supported in newer Coverity tool version 2017.07 (with the exception of TFS 2015 which was supported in prior versions) (BZ 105111)
