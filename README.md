@@ -59,7 +59,6 @@ The Coverity plugin for Jenkins performs four functions:
    * Add Coverity Static Analysis Tools:
    ![Screenshot of Coverity Global Tool Configuration](screenshots/global-tool-configuration.png)
      * Add one or more tools, configuring tools for multiple platforms can be managed here. The tools named 'default' will take priority, otherwise the tools path can be configured (or overwritten) per node and/or job configuration.
-     * If the Coverity Static Analysis tools are on the PATH, this can be skipped
      * Note: In Jenkins prior to Jenkins 2, global tools are in **Configure System**
 1. Configure Coverity global settins (**Manage Jenkins** > **Configure System**)
     * Add connection details for the Coverity Connect instance
@@ -70,7 +69,6 @@ The Coverity plugin for Jenkins performs four functions:
    * If preferred, the 'default' tools path can be overridden by setting a Tools Location in the Node configuration settings
    ![Screenshot of Node Tool Locations Configuration](screenshots/node-tool-configuration.png)
      * The tools used can also be configured (or overwritten) per job configuration if this works better for your distributed build architecture
-     * If the Coverity Static Analysis tools are on the Node PATH, and there are no global Coverity tools configured, this can be skipped.
 
 ### Freestyle Job Setup
 
