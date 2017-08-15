@@ -96,18 +96,20 @@ public class InvocationAssistanceBuilder {
     }
 
     public InvocationAssistance build() {
-        return new InvocationAssistance(
-            postCovBuild,
-            postCovAnalyze,
-            isScriptSrc,
-            buildArguments,
-            analyzeArguments,
-            commitArguments,
-            intermediateDir,
-            misraConfig,
-            javaWarFiles,
-            csharpMsvsca,
-            toolsOverride,
-            useAdvancedParser);
+        InvocationAssistance invocationAssistance = new InvocationAssistance();
+        invocationAssistance.setPostCovBuild(postCovBuild);
+        invocationAssistance.setPostCovAnalyze(postCovAnalyze);
+        invocationAssistance.setIsScriptSrc(isScriptSrc);
+        invocationAssistance.setBuildArguments(buildArguments);
+        invocationAssistance.setAnalyzeArguments(analyzeArguments);
+        invocationAssistance.setCommitArguments(commitArguments);
+        invocationAssistance.setIntermediateDir(intermediateDir);
+        invocationAssistance.setMisraConfig(misraConfig);
+        invocationAssistance.setJavaWarFiles(javaWarFiles);
+        invocationAssistance.setCsharpMsvsca(csharpMsvsca);
+        invocationAssistance.setToolsOverride(toolsOverride);
+        invocationAssistance.setUseAdvancedParser(useAdvancedParser);
+
+        return invocationAssistance;
     }
 }
