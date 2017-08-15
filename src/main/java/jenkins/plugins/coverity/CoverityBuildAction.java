@@ -82,6 +82,11 @@ public class CoverityBuildAction implements LastBuildAction {
      */
     public String getURL(CoverityDefect defect) throws IOException, CovRemoteServiceException_Exception {
         CIMInstance instance = Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class).getInstance(cimInstance);
+
+        if (instance == null){
+            return StringUtils.EMPTY;
+        }
+
         String header = "http";
 
         if(instance.isUseSSL()){
