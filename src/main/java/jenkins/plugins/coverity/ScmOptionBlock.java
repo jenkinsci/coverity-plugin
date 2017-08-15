@@ -36,8 +36,7 @@ public class ScmOptionBlock {
     private String fileRegex;
 
     @DataBoundConstructor
-    public ScmOptionBlock(
-            String scmSystem){
+    public ScmOptionBlock(String scmSystem){
         this.scmSystem = scmSystem;
     }
 

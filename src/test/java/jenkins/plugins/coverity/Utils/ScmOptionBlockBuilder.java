@@ -81,6 +81,5 @@ public class ScmOptionBlockBuilder {
         scmOptionBlock.setFileRegex(fileRegex);
 
         return scmOptionBlock;
-        }
-
+    }
 }
