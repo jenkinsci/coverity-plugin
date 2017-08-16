@@ -29,18 +29,16 @@ import java.util.logging.Logger;
 
 import javax.xml.ws.soap.SOAPFaultException;
 
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
-import hudson.security.ACL;
-import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import com.coverity.ws.v9.ConfigurationService;
-import com.coverity.ws.v9.ConfigurationServiceService;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.DefectService;
 import com.coverity.ws.v9.GroupDataObj;
@@ -56,12 +54,13 @@ import com.coverity.ws.v9.UserDataObj;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedMap;
 
+import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
+import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.ws.ViewContents;
 import jenkins.plugins.coverity.ws.ViewsService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
-import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Represents one Coverity Integrity Manager server. Abstracts functions like getting streams and defects.
