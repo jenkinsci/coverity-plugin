@@ -284,7 +284,8 @@ public class CIMInstance {
                     e.getClass().getSimpleName() + ": " + e.getMessage());
             }
             return FormValidation.error(e,
-                "Web service error occurred. " + e.getClass().getSimpleName() + ": " + e.getMessage());
+                "Web service error occurred. " + System.lineSeparator() +
+                    e.getClass().getSimpleName() + ": " + e.getMessage());
         } catch (Throwable e) {
             String javaVersion = System.getProperty("java.version");
             if(javaVersion.startsWith("1.6.0_")) {
@@ -294,7 +295,8 @@ public class CIMInstance {
                 }
             }
             return FormValidation.error(e,
-                "An unexpected error occurred. " + e.getClass().getSimpleName() + ": " + e.getMessage());
+                "An unexpected error occurred. " +  System.lineSeparator() +
+                    e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
