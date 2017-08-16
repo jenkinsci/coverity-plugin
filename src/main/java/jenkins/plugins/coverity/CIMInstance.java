@@ -12,10 +12,7 @@ package jenkins.plugins.coverity;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.ConnectException;
 import java.net.MalformedURLException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
