@@ -242,10 +242,6 @@ public class CoverityLauncher extends Launcher {
                     }
                     temp = new FilePath(node.getChannel(), customIdir);
                     temp.mkdirs();
-
-                    if (temp != null) {
-
-                    }
                 }
 
                 if(invocationAssistance != null){
@@ -254,13 +250,18 @@ public class CoverityLauncher extends Launcher {
                     build.addAction(new CoverityTempDir(temp, true));
                 }
             } catch(IOException e) {
-                throw new RuntimeException("Error while creating temporary directory for Coverity", e);
+                CoverityUtils.handleException("Error while creating temporary directory for Coverity", build, listener, e);
             } catch(InterruptedException e) {
-                throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
+                CoverityUtils.handleException("Interrupted while creating temporary directory for Coverity", build, listener, e);
             } catch (ParseException e) {
                 CoverityUtils.handleException(e.getMessage(), build, listener, e);
             } catch (Exception e){
-                CoverityUtils.handleException("An error occurred while setting intermediate directory: " + temp.getRemote(), build, listener, e);
+                if (temp != null){
+                    CoverityUtils.handleException("An error occurred while setting intermediate directory: " + temp.getRemote(), build, listener, e);
+                } else{
+                    CoverityUtils.handleException("An error occurred while setting intermediate directory", build, listener, e);
+                }
+
             }
             if (temp != null) {
                 envVars.put("COV_IDIR", temp.getRemote());
