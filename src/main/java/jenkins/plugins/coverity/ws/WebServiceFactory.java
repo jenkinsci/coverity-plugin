@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
@@ -169,37 +171,36 @@ public class WebServiceFactory {
     }
 
     /**
-     * Gets the response code for the {@link CIMInstance} V9 Web Services WSDL
+     * Gets the response code and message as {@link CheckWsResponse} for the {@link CIMInstance} V9 Web Services WSDL
      * @param cimInstance the CIM instance to get response for
-     * @return the HTTP Status-Code from the WSDL, or -1
+     * @return A {@link CheckWsResponse} with HTTP Status-Code and message from the WSDL, or -1 and an exception message
      */
-    public int getWSResponseCode(CIMInstance cimInstance) {
+    public CheckWsResponse getCheckWsResponse(CIMInstance cimInstance) {
         try {
-            int responseCode = getWSResponseCode(new URL(getURL(cimInstance), WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL));
-            return responseCode;
+            return getCheckWsResponse(new URL(getURL(cimInstance), WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL));
         } catch (MalformedURLException e) {
-            return -1;
+            return new CheckWsResponse(-1, e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
     /**
-     * The response code for the given {@link URL}
+     * The {@link CheckWsResponse} for the given {@link URL}
      * It will return 200 and 401 respectively.
      * Returns -1 if no code can be discerned
      * @param url to check response
-     * @return the HTTP Status-Code, or -1
+     * @return A {@link CheckWsResponse} with HTTP Status-Code and message from the WSDL, or -1 and an exception message
      */
-    private int getWSResponseCode(URL url) {
+    private CheckWsResponse getCheckWsResponse(URL url) {
         try {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
             conn.getInputStream();
-            return conn.getResponseCode();
+            return new CheckWsResponse(conn.getResponseCode(), conn.getResponseMessage());
         } catch(FileNotFoundException e) {
-            return 404;
+            return new CheckWsResponse(404, "URL '" + url + "' not found");
         } catch (IOException e) {
-            return -1;
+            return new CheckWsResponse(-1, e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -209,5 +210,30 @@ public class WebServiceFactory {
     private void attachAuthenticationHandler(BindingProvider service, CIMInstance cimInstance) {
         service.getBinding().setHandlerChain(Arrays.<Handler>asList(new ClientAuthenticationHandlerWSS(
                 cimInstance.getCoverityUser(), cimInstance.getCoverityPassword())));
+    }
+
+    /**
+     * A response from the web service URL check with the HTTP Status-Code and response message
+     */
+    public class CheckWsResponse {
+        private final int responseCode;
+        private final String responseMessage;
+
+        public CheckWsResponse(int responseCode, String responseMessage) {
+            this.responseCode = responseCode;
+            this.responseMessage = responseMessage;
+        }
+
+        public int getResponseCode() {
+            return responseCode;
+        }
+
+        @Override
+        public String toString() {
+            return "Check Coverity Web Service Response: {" +
+                " Code=" + responseCode +
+                ", Message=\"" + responseMessage + "\" " +
+                '}';
+        }
     }
 }

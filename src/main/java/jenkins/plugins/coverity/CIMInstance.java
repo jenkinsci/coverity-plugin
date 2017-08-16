@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.lang.StringUtils;
@@ -61,6 +62,7 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.ws.ViewContents;
 import jenkins.plugins.coverity.ws.ViewsService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
+import jenkins.plugins.coverity.ws.WebServiceFactory.CheckWsResponse;
 
 /**
  * Represents one Coverity Integrity Manager server. Abstracts functions like getting streams and defects.
@@ -256,11 +258,12 @@ public class CIMInstance {
 
     public FormValidation doCheck() {
         try {
-            int responseCode = WebServiceFactory.getInstance().getWSResponseCode(this);
-            if(responseCode != 200) {
-                return FormValidation.error("Coverity web services were not detected. Connection attempt responded with " +
-                    responseCode + ", check Coverity Connect version (minimum supported version is " +
-                    CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ").");
+            CheckWsResponse responseCode = WebServiceFactory.getInstance().getCheckWsResponse(this);
+            if(responseCode.getResponseCode() != 200) {
+                return FormValidation.error("Connection check failed." + System.lineSeparator() +
+                    responseCode.toString() + System.lineSeparator() +
+                    "(check that the values entered for this instance are correct and ensure the Coverity Connect version is at least " +
+                    CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ")");
             }
 
             FormValidation userPermissionsValidation = checkUserPermissions();
@@ -269,12 +272,14 @@ public class CIMInstance {
                 return userPermissionsValidation;
 
             return FormValidation.ok("Successfully connected to the instance.");
-        } catch(UnknownHostException e) {
-            return FormValidation.error("Host name unknown");
-        } catch(ConnectException e) {
-            return FormValidation.error("Connection refused");
-        } catch(SocketException e) {
-            return FormValidation.error("Error connecting to CIM. Please check your connection settings.");
+        } catch (WebServiceException e) {
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Unauthorized")) {
+                return FormValidation.error("User authentication failed." + System.lineSeparator() +
+                    e.getClass().getSimpleName() + ": " + e.getMessage());
+            }
+            return FormValidation.error(e,
+                "Web service error occurred. " + System.lineSeparator() +
+                    e.getClass().getSimpleName() + ": " + e.getMessage());
         } catch (Throwable e) {
             String javaVersion = System.getProperty("java.version");
             if(javaVersion.startsWith("1.6.0_")) {
@@ -283,7 +288,9 @@ public class CIMInstance {
                     return FormValidation.error(e, "Please use Java 1.6.0_26 or later to run Jenkins.");
                 }
             }
-            return FormValidation.error(e, "An unexpected error occurred.");
+            return FormValidation.error(e,
+                "An unexpected error occurred. " +  System.lineSeparator() +
+                    e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
