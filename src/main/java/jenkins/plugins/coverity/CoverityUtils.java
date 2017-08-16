@@ -120,6 +120,11 @@ public class CoverityUtils {
                             return (CoverityToolInstallation)installation.translate(node, environment, listener);
                         }
                     }
+
+                    final String warnMsg = "Attempted to use Job tools override with Coverity Static Analysis tools installation '" + toolName +
+                        "', but was not found, will continue to try to find alternate installation";
+                    logger.warning(warnMsg);
+                    listener.getLogger().println("[Coverity] Warning: " + warnMsg);
                 }
             }
 
