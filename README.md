@@ -332,6 +332,7 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 *   Added SCM drop-down entries for Team Foundation Server 2015 & 2017, Plastic & Plastic (fully distributed). These SCMs are supported in newer Coverity tool version 2017.07 (with the exception of TFS 2015 which was supported in prior versions) (BZ 105111)
 *   The Coverity plugin provides UI validation for "Post cov-build command" and "Post cov-analyze command". Also, if commands for either is not supplied, the "Post cov-build" and "Post cov-analyze" steps will be skipped with warnings on the console output. (BZ 107703)
 *   The "Dataport" field in the global Coverity Connect configuration has been removed. (BZ 108016)
+*   Some of the "DataBoundConstructor" arguments are moved to "DataBoundSetter" to make the JOB DSL configuration easier with Coverity plugin. (BZ 106600, BZ 84075)
 
 #### Version 1.9.2 (July 6, 2017)
 
