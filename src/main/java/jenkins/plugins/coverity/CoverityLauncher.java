@@ -197,27 +197,6 @@ public class CoverityLauncher extends Launcher {
         return newArgs;
     }
 
-
-    /**
-     * Resolves environment variables on the specified intermediate directory. If the result is a null object or the
-     * path is empty an exception is thrown.
-     */
-    public FilePath resolveIntermediateDirectory(AbstractBuild<?,?> build, TaskListener listener, Node node, String idirInput){
-        FilePath idirFilePath = null;
-        try {
-            String idir = EnvParser.interpolateRecursively(idirInput, 1, envVars);
-            if(idir == null || idir.isEmpty()){
-                throw new Exception("The specified Intermediate Directory is not valid: " + idirInput);
-            }
-            idirFilePath = new FilePath(node.getChannel(), idir);
-        } catch (ParseException e) {
-            CoverityUtils.handleException(e.getMessage(), build, listener, e);
-        } catch (Exception e){
-            CoverityUtils.handleException("An error occured while setting intermediate directory: " + idirInput, build, listener, e);
-        }
-        return idirFilePath;
-    }
-
     /**
      * Sets the value of environment variable "COV_IDIR" and creates necessary directories. This variable is used as argument of "--dir" for
      * cov-build.
@@ -234,7 +213,7 @@ public class CoverityLauncher extends Launcher {
         Validate.notNull(node, Node.class.getName() + " object can't be null");
         Validate.notNull(envVars, EnvVars.class.getName() + " object can't be null");
         if(!envVars.containsKey("COV_IDIR")){
-            FilePath temp;
+            FilePath temp = null;
             InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance(build);
             try {
                 if(invocationAssistance == null || invocationAssistance.getIntermediateDir() == null ||
@@ -243,18 +222,29 @@ public class CoverityLauncher extends Launcher {
                     coverityDir.mkdirs();
                     temp = coverityDir.createTempDir("temp-", null);
                 } else {
-                    // Gets a not null nor empty intermediate directory.
-                    temp = resolveIntermediateDirectory(build, listener, node, invocationAssistance.getIntermediateDir());
-                    if (temp != null) {
-                        File idir = new File(temp.getRemote());
-                        String workspace = envVars.get("WORKSPACE");
-                        if (idir != null && !idir.isAbsolute() && !StringUtils.isEmpty(workspace)) {
-                            String path = FilenameUtils.concat(workspace, temp.getRemote());
-                            if (!StringUtils.isEmpty(path)) {
-                                temp = new FilePath(temp.getChannel(), path);
+                    String customIdir = EnvParser.interpolateRecursively(invocationAssistance.getIntermediateDir(), 1, envVars);
+                    if(customIdir == null || customIdir.isEmpty()){
+                        throw new Exception("The specified Intermediate Directory is not valid: " + invocationAssistance.getIntermediateDir());
+                    }
+
+                    File idir = new File(customIdir);
+                    String workspace = envVars.get("WORKSPACE");
+                    if (idir != null && !idir.isAbsolute() && !StringUtils.isEmpty(workspace)) {
+                        customIdir = FilenameUtils.concat(workspace, customIdir);
+                        if (!StringUtils.isEmpty(customIdir)) {
+
+                            if (node.toComputer().isUnix()){
+                                customIdir = customIdir.replace("\\", "/");
+                            } else{
+                                customIdir = customIdir.replace("/", "\\");
                             }
                         }
-                        temp.mkdirs();
+                    }
+                    temp = new FilePath(node.getChannel(), customIdir);
+                    temp.mkdirs();
+
+                    if (temp != null) {
+
                     }
                 }
 
@@ -267,6 +257,10 @@ public class CoverityLauncher extends Launcher {
                 throw new RuntimeException("Error while creating temporary directory for Coverity", e);
             } catch(InterruptedException e) {
                 throw new RuntimeException("Interrupted while creating temporary directory for Coverity");
+            } catch (ParseException e) {
+                CoverityUtils.handleException(e.getMessage(), build, listener, e);
+            } catch (Exception e){
+                CoverityUtils.handleException("An error occurred while setting intermediate directory: " + temp.getRemote(), build, listener, e);
             }
             if (temp != null) {
                 envVars.put("COV_IDIR", temp.getRemote());
