@@ -268,7 +268,7 @@ public class CIMInstance {
             if(responseCode.getResponseCode() != 200) {
                 return FormValidation.error("Connection check failed." + System.lineSeparator() +
                     responseCode.toString() + System.lineSeparator() +
-                    " (check that the values entered for this instance are correct and ensure the Coverity Connect version is at least " +
+                    "(check that the values entered for this instance are correct and ensure the Coverity Connect version is at least " +
                     CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ")");
             }
 

@@ -128,9 +128,9 @@ public class CIMInstanceTest {
     public void doCheck_invalidWSResponseCode() {
         testWsFactory.setWSResponseCode(401, "failed response message");
         final String expectedErrorMessage = "Connection check failed." + System.lineSeparator() +
-            "Check Coverity Web Service Response: { Code=401, Message='failed response message' } " + System.lineSeparator() +
+            "Check Coverity Web Service Response: { Code=401, Message=\"failed response message\" }" + System.lineSeparator() +
             "(check that the values entered for this instance are correct and ensure the Coverity Connect version is at least " +
-            CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ").";
+            CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ")";
 
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
                 .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("").build();
@@ -138,7 +138,7 @@ public class CIMInstanceTest {
         FormValidation result = cimInstance.doCheck();
 
         assertEquals(Kind.ERROR, result.kind);
-        assertEquals(expectedErrorMessage, StringEscapeUtils.unescapeHtml(result.getMessage()));
+        assertEquals(expectedErrorMessage, StringEscapeUtils.unescapeHtml(result.getMessage()).replace("<br>", "\n"));
     }
 
     @Test
