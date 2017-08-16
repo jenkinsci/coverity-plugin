@@ -27,6 +27,7 @@ import javax.net.ssl.SSLContext;
 
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -125,8 +126,10 @@ public class CIMInstanceTest {
 
     @Test
     public void doCheck_invalidWSResponseCode() {
-        testWsFactory.setWSResponseCode(401);
-        final String expectedErrorMessage = "Coverity web services were not detected. Connection attempt responded with 401, check Coverity Connect version (minimum supported version is " +
+        testWsFactory.setWSResponseCode(401, "failed response message");
+        final String expectedErrorMessage = "Connection check failed." + System.lineSeparator() +
+            "Check Coverity Web Service Response: { Code=401, Message='failed response message' } " + System.lineSeparator() +
+            "(check that the values entered for this instance are correct and ensure the Coverity Connect version is at least " +
             CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ").";
 
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
@@ -135,7 +138,7 @@ public class CIMInstanceTest {
         FormValidation result = cimInstance.doCheck();
 
         assertEquals(Kind.ERROR, result.kind);
-        assertEquals(expectedErrorMessage, result.getMessage());
+        assertEquals(expectedErrorMessage, StringEscapeUtils.unescapeHtml(result.getMessage()));
     }
 
     @Test

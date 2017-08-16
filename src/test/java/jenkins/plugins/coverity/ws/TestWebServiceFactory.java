@@ -119,6 +119,7 @@ import jenkins.plugins.coverity.CIMInstance;
 
 public class TestWebServiceFactory extends WebServiceFactory {
     private int wsResponseCode = 200;
+    private String responseMsg = "OK";
 
     @Override
     protected DefectService createDefectService(CIMInstance cimInstance) throws MalformedURLException {
@@ -133,12 +134,13 @@ public class TestWebServiceFactory extends WebServiceFactory {
     }
 
     @Override
-    public int getWSResponseCode(CIMInstance cimInstance) {
-        return wsResponseCode;
+    public CheckWsResponse getCheckWsResponse(CIMInstance cimInstance) {
+        return new CheckWsResponse(wsResponseCode, responseMsg);
     }
 
-    public void setWSResponseCode(int wsResponseCode) {
+    public void setWSResponseCode(int wsResponseCode, String responseMsg) {
         this.wsResponseCode = wsResponseCode;
+        this.responseMsg = responseMsg;
     }
 
     public static class TestConfigurationService implements ConfigurationService {

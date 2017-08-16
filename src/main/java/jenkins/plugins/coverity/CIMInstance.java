@@ -61,6 +61,7 @@ import hudson.util.FormValidation.Kind;
 import jenkins.plugins.coverity.ws.ViewContents;
 import jenkins.plugins.coverity.ws.ViewsService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
+import jenkins.plugins.coverity.ws.WebServiceFactory.CheckWsResponse;
 import org.kohsuke.stapler.DataBoundSetter;
 
 /**
@@ -262,11 +263,12 @@ public class CIMInstance {
 
     public FormValidation doCheck() {
         try {
-            int responseCode = WebServiceFactory.getInstance().getWSResponseCode(this);
-            if(responseCode != 200) {
-                return FormValidation.error("Coverity web services were not detected. Connection attempt responded with " +
-                    responseCode + ", check Coverity Connect version (minimum supported version is " +
-                    CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ").");
+            CheckWsResponse responseCode = WebServiceFactory.getInstance().getCheckWsResponse(this);
+            if(responseCode.getResponseCode() != 200) {
+                return FormValidation.error("Connection check failed." + System.lineSeparator() +
+                    responseCode.toString() + System.lineSeparator() +
+                    " (check that the values entered for this instance are correct and ensure the Coverity Connect version is at least " +
+                    CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ")");
             }
 
             FormValidation userPermissionsValidation = checkUserPermissions();
