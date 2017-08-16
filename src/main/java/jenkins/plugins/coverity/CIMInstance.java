@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
@@ -277,12 +278,13 @@ public class CIMInstance {
                 return userPermissionsValidation;
 
             return FormValidation.ok("Successfully connected to the instance.");
-        } catch(UnknownHostException e) {
-            return FormValidation.error("Host name unknown");
-        } catch(ConnectException e) {
-            return FormValidation.error("Connection refused");
-        } catch(SocketException e) {
-            return FormValidation.error("Error connecting to CIM. Please check your connection settings.");
+        } catch (WebServiceException e) {
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Unauthorized")) {
+                return FormValidation.error("User authentication failed." + System.lineSeparator() +
+                    e.getClass().getSimpleName() + ": " + e.getMessage());
+            }
+            return FormValidation.error(e,
+                "Web service error occurred. " + e.getClass().getSimpleName() + ": " + e.getMessage());
         } catch (Throwable e) {
             String javaVersion = System.getProperty("java.version");
             if(javaVersion.startsWith("1.6.0_")) {
@@ -291,7 +293,8 @@ public class CIMInstance {
                     return FormValidation.error(e, "Please use Java 1.6.0_26 or later to run Jenkins.");
                 }
             }
-            return FormValidation.error(e, "An unexpected error occurred.");
+            return FormValidation.error(e,
+                "An unexpected error occurred. " + e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
