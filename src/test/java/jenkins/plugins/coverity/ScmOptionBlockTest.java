@@ -28,17 +28,7 @@ public class ScmOptionBlockTest {
 
     public ScmOptionBlockTest(String scm, String expectedMessage) {
         this.expectedMessage = expectedMessage;
-        this.scmOptionBlock = new ScmOptionBlock(
-                scm,
-                StringUtils.EMPTY,
-                StringUtils.EMPTY,
-                StringUtils.EMPTY,
-                StringUtils.EMPTY,
-                StringUtils.EMPTY,
-                StringUtils.EMPTY,
-                StringUtils.EMPTY,
-                StringUtils.EMPTY
-                );
+        this.scmOptionBlock = new ScmOptionBlock(scm);
     }
 
     @Parameters
@@ -53,9 +43,13 @@ public class ScmOptionBlockTest {
                 , new Object[] { "git", pass }
                 , new Object[] { "hg", pass }
                 , new Object[] { "tfs2008", pass }
-                , new Object[] { "tfs2008", pass }
-                , new Object[] { "tfs2008", pass }
-                , new Object[] { "tfs2008", pass }
+                , new Object[] { "tfs2010", pass }
+                , new Object[] { "tfs2012", pass }
+                , new Object[] { "tfs2013", pass }
+                , new Object[] { "tfs2015", pass }
+                , new Object[] { "tfs2017", pass }
+                , new Object[] { "plastic", pass }
+                , new Object[] { "plastic-distributed", pass }
                 , new Object[] { "perforce",
                         "[SCM] Please specify Perforce's port environment variable under 'Advanced'\n " }
                 , new Object[] { "perforce2009", pass }

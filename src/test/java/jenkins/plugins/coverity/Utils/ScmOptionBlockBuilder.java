@@ -70,16 +70,16 @@ public class ScmOptionBlockBuilder {
     }
 
     public ScmOptionBlock build() {
-        return new ScmOptionBlock(
-                scmSystem,
-                customTestTool,
-                scmToolArguments,
-                scmCommandArgs,
-                logFileLoc,
-                p4Port,
-                accRevRepo,
-                scmAdditionalCmd,
-                fileRegex);
-    }
+        ScmOptionBlock scmOptionBlock = new ScmOptionBlock(scmSystem);
+        scmOptionBlock.setCustomTestTool(customTestTool);
+        scmOptionBlock.setScmToolArguments(scmToolArguments);
+        scmOptionBlock.setScmCommandArgs(scmCommandArgs);
+        scmOptionBlock.setLogFileLoc(logFileLoc);
+        scmOptionBlock.setP4Port(p4Port);
+        scmOptionBlock.setAccRevRepo(accRevRepo);
+        scmOptionBlock.setScmAdditionalCmd(scmAdditionalCmd);
+        scmOptionBlock.setFileRegex(fileRegex);
 
+        return scmOptionBlock;
+    }
 }

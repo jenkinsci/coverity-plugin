@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +42,9 @@ public class CimCacheTest {
 
     @Test
     public void getProjects_returnsProjectsForInstances() throws IOException {
-        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "admin", "password", false, "");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
+                                    .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
+                                    .build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 1);
@@ -54,7 +57,10 @@ public class CimCacheTest {
         projects = CimCache.getInstance().getProjects(cimInstance);
         assertEquals(expectedProjectNames, projects);
 
-        cimInstance = new CIMInstance("test-instance-2", "test.coverity2.", 8080, "admin", "password", false, "");
+        cimInstance = new CIMInstanceBuilder().withName("test-instance-2").withHost("test.coverity2.").withPort(8080)
+                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
+                .build();
+
         testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 2, "stream", 1);
 
@@ -65,7 +71,9 @@ public class CimCacheTest {
 
     @Test
     public void getStreams_returnsStreamsForInstances() throws IOException {
-        CIMInstance cimInstance = new CIMInstance("test", "test.coverity", 8080, "admin", "password", false, "");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
+                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
+                .build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 2);
@@ -78,7 +86,9 @@ public class CimCacheTest {
         streams = CimCache.getInstance().getStreams(cimInstance, "project0");
         assertEquals(expectedStreamNames, streams);
 
-        cimInstance = new CIMInstance("test-instance-2", "test.coverity2.", 8080, "admin", "password", false, "");
+        cimInstance = new CIMInstanceBuilder().withName("test-instance-2").withHost("test.coverity2.").withPort(8080)
+                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
+                .build();
         testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 1, "stream", 4);
 

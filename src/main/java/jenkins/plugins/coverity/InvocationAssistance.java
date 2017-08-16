@@ -16,6 +16,7 @@ import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Util;
+import org.kohsuke.stapler.DataBoundSetter;
 
 public class InvocationAssistance {
 
@@ -30,61 +31,28 @@ public class InvocationAssistance {
     // deprecated fields which were removed in plugin version 1.10
     private transient String saOverride;
 
-    private final String buildArguments;
-    private final String analyzeArguments;
-    private final String commitArguments;
+    private String buildArguments;
+    private String analyzeArguments;
+    private String commitArguments;
     private List<String> javaWarFilesNames;
-    private final List<JavaWarFile> javaWarFiles;
-    private final boolean csharpMsvsca;
+    private List<JavaWarFile> javaWarFiles;
+    private boolean csharpMsvsca;
     private ToolsOverride toolsOverride;
     private MisraConfig misraConfig;
-    private final boolean isScriptSrc;
+    private boolean isScriptSrc;
     private PostCovBuild postCovBuild;
     private PostCovAnalyze postCovAnalyze;
 
     /**
      * Absolute path to the intermediate directory that Coverity should use. Null to use the default.
      */
-    private final String intermediateDir;
+    private String intermediateDir;
 
-    public boolean getUseAdvancedParser() {
-        return useAdvancedParser;
-    }
-
-    private final boolean useAdvancedParser;
+    private boolean useAdvancedParser;
 
     @DataBoundConstructor
-    public InvocationAssistance(PostCovBuild postCovBuild,
-                                PostCovAnalyze postCovAnalyze,
-                                boolean isScriptSrc,
-                                String buildArguments,
-                                String analyzeArguments,
-                                String commitArguments,
-                                String intermediateDir,
-                                MisraConfig misraConfig,
-                                List<JavaWarFile> javaWarFiles,
-                                boolean csharpMsvsca,
-                                ToolsOverride toolsOverride,
-                                boolean useAdvancedParser) {
-        this.postCovBuild = postCovBuild;
-        this.postCovAnalyze = postCovAnalyze;
-        this.isScriptSrc = isScriptSrc;
-        this.buildArguments = Util.fixEmpty(buildArguments);
-        this.analyzeArguments = Util.fixEmpty(analyzeArguments);
-        this.commitArguments = Util.fixEmpty(commitArguments);
-        this.intermediateDir = Util.fixEmpty(intermediateDir);
-        this.misraConfig = misraConfig;
-        List<String> tempJavaWarFilesPaths = new ArrayList<String>();
-        if (javaWarFiles != null && !javaWarFiles.isEmpty()) {
-            for (JavaWarFile javaWarFile : javaWarFiles) {
-                tempJavaWarFilesPaths.add(javaWarFile.getWarFile());
-            }
-        }
-        this.javaWarFilesNames = tempJavaWarFilesPaths;
-        this.javaWarFiles = javaWarFiles;
-        this.csharpMsvsca = csharpMsvsca;
-        this.toolsOverride = toolsOverride;
-        this.useAdvancedParser = useAdvancedParser;
+    public InvocationAssistance() {
+
     }
 
     /**
@@ -117,6 +85,11 @@ public class InvocationAssistance {
         return this;
     }
 
+    @DataBoundSetter
+    public void setPostCovBuild(PostCovBuild postCovBuild){
+        this.postCovBuild = postCovBuild;
+    }
+
     public String getPostCovBuildCmd() {
         return postCovBuild != null ? postCovBuild.getPostCovBuildCmd() : null;
     }
@@ -129,28 +102,70 @@ public class InvocationAssistance {
         return postCovAnalyze != null;
     }
 
+    @DataBoundSetter
+    public void setPostCovAnalyze(PostCovAnalyze postCovAnalyze){
+        this.postCovAnalyze = postCovAnalyze;
+    }
+
     public String getPostCovAnalyzeCmd() {
         return postCovAnalyze != null ? postCovAnalyze.getPostCovAnalyzeCmd() : null;
+    }
+
+    @DataBoundSetter
+    public void setIsScriptSrc(boolean isScriptSrc){
+        this.isScriptSrc = isScriptSrc;
     }
 
     public boolean getIsScriptSrc() {
         return isScriptSrc;
     }
 
+    @DataBoundSetter
+    public void setBuildArguments(String buildArguments){
+        this.buildArguments = Util.fixEmpty(buildArguments);
+    }
+
     public String getBuildArguments() {
         return buildArguments;
+    }
+
+    @DataBoundSetter
+    public void setAnalyzeArguments(String analyzeArguments){
+        this.analyzeArguments = Util.fixEmpty(analyzeArguments);
     }
 
     public String getAnalyzeArguments() {
         return analyzeArguments;
     }
 
+    @DataBoundSetter
+    public void setCommitArguments(String commitArguments){
+        this.commitArguments = Util.fixEmpty(commitArguments);
+    }
+
     public String getCommitArguments() {
         return commitArguments;
     }
 
+    @DataBoundSetter
+    public void setIntermediateDir(String intermediateDir){
+        this.intermediateDir = Util.fixEmpty(intermediateDir);
+    }
+
     public String getIntermediateDir() {
         return intermediateDir;
+    }
+
+    @DataBoundSetter
+    public void setJavaWarFiles(List<JavaWarFile> javaWarFiles){
+        List<String> tempJavaWarFilesPaths = new ArrayList<String>();
+        if (javaWarFiles != null && !javaWarFiles.isEmpty()) {
+            for (JavaWarFile javaWarFile : javaWarFiles) {
+                tempJavaWarFilesPaths.add(javaWarFile.getWarFile());
+            }
+        }
+        this.javaWarFilesNames = tempJavaWarFilesPaths;
+        this.javaWarFiles = javaWarFiles;
     }
 
     public List<JavaWarFile> getJavaWarFiles() {
@@ -161,12 +176,27 @@ public class InvocationAssistance {
         return javaWarFilesNames;
     }
 
+    @DataBoundSetter
+    public void setCsharpMsvsca(boolean csharpMsvsca){
+        this.csharpMsvsca = csharpMsvsca;
+    }
+
     public boolean getCsharpMsvsca() {
         return csharpMsvsca;
     }
 
+    @DataBoundSetter
+    public void setToolsOverride(ToolsOverride toolsOverride){
+        this.toolsOverride = toolsOverride;
+    }
+
     public ToolsOverride getToolsOverride() {
         return toolsOverride;
+    }
+
+    @DataBoundSetter
+    public void setMisraConfig(MisraConfig misraConfig){
+        this.misraConfig = misraConfig;
     }
 
     public boolean getIsUsingMisra() {
@@ -175,6 +205,15 @@ public class InvocationAssistance {
 
     public String getMisraConfigFile() {
         return misraConfig != null ? misraConfig.getMisraConfigFile() : null;
+    }
+
+    @DataBoundSetter
+    public void setUseAdvancedParser(boolean useAdvancedParser){
+        this.useAdvancedParser = useAdvancedParser;
+    }
+
+    public boolean getUseAdvancedParser() {
+        return useAdvancedParser;
     }
 
     /**
@@ -202,19 +241,22 @@ public class InvocationAssistance {
         PostCovAnalyze postCovAnalyze = override.isUsingPostCovAnalyzeCmd ? new PostCovAnalyze(override.postCovAnalyzeCmd) : null;
         List<JavaWarFile> javaWarFiles = override.getJavaWarFiles();
         boolean useAdvancedParser = override.getUseAdvancedParser();
-        return new InvocationAssistance(
-            postBuild,
-            postCovAnalyze,
-            isScriptSrc,
-            buildArguments,
-            analyzeArguments,
-            commitArguments,
-            intermediateDir,
-            misraConfig,
-            javaWarFiles,
-            csharpMsvsca,
-            toolsOverrideOverride,
-            useAdvancedParser);
+
+        InvocationAssistance invocationAssistance = new InvocationAssistance();
+        invocationAssistance.setPostCovBuild(postBuild);
+        invocationAssistance.setPostCovAnalyze(postCovAnalyze);
+        invocationAssistance.setIsScriptSrc(isScriptSrc);
+        invocationAssistance.setBuildArguments(buildArguments);
+        invocationAssistance.setAnalyzeArguments(analyzeArguments);
+        invocationAssistance.setCommitArguments(commitArguments);
+        invocationAssistance.setIntermediateDir(intermediateDir);
+        invocationAssistance.setMisraConfig(misraConfig);
+        invocationAssistance.setJavaWarFiles(javaWarFiles);
+        invocationAssistance.setCsharpMsvsca(csharpMsvsca);
+        invocationAssistance.setToolsOverride(toolsOverrideOverride);
+        invocationAssistance.setUseAdvancedParser(useAdvancedParser);
+
+        return invocationAssistance;
     }
 
     public String checkIAConfig() {

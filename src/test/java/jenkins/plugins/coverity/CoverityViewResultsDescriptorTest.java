@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hamcrest.CoreMatchers;
@@ -55,7 +56,9 @@ public class CoverityViewResultsDescriptorTest {
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
         DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
-        cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8080, "admin", "password", false, "");
+        cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
+                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
+                .build();
         final List<CIMInstance> cimInstances = Arrays.asList(cimInstance);
         when(descriptor.getInstances()).thenReturn(cimInstances);
         when(jenkins.getDescriptorByType(CoverityPublisher.DescriptorImpl.class)).thenReturn(descriptor);

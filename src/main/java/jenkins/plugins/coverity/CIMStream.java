@@ -44,14 +44,13 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
     /**
      * Defines how to filter discovered defects. Null for no filtering.
      */
-    private final DefectFilters defectFilters;
+    private DefectFilters defectFilters;
 
     @DataBoundConstructor
-    public CIMStream(String instance, String project, String stream, DefectFilters defectFilters) {
+    public CIMStream(String instance, String project, String stream) {
         this.instance = Util.fixEmpty(instance);
         this.project = Util.fixEmpty(project);
         this.stream = Util.fixEmpty(stream);
-        this.defectFilters = defectFilters;
     }
 
     @DataBoundSetter
@@ -73,6 +72,11 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
 
     public String getStream() {
         return stream;
+    }
+
+    @DataBoundSetter
+    public void setDefectFilters(DefectFilters defectFilters){
+        this.defectFilters = defectFilters;
     }
 
     public DefectFilters getDefectFilters() {

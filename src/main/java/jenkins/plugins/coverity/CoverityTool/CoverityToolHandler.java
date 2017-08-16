@@ -231,7 +231,7 @@ public class CoverityToolHandler {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
-        if(!publisher.isSkipFetchingDefects()) {
+        if(!publisher.getSkipFetchingDefects()) {
             DefectReader defectReader = new DefectReader(build, listener, publisher);
             defectReader.getLatestDefectsForBuild();
         }

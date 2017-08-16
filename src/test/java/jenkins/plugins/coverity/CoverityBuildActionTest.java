@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +75,8 @@ public class CoverityBuildActionTest {
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
         DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
-        cimInstance = new CIMInstance("test-cim-instance", "test-cim-instance", 8443, "admin", "password", true, "");
+        cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8443)
+                .withUser("admin").withPassword("password").withUseSSL(true).withCredentialId("").build();
         when(descriptor.getInstance(any(String.class))).thenReturn(cimInstance);
         when(jenkins.getDescriptorByType(CoverityPublisher.DescriptorImpl.class)).thenReturn(descriptor);
     }

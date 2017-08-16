@@ -74,15 +74,16 @@ public class CoverityPublisherBuilder {
     }
 
     public CoverityPublisher build() {
-        return new CoverityPublisher(
-                cimStream,
-                invocationAssistance,
-                failBuild,
-                unstable,
-                keepIntDir,
-                skipFetchingDefects,
-                hideChart,
-                taOptionBlock,
-                scmOptionBlock);
-    }
+        CoverityPublisher publisher = new CoverityPublisher(cimStream);
+        publisher.setInvocationAssistance(invocationAssistance);
+        publisher.setFailBuild(failBuild);
+        publisher.setUnstable(unstable);
+        publisher.setKeepIntDir(keepIntDir);
+        publisher.setSkipFetchingDefects(skipFetchingDefects);
+        publisher.setHideChart(hideChart);
+        publisher.setTaOptionBlock(taOptionBlock);
+        publisher.setScmOptionBlock(scmOptionBlock);
+
+        return publisher;
+        }
 }

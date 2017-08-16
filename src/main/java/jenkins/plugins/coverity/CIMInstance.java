@@ -61,6 +61,7 @@ import hudson.util.FormValidation.Kind;
 import jenkins.plugins.coverity.ws.ViewContents;
 import jenkins.plugins.coverity.ws.ViewsService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Represents one Coverity Integrity Manager server. Abstracts functions like getting streams and defects.
@@ -87,19 +88,19 @@ public class CIMInstance {
      * Deprecated since 1.10
      */
     @Deprecated
-    private final String user;
+    private String user;
 
     /**
      * Password for connecting to the CIM server
      * Deprecated since 1.10
      */
     @Deprecated
-    private final String password;
+    private String password;
 
     /**
      * Use SSL
      */
-    private final boolean useSSL;
+    private boolean useSSL;
 
     /**
      * Credential ID from configured Credentials to use
@@ -119,13 +120,10 @@ public class CIMInstance {
     private transient String lastSuccessfulUser;
 
     @DataBoundConstructor
-    public CIMInstance(String name, String host, int port, String user, String password, boolean useSSL, String credentialId) {
+    public CIMInstance(String name, String host, int port, String credentialId) {
         this.name = name;
         this.host = host;
         this.port = port;
-        this.user = user;
-        this.password = password;
-        this.useSSL = useSSL;
         this.credentialId = credentialId;
     }
 
@@ -149,6 +147,11 @@ public class CIMInstance {
         return user;
     }
 
+    @DataBoundSetter
+    public void setUser(String user){
+        this.user = user;
+    }
+
     /*
      * Deprecated since 1.10. Use credentialId
      */
@@ -157,8 +160,18 @@ public class CIMInstance {
         return password;
     }
 
+    @DataBoundSetter
+    public void setPassword(String password){
+        this.password = password;
+    }
+
     public boolean isUseSSL() {
         return useSSL;
+    }
+
+    @DataBoundSetter
+    public void setUseSSL(boolean useSSL){
+        this.useSSL = useSSL;
     }
 
     public String getCredentialId() { return credentialId; }
@@ -500,7 +513,11 @@ public class CIMInstance {
     }
 
     public CIMInstance cloneWithCredential(String credentialId) {
-        return new CIMInstance(name, host, port, user, password, useSSL, credentialId);
+        CIMInstance instance = new CIMInstance(name, host, port, credentialId);
+        instance.setUser(user);
+        instance.setPassword(password);
+        instance.setUseSSL(useSSL);
+        return instance;
     }
 
     @Override

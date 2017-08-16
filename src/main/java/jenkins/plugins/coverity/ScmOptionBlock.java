@@ -13,58 +13,89 @@ package jenkins.plugins.coverity;
 import hudson.Util;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 public class ScmOptionBlock {
 
     private final String scmSystem;
-    private final String customTestTool;
-    private final String scmToolArguments;
-    private final String scmCommandArgs;
-    private final String logFileLoc;
-    private final String p4Port;
-    private final String accRevRepo;
-    private final String scmAdditionalCmd;
-    private final String fileRegex;
+    private String customTestTool;
+    private String scmToolArguments;
+    private String scmCommandArgs;
+    private String logFileLoc;
+
+    /*
+     * Required field if perforce or perforce2009 is configured
+     */
+    private String p4Port;
+
+    /*
+     * Required field if accurev is configured
+     */
+    private String accRevRepo;
+    private String scmAdditionalCmd;
+    private String fileRegex;
 
     @DataBoundConstructor
-    public ScmOptionBlock(
-            String scmSystem,
-            String customTestTool,
-            String scmToolArguments,
-            String scmCommandArgs,
-            String logFileLoc,
-            String p4Port,
-            String accRevRepo,
-            String scmAdditionalCmd,
-            String fileRegex){
-
+    public ScmOptionBlock(String scmSystem){
         this.scmSystem = scmSystem;
-        this.customTestTool = Util.fixEmpty(customTestTool);
-        this.scmToolArguments = Util.fixEmpty(scmToolArguments);
-        this.scmCommandArgs = Util.fixEmpty(scmCommandArgs);
-        this.logFileLoc = Util.fixEmpty(logFileLoc);
-        this.p4Port = Util.fixEmpty(p4Port); // Required if perforce is selected
-        this.accRevRepo = Util.fixEmpty(accRevRepo);   // Required if accurev is selected
-        this.scmAdditionalCmd = Util.fixEmpty(scmAdditionalCmd);
-        this.fileRegex = Util.fixEmpty(fileRegex);
     }
 
     public String getScmSystem(){return scmSystem;}
 
+    @DataBoundSetter
+    public void setCustomTestTool(String customTestTool){
+        this.customTestTool = Util.fixEmpty(customTestTool);
+    }
+
     public String getCustomTestTool(){return customTestTool;}
+
+    @DataBoundSetter
+    public void setScmToolArguments(String scmToolArguments){
+        this.scmToolArguments = Util.fixEmpty(scmToolArguments);
+    }
 
     public String getScmToolArguments(){return scmToolArguments;}
 
+    @DataBoundSetter
+    public void setScmCommandArgs(String scmCommandArgs){
+        this.scmCommandArgs = Util.fixEmpty(scmCommandArgs);
+    }
+
     public String getScmCommandArgs(){return scmCommandArgs;}
+
+    @DataBoundSetter
+    public void setLogFileLoc(String logFileLoc){
+        this.logFileLoc = Util.fixEmpty(logFileLoc);
+    }
 
     public String getLogFileLoc(){return logFileLoc;}
 
+    @DataBoundSetter
+    public void setP4Port(String p4Port){
+        this.p4Port = Util.fixEmpty(p4Port);
+    }
+
     public String getP4Port(){return p4Port;}
+
+    @DataBoundSetter
+    public void setAccRevRepo(String accRevRepo){
+        this.accRevRepo = Util.fixEmpty(accRevRepo);
+    }
 
     public String getAccRevRepo(){return accRevRepo;}
 
+    @DataBoundSetter
+    public void setScmAdditionalCmd(String scmAdditionalCmd){
+        this.scmAdditionalCmd = Util.fixEmpty(scmAdditionalCmd);
+    }
+
     public String getScmAdditionalCmd() {
         return scmAdditionalCmd;
+    }
+
+    @DataBoundSetter
+    public void setFileRegex(String fileRegex){
+        this.fileRegex = Util.fixEmpty(fileRegex);
     }
 
     public String getFileRegex() {

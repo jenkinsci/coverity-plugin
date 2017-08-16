@@ -52,7 +52,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
@@ -80,7 +80,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest_WithSslConfiguration() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
 
         when(cimInstance.getHost()).thenReturn("Localhost");
         when(cimInstance.getPort()).thenReturn(8080);
@@ -115,7 +115,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void doesNotExecute_WithoutTaOptionBlock() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         Command covManageHistoryCommand = new CovManageHistoryCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
@@ -125,7 +125,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
 
     @Test
     public void doesNotExecute_WithoutCovHistoryEnabled() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
         TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 
@@ -137,7 +137,7 @@ public class CovManageHistoryCommandTest extends CommandTestBase {
     @Test
     public void doesNotExecute_WithoutSnapshots() throws IOException, InterruptedException {
         configurationService.setupSnapshotList(null);
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
         TaOptionBlock taOptionBlock = new TaOptionBlockBuilder().withCovHistoryCheckBox(true).build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().withTaOptionBlock(taOptionBlock).build();
 

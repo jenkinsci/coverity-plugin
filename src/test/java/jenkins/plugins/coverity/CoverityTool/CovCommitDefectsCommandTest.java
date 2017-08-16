@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import jenkins.plugins.coverity.*;
+import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -27,9 +28,10 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void prepareCommandTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
-
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false, "");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
+                                    .withUser("TestUser").withPassword("TestPassword").withUseSSL(false).withCredentialId("")
+                                    .build();
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
@@ -48,9 +50,10 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void addHttpsPortTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
-
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", true,"");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
+                .withUser("TestUser").withPassword("TestPassword").withUseSSL(true).withCredentialId("")
+                .build();
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
@@ -78,9 +81,10 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void addCommitArgumentsTest() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
-
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false,"");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
+                .withUser("TestUser").withPassword("TestPassword").withUseSSL(false).withCredentialId("")
+                .build();
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCommitArguments("AdditionalCommitArguments").build();
         CoverityPublisher publisher =
@@ -101,9 +105,10 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     public void addCommitArgumentsTest_WithCredentials() throws IOException, InterruptedException {
 
         setCredentialManager("TestUser", "TestPassword");
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
-
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "", "", false,"TestCredentialId");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
+                .withUser("").withPassword("").withUseSSL(false).withCredentialId("TestCredentialId")
+                .build();
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCommitArguments("AdditionalCommitArguments").build();
         CoverityPublisher publisher =
@@ -122,9 +127,11 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void addCommitArgumentsTest_WithParseException() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
+                .withUser("TestUser").withPassword("TestPassword").withUseSSL(false).withCredentialId("")
+                .build();
 
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false,"");
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().withCommitArguments("\'").build();
         CoverityPublisher publisher =
                 new CoverityPublisherBuilder().withCimStream(cimStream).
@@ -141,8 +148,10 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
 
     @Test
     public void doesNotExecute_WithoutInvocationAssistance() throws IOException, InterruptedException {
-        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream", null);
-        CIMInstance cimInstance = new CIMInstance("TestInstance", "Localhost", 8080, "TestUser", "TestPassword", false,"");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
+                .withUser("TestUser").withPassword("TestPassword").withUseSSL(false).withCredentialId("")
+                .build();
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);

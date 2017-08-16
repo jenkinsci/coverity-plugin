@@ -46,7 +46,7 @@ public class TaOptionBlockTest {
         final TaOptionBlock taOptionBlock = (TaOptionBlock)xstream.fromXML(oldTaOptionBlockXml);
         assertNotNull(taOptionBlock);
 
-        assertFalse(taOptionBlock.getCOptionBlock());
+        assertFalse(taOptionBlock.getcOptionBlock());
         assertEquals("none", taOptionBlock.getCxxCoverageTool());
 
         assertFalse(taOptionBlock.getCsOptionBlock());

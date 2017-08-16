@@ -13,6 +13,7 @@ package jenkins.plugins.coverity;
 import hudson.Util;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -24,21 +25,21 @@ public class TaOptionBlock {
     // Deprecated field from 1.9.0 release
     private transient String taStripPath;
 
-    private final String customTestCommand;
-    private final boolean cOptionBlock;
-    private final boolean csOptionBlock;
-    private final String customTestTool;
-    private final String logFileLoc;
-    private final String csFramework;
-    private final String csCoverageTool;
-    private final String cxxCoverageTool;
-    private final String javaCoverageTool;
-    private final boolean junitFramework;
-    private final boolean junit4Framework;
+    private String customTestCommand;
+    private boolean cOptionBlock;
+    private boolean csOptionBlock;
+    private String customTestTool;
+    private String logFileLoc;
+    private String csFramework;
+    private String csCoverageTool;
+    private String cxxCoverageTool;
+    private String javaCoverageTool;
+    private boolean junitFramework;
+    private boolean junit4Framework;
     private final String policyFile;
-    private final String bullsEyeDir;
-    private final boolean covHistoryCheckbox;
-    private final boolean javaOptionBlock;
+    private String bullsEyeDir;
+    private boolean covHistoryCheckbox;
+    private boolean javaOptionBlock;
     private List<TaStripPath> taStripPaths;
 
     /*
@@ -46,38 +47,8 @@ public class TaOptionBlock {
         are fields within the Test Advisor Option Block
      */
     @DataBoundConstructor
-    public TaOptionBlock(String customTestCommand,
-                         boolean cOptionBlock,
-                         boolean csOptionBlock,
-                         boolean javaOptionBlock,
-                         String customTestTool,
-                         String logFileLoc,
-                         String csFramework,
-                         String csCoverageTool,
-                         String cxxCoverageTool,
-                         String javaCoverageTool,
-                         boolean junitFramework,
-                         boolean junit4Framework,
-                         String policyFile,
-                         List<TaStripPath> taStripPaths,
-                         String bullsEyeDir,
-                         boolean covHistoryCheckbox) {
-        this.customTestCommand = Util.fixEmpty(customTestCommand);
-        this.cOptionBlock = cOptionBlock;
-        this.csOptionBlock = csOptionBlock;
-        this.javaOptionBlock = javaOptionBlock;
-        this.customTestTool = Util.fixEmpty(customTestTool);
-        this.logFileLoc = Util.fixEmpty(logFileLoc);
-        this.csFramework = csFramework;
-        this.csCoverageTool = csCoverageTool;     // Required if other two are not selected
-        this.cxxCoverageTool = cxxCoverageTool;    // Required if other two are not selected
-        this.javaCoverageTool = javaCoverageTool; // Required if other two are not selected
-        this.junit4Framework = junit4Framework;
-        this.junitFramework = junitFramework;
+    public TaOptionBlock(String policyFile) {
         this.policyFile = Util.fixEmpty(policyFile);    // Required
-        this.bullsEyeDir = Util.fixEmpty(bullsEyeDir); // Required if bulls eye is selected
-        this.covHistoryCheckbox = covHistoryCheckbox;
-        this.taStripPaths = taStripPaths;   // Required
     }
 
     /**
@@ -107,38 +78,110 @@ public class TaOptionBlock {
         taStripPaths.add(stripPath);
     }
 
-    /*
-    Required functions needed for jenkins to access all of the Test Advisor Data.
-     */
+    @DataBoundSetter
+    public void setCustomTestCommand(String customTestCommand){
+        this.customTestCommand = Util.fixEmpty(customTestCommand);
+    }
+
     public String getCustomTestCommand(){return customTestCommand;}
 
-    public boolean getCOptionBlock(){return cOptionBlock;}
+    @DataBoundSetter
+    public void setcOptionBlock(boolean cOptionBlock){
+        this.cOptionBlock = cOptionBlock;
+    }
+
+    public boolean getcOptionBlock(){return cOptionBlock;}
+
+    @DataBoundSetter
+    public void setCsOptionBlock(boolean csOptionBlock){
+        this.csOptionBlock = csOptionBlock;
+    }
 
     public boolean getCsOptionBlock(){return csOptionBlock;}
 
+    @DataBoundSetter
+    public void setJavaOptionBlock(boolean javaOptionBlock){
+        this.javaOptionBlock = javaOptionBlock;
+    }
+
     public boolean getJavaOptionBlock(){return javaOptionBlock;}
+
+    @DataBoundSetter
+    public void setCustomTestTool(String customTestTool){
+        this.customTestTool = Util.fixEmpty(customTestTool);
+    }
 
     public String getCustomTestTool(){return customTestTool;}
 
+    @DataBoundSetter
+    public void setLogFileLoc(String logFileLoc){
+        this.logFileLoc = Util.fixEmpty(logFileLoc);
+    }
+
     public String getLogFileLoc(){return logFileLoc ;}
+
+    @DataBoundSetter
+    public void setCsFramework(String csFramework){
+        this.csFramework = csFramework;
+    }
 
     public String getCsFramework(){return csFramework;}
 
+    @DataBoundSetter
+    public void setCsCoverageTool(String csCoverageTool){
+        this.csCoverageTool = csCoverageTool;
+    }
+
     public String getCsCoverageTool(){return csCoverageTool;}
+
+    @DataBoundSetter
+    public void setCxxCoverageTool(String cxxCoverageTool){
+        this.cxxCoverageTool = cxxCoverageTool;
+    }
 
     public String getCxxCoverageTool(){return cxxCoverageTool;}
 
+    @DataBoundSetter
+    public void setJavaCoverageTool(String javaCoverageTool){
+        this.javaCoverageTool = javaCoverageTool;
+    }
+
     public String getJavaCoverageTool(){return javaCoverageTool;}
 
+    @DataBoundSetter
+    public void setJunit4Framework(boolean junit4Framework){
+        this.junit4Framework = junit4Framework;
+    }
+
     public boolean getJunit4Framework(){return junit4Framework;}
+
+    @DataBoundSetter
+    public void setJunitFramework(boolean junitFramework){
+        this.junitFramework = junitFramework;
+    }
 
     public boolean getJunitFramework(){return junitFramework;}
 
     public String getPolicyFile(){return policyFile;}
 
+    @DataBoundSetter
+    public void setBullsEyeDir(String bullsEyeDir){
+        this.bullsEyeDir = bullsEyeDir;
+    }
+
     public String getBullsEyeDir(){return bullsEyeDir;}
 
+    @DataBoundSetter
+    public void setCovHistoryCheckbox(boolean covHistoryCheckbox){
+        this.covHistoryCheckbox = covHistoryCheckbox;
+    }
+
     public boolean getCovHistoryCheckbox(){return covHistoryCheckbox;}
+
+    @DataBoundSetter
+    public void setTaStripPaths(List<TaStripPath> taStripPaths){
+        this.taStripPaths = taStripPaths;
+    }
 
     public List<TaStripPath> getTaStripPaths() { return taStripPaths; }
 
