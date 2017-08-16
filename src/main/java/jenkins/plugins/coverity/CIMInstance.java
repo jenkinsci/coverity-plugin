@@ -108,11 +108,6 @@ public class CIMInstance {
     private String credentialId;
 
     /**
-     * cached webservice port for Configuration service
-     */
-    private transient ConfigurationServiceService configurationServiceService;
-
-    /**
      * Cached last username that was successfully check for this instance. This value is not saved and only updated as a result of
      * checking user permissions.
      * This is a part of fixing the issue in BZ 105657 (JENKINS-44724)
