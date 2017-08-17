@@ -129,19 +129,26 @@ public class CoverityUtils {
             }
 
             // next try to use the node property
-            CoverityInstallation nodeInstall = node.getNodeProperties().get(CoverityInstallation.class);
-            if(nodeInstall != null && nodeInstall.getHome() != null) {
-                // check for node property override before attempting to use
-                final FilePath nodePath = new FilePath(node.getChannel(), nodeInstall.getHome());
-                if (!nodePath.exists()) {
+            final CoverityInstallation nodeInstall = node.getNodeProperties().get(CoverityInstallation.class);
+            if(nodeInstall != null) {
+                FilePath nodePath = null;
+                final String nodeInstallHome = nodeInstall.getHome();
+
+                if (StringUtils.isNotEmpty(nodeInstallHome)) {
+                    nodePath = new FilePath(node.getChannel(), nodeInstallHome);
+                }
+
+                // check that node property override is a non-null value path before attempting to use (otherwise log warning)
+                if (nodePath != null && nodePath.exists()) {
+                    final CoverityToolInstallation install = new CoverityToolInstallation(CoverityToolInstallation.JOB_OVERRIDE_NAME, nodeInstallHome);
+                    logger.info("Found tools installation '" + install.getName() + "' with directory '" + install.getHome() + "' from Node property");
+                    return install.forEnvironment(environment);
+
+                } else {
                     final String warnMsg = "Attempted to use path to Coverity Static Analysis directory '" + nodePath + "' from '" + node.getDisplayName() + "' node property. " +
                         "The path was not found, will continue to try to find alternate installation.";
                     logger.warning(warnMsg);
                     listener.getLogger().println("[Coverity] Warning: " + warnMsg);
-                } else {
-                    final CoverityToolInstallation install = new CoverityToolInstallation(CoverityToolInstallation.JOB_OVERRIDE_NAME, nodeInstall.getHome());
-                    logger.info("Found tools installation '" + install.getName() + "' with directory '" + install.getHome() + "' from Node property");
-                    return install.forEnvironment(environment);
                 }
             }
 
