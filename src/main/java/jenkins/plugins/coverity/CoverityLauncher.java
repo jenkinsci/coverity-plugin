@@ -229,7 +229,7 @@ public class CoverityLauncher extends Launcher {
 
                     File idir = new File(customIdir);
                     String workspace = envVars.get("WORKSPACE");
-                    if (idir != null && !idir.isAbsolute() && !StringUtils.isEmpty(workspace)) {
+                    if (idir != null && !idir.isAbsolute() && StringUtils.isNotEmpty(workspace)) {
                         customIdir = FilenameUtils.concat(workspace, customIdir);
                         if (!StringUtils.isEmpty(customIdir)) {
 
@@ -240,8 +240,11 @@ public class CoverityLauncher extends Launcher {
                             }
                         }
                     }
-                    temp = new FilePath(node.getChannel(), customIdir);
-                    temp.mkdirs();
+
+                    if (customIdir != null && StringUtils.isNotEmpty(customIdir)){
+                        temp = new FilePath(node.getChannel(), customIdir);
+                        temp.mkdirs();
+                    }
                 }
 
                 if(invocationAssistance != null){
