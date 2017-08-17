@@ -231,7 +231,7 @@ public class CoverityLauncher extends Launcher {
                     String workspace = envVars.get("WORKSPACE");
                     if (idir != null && !idir.isAbsolute() && StringUtils.isNotEmpty(workspace)) {
                         customIdir = FilenameUtils.concat(workspace, customIdir);
-                        if (!StringUtils.isEmpty(customIdir)) {
+                        if (StringUtils.isNotEmpty(customIdir)) {
 
                             if (node.toComputer().isUnix()){
                                 customIdir = customIdir.replace("\\", "/");
@@ -241,7 +241,7 @@ public class CoverityLauncher extends Launcher {
                         }
                     }
 
-                    if (customIdir != null && StringUtils.isNotEmpty(customIdir)){
+                    if (StringUtils.isNotEmpty(customIdir)){
                         temp = new FilePath(node.getChannel(), customIdir);
                         temp.mkdirs();
                     }
