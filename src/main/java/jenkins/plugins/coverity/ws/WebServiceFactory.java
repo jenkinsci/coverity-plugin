@@ -215,7 +215,7 @@ public class WebServiceFactory {
     /**
      * A response from the web service URL check with the HTTP Status-Code and response message
      */
-    public class CheckWsResponse {
+    public static class CheckWsResponse {
         private final int responseCode;
         private final String responseMessage;
 
