@@ -10,24 +10,18 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
-
+import com.thoughtworks.xstream.XStream;
+import hudson.util.FormValidation;
+import hudson.util.XStream2;
+import jenkins.model.Jenkins;
+import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
+import jenkins.plugins.coverity.ws.TestWebServiceFactory;
+import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
+import jenkins.plugins.coverity.ws.WebServiceFactory;
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,16 +33,19 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.thoughtworks.xstream.XStream;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
-import hudson.util.XStream2;
-import jenkins.model.Jenkins;
-import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
-import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
-import jenkins.plugins.coverity.ws.TestWebServiceFactory;
-import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
-import jenkins.plugins.coverity.ws.WebServiceFactory;
-import net.sf.json.JSONObject;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jenkins.class, WebServiceFactory.class})
@@ -166,6 +163,20 @@ public class CoverityPublisherDescriptorImplTests {
 
         assertTrue(sslConfigurations.isTrustNewSelfSignedCert());
         assertEquals("C:\\customcerts\\mycertifcate.cer", sslConfigurations.getCertFileName());
+    }
+
+    @Test
+    public void doCheckHome_doCheckHomeWarnsForAnyValue() {
+        final DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+
+        FormValidation formValidation = descriptor.doCheckHome("node/tools/override");
+        assertEquals("Expect validation warning for any given home value", FormValidation.Kind.WARNING, formValidation.kind);
+
+        formValidation = descriptor.doCheckHome(StringUtils.EMPTY);
+        assertEquals("Expect validation ok for empty string", FormValidation.Kind.OK, formValidation.kind);
+
+        formValidation = descriptor.doCheckHome(null);
+        assertEquals("Expect validation ok for null", FormValidation.Kind.OK, formValidation.kind);
     }
 
     private ServletOutputStream getServletOutputStream(final ByteArrayOutputStream testableStream) {

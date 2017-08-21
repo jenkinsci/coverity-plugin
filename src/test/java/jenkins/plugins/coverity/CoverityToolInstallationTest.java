@@ -11,13 +11,15 @@
 package jenkins.plugins.coverity;
 
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
+import hudson.XmlFile;
+import hudson.model.Saveable;
+import hudson.model.listeners.SaveableListener;
+import hudson.util.FormValidation;
+import hudson.util.FormValidation.Kind;
+import jenkins.model.Jenkins;
+import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
+import jenkins.plugins.coverity.CoverityToolInstallation.CoverityToolInstallationDescriptor;
+import junit.framework.TestCase;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
@@ -31,15 +33,12 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import hudson.XmlFile;
-import hudson.model.Saveable;
-import hudson.model.listeners.SaveableListener;
-import hudson.util.FormValidation;
-import hudson.util.FormValidation.Kind;
-import jenkins.model.Jenkins;
-import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
-import jenkins.plugins.coverity.CoverityToolInstallation.CoverityToolInstallationDescriptor;
-import junit.framework.TestCase;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jenkins.class, SaveableListener.class})
@@ -113,5 +112,24 @@ public class CoverityToolInstallationTest extends TestCase {
         assertEquals(Kind.OK, result.kind);
         assertEquals("Analysis installation directory has been verified.",
             StringEscapeUtils.unescapeHtml(result.getMessage()));
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void deprecatedNodeProperty_coverityInstallation_doCheckHomeWarnsForAnyValue() {
+        final CoverityInstallation.DescriptorImpl descriptor = new CoverityInstallation.DescriptorImpl();
+        when(jenkins.getDescriptorOrDie(CoverityInstallation.class)).thenReturn(descriptor);
+        final CoverityInstallation installation = new CoverityInstallation("node/tools/override");
+
+        final CoverityInstallation.DescriptorImpl installationDescriptor = (CoverityInstallation.DescriptorImpl)installation.getDescriptor();
+
+        FormValidation formValidation = installationDescriptor.doCheckHome(installation.getHome());
+        assertEquals("Expect validation warning for any given home value", Kind.WARNING, formValidation.kind);
+
+        formValidation = installationDescriptor.doCheckHome(StringUtils.EMPTY);
+        assertEquals("Expect validation ok for empty string", Kind.OK, formValidation.kind);
+
+        formValidation = installationDescriptor.doCheckHome(null);
+        assertEquals("Expect validation ok for null", Kind.OK, formValidation.kind);
     }
 }
