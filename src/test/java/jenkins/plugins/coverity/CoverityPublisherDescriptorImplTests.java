@@ -179,6 +179,25 @@ public class CoverityPublisherDescriptorImplTests {
         assertEquals("Expect validation ok for null", FormValidation.Kind.OK, formValidation.kind);
     }
 
+    @Test
+    public void defaultCoverityToolInstallationCreated_fromPre110HomeValue() {
+        final String toolsPath = "C:\\Program Files\\Coverity\\Coverity Static Analysis";
+        final String version110Xml = "<jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl plugin=\"coverity@1.9.2\">\n" +
+                "  <home>" + toolsPath + "</home>\n" +
+                "  <instances/>\n" +
+                "  <installations/>\n" +
+                "</jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl>";
+
+        XStream xstream = new XStream2();
+
+        final CoverityPublisher.DescriptorImpl descriptor = (CoverityPublisher.DescriptorImpl)xstream.fromXML(version110Xml);
+        assertNotNull(descriptor);
+
+        final CoverityToolInstallation[] toolInstallations = descriptor.getInstallations();
+        assertEquals(1, toolInstallations.length);
+        assertEquals(toolsPath, toolInstallations[0].getHome());
+    }
+
     private ServletOutputStream getServletOutputStream(final ByteArrayOutputStream testableStream) {
         return new ServletOutputStream() {
                 @Override

@@ -45,7 +45,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.xml.ws.WebServiceException;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -365,7 +364,7 @@ public class CoverityPublisher extends Recorder {
                 if (!defaultExists) {
                     final List<CoverityToolInstallation> installationList = new ArrayList<>(Arrays.asList(installations));
                     installationList.add(new CoverityToolInstallation(CoverityToolInstallation.DEFAULT_NAME, home));
-                    setInstallations(installationList.toArray(new CoverityToolInstallation[installationList.size()]));
+                    installations = installationList.toArray(new CoverityToolInstallation[installationList.size()]);
                 }
             }
 
