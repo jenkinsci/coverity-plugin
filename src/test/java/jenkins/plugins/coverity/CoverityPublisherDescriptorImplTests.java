@@ -179,13 +179,44 @@ public class CoverityPublisherDescriptorImplTests {
         assertEquals("Expect validation ok for null", FormValidation.Kind.OK, formValidation.kind);
     }
 
+    /**
+     * Verifies the readResolve will create a new 'default' tool installation from previous 'home' String value
+     */
     @Test
     public void defaultCoverityToolInstallationCreated_fromPre110HomeValue() {
         final String toolsPath = "C:\\Program Files\\Coverity\\Coverity Static Analysis";
-        final String version110Xml = "<jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl plugin=\"coverity@1.9.2\">\n" +
+        final String version19Xml = "<jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl plugin=\"coverity@1.9.2\">\n" +
                 "  <home>" + toolsPath + "</home>\n" +
                 "  <instances/>\n" +
                 "  <installations/>\n" +
+                "</jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl>";
+
+        XStream xstream = new XStream2();
+
+        final CoverityPublisher.DescriptorImpl descriptor = (CoverityPublisher.DescriptorImpl)xstream.fromXML(version19Xml);
+        assertNotNull(descriptor);
+
+        final CoverityToolInstallation[] toolInstallations = descriptor.getInstallations();
+        assertEquals(1, toolInstallations.length);
+        assertEquals(toolsPath, toolInstallations[0].getHome());
+    }
+
+    /**
+     * Verifies the readResolve will not create a additional 'default' tool installation when an installation and the
+     * previous 'home' String value both exist
+     */
+    @Test
+    public void additionalCoverityToolNotCreated_whenExistingHomeValueAlreadyIsDefault() {
+        final String toolsPath = "C:\\Program Files\\Coverity\\Coverity Static Analysis";
+        final String version110Xml = "<jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl plugin=\"coverity@1.10.0\">\n" +
+                "  <home>" + toolsPath + "</home>\n" +
+                "  <instances/>\n" +
+                "  <installations>\n" +
+                "    <jenkins.plugins.coverity.CoverityToolInstallation>\n" +
+                "      <name>" + CoverityToolInstallation.DEFAULT_NAME + "</name>\n" +
+                "      <home>" + toolsPath + "</home>\n" +
+                "    </jenkins.plugins.coverity.CoverityToolInstallation>\n" +
+                "  </installations>\n" +
                 "</jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl>";
 
         XStream xstream = new XStream2();
