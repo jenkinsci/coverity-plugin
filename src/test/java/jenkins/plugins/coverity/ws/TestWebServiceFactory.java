@@ -17,10 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -151,6 +148,8 @@ public class TestWebServiceFactory extends WebServiceFactory {
         private UserDataObj user;
         private List<RoleDataObj> roles;
         private List<GroupDataObj> groups;
+        private List<ComponentMapDataObj> componentMaps;
+        private List<String> checkerNames;
 
         public TestConfigurationService(URL url) {
 
@@ -159,6 +158,8 @@ public class TestWebServiceFactory extends WebServiceFactory {
             this.roles = new ArrayList<>();
             this.groups = new ArrayList<>();
             this.user = new UserDataObj();
+            this.componentMaps = new ArrayList<>();
+            this.checkerNames = new ArrayList<>();
         }
 
         public URL getUrl() {
@@ -182,6 +183,9 @@ public class TestWebServiceFactory extends WebServiceFactory {
                     StreamIdDataObj streamIdDataObj = new StreamIdDataObj();
                     streamIdDataObj.setName(streamNamePrefix + j);
                     streamDataObj.setId(streamIdDataObj);
+                    ComponentMapIdDataObj componentMapIdDataObj = new ComponentMapIdDataObj();
+                    componentMapIdDataObj.setName("Default");
+                    streamDataObj.setComponentMapId(componentMapIdDataObj);
                     projectDataObj.getStreams().add(streamDataObj);
                 }
 
@@ -254,6 +258,22 @@ public class TestWebServiceFactory extends WebServiceFactory {
                 }
                 groups.add(group);
             }
+        }
+
+        public void setupComponents(String... components) {
+            ComponentMapDataObj componentMap = new ComponentMapDataObj();
+            for (String component : components) {
+                ComponentDataObj componentDataObj = new ComponentDataObj();
+                ComponentIdDataObj componentIdDataObj = new ComponentIdDataObj();
+                componentIdDataObj.setName(component);
+                componentDataObj.setComponentId(componentIdDataObj);
+                componentMap.getComponents().add(componentDataObj);
+            }
+            componentMaps.add(componentMap);
+        }
+
+        public void setupCheckerNames(String... checkerNames) {
+            this.checkerNames = checkerNames != null ? Arrays.asList(checkerNames) : new ArrayList<String>();
         }
 
         @Override
@@ -491,7 +511,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public List<ComponentMapDataObj> getComponentMaps(ComponentMapFilterSpecDataObj filterSpec) throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            return componentMaps;
         }
 
         @Override
@@ -631,7 +651,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public List<String> getCheckerNames() throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            return checkerNames;
         }
 
         @Override

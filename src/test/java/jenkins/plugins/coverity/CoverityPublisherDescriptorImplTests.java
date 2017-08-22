@@ -11,7 +11,10 @@
 package jenkins.plugins.coverity;
 
 import com.thoughtworks.xstream.XStream;
+import hudson.model.Descriptor;
+import hudson.model.listeners.SaveableListener;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
@@ -23,7 +26,9 @@ import jenkins.plugins.coverity.ws.WebServiceFactory;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -48,12 +53,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, WebServiceFactory.class})
+@PrepareForTest({Jenkins.class, SaveableListener.class, WebServiceFactory.class})
 public class CoverityPublisherDescriptorImplTests {
     private static final JSONObject PUBLISHER_FORM_OBJECT_JSON = JSONObject.fromObject("{\"name\":\"test-job\",\"publisher\":{\"kind\":\"jenkins.plugins.coverity.CoverityPublisher\",\"unstable\":false,\"hideChart\":false,\"invocationAssistance\":{\"buildArguments\":\"\",\"intermediateDir\":\"\",\"csharpMsvsca\":false,\"analyzeArguments\":\"\",\"saOverride\":\"\",\"commitArguments\":\"\",\"javaWarFile\":\"\"},\"keepIntDir\":false,\"cimStream\":{\"instance\":\"test-cim-instance\",\"id\":null,\"defectFilters\":{\"cutOffDate\":\"\"},\"project\":\"test-cim-project\",\"stream\":\"test-cim-stream\"},\"skipFetchingDefects\":false,\"failBuild\":false,\"stapler-class\":\"jenkins.plugins.coverity.CoverityPublisher\"},\"properties\":{\"hudson-model-ParametersDefinitionProperty\":{},\"stapler-class-bag\":\"true\"}}");
 
     @Mock
     private Jenkins jenkins;
+
+    @Rule
+    public TemporaryFolder tempJenkinsRoot = new TemporaryFolder();
 
     private CIMInstance cimInstance;
 
@@ -67,9 +75,44 @@ public class CoverityPublisherDescriptorImplTests {
         // setup jenkins
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(jenkins.getRootDir()).thenReturn(tempJenkinsRoot.getRoot());
         cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
                 .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
                 .build();
+    }
+
+    @Test
+    public void newInstance_createsNewPublisher_withdefectFiltersConfigured() throws Descriptor.FormException, IOException {
+        when(jenkins.getDescriptorOrDie(CIMStream.class)).thenReturn(new CIMStream.DescriptorImpl());
+        StaplerRequest request = mock(StaplerRequest.class);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        testConfigurationService.setupProjects("proj", 1, "test-cim-stream", 2);
+        testConfigurationService.setupComponents("Default", "Other", "Ignored Component");
+        testConfigurationService.setupCheckerNames("CHECKER1", "CHECKER2", "IGNORED_CHECKER");
+
+        DefectFilters defectFilters = new DefectFilters();
+        defectFilters.setCheckers(Arrays.asList("CHECKER1", "CHECKER2"));
+        defectFilters.setComponents(Arrays.asList("Default", "Other"));
+        CIMStream stream = new CIMStream("test-cim-instance", "test-cim-project", "test-cim-stream1");
+        stream.setDefectFilters(defectFilters);
+        CoverityPublisherBuilder publisherBuilder = new CoverityPublisherBuilder().withCimStream(stream);
+        when(request.bindJSON(eq(CoverityPublisher.class), any(JSONObject.class))).thenReturn(publisherBuilder.build());
+
+        DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+        descriptor.setInstances(Arrays.asList(cimInstance));
+        when(jenkins.getDescriptorByType(CoverityPublisher.DescriptorImpl.class)).thenReturn(descriptor);
+
+        CoverityPublisher publisher = (CoverityPublisher) descriptor.newInstance(request, PUBLISHER_FORM_OBJECT_JSON);
+
+        assertNotNull(publisher);
+        assertNotNull(publisher.getCimStream());
+        DefectFilters filters = publisher.getCimStream().getDefectFilters();
+        assertNotNull(filters);
+        assertArrayEquals(defectFilters.getCheckersList().toArray(), filters.getCheckersList().toArray());
+        assertArrayEquals(new String[] {"IGNORED_CHECKER"}, filters.getIgnoredChecker().toArray());
+        assertArrayEquals(defectFilters.getComponents().toArray(), filters.getComponents().toArray());
+        assertArrayEquals(new String[] {"Ignored Component"}, filters.getIgnoredComponents().toArray());
     }
 
     @Test
@@ -179,13 +222,44 @@ public class CoverityPublisherDescriptorImplTests {
         assertEquals("Expect validation ok for null", FormValidation.Kind.OK, formValidation.kind);
     }
 
+    /**
+     * Verifies the readResolve will create a new 'default' tool installation from previous 'home' String value
+     */
     @Test
     public void defaultCoverityToolInstallationCreated_fromPre110HomeValue() {
         final String toolsPath = "C:\\Program Files\\Coverity\\Coverity Static Analysis";
-        final String version110Xml = "<jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl plugin=\"coverity@1.9.2\">\n" +
+        final String version19Xml = "<jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl plugin=\"coverity@1.9.2\">\n" +
                 "  <home>" + toolsPath + "</home>\n" +
                 "  <instances/>\n" +
                 "  <installations/>\n" +
+                "</jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl>";
+
+        XStream xstream = new XStream2();
+
+        final CoverityPublisher.DescriptorImpl descriptor = (CoverityPublisher.DescriptorImpl)xstream.fromXML(version19Xml);
+        assertNotNull(descriptor);
+
+        final CoverityToolInstallation[] toolInstallations = descriptor.getInstallations();
+        assertEquals(1, toolInstallations.length);
+        assertEquals(toolsPath, toolInstallations[0].getHome());
+    }
+
+    /**
+     * Verifies the readResolve will not create a additional 'default' tool installation when an installation and the
+     * previous 'home' String value both exist
+     */
+    @Test
+    public void additionalCoverityToolNotCreated_whenExistingHomeValueAlreadyIsDefault() {
+        final String toolsPath = "C:\\Program Files\\Coverity\\Coverity Static Analysis";
+        final String version110Xml = "<jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl plugin=\"coverity@1.10.0\">\n" +
+                "  <home>" + toolsPath + "</home>\n" +
+                "  <instances/>\n" +
+                "  <installations>\n" +
+                "    <jenkins.plugins.coverity.CoverityToolInstallation>\n" +
+                "      <name>" + CoverityToolInstallation.DEFAULT_NAME + "</name>\n" +
+                "      <home>" + toolsPath + "</home>\n" +
+                "    </jenkins.plugins.coverity.CoverityToolInstallation>\n" +
+                "  </installations>\n" +
                 "</jenkins.plugins.coverity.CoverityPublisher_-DescriptorImpl>";
 
         XStream xstream = new XStream2();
@@ -196,6 +270,31 @@ public class CoverityPublisherDescriptorImplTests {
         final CoverityToolInstallation[] toolInstallations = descriptor.getInstallations();
         assertEquals(1, toolInstallations.length);
         assertEquals(toolsPath, toolInstallations[0].getHome());
+    }
+
+    @Test
+    public void doFillToolInstallationNameItems_returnsInstallations() {
+        PowerMockito.mockStatic(SaveableListener.class);
+
+        final DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+
+        ListBoxModel installationNameItems = descriptor.doFillToolInstallationNameItems();
+
+        assertNotNull(installationNameItems);
+        assertEquals(0, installationNameItems.size());
+
+        descriptor.setInstallations(
+                new CoverityToolInstallation(CoverityToolInstallation.DEFAULT_NAME, "default/path/to/coverity"),
+                new CoverityToolInstallation("Additional install", "alternate/path/to/coverity"));
+
+        installationNameItems = descriptor.doFillToolInstallationNameItems();
+
+        assertNotNull(installationNameItems);
+        assertEquals(2, installationNameItems.size());
+        assertEquals(CoverityToolInstallation.DEFAULT_NAME, installationNameItems.get(0).name);
+        assertEquals(CoverityToolInstallation.DEFAULT_NAME, installationNameItems.get(0).value);
+        assertEquals("Additional install", installationNameItems.get(1).name);
+        assertEquals("Additional install", installationNameItems.get(1).value);
     }
 
 

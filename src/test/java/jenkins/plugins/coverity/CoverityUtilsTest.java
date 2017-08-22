@@ -11,9 +11,15 @@
 package jenkins.plugins.coverity;
 
 import hudson.EnvVars;
+import hudson.model.*;
+import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
+import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
+import jenkins.plugins.coverity.Utils.TestUtils;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.jvnet.hudson.test.MockFolder;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -22,6 +28,8 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class CoverityUtilsTest {
     private HashMap<String, String> envMap;
@@ -139,6 +147,28 @@ public class CoverityUtilsTest {
 
         FileUtils.deleteDirectory(testDir);
         assertFalse(testDir.exists());
+    }
+
+    @Test
+    public void getInvocationAssistance_getsInvocationFromBuild() {
+        FreeStyleBuild build = TestUtils.getFreeStyleBuild();
+        InvocationAssistance invocationAssistance = CoverityUtils.getInvocationAssistance(build);
+        assertNull(invocationAssistance);
+
+        CoverityPublisher[] publishers = new CoverityPublisher[1];
+        CoverityPublisherBuilder publisherBuilder = new CoverityPublisherBuilder();
+        publishers[0] = publisherBuilder.build();
+        build = TestUtils.getFreeStyleBuild(publishers);
+        invocationAssistance = CoverityUtils.getInvocationAssistance(build);
+        assertNull(invocationAssistance);
+
+        InvocationAssistanceBuilder invocationAssistanceBuilder = new InvocationAssistanceBuilder();
+        InvocationAssistance expected = invocationAssistanceBuilder.build();
+        publisherBuilder.withInvocationAssistance(expected);
+        publishers[0] = publisherBuilder.build();
+        build = TestUtils.getFreeStyleBuild(publishers);
+        invocationAssistance = CoverityUtils.getInvocationAssistance(build);
+        assertSame(expected, invocationAssistance);
     }
 
     private File createTestDirectoryWithFiles(String rootDirectory, boolean subDirectory) throws IOException {
