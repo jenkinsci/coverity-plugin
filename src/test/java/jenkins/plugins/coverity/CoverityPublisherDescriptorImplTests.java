@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity;
 
 import com.thoughtworks.xstream.XStream;
+import hudson.model.Descriptor;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -78,6 +79,40 @@ public class CoverityPublisherDescriptorImplTests {
         cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
                 .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
                 .build();
+    }
+
+    @Test
+    public void newInstance_createsNewPublisher_withdefectFiltersConfigured() throws Descriptor.FormException, IOException {
+        when(jenkins.getDescriptorOrDie(CIMStream.class)).thenReturn(new CIMStream.DescriptorImpl());
+        StaplerRequest request = mock(StaplerRequest.class);
+
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        testConfigurationService.setupProjects("proj", 1, "test-cim-stream", 2);
+        testConfigurationService.setupComponents("Default", "Other", "Ignored Component");
+        testConfigurationService.setupCheckerNames("CHECKER1", "CHECKER2", "IGNORED_CHECKER");
+
+        DefectFilters defectFilters = new DefectFilters();
+        defectFilters.setCheckers(Arrays.asList("CHECKER1", "CHECKER2"));
+        defectFilters.setComponents(Arrays.asList("Default", "Other"));
+        CIMStream stream = new CIMStream("test-cim-instance", "test-cim-project", "test-cim-stream1");
+        stream.setDefectFilters(defectFilters);
+        CoverityPublisherBuilder publisherBuilder = new CoverityPublisherBuilder().withCimStream(stream);
+        when(request.bindJSON(eq(CoverityPublisher.class), any(JSONObject.class))).thenReturn(publisherBuilder.build());
+
+        DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+        descriptor.setInstances(Arrays.asList(cimInstance));
+        when(jenkins.getDescriptorByType(CoverityPublisher.DescriptorImpl.class)).thenReturn(descriptor);
+
+        CoverityPublisher publisher = (CoverityPublisher) descriptor.newInstance(request, PUBLISHER_FORM_OBJECT_JSON);
+
+        assertNotNull(publisher);
+        assertNotNull(publisher.getCimStream());
+        DefectFilters filters = publisher.getCimStream().getDefectFilters();
+        assertNotNull(filters);
+        assertArrayEquals(defectFilters.getCheckersList().toArray(), filters.getCheckersList().toArray());
+        assertArrayEquals(new String[] {"IGNORED_CHECKER"}, filters.getIgnoredChecker().toArray());
+        assertArrayEquals(defectFilters.getComponents().toArray(), filters.getComponents().toArray());
+        assertArrayEquals(new String[] {"Ignored Component"}, filters.getIgnoredComponents().toArray());
     }
 
     @Test
