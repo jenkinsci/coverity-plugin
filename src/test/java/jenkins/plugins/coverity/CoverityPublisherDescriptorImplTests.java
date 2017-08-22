@@ -297,6 +297,55 @@ public class CoverityPublisherDescriptorImplTests {
         assertEquals("Additional install", installationNameItems.get(1).value);
     }
 
+
+    @Test
+    public void doCheckPostCovBuildCmdTest(){
+        final CoverityPublisher.DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+
+        FormValidation result = descriptor.doCheckPostCovBuildCmd(StringUtils.EMPTY);
+        assertEquals(result.kind, FormValidation.Kind.ERROR);
+        assertEquals(result.getMessage(), "Post cov-build command cannot be empty!");
+
+        result = descriptor.doCheckPostCovBuildCmd("Test Post cov-build command");
+        assertEquals(result.kind, FormValidation.Kind.OK);
+    }
+
+    @Test
+    public void doCheckPostAnalyzeCmdTest(){
+        final CoverityPublisher.DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+
+        FormValidation result = descriptor.doCheckPostCovAnalyzeCmd(StringUtils.EMPTY);
+        assertEquals(result.kind, FormValidation.Kind.ERROR);
+        assertEquals(result.getMessage(), "Post cov-analyze command cannot be empty!");
+
+        result = descriptor.doCheckPostCovAnalyzeCmd("Test Post cov-analyze command");
+        assertEquals(result.kind, FormValidation.Kind.OK);
+    }
+
+    @Test
+    public void doCheckUserTest(){
+        final CoverityPublisher.DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+
+        FormValidation result = descriptor.doCheckUser(StringUtils.EMPTY);
+        assertEquals(result.kind, FormValidation.Kind.OK);
+
+        result = descriptor.doCheckUser("TestUser");
+        assertEquals(result.kind, FormValidation.Kind.WARNING);
+        assertEquals(result.getMessage(), "User is deprecated in Coverity plugin version 1.10 and later. Please use Credentials above for more secure username.");
+    }
+
+    @Test
+    public void doCheckPasswordTest(){
+        final CoverityPublisher.DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+
+        FormValidation result = descriptor.doCheckPassword(StringUtils.EMPTY);
+        assertEquals(result.kind, FormValidation.Kind.OK);
+
+        result = descriptor.doCheckPassword("TestPassword");
+        assertEquals(result.kind, FormValidation.Kind.WARNING);
+        assertEquals(result.getMessage(), "Password is deprecated in Coverity plugin version 1.10 and later. Please use Credentials above for more secure password.");
+    }
+
     private ServletOutputStream getServletOutputStream(final ByteArrayOutputStream testableStream) {
         return new ServletOutputStream() {
                 @Override
