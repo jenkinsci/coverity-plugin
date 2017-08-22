@@ -115,6 +115,20 @@ public class CoverityToolInstallationTest extends TestCase {
     }
 
     @Test
+    public void descriptor_doCheckHome_withUnsupportedVersion() throws IOException {
+        final CoverityToolInstallation toolInstallation = new CoverityToolInstallation("Unsupported Coverity Install", "unknown-directory");
+        final CoverityToolInstallationDescriptor toolDescriptor = (CoverityToolInstallationDescriptor)toolInstallation.getDescriptor();
+
+        final URL resource =  this.getClass().getResource("/UnsupportedCoverity/VERSION.xml");
+        assertNotNull(resource);
+        File versionFile = new File(resource.getPath());
+        FormValidation result = toolDescriptor.doCheckHome(versionFile.getParentFile());
+        assertEquals(Kind.ERROR, result.kind);
+        assertEquals("Analysis version 6.6.2 detected. The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString(),
+                StringEscapeUtils.unescapeHtml(result.getMessage()));
+    }
+
+    @Test
     @SuppressWarnings("deprecation")
     public void deprecatedNodeProperty_coverityInstallation_doCheckHomeWarnsForAnyValue() {
         final CoverityInstallation.DescriptorImpl descriptor = new CoverityInstallation.DescriptorImpl();
