@@ -73,7 +73,7 @@ public class CoverityPublisherDescriptorImplTests {
     }
 
     @Test
-    public void doLoadProjectsForInstance_returnsJsonReponse() throws ServletException, IOException, org.json.simple.parser.ParseException {
+    public void doLoadProjectsForInstance_returnsJsonResponse() throws ServletException, IOException, org.json.simple.parser.ParseException {
         final String projectName = "test-cim-project";
         final String streamName = "test-cim-stream";
         CIMStream stream = new CIMStream("test-cim-instance", projectName, streamName);
@@ -245,6 +245,26 @@ public class CoverityPublisherDescriptorImplTests {
         result = descriptor.doCheckPassword("TestPassword");
         assertEquals(result.kind, FormValidation.Kind.WARNING);
         assertEquals(result.getMessage(), "Password is deprecated in Coverity plugin version 1.10 and later. Please use Credentials above for more secure password.");
+    }
+
+    @Test
+    public void getInstanceTest(){
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+        final CoverityPublisher.DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+
+        CIMInstance result = descriptor.getInstance(publisher);
+        assertNull(result);
+
+        CIMInstance instance = new CIMInstance("instance", "localhost", 8080, "defaultCredentialID");
+        descriptor.setInstances(Arrays.asList(instance));
+
+        CIMStream stream = new CIMStream("instance", "project", "stream");
+        stream.setCredentialId("OverriddenCredentialId");
+        publisher = new CoverityPublisherBuilder().withCimStream(stream).build();
+
+        result = descriptor.getInstance(publisher);
+        assertNotNull(result);
+        assertEquals("OverriddenCredentialId", result.getCredentialId());
     }
 
     private ServletOutputStream getServletOutputStream(final ByteArrayOutputStream testableStream) {
