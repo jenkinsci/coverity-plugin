@@ -11,9 +11,11 @@
 package jenkins.plugins.coverity;
 
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.model.*;
 import hudson.model.Queue;
 import hudson.model.listeners.SaveableListener;
+import hudson.remoting.LocalChannel;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.NodePropertyDescriptor;
 import hudson.tools.ToolLocationNodeProperty;
@@ -50,7 +52,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, Executor.class, ToolLocationNodeProperty.class, SaveableListener.class})
+@PrepareForTest({Jenkins.class, Executor.class, ToolLocationNodeProperty.class, SaveableListener.class, Node.class})
 public class CoverityUtilsTest {
     @Mock
     private Jenkins jenkins;
@@ -404,6 +406,38 @@ public class CoverityUtilsTest {
         assertEquals(installation.getName() + "-" + CoverityToolInstallation.JOB_OVERRIDE_NAME, result.getName());
         assertEquals(customOverridePath, result.getHome());
     }
+    
+    @Test
+    public void getCovBuild_findsDefaultToolInstallation() {
+        final URL resource =  this.getClass().getResource("/VERSION.xml");
+        assertNotNull(resource);
+        final String installPath = new File(resource.getPath()).getParent();
+        PowerMockito.mockStatic(SaveableListener.class);
+        descriptor.setInstallations(
+                new CoverityToolInstallation("non default Coverity Tools", "non-default-install-path"),
+                new CoverityToolInstallation(CoverityToolInstallation.DEFAULT_NAME, installPath));
+        final FreeStyleBuild build = TestUtils.getFreeStyleBuild(new CoverityPublisherBuilder().build());
+        setupCurrentExecutable(build);
+
+        final Node node = mockNodeWithPropertyBehavior();
+        final LocalChannel channel = mock(LocalChannel.class);
+        when(node.getChannel()).thenReturn(channel);
+        
+        final String result = CoverityUtils.getCovBuild(listener, node);
+
+        FilePath expectedPath = new FilePath(new FilePath(new FilePath(new File(installPath)), "bin"), "cov-build");
+        assertEquals(expectedPath.getRemote(), result);
+    }
+
+    @Test
+    public void getCovBuild_returnsNullWithNoInstallations() {
+        final FreeStyleBuild build = TestUtils.getFreeStyleBuild();
+        setupCurrentExecutable(build);
+
+        final String result = CoverityUtils.getCovBuild(listener, mockNodeWithPropertyBehavior());
+
+        assertNull(result);
+    }
 
     private void setupCurrentExecutable(Queue.Executable build) {
         PowerMockito.mockStatic(Executor.class);
@@ -426,7 +460,7 @@ public class CoverityUtilsTest {
     }
 
     private Node mockNodeWithProperties(DescribableList<NodeProperty<?>, NodePropertyDescriptor> nodeProperties) {
-        final Node node = mock(Node.class);
+        final Node node = PowerMockito.mock(Node.class);
         when(node.getNodeProperties()).thenReturn(nodeProperties);
 
         PowerMockito.mockStatic(ToolLocationNodeProperty.class);
