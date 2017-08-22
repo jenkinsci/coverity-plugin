@@ -10,17 +10,21 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.Utils;
 
+import hudson.EnvVars;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.TaskListener;
 import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import jenkins.plugins.coverity.CoverityPublisher;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +36,13 @@ public class TestUtils {
         final DescribableList<Publisher, Descriptor<Publisher>> publisherList = new DescribableList<Publisher, Descriptor<Publisher>>(freeStyleProject, coverityPublishers);
         when(freeStyleProject.getPublishersList()).thenReturn(publisherList);
         when(freeStyleBuild.getProject()).thenReturn(freeStyleProject);
+
+        try {
+            when(freeStyleBuild.getEnvironment(any(TaskListener.class))).thenReturn(new EnvVars());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
         return freeStyleBuild;
     }
 }
