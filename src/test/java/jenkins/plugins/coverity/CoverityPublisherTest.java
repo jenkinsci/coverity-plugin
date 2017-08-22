@@ -10,10 +10,6 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -21,6 +17,8 @@ import com.thoughtworks.xstream.XStream;
 
 import hudson.util.XStream2;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
+
+import static org.junit.Assert.*;
 
 public class CoverityPublisherTest {
     @Test
@@ -287,6 +285,46 @@ public class CoverityPublisherTest {
         assertEquals("post cov build", invocationAssistance.getPostCovBuildCmd());
         assertTrue(invocationAssistance.getIsUsingPostCovAnalyzeCmd());
         assertEquals("post cov analyze", invocationAssistance.getPostCovAnalyzeCmd());
+        assertEquals("Pass", invocationAssistance.checkIAConfig());
+    }
+
+    @Test
+    public void getInvocationAssistance_fromPre110Configuration_withSaOverride() {
+        String oldJobXml = "<jenkins.plugins.coverity.CoverityPublisher plugin=\"coverity@1.9.2\">\n" +
+                "      <jenkins.plugins.coverity.CIMStream>\n" +
+                "        <instance>first-cim-instance</instance>\n" +
+                "        <project>first-cim-project</project>\n" +
+                "        <stream>first-cim-stream</stream>\n" +
+                "        <id>1955941757</id>\n" +
+                "        <defectFilters/>\n" +
+                "      </jenkins.plugins.coverity.CIMStream>\n" +
+                "      <invocationAssistance>\n" +
+                "        <javaWarFilesNames/>\n" +
+                "        <csharpMsvsca>false</csharpMsvsca>\n" +
+                "        <isCompiledSrc>false</isCompiledSrc>\n" +
+                "        <isScriptSrc>true</isScriptSrc>\n" +
+                "        <useAdvancedParser>false</useAdvancedParser>\n" +
+                "        <saOverride>/path/to/custom/coverity/override</saOverride>\n" +
+                "      </invocationAssistance>\n" +
+                "      <failBuild>false</failBuild>\n" +
+                "      <unstable>false</unstable>\n" +
+                "      <keepIntDir>false</keepIntDir>\n" +
+                "      <skipFetchingDefects>false</skipFetchingDefects>\n" +
+                "      <hideChart>false</hideChart>\n" +
+                "      <unstableBuild>false</unstableBuild>\n" +
+                "    </jenkins.plugins.coverity.CoverityPublisher>";
+
+        XStream xstream = new XStream2();
+
+        final CoverityPublisher publisher = (CoverityPublisher)xstream.fromXML(oldJobXml);
+        assertNotNull(publisher);
+
+        final InvocationAssistance invocationAssistance = publisher.getInvocationAssistance();
+        assertNotNull(invocationAssistance);
+        final ToolsOverride toolsOverride = invocationAssistance.getToolsOverride();
+        assertNotNull(toolsOverride);
+        assertEquals("/path/to/custom/coverity/override", toolsOverride.getToolsLocation());
+        assertNull(toolsOverride.getToolInstallationName());
         assertEquals("Pass", invocationAssistance.checkIAConfig());
     }
 
