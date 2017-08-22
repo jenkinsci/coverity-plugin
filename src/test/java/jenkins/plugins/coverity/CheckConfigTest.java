@@ -71,11 +71,19 @@ public class CheckConfigTest {
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
         CIMStream cimStream = new CIMStream(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
 
-        CheckConfig.StreamStatus status = CheckConfig.checkStream(publisher, cimStream);
+        CheckConfig.StreamStatus status = CheckConfig.checkStream(publisher, null);
         assertNotNull(status);
         assertFalse(status.isValid());
         String statusMessage = status.getStatus();
-        assertNotNull(statusMessage);
+        assertEquals("Could not connect to a Coverity instance. \n " +
+                "Verify that a Coverity instance has been configured for this job",
+                statusMessage);
+        assertNull(status.getVersion());
+
+        status = CheckConfig.checkStream(publisher, cimStream);
+        assertNotNull(status);
+        assertFalse(status.isValid());
+        statusMessage = status.getStatus();
         assertEquals("[Stream] null/null/null : Could not connect to a Coverity instance. \n" +
                 " Verify that a Coverity instance has been configured for this job", statusMessage);
         assertNull(status.getVersion());

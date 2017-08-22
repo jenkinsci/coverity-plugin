@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE coverity SYSTEM "coverity_config.dtd">
+<coverity>
+    <release_version><major>6</major><minor>6</minor><revision>2</revision><beta>0</beta></release_version>
+    <installed_components>
+    </installed_components>
+    <release_files>
+    </release_files>
+</coverity>
