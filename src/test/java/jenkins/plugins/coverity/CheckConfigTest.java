@@ -11,13 +11,11 @@
 package jenkins.plugins.coverity;
 
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.Executor;
+import hudson.model.FreeStyleBuild;
+import hudson.model.TaskListener;
 import hudson.remoting.LocalChannel;
-import hudson.remoting.VirtualChannel;
-import hudson.slaves.NodeProperty;
-import hudson.slaves.NodePropertyDescriptor;
 import hudson.tools.ToolLocationNodeProperty;
-import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.Utils.*;
@@ -34,17 +32,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -250,7 +241,7 @@ public class CheckConfigTest {
     public void checkNode_whenNoInstallationFound() throws IOException, InterruptedException {
         final String nodeName = "test-node";
         final FreeStyleBuild build = TestUtils.getFreeStyleBuild();
-        setupCurrentExecutorWithNode(nodeName, build, null);
+        TestUtils.setupCurrentExecutorWithNode(nodeName, build, null);
 
         final CheckConfig.NodeStatus result = CheckConfig.checkNode(null, build, launcher, listener);
 
@@ -264,46 +255,17 @@ public class CheckConfigTest {
         final LocalChannel channel = mock(LocalChannel.class);
         when(launcher.getChannel()).thenReturn(channel);
 
-        final CoverityToolInstallation installation = new CoverityToolInstallation(CoverityToolInstallation.DEFAULT_NAME, getInstallDirectory().getPath());
+        final CoverityToolInstallation installation = TestUtils.getTestInstallation();
         when(descriptor.getInstallations()).thenReturn(new CoverityToolInstallation[] { installation });
 
         final String nodeName = "test-node";
         final FreeStyleBuild build = TestUtils.getFreeStyleBuild(new CoverityPublisherBuilder().build());
-        setupCurrentExecutorWithNode(nodeName, build, installation);
+        TestUtils.setupCurrentExecutorWithNode(nodeName, build, installation);
 
         final CheckConfig.NodeStatus result = CheckConfig.checkNode(null, build, launcher, listener);
 
         assertNotNull(result);
         assertTrue(result.isValid());
         assertEquals("[Node] " + nodeName + " : version 2017.07", result.getStatus());
-    }
-
-    private File getInstallDirectory() {
-        final URL resource =  this.getClass().getResource("/VERSION.xml");
-        assertNotNull(resource);
-        File versionFile = new File(resource.getPath());
-        return versionFile.getParentFile();
-    }
-
-    @SuppressWarnings("deprecation")
-    private void setupCurrentExecutorWithNode(String nodeName, FreeStyleBuild build, CoverityToolInstallation installation) throws IOException, InterruptedException {
-        PowerMockito.mockStatic(Executor.class);
-        final Executor executor = mock(Executor.class);
-        final Node node = mock(Node.class);
-        final Computer computer = mock(Computer.class);
-        final VirtualChannel channel = mock(VirtualChannel.class);
-
-        when(node.getDisplayName()).thenReturn(nodeName);
-        when(node.getNodeProperties()).thenReturn(new DescribableList<NodeProperty<?>, NodePropertyDescriptor>(mock(Saveable.class)));
-        when(computer.getNode()).thenReturn(node);
-        when(computer.getChannel()).thenReturn(channel);
-        when(Executor.currentExecutor()).thenReturn(executor);
-        when(executor.getOwner()).thenReturn(computer);
-        when(executor.getCurrentExecutable()).thenReturn(build);
-
-        if (installation != null) {
-            PowerMockito.mockStatic(ToolLocationNodeProperty.class);
-            PowerMockito.when(ToolLocationNodeProperty.getToolHome(same(node), same(installation), any(TaskListener.class))).thenReturn(installation.getHome());
-        }
     }
 }
