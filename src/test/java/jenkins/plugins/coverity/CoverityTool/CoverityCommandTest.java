@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 public class CoverityCommandTest {
 
-    private final String command = "cov-command";
+    private final static String command = "cov-command";
     private AbstractBuild build;
     private Launcher launcher;
     private TaskListener listener;
@@ -90,7 +90,7 @@ public class CoverityCommandTest {
         assertEquals(expectedArguments, args);
     }
 
-    public class TestableCoverityCommand extends CoverityCommand{
+    public static class TestableCoverityCommand extends CoverityCommand{
 
         public TestableCoverityCommand(@Nonnull String command, AbstractBuild<?, ?> build,
                                        Launcher launcher, TaskListener listener, CoverityPublisher publisher,
