@@ -15,22 +15,24 @@ import hudson.model.BuildListener;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
 import org.apache.commons.lang.StringUtils;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.thoughtworks.xstream.XStream;
 
 import hudson.util.XStream2;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
+import org.junit.rules.TemporaryFolder;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 public class CoverityPublisherTest {
+
+    @Rule
+    public TemporaryFolder idir = new TemporaryFolder();
+
     @Test
     public void getCimStream_fromOldPre12Configuration() {
         String oldJobXml = "<jenkins.plugins.coverity.CoverityPublisher plugin=\"coverity@1.2.0\">\n" +
@@ -371,15 +373,9 @@ public class CoverityPublisherTest {
 
     @Test
     public void deleteIntermediateDirectoryTest_DeleteIdir() {
-        File idir = new File("testIdir");
-        if (idir.exists()){
-            idir.delete();
-        }
-        idir.mkdir();
+        assertTrue(idir.getRoot().exists());
 
-        assertTrue(idir.exists());
-
-        CoverityTempDir tempDir = new CoverityTempDir(new FilePath(idir), true);
+        CoverityTempDir tempDir = new CoverityTempDir(new FilePath(idir.getRoot()), true);
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
 
         BuildListener listener = mock(BuildListener.class);
@@ -390,20 +386,14 @@ public class CoverityPublisherTest {
         consoleLogger.verifyMessages(
                 "[Coverity] deleting intermediate directory: " + tempDir.getTempDir(),
                 "[Coverity] deleting intermediate directory  \"" + tempDir.getTempDir() + "\" was successful");
-        assertFalse(idir.exists());
+        assertFalse(idir.getRoot().exists());
     }
 
     @Test
     public void deleteIntermediateDirectoryTest_PreserveIdir() {
-        File idir = new File("testIdir");
-        if (idir.exists()){
-            idir.delete();
-        }
-        idir.mkdir();
+        assertTrue(idir.getRoot().exists());
 
-        assertTrue(idir.exists());
-
-        CoverityTempDir tempDir = new CoverityTempDir(new FilePath(idir), false);
+        CoverityTempDir tempDir = new CoverityTempDir(new FilePath(idir.getRoot()), false);
         CoverityPublisher publisher = new CoverityPublisherBuilder()
                 .withKeepIntDir(true).build();
 
@@ -414,7 +404,6 @@ public class CoverityPublisherTest {
         publisher.deleteIntermediateDirectory(listener, tempDir);
         consoleLogger.verifyMessages(
                 "[Coverity] preserving intermediate directory: " + tempDir.getTempDir());
-        assertTrue(idir.exists());
-        idir.delete();
+        assertTrue(idir.getRoot().exists());
     }
 }
