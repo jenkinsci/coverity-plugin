@@ -26,91 +26,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.soap.SOAPFaultException;
 
+import com.coverity.ws.v9.*;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
-
-import com.coverity.ws.v9.AttributeDefinitionDataObj;
-import com.coverity.ws.v9.AttributeDefinitionIdDataObj;
-import com.coverity.ws.v9.AttributeDefinitionSpecDataObj;
-import com.coverity.ws.v9.AttributeValueIdDataObj;
-import com.coverity.ws.v9.BackupConfigurationDataObj;
-import com.coverity.ws.v9.CommitStateDataObj;
-import com.coverity.ws.v9.ComponentDataObj;
-import com.coverity.ws.v9.ComponentIdDataObj;
-import com.coverity.ws.v9.ComponentMapDataObj;
-import com.coverity.ws.v9.ComponentMapFilterSpecDataObj;
-import com.coverity.ws.v9.ComponentMapIdDataObj;
-import com.coverity.ws.v9.ComponentMapSpecDataObj;
-import com.coverity.ws.v9.ComponentMetricsDataObj;
-import com.coverity.ws.v9.ConfigurationDataObj;
-import com.coverity.ws.v9.ConfigurationService;
-import com.coverity.ws.v9.CovRemoteServiceException_Exception;
-import com.coverity.ws.v9.DefectChangeDataObj;
-import com.coverity.ws.v9.DefectDetectionHistoryDataObj;
-import com.coverity.ws.v9.DefectInstanceIdDataObj;
-import com.coverity.ws.v9.DefectService;
-import com.coverity.ws.v9.DefectStateAttributeValueDataObj;
-import com.coverity.ws.v9.DefectStateSpecDataObj;
-import com.coverity.ws.v9.DeleteSnapshotJobInfoDataObj;
-import com.coverity.ws.v9.FeatureUpdateTimeDataObj;
-import com.coverity.ws.v9.FileContentsDataObj;
-import com.coverity.ws.v9.FileIdDataObj;
-import com.coverity.ws.v9.GroupDataObj;
-import com.coverity.ws.v9.GroupFilterSpecDataObj;
-import com.coverity.ws.v9.GroupIdDataObj;
-import com.coverity.ws.v9.GroupSpecDataObj;
-import com.coverity.ws.v9.GroupsPageDataObj;
-import com.coverity.ws.v9.LdapConfigurationDataObj;
-import com.coverity.ws.v9.LdapConfigurationSpecDataObj;
-import com.coverity.ws.v9.LicenseDataObj;
-import com.coverity.ws.v9.LicenseSpecDataObj;
-import com.coverity.ws.v9.LicenseStateDataObj;
-import com.coverity.ws.v9.LocalizedValueDataObj;
-import com.coverity.ws.v9.LoggingConfigurationDataObj;
-import com.coverity.ws.v9.MergedDefectDataObj;
-import com.coverity.ws.v9.MergedDefectFilterSpecDataObj;
-import com.coverity.ws.v9.MergedDefectIdDataObj;
-import com.coverity.ws.v9.MergedDefectsPageDataObj;
-import com.coverity.ws.v9.PageSpecDataObj;
-import com.coverity.ws.v9.PermissionDataObj;
-import com.coverity.ws.v9.ProjectDataObj;
-import com.coverity.ws.v9.ProjectFilterSpecDataObj;
-import com.coverity.ws.v9.ProjectIdDataObj;
-import com.coverity.ws.v9.ProjectMetricsDataObj;
-import com.coverity.ws.v9.ProjectScopeDefectFilterSpecDataObj;
-import com.coverity.ws.v9.ProjectSpecDataObj;
-import com.coverity.ws.v9.ProjectTrendRecordFilterSpecDataObj;
-import com.coverity.ws.v9.PropertySpecDataObj;
-import com.coverity.ws.v9.RoleAssignmentDataObj;
-import com.coverity.ws.v9.RoleDataObj;
-import com.coverity.ws.v9.RoleIdDataObj;
-import com.coverity.ws.v9.RoleSpecDataObj;
-import com.coverity.ws.v9.ServerDomainIdDataObj;
-import com.coverity.ws.v9.SignInSettingsDataObj;
-import com.coverity.ws.v9.SkeletonizationConfigurationDataObj;
-import com.coverity.ws.v9.SnapshotFilterSpecDataObj;
-import com.coverity.ws.v9.SnapshotIdDataObj;
-import com.coverity.ws.v9.SnapshotInfoDataObj;
-import com.coverity.ws.v9.SnapshotPurgeDetailsObj;
-import com.coverity.ws.v9.SnapshotScopeDefectFilterSpecDataObj;
-import com.coverity.ws.v9.SnapshotScopeSpecDataObj;
-import com.coverity.ws.v9.StreamDataObj;
-import com.coverity.ws.v9.StreamDefectDataObj;
-import com.coverity.ws.v9.StreamDefectFilterSpecDataObj;
-import com.coverity.ws.v9.StreamDefectIdDataObj;
-import com.coverity.ws.v9.StreamFilterSpecDataObj;
-import com.coverity.ws.v9.StreamIdDataObj;
-import com.coverity.ws.v9.StreamSpecDataObj;
-import com.coverity.ws.v9.TriageHistoryDataObj;
-import com.coverity.ws.v9.TriageStoreDataObj;
-import com.coverity.ws.v9.TriageStoreFilterSpecDataObj;
-import com.coverity.ws.v9.TriageStoreIdDataObj;
-import com.coverity.ws.v9.TriageStoreSpecDataObj;
-import com.coverity.ws.v9.UserDataObj;
-import com.coverity.ws.v9.UserFilterSpecDataObj;
-import com.coverity.ws.v9.UserSpecDataObj;
-import com.coverity.ws.v9.UsersPageDataObj;
-import com.coverity.ws.v9.VersionDataObj;
 
 import jenkins.plugins.coverity.CIMInstance;
 
@@ -150,6 +68,9 @@ public class TestWebServiceFactory extends WebServiceFactory {
         private List<GroupDataObj> groups;
         private List<ComponentMapDataObj> componentMaps;
         private List<String> checkerNames;
+        private List<AttributeValueDataObj> classifications;
+        private List<AttributeValueDataObj> actions;
+        private List<AttributeValueDataObj> severities;
 
         public TestConfigurationService(URL url) {
 
@@ -160,6 +81,9 @@ public class TestWebServiceFactory extends WebServiceFactory {
             this.user = new UserDataObj();
             this.componentMaps = new ArrayList<>();
             this.checkerNames = new ArrayList<>();
+            this.classifications = new ArrayList<>();
+            this.actions = new ArrayList<>();
+            this.severities = new ArrayList<>();
         }
 
         public URL getUrl() {
@@ -274,6 +198,41 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         public void setupCheckerNames(String... checkerNames) {
             this.checkerNames = checkerNames != null ? Arrays.asList(checkerNames) : new ArrayList<String>();
+        }
+
+        public void setupDefaultAttributes() {
+            classifications.addAll(
+                    Arrays.asList(
+                            createAttributeValue("Unclassified"),
+                            createAttributeValue("Pending"),
+                            createAttributeValue("False Positive"),
+                            createAttributeValue("Intentional"),
+                            createAttributeValue("Bug"),
+                            createAttributeValue("Untested"),
+                            createAttributeValue("No Test Needed"),
+                            createAttributeValue("Tested Elsewhere")));
+            actions.addAll(
+                    Arrays.asList(
+                            createAttributeValue("Undecided"),
+                            createAttributeValue("Fix Required"),
+                            createAttributeValue("Fix Submitted"),
+                            createAttributeValue("Modeling Required"),
+                            createAttributeValue("Ignore")));
+            severities.addAll(
+                    Arrays.asList(
+                            createAttributeValue("Unspecified"),
+                            createAttributeValue("Major"),
+                            createAttributeValue("Moderate"),
+                            createAttributeValue("Minor")));
+        }
+
+        private AttributeValueDataObj createAttributeValue(String value) {
+            AttributeValueDataObj attributeValue = new AttributeValueDataObj();
+            AttributeValueIdDataObj attributeValueId = new AttributeValueIdDataObj();
+            attributeValueId.setName(value);
+            attributeValue.setAttributeValueId(attributeValueId);
+            attributeValue.setDisplayName(value);
+            return attributeValue;
         }
 
         @Override
@@ -678,7 +637,18 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
         @Override
         public AttributeDefinitionDataObj getAttribute(AttributeDefinitionIdDataObj attributeDefinitionId) throws CovRemoteServiceException_Exception {
-            throw new NotImplementedException();
+            final AttributeDefinitionDataObj attributeDefinitionDataObj = new AttributeDefinitionDataObj();
+            attributeDefinitionDataObj.setAttributeDefinitionId(attributeDefinitionId);
+
+            if (attributeDefinitionId.getName().equals("Classification")) {
+                attributeDefinitionDataObj.getConfigurableValues().addAll(classifications);
+            } else if (attributeDefinitionId.getName().equals("Action")) {
+                attributeDefinitionDataObj.getConfigurableValues().addAll(actions);
+            } else if (attributeDefinitionId.getName().equals("Severity")) {
+                attributeDefinitionDataObj.getConfigurableValues().addAll(severities);
+            }
+
+            return attributeDefinitionDataObj;
         }
 
         @Override
