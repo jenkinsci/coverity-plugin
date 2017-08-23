@@ -11,6 +11,7 @@
 package jenkins.plugins.coverity;
 
 import com.thoughtworks.xstream.XStream;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.model.listeners.SaveableListener;
@@ -20,13 +21,14 @@ import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
-import jenkins.plugins.coverity.Utils.TestUtils;
 import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
 import org.junit.rules.TemporaryFolder;
+import jenkins.plugins.coverity.Utils.TestUtils;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
@@ -42,6 +44,10 @@ import static org.mockito.Mockito.when;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jenkins.class, Executor.class, ToolLocationNodeProperty.class, SaveableListener.class})
 public class CoverityPublisherTest {
+
+    @Rule
+    public TemporaryFolder idir = new TemporaryFolder();
+
     @Mock
     private Jenkins jenkins;
 
@@ -398,6 +404,42 @@ public class CoverityPublisherTest {
         builder.withMisraConfigFile("MISRA_cpp2008_1.config");
         invocationAssistance = builder.build();
         assertEquals(expectedOkMessage, invocationAssistance.checkIAConfig());
+    }
+
+    @Test
+    public void deleteIntermediateDirectoryTest_DeleteIdir() {
+        assertTrue(idir.getRoot().exists());
+
+        CoverityTempDir tempDir = new CoverityTempDir(new FilePath(idir.getRoot()), true);
+        CoverityPublisher publisher = new CoverityPublisherBuilder().build();
+
+        BuildListener listener = mock(BuildListener.class);
+        TestableConsoleLogger consoleLogger = new TestableConsoleLogger();
+        when(listener.getLogger()).thenReturn(consoleLogger.getPrintStream());
+
+        publisher.deleteIntermediateDirectory(listener, tempDir);
+        consoleLogger.verifyMessages(
+                "[Coverity] deleting intermediate directory: " + tempDir.getTempDir(),
+                "[Coverity] deleting intermediate directory  \"" + tempDir.getTempDir() + "\" was successful");
+        assertFalse(idir.getRoot().exists());
+    }
+
+    @Test
+    public void deleteIntermediateDirectoryTest_PreserveIdir() {
+        assertTrue(idir.getRoot().exists());
+
+        CoverityTempDir tempDir = new CoverityTempDir(new FilePath(idir.getRoot()), false);
+        CoverityPublisher publisher = new CoverityPublisherBuilder()
+                .withKeepIntDir(true).build();
+
+        BuildListener listener = mock(BuildListener.class);
+        TestableConsoleLogger consoleLogger = new TestableConsoleLogger();
+        when(listener.getLogger()).thenReturn(consoleLogger.getPrintStream());
+
+        publisher.deleteIntermediateDirectory(listener, tempDir);
+        consoleLogger.verifyMessages(
+                "[Coverity] preserving intermediate directory: " + tempDir.getTempDir());
+        assertTrue(idir.getRoot().exists());
     }
 
     /**
