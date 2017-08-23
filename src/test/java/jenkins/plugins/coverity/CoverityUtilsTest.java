@@ -409,9 +409,10 @@ public class CoverityUtilsTest {
     
     @Test
     public void getCovBuild_findsDefaultToolInstallation() {
-        final URL resource =  this.getClass().getResource("/VERSION.xml");
+        final URL resource = this.getClass().getResource("/VERSION.xml");
         assertNotNull(resource);
         final String installPath = new File(resource.getPath()).getParent();
+        assertNotNull(installPath);
         PowerMockito.mockStatic(SaveableListener.class);
         descriptor.setInstallations(
                 new CoverityToolInstallation("non default Coverity Tools", "non-default-install-path"),
