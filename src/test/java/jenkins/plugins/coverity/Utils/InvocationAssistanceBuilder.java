@@ -16,6 +16,7 @@ import jenkins.plugins.coverity.MisraConfig;
 import jenkins.plugins.coverity.PostCovAnalyze;
 import jenkins.plugins.coverity.PostCovBuild;
 import jenkins.plugins.coverity.ToolsOverride;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
@@ -64,9 +65,10 @@ public class InvocationAssistanceBuilder {
         return this;
     }
 
-    public InvocationAssistanceBuilder withToolsLocationOverride(String saOverride) {
-        this.toolsOverride = new ToolsOverride(null);
-        this.toolsOverride.setToolsLocation(saOverride);
+    public InvocationAssistanceBuilder withToolsLocationOverride(String toolInstallation, String optionalOverridePath) {
+        this.toolsOverride = new ToolsOverride(toolInstallation);
+        if (!StringUtils.isEmpty(optionalOverridePath))
+            this.toolsOverride.setToolsLocation(optionalOverridePath);
         return this;
     }
 

@@ -10,28 +10,63 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import com.thoughtworks.xstream.XStream;
 import hudson.FilePath;
-import hudson.model.BuildListener;
+import hudson.Launcher;
+import hudson.model.*;
+import hudson.model.listeners.SaveableListener;
+import hudson.remoting.LocalChannel;
+import hudson.tools.ToolLocationNodeProperty;
+import hudson.util.XStream2;
+import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
+import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.thoughtworks.xstream.XStream;
-
-import hudson.util.XStream2;
-import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
 import org.junit.rules.TemporaryFolder;
+import jenkins.plugins.coverity.Utils.TestUtils;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Jenkins.class, Executor.class, ToolLocationNodeProperty.class, SaveableListener.class})
 public class CoverityPublisherTest {
 
     @Rule
     public TemporaryFolder idir = new TemporaryFolder();
+
+    @Mock
+    private Jenkins jenkins;
+
+    @Rule
+    private TemporaryFolder tempJenkinsRoot = new TemporaryFolder();
+
+    private CoverityPublisher.DescriptorImpl descriptor;
+
+    @Before
+    public void setup() {
+        // setup jenkins
+        PowerMockito.mockStatic(Jenkins.class);
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(jenkins.getRootDir()).thenReturn(tempJenkinsRoot.getRoot());
+        descriptor = new CoverityPublisher.DescriptorImpl();
+        when(jenkins.getDescriptorOrDie(CoverityPublisher.class)).thenReturn(descriptor);
+
+        PowerMockito.mockStatic(SaveableListener.class);
+    }
 
     @Test
     public void getCimStream_fromOldPre12Configuration() {
@@ -405,5 +440,33 @@ public class CoverityPublisherTest {
         consoleLogger.verifyMessages(
                 "[Coverity] preserving intermediate directory: " + tempDir.getTempDir());
         assertTrue(idir.getRoot().exists());
+    }
+
+    /**
+     * This test verifies running the CoverityPublisher perform method with no publisher invocation options configured does
+     * not run throw exception and passes
+     */
+    @Test
+    public void perform_runsToolHandlerWithoutExceptions() throws IOException, InterruptedException {
+        final CoverityPublisherBuilder builder = new CoverityPublisherBuilder().withSkipFetchingDefects(true);
+        final CoverityPublisher publisher = builder.build();
+        final FreeStyleBuild build = TestUtils.getFreeStyleBuild(publisher);
+        final Launcher launcher = mock(Launcher.class);
+        final BuildListener listener = mock(BuildListener.class);
+
+        final TestableConsoleLogger testLogger = new TestableConsoleLogger();
+        when(listener.getLogger()).thenReturn(testLogger.getPrintStream());
+
+        final LocalChannel channel = mock(LocalChannel.class);
+        when(launcher.getChannel()).thenReturn(channel);
+
+        when(build.getResult()).thenReturn(Result.SUCCESS);
+        final CoverityToolInstallation installation = TestUtils.getTestInstallation();
+        descriptor.setInstallations(installation);
+        TestUtils.setupCurrentExecutorWithNode("test", build, installation);
+
+        boolean result = publisher.perform((AbstractBuild<?, ?>)build, launcher, listener);
+
+        assertTrue(result);
     }
 }

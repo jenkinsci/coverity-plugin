@@ -10,12 +10,15 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import hudson.Launcher;
+import hudson.model.Executor;
+import hudson.model.FreeStyleBuild;
+import hudson.model.TaskListener;
+import hudson.remoting.LocalChannel;
+import hudson.tools.ToolLocationNodeProperty;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
-import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
-import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
-import jenkins.plugins.coverity.Utils.ScmOptionBlockBuilder;
-import jenkins.plugins.coverity.Utils.TaOptionBlockBuilder;
+import jenkins.plugins.coverity.Utils.*;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
@@ -31,17 +34,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, WebServiceFactory.class})
+@PrepareForTest({Jenkins.class, Executor.class, ToolLocationNodeProperty.class, WebServiceFactory.class})
 public class CheckConfigTest {
 
     @Mock
@@ -50,7 +49,14 @@ public class CheckConfigTest {
     @Mock
     private CoverityPublisher.DescriptorImpl descriptor;
 
+    @Mock
+    protected Launcher launcher;
+
+    @Mock
+    protected TaskListener listener;
+
     private WebServiceFactory testWsFactory;
+    private TestableConsoleLogger testLogger;
 
     @Before
     public void setup() throws IOException {
@@ -64,6 +70,9 @@ public class CheckConfigTest {
         when(Jenkins.getInstance()).thenReturn(jenkins);
         descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         when(jenkins.getDescriptorOrDie(CoverityPublisher.class)).thenReturn(descriptor);
+
+        testLogger = new TestableConsoleLogger();
+        when(listener.getLogger()).thenReturn(testLogger.getPrintStream());
     }
 
     @Test
@@ -226,5 +235,37 @@ public class CheckConfigTest {
         assertNotNull(statusMessage);
         assertEquals("[SCM] Please specify AccuRev's source control repository under 'Advanced' \n",
                 statusMessage);
+    }
+
+    @Test
+    public void checkNode_whenNoInstallationFound() throws IOException, InterruptedException {
+        final String nodeName = "test-node";
+        final FreeStyleBuild build = TestUtils.getFreeStyleBuild();
+        TestUtils.setupCurrentExecutorWithNode(nodeName, build, null);
+
+        final CheckConfig.NodeStatus result = CheckConfig.checkNode(null, build, launcher, listener);
+
+        assertNotNull(result);
+        assertFalse(result.isValid());
+        assertEquals("[Node] " + nodeName + " : Could not find Coverity Analysis tools installation.", result.getStatus());
+    }
+
+    @Test
+    public void checkNode_withInstallation() throws IOException, InterruptedException {
+        final LocalChannel channel = mock(LocalChannel.class);
+        when(launcher.getChannel()).thenReturn(channel);
+
+        final CoverityToolInstallation installation = TestUtils.getTestInstallation();
+        when(descriptor.getInstallations()).thenReturn(new CoverityToolInstallation[] { installation });
+
+        final String nodeName = "test-node";
+        final FreeStyleBuild build = TestUtils.getFreeStyleBuild(new CoverityPublisherBuilder().build());
+        TestUtils.setupCurrentExecutorWithNode(nodeName, build, installation);
+
+        final CheckConfig.NodeStatus result = CheckConfig.checkNode(null, build, launcher, listener);
+
+        assertNotNull(result);
+        assertTrue(result.isValid());
+        assertEquals("[Node] " + nodeName + " : version 2017.07", result.getStatus());
     }
 }

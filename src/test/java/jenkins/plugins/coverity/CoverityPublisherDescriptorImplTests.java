@@ -10,6 +10,7 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.thoughtworks.xstream.XStream;
 import hudson.model.Descriptor;
 import hudson.model.listeners.SaveableListener;
@@ -47,8 +48,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -82,7 +82,7 @@ public class CoverityPublisherDescriptorImplTests {
     }
 
     @Test
-    public void newInstance_createsNewPublisher_withdefectFiltersConfigured() throws Descriptor.FormException, IOException {
+    public void newInstance_createsNewPublisher_withDefectFiltersConfigured() throws Descriptor.FormException, IOException {
         when(jenkins.getDescriptorOrDie(CIMStream.class)).thenReturn(new CIMStream.DescriptorImpl());
         StaplerRequest request = mock(StaplerRequest.class);
 
@@ -116,7 +116,7 @@ public class CoverityPublisherDescriptorImplTests {
     }
 
     @Test
-        public void doLoadProjectsForInstance_returnsJsonResponse() throws ServletException, IOException, org.json.simple.parser.ParseException {
+    public void doLoadProjectsForInstance_returnsJsonResponse() throws ServletException, IOException, org.json.simple.parser.ParseException {
         final String projectName = "test-cim-project";
         final String streamName = "test-cim-stream";
         CIMStream stream = new CIMStream("test-cim-instance", projectName, streamName);
@@ -182,6 +182,55 @@ public class CoverityPublisherDescriptorImplTests {
             assertEquals(
                 String.format("{\"streams\":[\"%1$s0\",\"%1$s1\",\"%1$s2\",\"%1$s\"],\"selectedStream\":\"%1$s\",\"validSelection\":false}", streamName),
                 responseOutput);
+        } finally {
+            responseOutputStream.close();
+        }
+    }
+
+    @Test
+    public void doDefectFiltersConfig_initializesFilter() throws ServletException, IOException, CovRemoteServiceException_Exception {
+        final String projectName = "test-cim-project";
+        final String streamName = "test-cim-stream";
+        CIMStream stream = new CIMStream("test-cim-instance", projectName + "0", streamName + "0");
+        stream.setDefectFilters(new DefectFilters());
+        TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
+        testConfigurationService.setupProjects(projectName, 1, streamName, 1);
+        testConfigurationService.setupCheckerNames("CHECKER1", "CHECKER2");
+        testConfigurationService.setupComponents("Default", "Other");
+        testConfigurationService.setupDefaultAttributes();
+
+        CoverityPublisher publisher = new CoverityPublisherBuilder().withCimStream(stream).build();
+
+        DescriptorImpl descriptor = new CoverityPublisher.DescriptorImpl();
+        descriptor.setInstances(Arrays.asList(cimInstance));
+        when(jenkins.getDescriptorByType(CoverityPublisher.DescriptorImpl.class)).thenReturn(descriptor);
+        when(jenkins.getDescriptorOrDie(CIMStream.class)).thenReturn(new CIMStream.DescriptorImpl());
+
+        StaplerRequest request = mock(StaplerRequest.class);
+        when(request.getSubmittedForm()).thenReturn(PUBLISHER_FORM_OBJECT_JSON);
+        when(request.bindJSON(eq(CoverityPublisher.class), any(JSONObject.class))).thenReturn(publisher);
+
+        StaplerResponse response = mock(StaplerResponse.class);
+        final ByteArrayOutputStream testableStream = new ByteArrayOutputStream();
+        ServletOutputStream responseOutputStream = getServletOutputStream(testableStream);
+
+        try {
+            when(response.getOutputStream()).thenReturn(responseOutputStream);
+
+            descriptor.doDefectFiltersConfig(request, response);
+
+            Mockito.verify(response).forward(any(CIMStream.DescriptorImpl.class), eq("defectFilters"), same(request));
+
+            // verify the filter has expected default attribute values
+            DefectFilters filters = publisher.getCimStream().getDefectFilters();
+            assertNotNull(filters);
+            assertEquals(Arrays.asList("CHECKER1", "CHECKER2"), filters.getCheckersList());
+            assertEquals(Arrays.asList("Default", "Other"), filters.getComponents());
+            assertEquals(Arrays.asList("Unclassified", "Pending", "Bug", "Untested"), filters.getClassifications());
+            assertEquals(Arrays.asList("Undecided", "Fix Required", "Fix Submitted", "Modeling Required", "Ignore"), filters.getActions());
+            assertEquals(Arrays.asList("Unspecified", "Major", "Moderate", "Minor"), filters.getSeverities());
+            assertEquals(Arrays.asList("High", "Medium", "Low"), filters.getImpacts());
+
         } finally {
             responseOutputStream.close();
         }
