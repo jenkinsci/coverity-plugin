@@ -401,8 +401,8 @@ public class CoverityPublisherTest {
     }
 
     /**
-     * This test verifies running the CoverityPublisher perform with no options publisher invocation options set does
-     * not run throw exception
+     * This test verifies running the CoverityPublisher perform method with no publisher invocation options configured does
+     * not run throw exception and passes
      */
     @Test
     public void perform_runsToolHandlerWithoutExceptions() throws IOException, InterruptedException {
