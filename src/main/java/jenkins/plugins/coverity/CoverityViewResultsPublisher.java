@@ -10,10 +10,12 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import java.io.IOException;
 import java.io.PrintStream;
 
 import javax.annotation.Nonnull;
 
+import hudson.AbortException;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -46,7 +48,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws IOException {
         final PrintStream logger = listener.getLogger();
         logger.println("[Coverity] Publish Coverity View Results { "+
             "connectInstance:'" + connectInstance + "', " +
@@ -58,15 +60,14 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
 
         if (instance == null) {
             logger.println("[Coverity] Unable to find Coverity Connect instance: " + connectInstance);
-            run.setResult(Result.FAILURE);
-            return;
+            throw new AbortException("Unable to find Coverity Connect instance: " + connectInstance);
         }
 
         if (StringUtils.isEmpty(projectId) || StringUtils.isEmpty(connectView)) {
             logger.println("[Coverity] Coverity Connect project and view are required. But was Project: '" + projectId +
                 "' View: '" + connectView + "'");
-            run.setResult(Result.FAILURE);
-            return;
+            throw new AbortException("Coverity Connect project and view are required. But was Project: '" + projectId +
+                    "' View: '" + connectView + "'");
         }
 
         try {
@@ -74,14 +75,16 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
             reader.getIssuesFromConnectView();
             final CoverityBuildAction buildAction = run.getAction(CoverityBuildAction.class);
             if (failPipeline && buildAction.getDefects().size() > 0) {
+                logger.println("Coverity issues were found and failPipeline was set to true, the pipeline result will be marked as FAILURE.");
                 run.setResult(Result.FAILURE);
             } else if (unstable && buildAction.getDefects().size() > 0) {
+                logger.println("Coverity issues were found and unstable was set to true, the pipeline result will be marked as UNSTABLE.");
                 run.setResult(Result.UNSTABLE);
             }
         } catch (Exception e) {
             logger.println("[Coverity] Error Publishing Coverity View Results");
             logger.println(e.toString());
-            run.setResult(Result.FAILURE);
+            throw new AbortException("Error Publishing Coverity View Results");
         }
 
         logger.println("[Coverity] Finished Publishing Coverity View Results");
