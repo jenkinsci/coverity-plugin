@@ -22,6 +22,7 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
+import hudson.AbortException;
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +88,7 @@ public class CoverityViewResultsPublisherTest {
         expectedUrlMessage = "Coverity details: " + jenkins.getRootUrl() + run.getUrl() + "coverity_defects";
     }
 
-    @Test
+    @Test(expected = AbortException.class)
     public void perform_unknownInstance_logsError() throws IOException, InterruptedException {
         final String instance = "my instance";
         final String projectId = "my projectId";
@@ -99,10 +100,9 @@ public class CoverityViewResultsPublisherTest {
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
             "[Coverity] Unable to find Coverity Connect instance: " + instance);
-        verify(run).setResult(Result.FAILURE);
     }
 
-    @Test
+    @Test(expected = AbortException.class)
     public void perform_emptyProject_logsError() throws IOException, InterruptedException {
         final String instance = cimInstance.getName();
         final String projectId = "";
@@ -114,10 +114,9 @@ public class CoverityViewResultsPublisherTest {
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
             "[Coverity] Coverity Connect project and view are required. But was Project: '" + projectId +"' View: '" + view + "'");
-        verify(run).setResult(Result.FAILURE);
     }
 
-    @Test
+    @Test(expected = AbortException.class)
     public void perform_nullView_logsError() throws IOException, InterruptedException {
         final String instance = cimInstance.getName();
         final String projectId = "my projectId";
@@ -129,7 +128,6 @@ public class CoverityViewResultsPublisherTest {
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
             "[Coverity] Coverity Connect project and view are required. But was Project: '" + projectId +"' View: '" + view + "'");
-        verify(run).setResult(Result.FAILURE);
     }
 
     @Test
@@ -189,6 +187,7 @@ public class CoverityViewResultsPublisherTest {
             getRetrievingMessage(projectId, view),
             getIssueCountMessage(10, projectId, view),
             expectedUrlMessage,
+            "[Coverity] Coverity issues were found and failPipeline was set to true, the pipeline result will be marked as FAILURE.",
             expectedFinishedMessage);
         verify(run).setResult(Result.FAILURE);
     }
@@ -211,11 +210,12 @@ public class CoverityViewResultsPublisherTest {
             getRetrievingMessage(projectId, view),
             getIssueCountMessage(20, projectId, view),
             expectedUrlMessage,
+            "[Coverity] Coverity issues were found and unstable was set to true, the pipeline result will be marked as UNSTABLE.",
             expectedFinishedMessage);
         verify(run).setResult(Result.UNSTABLE);
     }
 
-    @Test
+    @Test(expected = AbortException.class)
     public void perform_handlesError_failsPipeline() throws IOException, InterruptedException {
         final String instance = cimInstance.getName();
         final String projectId = "projectId";
@@ -233,10 +233,9 @@ public class CoverityViewResultsPublisherTest {
             "[Coverity] Error Publishing Coverity View Results",
             exception.toString(),
             expectedFinishedMessage);
-        verify(run).setResult(Result.FAILURE);
     }
 
-    @Test
+    @Test(expected = AbortException.class)
     public void perform_handles400Error_logsMessage_failsPipeline() throws IOException, InterruptedException {
         final String instance = cimInstance.getName();
         final String projectId = "projectId";
@@ -258,7 +257,6 @@ public class CoverityViewResultsPublisherTest {
             "[Coverity] Error Publishing Coverity View Results",
             exception.toString(),
             expectedFinishedMessage);
-        verify(run).setResult(Result.FAILURE);
     }
 
     public void setupIssues(String view, int count) {
