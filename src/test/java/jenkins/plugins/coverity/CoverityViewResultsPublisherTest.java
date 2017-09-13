@@ -187,7 +187,7 @@ public class CoverityViewResultsPublisherTest {
             getRetrievingMessage(projectId, view),
             getIssueCountMessage(10, projectId, view),
             expectedUrlMessage,
-            "Coverity issues were found and failPipeline was set to true, the pipeline result will be marked as FAILURE.",
+            "[Coverity] Coverity issues were found and failPipeline was set to true, the pipeline result will be marked as FAILURE.",
             expectedFinishedMessage);
         verify(run).setResult(Result.FAILURE);
     }
@@ -210,7 +210,7 @@ public class CoverityViewResultsPublisherTest {
             getRetrievingMessage(projectId, view),
             getIssueCountMessage(20, projectId, view),
             expectedUrlMessage,
-            "Coverity issues were found and unstable was set to true, the pipeline result will be marked as UNSTABLE.",
+            "[Coverity] Coverity issues were found and unstable was set to true, the pipeline result will be marked as UNSTABLE.",
             expectedFinishedMessage);
         verify(run).setResult(Result.UNSTABLE);
     }
