@@ -227,16 +227,19 @@ public class CheckConfig extends AbstractDescribableImpl<CheckConfig> {
             FilePath homePath = new FilePath(launcher.getChannel(), installation.getHome());
             CoverityVersion version = getVersion(homePath);
 
-            if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
-                return new NodeStatus(false,
-                    "\"Coverity Static Analysis\" version " + version.toString() + " is not supported. " +
-                    "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString(),
-                    node,
-                    version);
+            if (version == null) {
+                return new NodeStatus(false, "VERSION file is missing", node, null);
+            } else {
+                if(version.compareTo(CoverityVersion.MINIMUM_SUPPORTED_VERSION) < 0) {
+                    return new NodeStatus(false,
+                            "\"Coverity Static Analysis\" version " + version.toString() + " is not supported. " +
+                                    "The minimum supported version is " + CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString(),
+                            node,
+                            version);
+                }
+
+                return new NodeStatus(true, "version " + version, node, version);
             }
-
-            return new NodeStatus(true, "version " + version, node, version);
-
         } catch(IOException e) {
             e.printStackTrace();
             return new NodeStatus(false, "Error checking node: " + e.toString(), node, null);

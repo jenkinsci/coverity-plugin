@@ -153,8 +153,15 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
             if (cimInstance != null) {
                 FormValidation checkResult = cimInstance.doCheck();
 
-                // initialize cache for instance
-                CimCache.getInstance().cacheCimInstance(cimInstance);
+                try {
+                    // initialize cache for instance
+                    CimCache.getInstance().cacheCimInstance(cimInstance);
+                } catch (Exception e) {
+                    if (e.getMessage().contains("Unauthorized")) {
+                        return FormValidation.error("User is not authorized. Please check global configuration!");
+                    }
+                }
+
 
                 // return FormValidation.ok in order to suppress any success messages, these don't need to show automatically here
                 return checkResult.kind.equals(FormValidation.Kind.OK) ? FormValidation.ok() : checkResult;
@@ -201,7 +208,6 @@ public class CIMStream extends AbstractDescribableImpl<CIMStream> {
         }
 
         public List<String> loadStreams(@QueryParameter String instance, @QueryParameter String project, @QueryParameter String stream) {
-
             List<String> streams = new ArrayList<>();
 
             if (!StringUtils.isEmpty(instance) && !StringUtils.isEmpty(project)) {
