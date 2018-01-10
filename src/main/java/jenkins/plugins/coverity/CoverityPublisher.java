@@ -475,11 +475,8 @@ public class CoverityPublisher extends Recorder {
          * This is called when the user clicks the 'Validate' button for an instance.
          */
         public FormValidation doCheckInstance(@QueryParameter String host, @QueryParameter int port,
-                                              @QueryParameter String user, @QueryParameter String password,
                                               @QueryParameter boolean useSSL, @QueryParameter String credentialId) {
             CIMInstance instance = new CIMInstance("", host, port, credentialId);
-            instance.setUser(user);
-            instance.setPassword(password);
             instance.setUseSSL(useSSL);
             return instance.doCheck();
         }

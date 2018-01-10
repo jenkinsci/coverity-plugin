@@ -10,22 +10,35 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import com.cloudbees.plugins.credentials.Credentials;
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.Launcher;
 import hudson.model.Executor;
 import hudson.model.FreeStyleBuild;
+import hudson.model.ItemGroup;
 import hudson.model.TaskListener;
 import hudson.remoting.LocalChannel;
 import hudson.tools.ToolLocationNodeProperty;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.Utils.*;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
+import org.acegisecurity.Authentication;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -33,6 +46,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -40,7 +54,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, Executor.class, ToolLocationNodeProperty.class, WebServiceFactory.class})
+@PrepareForTest({Jenkins.class, Executor.class, ToolLocationNodeProperty.class, WebServiceFactory.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public class CheckConfigTest {
 
     @Mock
@@ -57,6 +71,9 @@ public class CheckConfigTest {
 
     private WebServiceFactory testWsFactory;
     private TestableConsoleLogger testLogger;
+
+    @Mock
+    UsernamePasswordCredentials credentials;
 
     @Before
     public void setup() throws IOException {
@@ -116,10 +133,10 @@ public class CheckConfigTest {
 
     @Test
     public void checkStreamTest_NoStreamConfiguredForCIMStream() {
+        setCredentialManager("admin", "password");
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
-                .build();
+                .withUseSSL(false).withDefaultCredentialId().build();
         CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, StringUtils.EMPTY);
         when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
 
@@ -267,5 +284,27 @@ public class CheckConfigTest {
         assertNotNull(result);
         assertTrue(result.isValid());
         assertEquals("[Node] " + nodeName + " : version 2017.07", result.getStatus());
+    }
+
+    protected void setCredentialManager(String username, String password) {
+        PowerMockito.mockStatic(CredentialsMatchers.class);
+        PowerMockito.mockStatic(CredentialsProvider.class);
+        credentials = Mockito.mock(UsernamePasswordCredentialsImpl.class);
+
+        Secret secret = PowerMockito.mock(Secret.class);
+        PowerMockito.when(secret.getPlainText()).thenReturn(password);
+        PowerMockito.when(credentials.getPassword()).thenReturn(secret);
+        PowerMockito.when(credentials.getUsername()).thenReturn(username);
+
+        PowerMockito.when(CredentialsProvider.lookupCredentials(
+                Matchers.<Class<Credentials>>any(),
+                Matchers.any(ItemGroup.class),
+                Matchers.any(Authentication.class),
+                Matchers.anyListOf(DomainRequirement.class)
+        )).thenReturn(new ArrayList<Credentials>() {
+        });
+
+        PowerMockito.when(CredentialsMatchers.firstOrNull(Matchers.anyListOf(StandardCredentials.class),
+                Matchers.any(CredentialsMatcher.class))).thenReturn((StandardUsernamePasswordCredentials) credentials);
     }
 }

@@ -17,8 +17,6 @@ public class CIMInstanceBuilder {
     private String host;
     private int port;
     private String credentialId;
-    private String user;
-    private String password;
     private boolean useSSL;
 
     public CIMInstanceBuilder withName(String name){
@@ -41,13 +39,8 @@ public class CIMInstanceBuilder {
         return this;
     }
 
-    public CIMInstanceBuilder withUser(String user){
-        this.user = user;
-        return this;
-    }
-
-    public CIMInstanceBuilder withPassword(String password){
-        this.password = password;
+    public CIMInstanceBuilder withDefaultCredentialId() {
+        this.credentialId = "DefaultCredentialId";
         return this;
     }
 
@@ -59,8 +52,6 @@ public class CIMInstanceBuilder {
     public CIMInstance build(){
         CIMInstance instance = new CIMInstance(name, host, port, credentialId);
         instance.setUseSSL(useSSL);
-        instance.setUser(user);
-        instance.setPassword(password);
 
         return instance;
     }
