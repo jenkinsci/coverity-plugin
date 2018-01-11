@@ -60,13 +60,10 @@ import jenkins.plugins.coverity.ws.WebServiceFactory;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, WebServiceFactory.class, Client.class, SSLContext.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
+@PrepareForTest({WebServiceFactory.class, Client.class, SSLContext.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 @PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
 public class CIMInstanceTest {
     private TestWebServiceFactory testWsFactory;
-
-    @Rule
-    public final JenkinsRule r = new JenkinsRule();
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -741,29 +738,5 @@ public class CIMInstanceTest {
             "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 1,000 of 3,000)",
             "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 2,000 of 3,000)",
             "[Coverity] Found 3,000 issues for project \"project0\" and view \"view0\"");
-    }
-
-    /**
-     * This test verifies that if user and password are still stored in the older configuration ( before 1.11.0 ),
-     * then the user and password will be migrated into credentials with default ID
-     */
-    @Test
-    public void migrateOldUseAndPassword() {
-        String oldConfiguration = "    <jenkins.plugins.coverity.CIMInstance>\n" +
-                "      <name>Igor:1401</name>\n" +
-                "      <host>igor</host>\n" +
-                "      <port>1401</port>\n" +
-                "      <user>admin</user>\n" +
-                "      <password>coverity</password>\n" +
-                "      <useSSL>false</useSSL>\n" +
-                "      <credentialId></credentialId>\n" +
-                "    </jenkins.plugins.coverity.CIMInstance>\n" +
-                "  </instances>";
-
-        XStream xstream = new XStream2();
-
-        final CIMInstance instance = (CIMInstance)xstream.fromXML(oldConfiguration);
-        assertNotNull(instance);
-        assertEquals("Igor:1401_admin", instance.getCredentialId());
     }
 }
