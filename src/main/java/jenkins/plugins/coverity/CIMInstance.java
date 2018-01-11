@@ -28,12 +28,8 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import com.cloudbees.plugins.credentials.*;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
-import edu.umd.cs.findbugs.annotations.NonNull;
-import hudson.Extension;
-import hudson.util.Secret;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -76,7 +72,6 @@ public class CIMInstance {
     private transient String password;
 
     private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
-    private static final String migratedCredentialId = "Migrated-Coverity-Credential";
     /**
      * The id for this instance, used as a key in CoverityPublisher
      */
