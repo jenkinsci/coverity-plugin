@@ -122,7 +122,7 @@ public class CIMInstance {
 
         // Setting the migrated credential to use
         if (StringUtils.isEmpty(credentialId)) {
-            credentialId = migratedCredentialId;
+            credentialId = name + "_" + user;
         }
 
         return this;
