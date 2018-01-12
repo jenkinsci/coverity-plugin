@@ -10,6 +10,9 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import hudson.Launcher;
 import hudson.model.Executor;
 import hudson.model.FreeStyleBuild;
@@ -17,6 +20,7 @@ import hudson.model.TaskListener;
 import hudson.remoting.LocalChannel;
 import hudson.tools.ToolLocationNodeProperty;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.Utils.*;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
@@ -40,7 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, Executor.class, ToolLocationNodeProperty.class, WebServiceFactory.class})
+@PrepareForTest({Jenkins.class, Executor.class, ToolLocationNodeProperty.class, WebServiceFactory.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public class CheckConfigTest {
 
     @Mock
@@ -57,6 +61,9 @@ public class CheckConfigTest {
 
     private WebServiceFactory testWsFactory;
     private TestableConsoleLogger testLogger;
+
+    @Mock
+    UsernamePasswordCredentials credentials;
 
     @Before
     public void setup() throws IOException {
@@ -116,10 +123,10 @@ public class CheckConfigTest {
 
     @Test
     public void checkStreamTest_NoStreamConfiguredForCIMStream() {
+        CredentialUtil.setCredentialManager("admin", "password");
         CoverityPublisher publisher = new CoverityPublisherBuilder().build();
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
-                .build();
+                .withUseSSL(false).withDefaultCredentialId().build();
         CIMStream cimStream = new CIMStream("test-cim-instance", StringUtils.EMPTY, StringUtils.EMPTY);
         when(descriptor.getInstance(any(CoverityPublisher.class))).thenReturn(cimInstance);
 

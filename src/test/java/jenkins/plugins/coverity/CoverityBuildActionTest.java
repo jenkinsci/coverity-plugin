@@ -10,17 +10,21 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.thoughtworks.xstream.XStream;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Run;
+import hudson.util.Secret;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
+import jenkins.plugins.coverity.Utils.CredentialUtil;
 import jenkins.plugins.coverity.Utils.TestUtils;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
@@ -46,7 +50,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, WebServiceFactory.class})
+@PrepareForTest({Jenkins.class, WebServiceFactory.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public class CoverityBuildActionTest {
     @Mock
     private Jenkins jenkins;
@@ -64,8 +68,9 @@ public class CoverityBuildActionTest {
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
         DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
+        CredentialUtil.setCredentialManager("admin", "password");
         cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8443)
-                .withUser("admin").withPassword("password").withUseSSL(true).withCredentialId("").build();
+                .withUseSSL(true).withDefaultCredentialId().build();
         when(descriptor.getInstance(any(String.class))).thenReturn(cimInstance);
         when(jenkins.getDescriptorByType(CoverityPublisher.DescriptorImpl.class)).thenReturn(descriptor);
     }

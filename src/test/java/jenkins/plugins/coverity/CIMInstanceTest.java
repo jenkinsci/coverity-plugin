@@ -25,14 +25,21 @@ import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.thoughtworks.xstream.XStream;
+import hudson.util.Secret;
+import hudson.util.XStream2;
+import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
+import jenkins.plugins.coverity.Utils.CredentialUtil;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -53,7 +60,7 @@ import jenkins.plugins.coverity.ws.WebServiceFactory;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WebServiceFactory.class, Client.class, SSLContext.class})
+@PrepareForTest({WebServiceFactory.class, Client.class, SSLContext.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 @PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
 public class CIMInstanceTest {
     private TestWebServiceFactory testWsFactory;
@@ -71,8 +78,9 @@ public class CIMInstanceTest {
 
     @Test
     public void getProjectKey_forExistingProject() throws IOException, CovRemoteServiceException_Exception {
+        CredentialUtil.setCredentialManager("admin", "password");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                                    .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                                    .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 1);
@@ -84,8 +92,9 @@ public class CIMInstanceTest {
 
     @Test
     public void getProjectKey_forUnknownProject() throws IOException, CovRemoteServiceException_Exception {
+        CredentialUtil.setCredentialManager("admin", "password");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 1);
@@ -98,9 +107,10 @@ public class CIMInstanceTest {
     @Test
     public void getStream_returnsMatchingStream() throws IOException, CovRemoteServiceException_Exception {
         final String streamId = "stream0";
+        CredentialUtil.setCredentialManager("admin", "password");
 
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 1);
@@ -115,9 +125,10 @@ public class CIMInstanceTest {
     @Test
     public void getStreams_throwsWithNoStreams() throws IOException, CovRemoteServiceException_Exception {
         final String streamId = "stream1";
+        CredentialUtil.setCredentialManager("admin", "password");
 
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         exception.expect(IOException.class);
         exception.expectMessage("An error occurred while retrieving streams for the given project. Could not find stream: " + streamId);
@@ -131,9 +142,10 @@ public class CIMInstanceTest {
             "Check Coverity Web Service Response: { Code=401, Message=\"failed response message\" }" + System.lineSeparator() +
             "(check that the values entered for this instance are correct and ensure the Coverity Connect version is at least " +
             CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ")";
+        CredentialUtil.setCredentialManager("admin", "password");
 
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         FormValidation result = cimInstance.doCheck();
 
@@ -144,8 +156,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_superUser() throws IOException {
         final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CredentialUtil.setCredentialManager("admin", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupUser("cim-user", true, new HashMap<String, String[]>());
@@ -159,9 +173,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_missingCommitPermission() throws IOException {
         final String expectedErrorMessage ="\"cim-user\" does not have following permission(s): \"Commit to a stream\" ";
+        CredentialUtil.setCredentialManager("cim-user", "password");
 
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -177,9 +192,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_missingViewIssuesPermission() throws IOException {
         final String expectedErrorMessage ="\"cim-user\" does not have following permission(s): \"View issues\" ";
+        CredentialUtil.setCredentialManager("cim-user", "password");
 
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -195,9 +211,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_missingInvokeWebServicesPermission() throws IOException, CovRemoteServiceException_Exception {
         final String expectedErrorMessage ="\"cim-user\" does not have following permission(s): \"Access web services\"";
+        CredentialUtil.setCredentialManager("cim-user", "password");
 
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -213,8 +230,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_allRoleAssignments() throws IOException {
         final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CredentialUtil.setCredentialManager("cim-user", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -230,8 +249,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_builtInRoleServerAdmin() throws IOException {
         final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CredentialUtil.setCredentialManager("cim-user", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -247,8 +268,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_builtInRoleProjectOwner() throws IOException {
         final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CredentialUtil.setCredentialManager("cim-user", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -264,8 +287,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_builtInRoleStreamOwner() throws IOException {
         final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CredentialUtil.setCredentialManager("cim-user", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -281,8 +306,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_allGroupRoleAssignments() throws IOException {
         final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CredentialUtil.setCredentialManager("cim-user", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -300,8 +327,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_groupBuiltInRoleServerAdmin() throws IOException {
         final String expectedSuccessMessage = "Successfully connected to the instance.";
+        CredentialUtil.setCredentialManager("cim-user", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -319,8 +348,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_nonGlobalRoleAssignments() throws IOException {
         final String expectedWarningMessage ="\"cim-user\" does not have following global permission(s): \"Commit to a stream\" \"View issues\" ";
+        CredentialUtil.setCredentialManager("cim-user", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -336,8 +367,10 @@ public class CIMInstanceTest {
     @Test
     public void doCheck_nonGlobalBuiltInRole() throws IOException {
         final String expectedWarningMessage ="\"cim-user\" does not have following global permission(s): \"Commit to a stream\" \"View issues\" ";
+        CredentialUtil.setCredentialManager("cim-user", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("cim-user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         Map<String, String[]> rolePermissions = new HashMap<>();
@@ -429,8 +462,10 @@ public class CIMInstanceTest {
             "    }" +
             "]}";
         TestableViewsService.setupWithViewApi(viewApiJsonResult);
+        CredentialUtil.setCredentialManager("user", "password");
+
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("host").withPort(8080)
-                .withUser("user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
 
@@ -496,8 +531,9 @@ public class CIMInstanceTest {
             "    }" +
             "]}";
         TestableViewsService.setupWithViewApi(viewApiJsonResult);
+        CredentialUtil.setCredentialManager("user", "password");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("ssl-host").withPort(8443)
-                .withUser("user").withPassword("password").withUseSSL(true).withCredentialId("").build();
+                .withUseSSL(true).withDefaultCredentialId().build();
 
         final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
 
@@ -512,9 +548,10 @@ public class CIMInstanceTest {
     public void getViews_handlesExceptions() throws NoSuchAlgorithmException {
         PowerMockito.mockStatic(SSLContext.class);
         when(SSLContext.getInstance("SSL")).thenThrow(new NoSuchAlgorithmException());
+        CredentialUtil.setCredentialManager("user", "password");
 
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("host").withPort(8080)
-                .withUser("user").withPassword("password").withUseSSL(true).withCredentialId("").build();
+                .withUseSSL(true).withDefaultCredentialId().build();
 
         final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
 
@@ -591,8 +628,9 @@ public class CIMInstanceTest {
             "    ]" +
             "}}";
         TestableViewsService.setupViewContentsApi("view0", 200, viewContentsApiJsonResult);
+        CredentialUtil.setCredentialManager("user", "password");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("host").withPort(8080)
-                .withUser("user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
 
@@ -627,8 +665,9 @@ public class CIMInstanceTest {
             "    ]" +
             "}}";
         TestableViewsService.setupViewContentsApi("view0", 200, viewContentsApiJsonResult);
+        CredentialUtil.setCredentialManager("user", "password");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("host").withPort(8080)
-                .withUser("user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
 
@@ -688,8 +727,9 @@ public class CIMInstanceTest {
             "    ]" +
             "}}");
         TestableViewsService.setupViewContentsApi("view0", 200, viewContentsApiJsonResult.toString());
+        CredentialUtil.setCredentialManager("user", "password");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("host").withPort(8080)
-                .withUser("user").withPassword("password").withUseSSL(false).withCredentialId("").build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
 

@@ -27,12 +27,13 @@ import java.util.logging.Logger;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
 
+import com.cloudbees.plugins.credentials.*;
+import com.cloudbees.plugins.credentials.domains.Domain;
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
@@ -65,6 +66,11 @@ import jenkins.plugins.coverity.ws.WebServiceFactory.CheckWsResponse;
  * Represents one Coverity Integrity Manager server. Abstracts functions like getting streams and defects.
  */
 public class CIMInstance {
+
+    // deprecated fields which were removed in plugin version 1.11
+    private transient String user;
+    private transient String password;
+
     private static final Logger logger = Logger.getLogger(CIMStream.class.getName());
     /**
      * The id for this instance, used as a key in CoverityPublisher
@@ -80,20 +86,6 @@ public class CIMInstance {
      * The port for the CIM server (this is the HTTP port and not the data port)
      */
     private final int port;
-
-    /**
-     * Username for connecting to the CIM server
-     * Deprecated since 1.10
-     */
-    @Deprecated
-    private String user;
-
-    /**
-     * Password for connecting to the CIM server
-     * Deprecated since 1.10
-     */
-    @Deprecated
-    private String password;
 
     /**
      * Use SSL
@@ -120,6 +112,17 @@ public class CIMInstance {
         this.credentialId = credentialId;
     }
 
+    protected Object readResolve() {
+        createCredentials(user, password);
+
+        // Setting the migrated credential to use
+        if (StringUtils.isEmpty(credentialId)) {
+            credentialId = name + "_" + user;
+        }
+
+        return this;
+    }
+
     public String getHost() {
         return host;
     }
@@ -130,32 +133,6 @@ public class CIMInstance {
 
     public String getName() {
         return name;
-    }
-
-    /*
-     * Deprecated since 1.10. Use credentialId
-     */
-    @Deprecated
-    public String getUser() {
-        return user;
-    }
-
-    @DataBoundSetter
-    public void setUser(String user){
-        this.user = user;
-    }
-
-    /*
-     * Deprecated since 1.10. Use credentialId
-     */
-    @Deprecated
-    public String getPassword() {
-        return password;
-    }
-
-    @DataBoundSetter
-    public void setPassword(String password){
-        this.password = password;
     }
 
     public boolean isUseSSL() {
@@ -510,10 +487,21 @@ public class CIMInstance {
         return StringUtils.EMPTY;
     }
 
+    private void createCredentials(String username, String password) {
+        try{
+            UsernamePasswordCredentialsImpl credential = new UsernamePasswordCredentialsImpl(
+                    CredentialsScope.GLOBAL, name + "_" + username, "Migrated Coverity Credential", username, password);
+
+            CredentialsStore store = CredentialsProvider.lookupStores(Jenkins.getInstance()).iterator().next();
+            store.addCredentials(Domain.global(), credential);
+        } catch (IOException ioe) {
+            logger.warning("Migrating username and password into credentials encountered IOException"
+            + "\nPlease try to resolve this issue by adding credentials manually");
+        }
+    }
+
     public CIMInstance cloneWithCredential(String credentialId) {
         CIMInstance instance = new CIMInstance(name, host, port, credentialId);
-        instance.setUser(user);
-        instance.setPassword(password);
         instance.setUseSSL(useSSL);
         return instance;
     }

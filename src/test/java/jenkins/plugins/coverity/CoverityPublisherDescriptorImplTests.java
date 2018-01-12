@@ -10,17 +10,21 @@
  *******************************************************************************/
 package jenkins.plugins.coverity;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.thoughtworks.xstream.XStream;
 import hudson.model.Descriptor;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CoverityPublisher.DescriptorImpl;
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
+import jenkins.plugins.coverity.Utils.CredentialUtil;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
@@ -53,7 +57,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, SaveableListener.class, WebServiceFactory.class})
+@PrepareForTest({Jenkins.class, SaveableListener.class, WebServiceFactory.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public class CoverityPublisherDescriptorImplTests {
     private static final JSONObject PUBLISHER_FORM_OBJECT_JSON = JSONObject.fromObject("{\"name\":\"test-job\",\"publisher\":{\"kind\":\"jenkins.plugins.coverity.CoverityPublisher\",\"unstable\":false,\"hideChart\":false,\"invocationAssistance\":{\"buildArguments\":\"\",\"intermediateDir\":\"\",\"csharpMsvsca\":false,\"analyzeArguments\":\"\",\"saOverride\":\"\",\"commitArguments\":\"\",\"javaWarFile\":\"\"},\"keepIntDir\":false,\"cimStream\":{\"instance\":\"test-cim-instance\",\"id\":null,\"defectFilters\":{\"cutOffDate\":\"\"},\"project\":\"test-cim-project\",\"stream\":\"test-cim-stream\"},\"skipFetchingDefects\":false,\"failBuild\":false,\"stapler-class\":\"jenkins.plugins.coverity.CoverityPublisher\"},\"properties\":{\"hudson-model-ParametersDefinitionProperty\":{},\"stapler-class-bag\":\"true\"}}");
 
@@ -76,9 +80,9 @@ public class CoverityPublisherDescriptorImplTests {
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
         when(jenkins.getRootDir()).thenReturn(tempJenkinsRoot.getRoot());
+        CredentialUtil.setCredentialManager("admin", "password");
         cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
-                .build();
+                .withUseSSL(false).withDefaultCredentialId().build();
     }
 
     @Test

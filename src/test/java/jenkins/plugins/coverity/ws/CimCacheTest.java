@@ -18,7 +18,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import hudson.util.Secret;
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
+import jenkins.plugins.coverity.Utils.CredentialUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +34,7 @@ import jenkins.plugins.coverity.CIMInstance;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(WebServiceFactory.class)
+@PrepareForTest({WebServiceFactory.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public class CimCacheTest {
     @Before
     public void setup() throws IOException {
@@ -42,9 +46,9 @@ public class CimCacheTest {
 
     @Test
     public void getProjects_returnsProjectsForInstances() throws IOException {
+        CredentialUtil.setCredentialManager("admin", "password");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                                    .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
-                                    .build();
+                                    .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 1);
@@ -58,8 +62,7 @@ public class CimCacheTest {
         assertEquals(expectedProjectNames, projects);
 
         cimInstance = new CIMInstanceBuilder().withName("test-instance-2").withHost("test.coverity2.").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
-                .build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 2, "stream", 1);
@@ -71,9 +74,9 @@ public class CimCacheTest {
 
     @Test
     public void getStreams_returnsStreamsForInstances() throws IOException {
+        CredentialUtil.setCredentialManager("admin", "password");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("test").withHost("test.coverity").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
-                .build();
+                .withUseSSL(false).withDefaultCredentialId().build();
 
         TestConfigurationService testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 3, "stream", 2);
@@ -87,8 +90,7 @@ public class CimCacheTest {
         assertEquals(expectedStreamNames, streams);
 
         cimInstance = new CIMInstanceBuilder().withName("test-instance-2").withHost("test.coverity2.").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
-                .build();
+                .withUseSSL(false).withDefaultCredentialId().build();
         testConfigurationService = (TestConfigurationService)WebServiceFactory.getInstance().getConfigurationService(cimInstance);
         testConfigurationService.setupProjects("project", 1, "stream", 4);
 

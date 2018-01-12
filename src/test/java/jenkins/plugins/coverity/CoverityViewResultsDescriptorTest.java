@@ -21,7 +21,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import hudson.util.Secret;
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
+import jenkins.plugins.coverity.Utils.CredentialUtil;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hamcrest.CoreMatchers;
@@ -45,7 +49,7 @@ import jenkins.plugins.coverity.ws.TestableViewsService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, WebServiceFactory.class, Client.class})
+@PrepareForTest({Jenkins.class, WebServiceFactory.class, Client.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public class CoverityViewResultsDescriptorTest {
     private CIMInstance cimInstance;
 
@@ -56,9 +60,9 @@ public class CoverityViewResultsDescriptorTest {
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
         DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
+        CredentialUtil.setCredentialManager("admin", "password");
         cimInstance = new CIMInstanceBuilder().withName("test-cim-instance").withHost("test-cim-instance").withPort(8080)
-                .withUser("admin").withPassword("password").withUseSSL(false).withCredentialId("")
-                .build();
+                .withUseSSL(false).withDefaultCredentialId().build();
         final List<CIMInstance> cimInstances = Arrays.asList(cimInstance);
         when(descriptor.getInstances()).thenReturn(cimInstances);
         when(jenkins.getDescriptorByType(CoverityPublisher.DescriptorImpl.class)).thenReturn(descriptor);
