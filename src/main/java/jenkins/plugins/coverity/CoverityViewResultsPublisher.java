@@ -76,15 +76,15 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
             ViewIssuesReader reader = new ViewIssuesReader(run, listener.getLogger(), this);
             reader.getIssuesFromConnectView();
             final CoverityBuildAction buildAction = run.getAction(CoverityBuildAction.class);
-            if (failPipeline && buildAction.getDefects().size() > 0) {
+            if (abortPipeline && buildAction.getDefects().size() > 0) {
+                logger.println("[Coverity] Coverity issues were found and abortPipeline was set to true, throwing abort exception.");
+                throw new AbortException("Coverity issues were found");
+            } else if (failPipeline && buildAction.getDefects().size() > 0) {
                 logger.println("[Coverity] Coverity issues were found and failPipeline was set to true, the pipeline result will be marked as FAILURE.");
                 run.setResult(Result.FAILURE);
             } else if (unstable && buildAction.getDefects().size() > 0) {
                 logger.println("[Coverity] Coverity issues were found and unstable was set to true, the pipeline result will be marked as UNSTABLE.");
                 run.setResult(Result.UNSTABLE);
-            } else if (abortPipeline && buildAction.getDefects().size() > 0) {
-                logger.println("[Coverity] Coverity issues were found and abortPipeline was set to true, throwing abort exception.");
-                throw new AbortException("Coverity issues were found");
             }
         } catch (Exception e) {
             logger.println("[Coverity] Error Publishing Coverity View Results");
