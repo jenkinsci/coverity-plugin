@@ -698,11 +698,10 @@ public class CIMInstanceTest {
     @Test
     public void getIssuesForView_handlesPagingAndLogsProgress() throws Exception {
         final TestableConsoleLogger testableConsoleLogger = new TestableConsoleLogger();
-        int rowCount = 3000;
 
-        final StringBuilder viewContentsApiJsonResultHeader = new StringBuilder("{\"viewContentsV1\": {" +
+        final String viewContentsApiJsonResultHeader = "{\"viewContentsV1\": {" +
                 "    \"offset\": 0," +
-                "    \"totalRows\": " + rowCount + "," +
+                "    \"totalRows\": 3000," +
                 "    \"columns\": [" +
                 "        {" +
                 "            \"name\": \"cid\"," +
@@ -721,17 +720,16 @@ public class CIMInstanceTest {
                 "            \"label\": \"Function\"" +
                 "        }" +
                 "    ]," +
-                "    \"rows\": [");
+                "    \"rows\": [";
 
         ViewsService mockViewsService = mock(ViewsService.class);
-
         Answer<ViewContents> contents = new Answer<ViewContents>() {
             public ViewContents answer(InvocationOnMock mock) throws Throwable {
                 int pageSize = (int)mock.getArguments()[2];
                 int offSet = (int)mock.getArguments()[3];
 
                 JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject) parser.parse(viewContentsApiJsonResultHeader.toString().concat(constructViewContentsResult(pageSize, offSet)));
+                JSONObject json = (JSONObject) parser.parse(viewContentsApiJsonResultHeader.concat(constructViewContentsResult(pageSize, offSet)));
 
                 return new ViewContents((JSONObject)json.get("viewContentsV1"));
             }
@@ -747,7 +745,7 @@ public class CIMInstanceTest {
 
         final List<CoverityDefect> issuesVorView = cimInstance.getIssuesVorView("project0", "view0", testableConsoleLogger.getPrintStream());
 
-        assertEquals(rowCount, issuesVorView.size());
+        assertEquals(3000, issuesVorView.size());
         testableConsoleLogger.verifyMessages("[Coverity] Retrieving issues for project \"project0\" and view \"view0\"",
             "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 1,000 of 3,000)",
             "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 2,000 of 3,000)",
