@@ -37,6 +37,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     private String projectId;
     private boolean failPipeline;
     private boolean unstable;
+    private boolean abortPipeline;
 
     @DataBoundConstructor
     public CoverityViewResultsPublisher(String connectInstance, String connectView, String projectId) {
@@ -45,6 +46,7 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
         this.projectId = projectId;
         failPipeline = false;
         unstable = false;
+        abortPipeline = false;
     }
 
     @Override
@@ -80,6 +82,9 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
             } else if (unstable && buildAction.getDefects().size() > 0) {
                 logger.println("[Coverity] Coverity issues were found and unstable was set to true, the pipeline result will be marked as UNSTABLE.");
                 run.setResult(Result.UNSTABLE);
+            } else if (abortPipeline && buildAction.getDefects().size() > 0) {
+                logger.println("[Coverity] Coverity issues were found and abortPipeline was set to true, throwing abort exception.");
+                throw new AbortException("Coverity issues were found");
             }
         } catch (Exception e) {
             logger.println("[Coverity] Error Publishing Coverity View Results");
@@ -147,5 +152,14 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
     @DataBoundSetter
     public void setUnstable(boolean unstable) {
         this.unstable = unstable;
+    }
+
+    @DataBoundSetter
+    public void setAbortPipeline(boolean abortPipeline) {
+        this.abortPipeline = abortPipeline;
+    }
+
+    public boolean isAbortPipeline() {
+        return abortPipeline;
     }
 }
