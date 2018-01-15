@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -27,19 +28,21 @@ import javax.net.ssl.SSLContext;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.thoughtworks.xstream.XStream;
 import hudson.util.Secret;
-import hudson.util.XStream2;
-import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import jenkins.plugins.coverity.Utils.CredentialUtil;
+import jenkins.plugins.coverity.ws.*;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.jvnet.hudson.test.JenkinsRule;
+import org.mockito.Matchers;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -53,10 +56,7 @@ import com.sun.jersey.api.client.Client;
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
-import jenkins.plugins.coverity.ws.TestWebServiceFactory;
 import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationService;
-import jenkins.plugins.coverity.ws.TestableViewsService;
-import jenkins.plugins.coverity.ws.WebServiceFactory;
 
 
 @RunWith(PowerMockRunner.class)
@@ -615,6 +615,17 @@ public class CIMInstanceTest {
             "            \"displayFunction\": \"main\"" +
             "        }," +
             "        {" +
+            "            \"cid\": 12345," +
+            "            \"displayType\": \"Insufficient function coverage\"," +
+            "            \"displayImpact\": \"Low\"," +
+            "            \"status\": \"New\"," +
+            "            \"checker\": \"TA.FUNCTION_INSUFFICIENTLY_TESTED\"," +
+            "            \"owner\": \"Unassigned\"," +
+            "            \"classification\": \"Unclassified\"," +
+            "            \"displayFile\": \"source.cpp\"" +
+            "            \"displayFunction\": \"main\"" +
+            "        }," +
+            "        {" +
             "            \"cid\": 54321," +
             "            \"displayType\": \"Insufficient function coverage\"," +
             "            \"displayImpact\": \"Low\"," +
@@ -685,48 +696,51 @@ public class CIMInstanceTest {
     }
 
     @Test
-    public void getIssuesForView_handlesPagingAndLogsProgess() throws Exception {
+    public void getIssuesForView_handlesPagingAndLogsProgress() throws Exception {
         final TestableConsoleLogger testableConsoleLogger = new TestableConsoleLogger();
         int rowCount = 3000;
-        int pageSize = 1000;
 
-        final StringBuilder viewContentsApiJsonResult = new StringBuilder("{\"viewContentsV1\": {" +
-            "    \"offset\": 0," +
-            "    \"totalRows\": " + rowCount + "," +
-            "    \"columns\": [" +
-            "        {" +
-            "            \"name\": \"cid\"," +
-            "            \"label\": \"CID\"" +
-            "        }," +
-            "        {" +
-            "            \"name\": \"checker\"," +
-            "            \"label\": \"Checker\"" +
-            "        }," +
-            "        {" +
-            "            \"name\": \"displayFile\"," +
-            "            \"label\": \"File\"" +
-            "        }" +
-            "        {" +
-            "            \"name\": \"displayFunction\"," +
-            "            \"label\": \"Function\"" +
-            "        }" +
-            "    ]," +
-            "    \"rows\": [");
-
-        for (int i = 0; i < pageSize; i++) {
-            viewContentsApiJsonResult.append(
+        final StringBuilder viewContentsApiJsonResultHeader = new StringBuilder("{\"viewContentsV1\": {" +
+                "    \"offset\": 0," +
+                "    \"totalRows\": " + rowCount + "," +
+                "    \"columns\": [" +
                 "        {" +
-                "            \"cid\": " + i + "," +
-                "            \"checker\": \"FORWARD_NULL\"," +
-                "            \"displayFile\": \"source.cpp\"" +
-                "            \"displayFunction\": \"test" + i + "\"" +
-                "        },");
-        }
+                "            \"name\": \"cid\"," +
+                "            \"label\": \"CID\"" +
+                "        }," +
+                "        {" +
+                "            \"name\": \"checker\"," +
+                "            \"label\": \"Checker\"" +
+                "        }," +
+                "        {" +
+                "            \"name\": \"displayFile\"," +
+                "            \"label\": \"File\"" +
+                "        }" +
+                "        {" +
+                "            \"name\": \"displayFunction\"," +
+                "            \"label\": \"Function\"" +
+                "        }" +
+                "    ]," +
+                "    \"rows\": [");
 
-        viewContentsApiJsonResult.append(
-            "    ]" +
-            "}}");
-        TestableViewsService.setupViewContentsApi("view0", 200, viewContentsApiJsonResult.toString());
+        ViewsService mockViewsService = mock(ViewsService.class);
+
+        Answer<ViewContents> contents = new Answer<ViewContents>() {
+            public ViewContents answer(InvocationOnMock mock) throws Throwable {
+                int pageSize = (int)mock.getArguments()[2];
+                int offSet = (int)mock.getArguments()[3];
+
+                JSONParser parser = new JSONParser();
+                JSONObject json = (JSONObject) parser.parse(viewContentsApiJsonResultHeader.toString().concat(constructViewContentsResult(pageSize, offSet)));
+
+                return new ViewContents((JSONObject)json.get("viewContentsV1"));
+            }
+        };
+
+        when(mockViewsService.getViewContents(Matchers.anyString(), Matchers.anyString(), Matchers.anyInt(), Matchers.anyInt()))
+                .thenAnswer(contents);
+        testWsFactory.setMockViewsService(mockViewsService);
+
         CredentialUtil.setCredentialManager("user", "password");
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("host").withPort(8080)
                 .withUseSSL(false).withDefaultCredentialId().build();
@@ -738,5 +752,25 @@ public class CIMInstanceTest {
             "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 1,000 of 3,000)",
             "[Coverity] Retrieving issues for project \"project0\" and view \"view0\" (fetched 2,000 of 3,000)",
             "[Coverity] Found 3,000 issues for project \"project0\" and view \"view0\"");
+    }
+
+    private String constructViewContentsResult(int pageSize, int offSet) {
+        final StringBuilder viewContentsApiJsonResult = new StringBuilder();
+
+        for (int i = offSet; i < offSet + pageSize; i++) {
+            viewContentsApiJsonResult.append(
+                    "        {" +
+                            "            \"cid\": " + i + "," +
+                            "            \"checker\": \"FORWARD_NULL\"," +
+                            "            \"displayFile\": \"source.cpp\"" +
+                            "            \"displayFunction\": \"test" + i + "\"" +
+                            "        },");
+        }
+
+        viewContentsApiJsonResult.append(
+                "    ]" +
+                        "}}");
+
+        return viewContentsApiJsonResult.toString();
     }
 }
