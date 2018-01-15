@@ -264,6 +264,24 @@ public class CoverityViewResultsPublisherTest {
             expectedFinishedMessage);
     }
 
+    @Test(expected = AbortException.class)
+    public void perform_abortPipeline_withIssues() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String view = "view";
+        final boolean abortPipeline = true;
+
+        setupRunToHandleBuildAction();
+        setupIssues(view, 10);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisher.setAbortPipeline(abortPipeline);
+
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+                "[Coverity] Coverity issues were found and abortPipeline was set to true, throwing abort exception");
+    }
+
     public void setupIssues(String view, int count) {
         final StringBuilder viewContentsApiJsonResult = new StringBuilder("{\"viewContentsV1\": {" +
             "    \"offset\": 0," +
