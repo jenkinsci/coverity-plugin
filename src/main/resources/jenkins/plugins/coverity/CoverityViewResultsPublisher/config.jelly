@@ -27,6 +27,10 @@
     <f:validateButton method="checkViews" title="Check configuration" progress="Checking..." with="connectInstance,connectView,projectId" />
 
     <f:advanced>
+        <f:entry title="Abort the pipeline if issues are found" field="abortPipeline">
+            <f:checkbox/>
+        </f:entry>
+
         <f:entry title="Fail the pipeline if issues are found" field="failPipeline">
             <f:checkbox/>
         </f:entry>

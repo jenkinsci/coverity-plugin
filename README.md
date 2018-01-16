@@ -233,7 +233,8 @@ coverityResults connectInstance: 'cov-connect', connectView: 'JenkinsPipelineVie
 ```
 *  Use the Pipeline Syntax Snippet Generator to get help choosing a Coverity Connect Instance and verifying the Project and View values
 ![Screenshot of coverityResults Pipeline Syntax Snippet Generator](screenshots/coverityResults-snippet-generator.png)
-*  Advanced options are available to fail the pipeline or mark the pipeline as unstable if any issues were found in the Coverity Connect View (use `failPipeline` or `unstable`, these both default to false).
+*  Advanced options are available to abort the pipeline, fail the pipeline or mark the pipeline as unstable if any issues were found in the Coverity Connect View (use `abortPipeline`, `failPipeline` or `unstable`, default value for these options is false).
+* `abortPipeline` takes precedence over `failPipeline` and `failPipeline` takes precedence over `unstable`.
 *  The View can be configured within the Coverity Connect User Interface (use the same user credentials which will connect during the pipeline run). See the Coverity Platform User and Administrator Guide for information on configuring views.
    *  The View must be configured as an "Issues: By Snapshot" View Type. This can ensure the most recently committed issues are used, by keeping the default View "Snaphost Scope" of `last()`.
    *  The view should include the columns "CID", "Checker", "File", and "Function" in order to properly record issues per pipeline run (otherwise just a count may be shown).
