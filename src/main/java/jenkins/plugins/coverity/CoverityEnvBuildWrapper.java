@@ -11,8 +11,14 @@
 package jenkins.plugins.coverity;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
+import hudson.console.ConsoleLogFilter;
+import hudson.console.LineTransformationOutputStream;
+import hudson.model.*;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -22,11 +28,6 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractProject;
-import hudson.model.Computer;
-import hudson.model.Node;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.tools.ToolInstallation;
 import hudson.util.ListBoxModel;
@@ -45,6 +46,7 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
     private String portVariable;
     private String usernameVariable;
     private String passwordVariable;
+    private String passwordToMask;
 
     @DataBoundConstructor
     public CoverityEnvBuildWrapper(String coverityToolName) {
@@ -130,6 +132,8 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
                 covEnvVars.put(StringUtils.isNotEmpty(portVariable) ? portVariable : "COVERITY_PORT", String.valueOf(instance.getPort()));
                 covEnvVars.put(StringUtils.isNotEmpty(usernameVariable) ? usernameVariable : "COV_USER", instance.getCoverityUser());
                 covEnvVars.put(StringUtils.isNotEmpty(passwordVariable) ? passwordVariable : "COVERITY_PASSPHRASE", instance.getCoverityPassword());
+
+                this.passwordToMask = instance.getCoverityPassword();
             }
         }
 
@@ -148,6 +152,11 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
         }
 
         return null;
+    }
+
+    @Override
+    public ConsoleLogFilter createLoggerDecorator(Run<?, ?> build) {
+        return new FilterImpl(passwordToMask);
     }
 
     @Override
@@ -191,6 +200,51 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
             }
 
             return result;
+        }
+    }
+
+    private static final class FilterImpl extends ConsoleLogFilter implements Serializable {
+        private static final long serialVersionUID = 10L;
+
+        private final String passwordToMask;
+
+        FilterImpl(String passwordToMask) {
+            this.passwordToMask = passwordToMask;
+        }
+
+        @Override
+        public OutputStream decorateLogger(Run _ignore, OutputStream logger) throws IOException, InterruptedException {
+            return new PasswordsMaskOutputStream(logger, passwordToMask);
+        }
+    }
+
+    /** Similar to {@code MaskPasswordsOutputStream}. */
+    public static final class PasswordsMaskOutputStream extends LineTransformationOutputStream {
+        private static final String MASKED_PASSWORD = "******";
+        private final OutputStream  logger;
+        private final Pattern passwordsAsPattern;
+
+        public PasswordsMaskOutputStream(OutputStream logger, String passwordToMask) {
+            this.logger = logger;
+
+            if (StringUtils.isNotEmpty(passwordToMask)) {
+                StringBuilder regex = new StringBuilder().append('(');
+                regex.append(Pattern.quote(passwordToMask));
+                regex.append(')');
+
+                this.passwordsAsPattern = Pattern.compile(regex.toString());
+            } else{
+                this.passwordsAsPattern = null;
+            }
+        }
+
+        @Override
+        protected void eol(byte[] bytes, int len) throws IOException {
+            String line = new String(bytes, 0, len);
+            if(passwordsAsPattern != null) {
+                line = passwordsAsPattern.matcher(line).replaceAll(MASKED_PASSWORD);
+            }
+            logger.write(line.getBytes());
         }
     }
 }
