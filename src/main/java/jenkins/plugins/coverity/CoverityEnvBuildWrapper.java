@@ -13,6 +13,7 @@ package jenkins.plugins.coverity;
 import java.io.IOException;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -32,12 +33,18 @@ import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.plugins.coverity.CoverityToolInstallation.CoverityToolInstallationDescriptor;
 import jenkins.tasks.SimpleBuildWrapper;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * A simple build wrapper to contribute Coverity tools bin path to the PATH environment variable
  */
 public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
     private final String coverityToolName;
+    private String cimInstance;
+    private String hostVariable;
+    private String portVariable;
+    private String usernameVariable;
+    private String passwordVariable;
 
     @DataBoundConstructor
     public CoverityEnvBuildWrapper(String coverityToolName) {
@@ -46,6 +53,51 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
 
     public String getCoverityToolName() {
         return coverityToolName;
+    }
+
+    @DataBoundSetter
+    public void setCimInstance(String cimInstance) {
+        this.cimInstance = cimInstance;
+    }
+
+    public String getCimInstance() {
+        return cimInstance;
+    }
+
+    @DataBoundSetter
+    public void setHostVariable(String hostVariable) {
+        this.hostVariable = hostVariable;
+    }
+
+    public String getHostVariable() {
+        return hostVariable;
+    }
+
+    @DataBoundSetter
+    public void setPortVariable(String portVariable) {
+        this.portVariable = portVariable;
+    }
+
+    public String getPortVariable() {
+        return portVariable;
+    }
+
+    @DataBoundSetter
+    public void setUsernameVariable(String usernameVariable) {
+        this.usernameVariable = usernameVariable;
+    }
+
+    public String getUsernameVariable() {
+        return usernameVariable;
+    }
+
+    @DataBoundSetter
+    public void setPasswordVariable(String passwordVariable) {
+        this.passwordVariable = passwordVariable;
+    }
+
+    public String getPasswordVariable() {
+        return passwordVariable;
     }
 
     @Override
@@ -68,6 +120,18 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
         covTools = covTools.translate(node, initialEnvironment, listener);
         final EnvVars covEnvVars = new EnvVars();
         covTools.buildEnvVars(covEnvVars);
+
+        if (StringUtils.isNotEmpty(cimInstance)) {
+            // Add environment variables for CIMInstance information such as host, port, username, and password
+            final CoverityPublisher.DescriptorImpl descriptor = Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
+            CIMInstance instance = descriptor.getInstance(cimInstance);
+            if (instance != null) {
+                covEnvVars.put(StringUtils.isNotEmpty(hostVariable) ? hostVariable : "COVERITY_HOST", instance.getHost());
+                covEnvVars.put(StringUtils.isNotEmpty(portVariable) ? portVariable : "COVERITY_PORT", String.valueOf(instance.getPort()));
+                covEnvVars.put(StringUtils.isNotEmpty(usernameVariable) ? usernameVariable : "COV_USER", instance.getCoverityUser());
+                covEnvVars.put(StringUtils.isNotEmpty(passwordVariable) ? passwordVariable : "COVERITY_PASSPHRASE", instance.getCoverityPassword());
+            }
+        }
 
         for (Entry<String,String> entry : covEnvVars.entrySet()) {
             context.env(entry.getKey(), entry.getValue());
@@ -102,7 +166,7 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
 
         @Override
         public String getDisplayName() {
-            return "Provide Coverity Tools bin/ directory to PATH";
+            return "Binds Coverity Tool path and Coverity Connection Instance information to Environment Variables";
         }
 
         public ListBoxModel doFillCoverityToolNameItems() {
@@ -116,6 +180,17 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
         public CoverityToolInstallation[] getInstallations() {
             final CoverityToolInstallationDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(CoverityToolInstallationDescriptor.class);
             return descriptor.getInstallations();
+        }
+
+        public ListBoxModel doFillCimInstanceItems() {
+            final CoverityPublisher.DescriptorImpl descriptor = Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
+            ListBoxModel result = new ListBoxModel();
+
+            for (CIMInstance instance : descriptor.getInstances()) {
+                result.add(instance.getName());
+            }
+
+            return result;
         }
     }
 }

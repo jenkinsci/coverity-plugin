@@ -11,9 +11,36 @@
  *******************************************************************************/
 -->
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:block>
+        <f:section title="Coverity Tool Installation"/>
+        <f:entry title="${%Coverity Tool Installation}" field="coverityToolName">
+            <f:select/>
+        </f:entry>
+    </f:block>
 
-    <f:entry title="${%Coverity Tool Installation}" field="coverityToolName">
-        <f:select/>
-    </f:entry>
+    <f:block>
+        <f:section title="Coverity Connect Instance Environment"/>
+        <f:entry title="Coverity Connect instance" field="cimInstance">
+            <f:select/>
+        </f:entry>
 
+        <f:advanced>
+            <f:entry title="Coverity Host Variable" field="hostVariable">
+                <f:textbox/>
+            </f:entry>
+
+            <f:entry title="Coverity Port Variable" field="portVariable">
+                <f:textbox/>
+            </f:entry>
+
+            <f:entry title="Coverity Username Variable" field="usernameVariable">
+                <f:textbox/>
+            </f:entry>
+
+            <f:entry title="Coverity Password Variable" field="passwordVariable">
+                <f:textbox/>
+            </f:entry>
+        </f:advanced>
+
+    </f:block>
 </j:jelly>
