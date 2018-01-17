@@ -12,6 +12,7 @@ package jenkins.plugins.coverity;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
@@ -20,9 +21,15 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Map;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import hudson.util.Secret;
+import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
+import jenkins.plugins.coverity.Utils.CredentialUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -47,11 +54,12 @@ import jenkins.plugins.coverity.CoverityToolInstallation.CoverityToolInstallatio
 import jenkins.tasks.SimpleBuildWrapper.Context;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, ToolLocationNodeProperty.class })
+@PrepareForTest({Jenkins.class, ToolLocationNodeProperty.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public class CoverityEnvBuildWrapperTest {
 
     private CoverityToolInstallation toolInstallation;
     private Jenkins jenkins;
+    private DescriptorImpl descriptor;
 
     @Before
     public void setup() {
@@ -59,7 +67,7 @@ public class CoverityEnvBuildWrapperTest {
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.getInstance()).thenReturn(jenkins);
 
-        DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
+        descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         toolInstallation = new CoverityToolInstallation(CoverityToolInstallation.DEFAULT_NAME, "C:\\Program Files\\Coverity\\Coverity Static Analysis");
         final CoverityToolInstallation[] toolInstallations = new CoverityToolInstallation[]{toolInstallation};
         when(descriptor.getInstallations()).thenReturn(toolInstallations);
@@ -91,6 +99,74 @@ public class CoverityEnvBuildWrapperTest {
         final Map<String, String> env = context.getEnv();
         assertTrue(env.containsKey("PATH+COVERITY"));
         assertEquals(env.get("PATH+COVERITY"), toolInstallation.getHome() + "/bin");
+    }
+
+    @Test
+    public void setUp_addCoverityConnectInformation_WithDefault() throws IOException, InterruptedException {
+        final Context context = new Context();
+        final FilePath workspace = setupFilePath();
+        final CIMInstance instance = new CIMInstanceBuilder()
+                .withName("TestInstance").withHost("localhost").withPort(8080).withDefaultCredentialId().build();
+
+        when(descriptor.getInstance(Matchers.anyString())).thenReturn(instance);
+        CredentialUtil.setCredentialManager("TestUser", "TestPassword");
+
+        final CoverityEnvBuildWrapper buildWrapper = new CoverityEnvBuildWrapper(toolInstallation.getName());
+        buildWrapper.setCimInstance("TestInstance");
+
+        buildWrapper.setUp(context, mock(Run.class), workspace, mock(Launcher.class), mock(TaskListener.class), new EnvVars());
+
+        final Map<String, String> env = context.getEnv();
+
+        assertTrue(env.containsKey("COVERITY_HOST"));
+        assertEquals(env.get("COVERITY_HOST"), "localhost");
+
+        assertTrue(env.containsKey("COVERITY_PORT"));
+        assertEquals(env.get("COVERITY_PORT"), "8080");
+
+        assertTrue(env.containsKey("COV_USER"));
+        assertEquals(env.get("COV_USER"), "TestUser");
+
+        assertTrue(env.containsKey("COVERITY_PASSPHRASE"));
+        assertEquals(env.get("COVERITY_PASSPHRASE"), "TestPassword");
+    }
+
+    @Test
+    public void setUp_addCoverityConnectInformation_WithCustomizedVariables() throws IOException, InterruptedException {
+        final Context context = new Context();
+        final FilePath workspace = setupFilePath();
+        final CIMInstance instance = new CIMInstanceBuilder()
+                .withName("TestInstance").withHost("localhost").withPort(8080).withDefaultCredentialId().build();
+
+        when(descriptor.getInstance(Matchers.anyString())).thenReturn(instance);
+        CredentialUtil.setCredentialManager("TestUser", "TestPassword");
+
+        final CoverityEnvBuildWrapper buildWrapper = new CoverityEnvBuildWrapper(toolInstallation.getName());
+        buildWrapper.setCimInstance("TestInstance");
+        buildWrapper.setHostVariable("TEST_HOST");
+        buildWrapper.setPortVariable("TEST_PORT");
+        buildWrapper.setUsernameVariable("TEST_USER");
+        buildWrapper.setPasswordVariable("TEST_PASSWORD");
+
+        buildWrapper.setUp(context, mock(Run.class), workspace, mock(Launcher.class), mock(TaskListener.class), new EnvVars());
+
+        final Map<String, String> env = context.getEnv();
+        assertFalse(env.containsKey("COVERITY_HOST"));
+        assertFalse(env.containsKey("COVERITY_PORT"));
+        assertFalse(env.containsKey("COV_USER"));
+        assertFalse(env.containsKey("COVERITY_PASSPHRASE"));
+
+        assertTrue(env.containsKey("TEST_HOST"));
+        assertEquals(env.get("TEST_HOST"), "localhost");
+
+        assertTrue(env.containsKey("TEST_PORT"));
+        assertEquals(env.get("TEST_PORT"), "8080");
+
+        assertTrue(env.containsKey("TEST_USER"));
+        assertEquals(env.get("TEST_USER"), "TestUser");
+
+        assertTrue(env.containsKey("TEST_PASSWORD"));
+        assertEquals(env.get("TEST_PASSWORD"), "TestPassword");
     }
 
     @SuppressWarnings("deprecation")
