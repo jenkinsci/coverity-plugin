@@ -38,6 +38,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * A simple build wrapper to contribute Coverity tools bin path to the PATH environment variable
+ * as well as Coverity Connect Instance(CIMInstance) information, such as Host/Port/Credentials
+ * to environment variables.
  */
 public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
     private final String coverityToolName;
@@ -175,7 +177,7 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
 
         @Override
         public String getDisplayName() {
-            return "Binds Coverity Tool path and Coverity Connection Instance information to Environment Variables";
+            return "Binds Coverity Tool path and Coverity Connect Instance information to Environment Variables";
         }
 
         public ListBoxModel doFillCoverityToolNameItems() {
