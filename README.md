@@ -194,18 +194,33 @@ Note that the “Hello World” string, surrounded by unescaped quotes, is place
 
 The Coverity plugin has basic support for some pipeline functionality. It provides a `withCoverityEnv` step to wrap tool invocations and a `coverityResults` step to retrieve issues from a Coverity Connect View. In order to use these steps you will be required to setup Coverity tools in global tool configuration and a Coverity Connect instance in global configuration (see [Getting Started](#getting-started) for details).
 
-#### Using Coverity Static Analysis Tools
+#### Using `withCoverityEnv` build wrapper
+
+This step will use the specified Coverity Tool Installation and add the bin/ directory to PATH for any steps that are wrapped. This will allow the pipeline script to access Coverity tools (like cov-build, cov-analyze, and cov-commit-defects) directly from a script step (such as a Shell Script or Windows Batch Script). Also, this step provides users to bind the Coverity Connect Instance information, such as Host/Port/Credentials to environment variables.
 
 *  Recommended usage:
 ```
-withCoverityEnv('default') {
+withCoverityEnv(coverityToolName: 'default', cimInstance: 'Coverity Connect Instance Name') {
   // execute any coverity commands with either `sh` or `bat` script step
   //  (all Coverity Tools in /bin available on PATH)
+  // By default, Coveriy Connect Instance information will be avaible in following environment variables
+  //
+  // HOST -> COVERITY_HOST
+  // PORT -> COVERITY_PORT
+  // USER -> COV_USER
+  // PASSWORD -> COVERITY_PASSPHRASE
+  //
+  // Users can customize all the above default environment variables
 }
 ```
    *  This will use the Coverity Static Analysis Tools installation named 'default' and add '/bin' directory to PATH within the scope of this Build Wrapper.
-   *  Hint: Use the Pipeline Syntax Snippet Generator for the `withCoverityEnv` to ensure you've selected a configured tool installation
-*  Other usage options using the `tool` step:
+   *  Hint: Use the Pipeline Syntax Snippet Generator for the `withCoverityEnv` to ensure you've selected a configured tool installation and configured Coverity Connect Instance
+
+##### Using Coverity Static Analysis Tools
+
+   *  The above sample use the Coverity Static Analysis Tools installation named 'default' and add '/bin' directory to PATH within the scope of this Build Wrapper.
+
+   *  Other usage options using the `tool` step:
    *  With a variable in the script to access coverity tools directory, example:
    ```
    def covHome = tool name: 'default', type: 'coverity'
@@ -221,7 +236,6 @@ withCoverityEnv('default') {
    ```
    * You may also combine `withEnv` with the `tool` step to set a Coverity tools directory to any environment variable
 *  The tools directory will be resolved for the Node which executes the pipeline (see [Getting Started](#getting-started) for details on tools installations and locations per node)
-*  For tools commands which require a Coverity Connect username and password it is recommended to use the `withCredentials` step and access a configured credentialId for username with password
 *  Note that as with any Coverity tools execution the build/analyze/commit steps must share the same intermediate directory value (see the Coverity Analysis User and Administrator Guide for more details)
 
 #### Publishing Coverity results
@@ -259,18 +273,15 @@ node {
       // use a variable for the shared intermediate directory
       iDir = 'cov-idir'
       
-      withCoverityEnv('default') { 
+      withCoverityEnv(coverityToolName: 'default', cimInstance: 'Coverity Connect Instance Name') { 
         // run cov-build capture command
         sh "cov-build --dir ${iDir} <build-command>"
       
         // run cov-analyze command
         sh "cov-analyze --dir ${iDir}"
 
-        // access Username with Password and set to COVERITY_PASSPHRASE and COV_USER environment variables
-        withCredentials([usernamePassword(credentialsId: 'jenkins-cov-user', passwordVariable: 'COVERITY_PASSPHRASE', usernameVariable: 'COV_USER')]) {
-          // run cov-commit-defects command
-          sh "cov-commit-defects --dir ${iDir} --host <host> --port <port> --stream 'my stream'"
-        }
+        // run cov-commit-defects command
+        sh "cov-commit-defects --dir ${iDir} --host ${COVERITY_HOST} --port ${COVERITY_PORT} --stream 'my stream'"
       }
       
       // cleanup intermediate directory after commit was made (optional space saving step)
