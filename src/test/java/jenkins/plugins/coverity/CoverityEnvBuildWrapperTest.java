@@ -19,13 +19,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Map;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import hudson.model.*;
 import hudson.util.Secret;
 import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import jenkins.plugins.coverity.Utils.CredentialUtil;
+import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,11 +41,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.Computer;
-import hudson.model.Node;
-import hudson.model.Run;
-import hudson.model.Saveable;
-import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.NodePropertyDescriptor;
@@ -167,6 +166,43 @@ public class CoverityEnvBuildWrapperTest {
 
         assertTrue(env.containsKey("TEST_PASSWORD"));
         assertEquals(env.get("TEST_PASSWORD"), "TestPassword");
+    }
+
+    @Test
+    public void maskPassword() throws IOException, InterruptedException {
+        final Context context = new Context();
+        final FilePath workspace = setupFilePath();
+        final CIMInstance instance = new CIMInstanceBuilder()
+                .withName("TestInstance").withHost("localhost").withPort(8080).withDefaultCredentialId().build();
+
+        when(descriptor.getInstance(Matchers.anyString())).thenReturn(instance);
+        CredentialUtil.setCredentialManager("TestUser", "TestPassword");
+
+        final CoverityEnvBuildWrapper buildWrapper = new CoverityEnvBuildWrapper(toolInstallation.getName());
+        buildWrapper.setCimInstance("TestInstance");
+
+        buildWrapper.setUp(context, mock(Run.class), workspace, mock(Launcher.class), mock(TaskListener.class), new EnvVars());
+        TestableConsoleLogger logger = new TestableConsoleLogger();
+        OutputStream stream = buildWrapper.createLoggerDecorator(mock(Run.class)).decorateLogger(mock(AbstractBuild.class), logger.getPrintStream());
+
+        stream.write("My password is TestPassword".getBytes());
+        stream.write(0x0A);
+        stream.flush();
+
+        logger.verifyLastMessage("My password is ******\n");
+    }
+
+    @Test
+    public void descriptor_doFillCoverityToolNameItems_returnsCIMInstanceNames() {
+        final CIMInstance instance = new CIMInstanceBuilder().withName("TestInstance1").build();
+        when(descriptor.getInstances()).thenReturn(Arrays.asList(instance));
+
+        final CoverityEnvBuildWrapper.DescriptorImpl buildWrapperDescriptor = new CoverityEnvBuildWrapper.DescriptorImpl();
+        final ListBoxModel result = buildWrapperDescriptor.doFillCimInstanceItems();
+
+        assertEquals(1, result.size());
+        assertEquals(instance.getName(), result.get(0).name);
+        assertEquals(instance.getName(), result.get(0).value);
     }
 
     @SuppressWarnings("deprecation")
