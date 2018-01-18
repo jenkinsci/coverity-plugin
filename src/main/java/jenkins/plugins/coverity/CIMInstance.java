@@ -15,12 +15,7 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -290,7 +285,7 @@ public class CIMInstance {
     }
 
     public List<CoverityDefect> getIssuesVorView(String projectId, String connectView, PrintStream outputLogger) throws Exception {
-        final ArrayList<CoverityDefect> coverityDefects = new ArrayList<>();
+        final Map<String, CoverityDefect> coverityDefects = new LinkedHashMap<>();
 
         try {
             final ViewsService viewService = WebServiceFactory.getInstance().getViewService(this);
@@ -325,7 +320,7 @@ public class CIMInstance {
                     final String checker = row.get("checker") != null ? row.get("checker").toString() : null;
                     final String displayFunction = row.get("displayFunction") != null ? row.get("displayFunction").toString() : null;
                     final String displayFile = row.get("displayFile") != null ? row.get("displayFile").toString() : null;
-                    coverityDefects.add(new CoverityDefect(cid, checker, displayFunction, displayFile));
+                    coverityDefects.put(String.valueOf(cid), new CoverityDefect(cid, checker, displayFunction, displayFile));
                 }
 
                 defectSize = viewContents.getTotalRows().intValue();
@@ -337,7 +332,7 @@ public class CIMInstance {
                 throw new Exception(e);
         }
 
-        return coverityDefects;
+        return new ArrayList<>(coverityDefects.values());
     }
 
     /**

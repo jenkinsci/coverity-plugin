@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,6 +36,7 @@ import jenkins.plugins.coverity.CIMInstance;
 public class TestWebServiceFactory extends WebServiceFactory {
     private int wsResponseCode = 200;
     private String responseMsg = "OK";
+    private ViewsService _mockViewsService;
 
     @Override
     protected DefectService createDefectService(CIMInstance cimInstance) throws MalformedURLException {
@@ -56,6 +58,19 @@ public class TestWebServiceFactory extends WebServiceFactory {
     public void setWSResponseCode(int wsResponseCode, String responseMsg) {
         this.wsResponseCode = wsResponseCode;
         this.responseMsg = responseMsg;
+    }
+
+    public void setMockViewsService(ViewsService mockViewsService) {
+        _mockViewsService = mockViewsService;
+    }
+
+    @Override
+    public ViewsService getViewService(CIMInstance instance) throws MalformedURLException, NoSuchAlgorithmException {
+        if (_mockViewsService != null) {
+            return _mockViewsService;
+        }
+
+        return super.getViewService(instance);
     }
 
     public static class TestConfigurationService implements ConfigurationService {
