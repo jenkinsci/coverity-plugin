@@ -327,6 +327,14 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 
 ## Changelog
 
+#### Version 1.11.0 (January, 2018)
+
+*   `User` and `Password` fields are removed. If these properties were configured, then these configurations will be migrated into credentials automatically. (BZ 108097, BZ 109522)
+*   Fixed an unhandled exceptions if configured user does not have WS access permission. (BZ 109223)
+*   Fixed an issue where coverityResults step report incorrect number of defects retrieved from Coverity Connect. (BZ 112041)
+*   New option, called `AbortPipeline`, has been added to abort the pipeline flow when Coverity issues are found. (BZ 113560)
+*   CoverityConnect information(host/port/credentails) can be accessed within "withCoverityEnv" builder in the pipeline. The users can override the default environment variable names. (BZ 113563)
+
 #### Version 1.10.0 (September, 2017)
 
 *   Added support for Jenkins Pipeline by adding the pipeline steps `coverityResults` and `withCoverityEnv`. (BZ 97113)
