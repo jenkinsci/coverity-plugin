@@ -11,9 +11,6 @@
  *******************************************************************************/
 -->
 <div>
-    This step will use the specified Coverity Tool Installation and add the bin/ directory to PATH for any steps that
-    are wrapped. This will allow the pipeline script to access Coverity tools (like cov-build, cov-analyze, and cov-commit-defects)
-    directly from a script step (such as a Shell Script or Windows Batch Script).
-
-    Also, this step optionally allows users to bind the Coverity Connect Instance information (Host/Port/Credentials) to environment variables.
+    Name of an environment variable to be set to the host of Coverity Connect during the build.
+    Default environment variable name is "COVERITY_HOST" if not specified.
 </div>

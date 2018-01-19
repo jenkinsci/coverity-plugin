@@ -10,10 +10,12 @@
  *******************************************************************************/
 package jenkins.plugins.coverity.Utils;
 
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,11 @@ public class TestableConsoleLogger {
     }
 
     private void setUpOutputStream() {
+        setUpOutputStream_println();
+        setUpOutputStream_Write();
+    }
+
+    private void setUpOutputStream_println() {
         Answer<Void> setLastMessage = new Answer<Void>() {
             public Void answer(InvocationOnMock mock) throws Throwable {
                 String arg = (String)mock.getArguments()[0];
@@ -52,6 +59,23 @@ public class TestableConsoleLogger {
             }
         };
         Mockito.doAnswer(setLastMessage).when(printStream).println(anyString());
+    }
+
+    private void setUpOutputStream_Write() {
+        try{
+            Answer<Void> setLastMessage = new Answer<Void>() {
+                public Void answer(InvocationOnMock mock) throws Throwable {
+                    byte[] obj = (byte[])mock.getArguments()[0];
+                    String arg = new String(obj);
+                    lastMessage = arg;
+                    allMessages.add(arg);
+                    return null;
+                }
+            };
+            Mockito.doAnswer(setLastMessage).when(printStream).write(Matchers.any(byte[].class));
+        } catch (IOException e) {
+            // no-op
+        }
     }
 
     public void verifyLastMessage(String expectedMessage) {
