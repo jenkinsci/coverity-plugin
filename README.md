@@ -200,10 +200,10 @@ This step will use the specified Coverity Tool Installation and add the bin/ dir
 
 *  Recommended usage:
 ```
-withCoverityEnv(coverityToolName: 'default', cimInstance: 'Coverity Connect Instance Name') {
+withCoverityEnv(coverityToolName: 'default', connectInstance: 'Coverity Connect Instance Name') {
   // execute any coverity commands with either `sh` or `bat` script step
   //  (all Coverity Tools in /bin available on PATH)
-  // By default, Coveriy Connect Instance information will be avaible in following environment variables
+  // By default, Coverity Connect Instance information will be avaible in following environment variables
   //
   // HOST -> COVERITY_HOST
   // PORT -> COVERITY_PORT
@@ -218,9 +218,6 @@ withCoverityEnv(coverityToolName: 'default', cimInstance: 'Coverity Connect Inst
 
 ##### Using Coverity Static Analysis Tools
 
-   *  The above sample use the Coverity Static Analysis Tools installation named 'default' and add '/bin' directory to PATH within the scope of this Build Wrapper.
-
-   *  Other usage options using the `tool` step:
    *  With a variable in the script to access coverity tools directory, example:
    ```
    def covHome = tool name: 'default', type: 'coverity'
@@ -281,7 +278,7 @@ node {
         sh "cov-analyze --dir ${iDir}"
 
         // run cov-commit-defects command
-        sh "cov-commit-defects --dir ${iDir} --host ${COVERITY_HOST} --port ${COVERITY_PORT} --stream 'my stream'"
+        sh "cov-commit-defects --dir ${iDir} --host ${COVERITY_HOST} --port ${COVERITY_PORT} --stream my stream"
       }
       
       // cleanup intermediate directory after commit was made (optional space saving step)
