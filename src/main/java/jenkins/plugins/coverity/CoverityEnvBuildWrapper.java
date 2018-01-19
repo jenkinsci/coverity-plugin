@@ -43,7 +43,7 @@ import org.kohsuke.stapler.DataBoundSetter;
  */
 public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
     private final String coverityToolName;
-    private String cimInstance;
+    private String connectInstance;
     private String hostVariable;
     private String portVariable;
     private String usernameVariable;
@@ -60,12 +60,12 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
     }
 
     @DataBoundSetter
-    public void setCimInstance(String cimInstance) {
-        this.cimInstance = cimInstance;
+    public void setConnectInstance(String cimInstance) {
+        this.connectInstance = cimInstance;
     }
 
-    public String getCimInstance() {
-        return cimInstance;
+    public String getConnectInstance() {
+        return connectInstance;
     }
 
     @DataBoundSetter
@@ -125,10 +125,10 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
         final EnvVars covEnvVars = new EnvVars();
         covTools.buildEnvVars(covEnvVars);
 
-        if (StringUtils.isNotEmpty(cimInstance)) {
+        if (StringUtils.isNotEmpty(connectInstance)) {
             // Add environment variables for CIMInstance information such as host, port, username, and password
             final CoverityPublisher.DescriptorImpl descriptor = Jenkins.getInstance().getDescriptorByType(CoverityPublisher.DescriptorImpl.class);
-            CIMInstance instance = descriptor.getInstance(cimInstance);
+            CIMInstance instance = descriptor.getInstance(connectInstance);
             if (instance != null) {
                 covEnvVars.put(StringUtils.isNotEmpty(hostVariable) ? hostVariable : "COVERITY_HOST", instance.getHost());
                 covEnvVars.put(StringUtils.isNotEmpty(portVariable) ? portVariable : "COVERITY_PORT", String.valueOf(instance.getPort()));

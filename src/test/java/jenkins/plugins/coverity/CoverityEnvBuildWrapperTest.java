@@ -111,7 +111,7 @@ public class CoverityEnvBuildWrapperTest {
         CredentialUtil.setCredentialManager("TestUser", "TestPassword");
 
         final CoverityEnvBuildWrapper buildWrapper = new CoverityEnvBuildWrapper(toolInstallation.getName());
-        buildWrapper.setCimInstance("TestInstance");
+        buildWrapper.setConnectInstance("TestInstance");
 
         buildWrapper.setUp(context, mock(Run.class), workspace, mock(Launcher.class), mock(TaskListener.class), new EnvVars());
 
@@ -141,7 +141,7 @@ public class CoverityEnvBuildWrapperTest {
         CredentialUtil.setCredentialManager("TestUser", "TestPassword");
 
         final CoverityEnvBuildWrapper buildWrapper = new CoverityEnvBuildWrapper(toolInstallation.getName());
-        buildWrapper.setCimInstance("TestInstance");
+        buildWrapper.setConnectInstance("TestInstance");
         buildWrapper.setHostVariable("TEST_HOST");
         buildWrapper.setPortVariable("TEST_PORT");
         buildWrapper.setUsernameVariable("TEST_USER");
@@ -179,7 +179,7 @@ public class CoverityEnvBuildWrapperTest {
         CredentialUtil.setCredentialManager("TestUser", "TestPassword");
 
         final CoverityEnvBuildWrapper buildWrapper = new CoverityEnvBuildWrapper(toolInstallation.getName());
-        buildWrapper.setCimInstance("TestInstance");
+        buildWrapper.setConnectInstance("TestInstance");
 
         buildWrapper.setUp(context, mock(Run.class), workspace, mock(Launcher.class), mock(TaskListener.class), new EnvVars());
         TestableConsoleLogger logger = new TestableConsoleLogger();
