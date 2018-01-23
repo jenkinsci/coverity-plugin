@@ -310,7 +310,7 @@ When you encounter problems while using the plugin, please provide the following
 To enable the Jenkins Coverity plugin to operate with a Coverity Connect instance that is configured to use SSL, do the following:
 
 1.  Set the environmental variable CATALINA_OPTS to this value: " -Djavax.net.ssl.trustStore=$keystore -Djavax.net.ssl.trustStorePassword=changeit";
-1.  Make sure that the environmental variable $keystore points to the Java keystore used by Coverity Connect.
+1.  Make sure that the environmental variable $keystore points to the Java truststore that contains the CA root and any intermediate certificate, or the self-signed certificate, that the Coverity Connect serves.
 1.  Restart the Tomcat server.
 
 ### Compatibility with other Jenkins plugins
