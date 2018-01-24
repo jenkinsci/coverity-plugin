@@ -329,7 +329,7 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 
 #### Version 1.11.0 (January, 2018)
 
-*   `User` and `Password` fields are removed. If these properties were configured, then these configurations will be migrated into credentials automatically. (BZ 108097, BZ 109522)
+*   User and Password fields are removed from any global Coverity Connect Server settings. If these properties were configured, then these configurations will be migrated into credentials in the Credential Manager Plugin automatically. (BZ 108097, BZ 109522)
 *   Fixed an unhandled exceptions if configured user does not have WS access permission. (BZ 109223)
 *   Fixed an issue where coverityResults step report incorrect number of defects retrieved from Coverity Connect. (BZ 112041)
 *   New option, called `AbortPipeline`, has been added to abort the pipeline flow when Coverity issues are found. (BZ 113560)
