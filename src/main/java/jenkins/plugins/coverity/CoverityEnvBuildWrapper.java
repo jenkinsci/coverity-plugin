@@ -243,7 +243,7 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
 
         @Override
         protected void eol(byte[] bytes, int len) throws IOException {
-            String line = new String(bytes, 0, len);
+            String line = new String(bytes, 0, len, StandardCharsets.UTF_8);
             if(passwordsAsPattern != null) {
                 line = passwordsAsPattern.matcher(line).replaceAll(MASKED_PASSWORD);
             }
