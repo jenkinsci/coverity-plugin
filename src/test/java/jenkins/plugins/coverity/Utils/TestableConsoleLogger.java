@@ -17,6 +17,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class TestableConsoleLogger {
             Answer<Void> setLastMessage = new Answer<Void>() {
                 public Void answer(InvocationOnMock mock) throws Throwable {
                     byte[] obj = (byte[])mock.getArguments()[0];
-                    String arg = new String(obj);
+                    String arg = new String(obj, StandardCharsets.UTF_8);
                     lastMessage = arg;
                     allMessages.add(arg);
                     return null;

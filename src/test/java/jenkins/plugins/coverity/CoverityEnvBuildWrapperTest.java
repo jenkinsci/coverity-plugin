@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -185,7 +186,7 @@ public class CoverityEnvBuildWrapperTest {
         TestableConsoleLogger logger = new TestableConsoleLogger();
         OutputStream stream = buildWrapper.createLoggerDecorator(mock(Run.class)).decorateLogger(mock(AbstractBuild.class), logger.getPrintStream());
 
-        stream.write("My password is TestPassword".getBytes());
+        stream.write("My password is TestPassword".getBytes(StandardCharsets.UTF_8));
         stream.write(0x0A);
         stream.flush();
 

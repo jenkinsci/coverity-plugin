@@ -13,6 +13,7 @@ package jenkins.plugins.coverity;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
@@ -246,7 +247,7 @@ public class CoverityEnvBuildWrapper extends SimpleBuildWrapper {
             if(passwordsAsPattern != null) {
                 line = passwordsAsPattern.matcher(line).replaceAll(MASKED_PASSWORD);
             }
-            logger.write(line.getBytes());
+            logger.write(line.getBytes(StandardCharsets.UTF_8));
         }
     }
 }
