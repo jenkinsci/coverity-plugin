@@ -108,11 +108,13 @@ public class CIMInstance {
     }
 
     protected Object readResolve() {
-        createCredentials(user, password);
+        if (StringUtils.isNotEmpty(user) && StringUtils.isNotEmpty(password)) {
+            String migratedCredentialId = createCredentials(user, password);
 
-        // Setting the migrated credential to use
-        if (StringUtils.isEmpty(credentialId)) {
-            credentialId = name + "_" + user;
+            // Setting the migrated credential to use
+            if (StringUtils.isEmpty(credentialId) && StringUtils.isNotEmpty(migratedCredentialId)) {
+                credentialId = migratedCredentialId;
+            }
         }
 
         return this;
@@ -462,37 +464,53 @@ public class CIMInstance {
     }
 
     private String retrieveCredentialInfo(boolean getUsername){
-        if (!StringUtils.isEmpty(credentialId)){
-            StandardCredentials credentials = CredentialsMatchers.firstOrNull(
-                    CredentialsProvider.lookupCredentials(
-                            StandardCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()
-                    ), CredentialsMatchers.withId(credentialId)
-            );
+        StandardCredentials credentials =  retrieveCredential(credentialId);
 
-            if (credentials != null && credentials instanceof UsernamePasswordCredentials) {
-                UsernamePasswordCredentials c = (UsernamePasswordCredentials)credentials;
-                if (getUsername){
-                    return c.getUsername();
-                } else{
-                    return c.getPassword().getPlainText();
-                }
+        if (credentials != null && credentials instanceof UsernamePasswordCredentials) {
+            UsernamePasswordCredentials c = (UsernamePasswordCredentials)credentials;
+            if (getUsername){
+                return c.getUsername();
+            } else{
+                return c.getPassword().getPlainText();
             }
         }
 
         return StringUtils.EMPTY;
     }
 
-    private void createCredentials(String username, String password) {
+    private StandardCredentials retrieveCredential(String credentialId) {
+        if (StringUtils.isNotEmpty(credentialId)) {
+            return CredentialsMatchers.firstOrNull(
+                    CredentialsProvider.lookupCredentials(
+                            StandardCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()
+                    ), CredentialsMatchers.withId(credentialId)
+            );
+        }
+
+        return null;
+    }
+
+    private String createCredentials(String username, String password) {
+        String credentialId = name + "_" + username;
         try{
-            UsernamePasswordCredentialsImpl credential = new UsernamePasswordCredentialsImpl(
+
+            StandardCredentials credential = retrieveCredential(credentialId);
+            if (credential != null) {
+                return StringUtils.EMPTY;
+            }
+
+            UsernamePasswordCredentialsImpl migrateCredential = new UsernamePasswordCredentialsImpl(
                     CredentialsScope.GLOBAL, name + "_" + username, "Migrated Coverity Credential", username, password);
 
             CredentialsStore store = CredentialsProvider.lookupStores(Jenkins.getInstance()).iterator().next();
-            store.addCredentials(Domain.global(), credential);
+            store.addCredentials(Domain.global(), migrateCredential);
         } catch (IOException ioe) {
             logger.warning("Migrating username and password into credentials encountered IOException"
             + "\nPlease try to resolve this issue by adding credentials manually");
+            return StringUtils.EMPTY;
         }
+
+        return credentialId;
     }
 
     public CIMInstance cloneWithCredential(String credentialId) {
