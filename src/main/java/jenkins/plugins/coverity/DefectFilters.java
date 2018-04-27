@@ -234,10 +234,22 @@ public class DefectFilters {
 
     public MergedDefectFilterSpecDataObj ToFilterSpecDataObj(){
         MergedDefectFilterSpecDataObj filterSpecDataObj = new MergedDefectFilterSpecDataObj();
-        filterSpecDataObj.getActionNameList().addAll(actions);
-        filterSpecDataObj.getClassificationNameList().addAll(classifications);
-        filterSpecDataObj.getSeverityNameList().addAll(severities);
-        filterSpecDataObj.getImpactList().addAll(impacts);
+        if (actions != null && actions.size() > 0) {
+            filterSpecDataObj.getActionNameList().addAll(actions);
+        }
+
+        if (classifications != null && classifications.size() > 0) {
+            filterSpecDataObj.getClassificationNameList().addAll(classifications);
+        }
+
+        if (severities != null && severities.size() > 0) {
+            filterSpecDataObj.getSeverityNameList().addAll(severities);
+        }
+
+        if (impacts != null && impacts.size() > 0) {
+            filterSpecDataObj.getImpactList().addAll(impacts);
+        }
+
         if (components != null){
             for (String component : components) {
                 ComponentIdDataObj componentIdDataObj = new ComponentIdDataObj();
