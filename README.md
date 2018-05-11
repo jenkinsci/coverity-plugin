@@ -193,6 +193,7 @@ Note that the “Hello World” string, surrounded by unescaped quotes, is place
 ### Pipeline Setup
 
 The Coverity plugin has basic support for some pipeline functionality. (https://jenkins.io/doc/pipeline/steps/coverity) 
+
 It provides a `withCoverityEnv` step to wrap tool invocations and a `coverityResults` step to retrieve issues from a Coverity Connect View. In order to use these steps you will be required to setup Coverity tools in global tool configuration and a Coverity Connect instance in global configuration (see [Getting Started](#getting-started) for details).
 
 #### Using `withCoverityEnv` build wrapper
