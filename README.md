@@ -34,12 +34,12 @@ See [https://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin](https://wiki.j
 
 The following is the plugin version compatability with Coverity Connect server and Coverity Static Analysis Tools.
 
-Plugin version | Coverity Connect / Static Analysis version
---- | ---
-**1.7.0** to **1.8.1** | **7.5.1** to **8.7.0**
-**1.9.0** to **1.9.1** | **7.7.0** to **8.7.1**
-**1.9.2** | **7.7.0** to **2017.07+**
-**1.10.0+** | **8.0.0** to **2017.07+**
+| Plugin version         | Coverity Connect / Static Analysis version |
+| ---------------------- | ---------------------------------------- |
+| **1.7.0** to **1.8.1** | **7.5.1** to **8.7.0**                   |
+| **1.9.0** to **1.9.1** | **7.7.0** to **8.7.1**                   |
+| **1.9.2**              | **7.7.0** to **2017.07+**                |
+| **1.10.0+**            | **8.0.0** to **2017.07+**                |
 
 ## Features
 
@@ -55,34 +55,34 @@ The Coverity plugin for Jenkins performs four functions:
 ### Getting Started
 
 1. Install the plugin using the **Plugin Manager**, and restart Jenkins.
-1. Configure Coverity tools (**Manage Jenkins** > **Global Tool Configuration**)
+2. Configure Coverity tools (**Manage Jenkins** > **Global Tool Configuration**)
    * Add Coverity Static Analysis Tools:
-   ![Screenshot of Coverity Global Tool Configuration](screenshots/global-tool-configuration.png)
+     ![Screenshot of Coverity Global Tool Configuration](screenshots/global-tool-configuration.png)
      * Add one or more tools, configuring tools for multiple platforms can be managed here. The tools named 'default' will take priority, otherwise the tools path can be configured (or overwritten) per node and/or job configuration.
      * Note: In Jenkins prior to Jenkins 2, global tools are in **Configure System**
-1. Configure Coverity global settins (**Manage Jenkins** > **Configure System**)
+3. Configure Coverity global settins (**Manage Jenkins** > **Configure System**)
     * Add connection details for the Coverity Connect instance
-    ![Screenshot of Coverity Connect Configuration](screenshots/configure-coverity-connect.png)
+      ![Screenshot of Coverity Connect Configuration](screenshots/configure-coverity-connect.png)
       * Add Credential to store Coverity Connect username and password (managed through [Credentials Plugin](https://wiki.jenkins.io/display/JENKINS/Credentials+Plugin)). Coverity plugin supports only the "Username with Password" credential kind.
       * Click **Check** to validate your settings and Coverity user account permissions
-1. Configure Node specific tools (if necessary)
+4. Configure Node specific tools (if necessary)
    * If preferred, the 'default' tools path can be overridden by setting a Tools Location in the Node configuration settings
-   ![Screenshot of Node Tool Locations Configuration](screenshots/node-tool-configuration.png)
+     ![Screenshot of Node Tool Locations Configuration](screenshots/node-tool-configuration.png)
      * The tools used can also be configured (or overwritten) per job configuration if this works better for your distributed build architecture
 
 ### Freestyle Job Setup
 
 1.  Create the job, by creating it from scratch or copying from an existing job.
-1.  Under **Build**, select **Add build step** and select **Invoke Coverity Capture Build**, if needed.
+2.  Under **Build**, select **Add build step** and select **Invoke Coverity Capture Build**, if needed.
     ![Screenshot of Invoke Coverity Capture Build Step](screenshots/coverity-build-step.png)
     * If no Invoke Coverity Capture Build is provided, the Coverity Plugin will transparently invoke the build capture for all build steps during your build.
-1.  Under **Post-build Actions**, select **Add post-build action** and select **Coverity**.
-1.  Select the Coverity Connect instance, project and stream relevant for this job.
+3.  Under **Post-build Actions**, select **Add post-build action** and select **Coverity**.
+4.  Select the Coverity Connect instance, project and stream relevant for this job.
     ![Screenshot of Coverity Post-Build Step Stream](screenshots/coverity-post-build-stream.png)
-1.  If you want the plugin to invoke **cov-build/cov-analyze/cov-commit-defects** for you, check **Perform Coverity build, analysis and commit**. You can add additional arguments for each of these tools, and configure the intermediate directory used (all optional).
-1.  If your build already invokes Coverity, leave the checkbox unchecked.
-1.  If you want to fail the build when defects are found, check the corresponding checkbox. By default all defects are considered, but you can specify filters. Every filter should match for a defect to be included.
-1.  If you want the plugin to invoke test and Test Advisor functions for you, check **Perform Coverity Test Advisor and Commit**. You can add additional arguments and functionality to the build by entering your source control configurations (optional).
+5.  If you want the plugin to invoke **cov-build/cov-analyze/cov-commit-defects** for you, check **Perform Coverity build, analysis and commit**. You can add additional arguments for each of these tools, and configure the intermediate directory used (all optional).
+6.  If your build already invokes Coverity, leave the checkbox unchecked.
+7.  If you want to fail the build when defects are found, check the corresponding checkbox. By default all defects are considered, but you can specify filters. Every filter should match for a defect to be included.
+8.  If you want the plugin to invoke test and Test Advisor functions for you, check **Perform Coverity Test Advisor and Commit**. You can add additional arguments and functionality to the build by entering your source control configurations (optional).
 
 ### Build Results
 
@@ -103,29 +103,29 @@ Coverity-specific settings are available under the **Build** and **Post-build Ac
 
 The Coverity build action has the following options:
 
-Option | Description
---- | ---
-Builder | Select the build step which will be wrapped with **cov-build**. Note that if Coverity Capture Build step is not added, then all build steps are wrapped.
+| Option  | Description                              |
+| ------- | ---------------------------------------- |
+| Builder | Select the build step which will be wrapped with **cov-build**. Note that if Coverity Capture Build step is not added, then all build steps are wrapped. |
 
 #### Coverity Post-build Action Settings
 
 The Coverity post-build action has the following options:
 
-Option | Description
---- | ---
-Check configuration | Click to verify that the connection to a stream in Coverity Connect is configured correctly.
-Coverity Connect instance | The Coverity Connect instance selection (from global configuration).
-Project | The Project which contains the Stream to commit and fetch defects.
-Stream | The Stream to commit and fetch defects.
-Defect Filters | Select defects according to Classification, Action, Severity, Impact, Component, Checker, or Date first detected.
-Perform Coverity build, analysis, and commit | When this option is selected, Jenkins will monitor the build using cov-build, run the analysis, and commit defects to Coverity Connect. Various arguments can be specified to optimize the build process.
-Perform Coverity Test Advisor and Commit | Make settings for Test Advisor Configuration, and Coverage Configuration settings specific to C/C++, C#, and Java.
-Source Control Configuration 'SCM' (optional) | Make settings to enable retrieval of the version history from source control.
-Fail the build if matching defects are found | Fail the build if defects are found that pass all the defect filters.
-Mark build as unstable if matching defects are found | Mark the build as unstable if defects are found that pass all the defect filters.
-Do not fetch defects after the build | Select this if builds are slow or fetching defects is taking too many resources.
-Preserve the intermediate directory after each build | Keep the intermediate directory after a build. This will only have an effect is a non-default intermediate directory is chosen.
-Hide the defects chart on the project page | Hide the defects chart on the project page. This setting can speed up page loads when there are a large number of defects or builds.
+| Option                                   | Description                              |
+| ---------------------------------------- | ---------------------------------------- |
+| Check configuration                      | Click to verify that the connection to a stream in Coverity Connect is configured correctly. |
+| Coverity Connect instance                | The Coverity Connect instance selection (from global configuration). |
+| Project                                  | The Project which contains the Stream to commit and fetch defects. |
+| Stream                                   | The Stream to commit and fetch defects.  |
+| Defect Filters                           | Select defects according to Classification, Action, Severity, Impact, Component, Checker, or Date first detected. |
+| Perform Coverity build, analysis, and commit | When this option is selected, Jenkins will monitor the build using cov-build, run the analysis, and commit defects to Coverity Connect. Various arguments can be specified to optimize the build process. |
+| Perform Coverity Test Advisor and Commit | Make settings for Test Advisor Configuration, and Coverage Configuration settings specific to C/C++, C#, and Java. |
+| Source Control Configuration 'SCM' (optional) | Make settings to enable retrieval of the version history from source control. |
+| Fail the build if matching defects are found | Fail the build if defects are found that pass all the defect filters. |
+| Mark build as unstable if matching defects are found | Mark the build as unstable if defects are found that pass all the defect filters. |
+| Do not fetch defects after the build     | Select this if builds are slow or fetching defects is taking too many resources. |
+| Preserve the intermediate directory after each build | Keep the intermediate directory after a build. This will only have an effect is a non-default intermediate directory is chosen. |
+| Hide the defects chart on the project page | Hide the defects chart on the project page. This setting can speed up page loads when there are a large number of defects or builds. |
 
 <details>
   <summary><b>Coverity Advanced Parsing</b></summary>
@@ -139,23 +139,23 @@ The value of an environmental variable is passed into an array as follows. For e
 *   String literals: If listed as ‘$VAR’, using single quotes, then it is interpreted as [$VAR].
 *   As with the bash shell, single quotes escape double quotes and conversely double quotes escape single quotes. For example:
 
-	```
-	”’”a”’”   - >   [‘a’]
-	’”’a’”’   - >   [“a”]
-	```
+  ```
+  ”’”a”’”   - >   [‘a’]
+  ’”’a’”’   - >   [“a”]
+  ```
 
 *   Concatenated environment variables are also supported. For example:
 
-	```
-	If VAR1=ABC and VAR2=123
+  ```
+  If VAR1=ABC and VAR2=123
     $VAR1$VAR2   - >   [ABC123]
-	```
+  ```
 
 *   Environment variables can be concatenated to a string. For example:
 
-	```
-	${VAR1}DEF -> [ABCDEF]
-   	```
+  ```
+  ${VAR1}DEF -> [ABCDEF]
+  ```
 
 #### How the Coverity parser works
 
@@ -192,7 +192,9 @@ Note that the “Hello World” string, surrounded by unescaped quotes, is place
 
 ### Pipeline Setup
 
-The Coverity plugin has basic support for some pipeline functionality. It provides a `withCoverityEnv` step to wrap tool invocations and a `coverityResults` step to retrieve issues from a Coverity Connect View. In order to use these steps you will be required to setup Coverity tools in global tool configuration and a Coverity Connect instance in global configuration (see [Getting Started](#getting-started) for details).
+The Coverity plugin has basic support for some pipeline functionality. (https://jenkins.io/doc/pipeline/steps/coverity) 
+
+It provides a `withCoverityEnv` step to wrap tool invocations and a `coverityResults` step to retrieve issues from a Coverity Connect View. In order to use these steps you will be required to setup Coverity tools in global tool configuration and a Coverity Connect instance in global configuration (see [Getting Started](#getting-started) for details).
 
 #### Using `withCoverityEnv` build wrapper
 
@@ -232,8 +234,8 @@ withCoverityEnv(coverityToolName: 'default', connectInstance: 'Coverity Connect 
    // followed by other coverity commands (all in /bin available on PATH)
    ```
    * You may also combine `withEnv` with the `tool` step to set a Coverity tools directory to any environment variable
-*  The tools directory will be resolved for the Node which executes the pipeline (see [Getting Started](#getting-started) for details on tools installations and locations per node)
-*  Note that as with any Coverity tools execution the build/analyze/commit steps must share the same intermediate directory value (see the Coverity Analysis User and Administrator Guide for more details)
+* The tools directory will be resolved for the Node which executes the pipeline (see [Getting Started](#getting-started) for details on tools installations and locations per node)
+* Note that as with any Coverity tools execution the build/analyze/commit steps must share the same intermediate directory value (see the Coverity Analysis User and Administrator Guide for more details)
 
 #### Publishing Coverity results
 
@@ -243,9 +245,9 @@ withCoverityEnv(coverityToolName: 'default', connectInstance: 'Coverity Connect 
 coverityResults connectInstance: 'cov-connect', connectView: 'JenkinsPipelineView', projectId: 'my project'
 ```
 *  Use the Pipeline Syntax Snippet Generator to get help choosing a Coverity Connect Instance and verifying the Project and View values
-![Screenshot of coverityResults Pipeline Syntax Snippet Generator](screenshots/coverityResults-snippet-generator.png)
+  ![Screenshot of coverityResults Pipeline Syntax Snippet Generator](screenshots/coverityResults-snippet-generator.png)
 *  Advanced options are available to abort the pipeline, fail the pipeline or mark the pipeline as unstable if any issues were found in the Coverity Connect View (use `abortPipeline`, `failPipeline` or `unstable`, default value for these options is false).
-* `abortPipeline` takes precedence over `failPipeline` and `failPipeline` takes precedence over `unstable`.
+*  `abortPipeline` takes precedence over `failPipeline` and `failPipeline` takes precedence over `unstable`.
 *  The View can be configured within the Coverity Connect User Interface (use the same user credentials which will connect during the pipeline run). See the Coverity Platform User and Administrator Guide for information on configuring views.
    *  The View must be configured as an "Issues: By Snapshot" View Type. This can ensure the most recently committed issues are used, by keeping the default View "Snaphost Scope" of `last()`.
    *  The view should include the columns "CID", "Checker", "File", and "Function" in order to properly record issues per pipeline run (otherwise just a count may be shown).
@@ -254,7 +256,7 @@ coverityResults connectInstance: 'cov-connect', connectView: 'JenkinsPipelineVie
 *  Note that this pipeline step differs greatly from the freestyle job post-build step in two major ways:
    1. The results are retrieved per project, not per stream.
       * In cases where multiple pipelines (or jobs) commit to multiple streams in the same project, different Views must be configured to filter by the proper stream.
-   1. The filtering is configured entirely on Coverity Connect, not in Jenkins configuration
+   2. The filtering is configured entirely on Coverity Connect, not in Jenkins configuration
       *  This allows for filtering on columns which were not offered in the post-build step as well as much more dynamic date filtering capabilities.
 
 #### Example Script
@@ -270,7 +272,7 @@ node {
       // use a variable for the shared intermediate directory
       iDir = 'cov-idir'
       
-      withCoverityEnv(coverityToolName: 'default', cimInstance: 'Coverity Connect Instance Name') { 
+      withCoverityEnv(coverityToolName: 'default', connectInstance: 'Coverity Connect Instance Name') { 
         // run cov-build capture command
         sh "cov-build --dir ${iDir} <build-command>"
       
@@ -310,8 +312,8 @@ When you encounter problems while using the plugin, please provide the following
 To enable the Jenkins Coverity plugin to operate with a Coverity Connect instance that is configured to use SSL, do the following:
 
 1.  Set the environmental variable CATALINA_OPTS to this value: " -Djavax.net.ssl.trustStore=$keystore -Djavax.net.ssl.trustStorePassword=changeit";
-1.  Make sure that the environmental variable $keystore points to the Java truststore that contains the CA root and any intermediate certificate, or the self-signed certificate, that the Coverity Connect serves.
-1.  Restart the Tomcat server.
+2.  Make sure that the environmental variable $keystore points to the Java truststore that contains the CA root and any intermediate certificate, or the self-signed certificate, that the Coverity Connect serves.
+3.  Restart the Tomcat server.
 
 ### Compatibility with other Jenkins plugins
 
@@ -326,6 +328,10 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 If you have any questions or issues with the Coverity plugin, contact <coverity-support@synopsys.com>
 
 ## Changelog
+
+#### Version 1.11.1 (May, 2018)
+
+* Fixed "NullPointerException" thrown when the plugin is retrieving the defects from Coverity Connect. (BZ 116484)
 
 #### Version 1.11.0 (January, 2018)
 
@@ -397,7 +403,7 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 
 <details>
   <summary><b>Changelog for older versions</b></summary>
-  
+
 #### Version 1.8.1 (January 9, 2017)
 
 *   Support for Coverity Connect v6 web services is deprecated, and in a future release support for Coverity Analysis and Coverity Connect versions 7.6.x and earlier will be removed. (BZ 98801)
@@ -489,9 +495,11 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 *   User input in configuration now resolves environment variables
 *   Added new checkers to the defect list for each language. List has been updated to all checkers present to 7.6.0 
 *   <details>
-      <summary>New C/C++ Checkers</summary>
+     <summary>New C/C++ Checkers</summary>
 
-	```
+     ```
+
+     ```
     ASSIGN_NOT_RETURNING_STAR_THIS
     ATOMICITY
     BAD_EQ
@@ -563,12 +571,14 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
     VIRTUAL_DTOR
     VOLATILE_ATOMICITY
     WRAPPER_ESCAPE
-	```
+    ​```
     </details>
 *   <details>
-      <summary>New Java Checkers</summary>
+     <summary>New Java Checkers</summary>
 
-	```
+     ```
+
+     ```
     ATOMICITY
     BAD_CHECK_OF_WAIT_COND
     BAD_LOCK_OBJECT
@@ -661,12 +671,14 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
     WRONG_METHOD
     XPATH_INJECTION
     XSS
-	```
+    ​```
     </details>
 *   <details>
-      <summary>New C# Checker</summary>
+     <summary>New C# Checker</summary>
 
-	```
+     ```
+
+     ```
     ALLOC_FREE_MISMATCH
     ARRAY_VS_SINGLETON
     ASSERT_SIDE_EFFECT
@@ -772,7 +784,7 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
     VIRTUAL_DTOR
     VOLATILE_ATOMICITY
     WRAPPER_ESCAPE
-	```
+    ​```
     </details>
 
 *   Fixed SSL issue with cov-manage-history  
@@ -780,7 +792,7 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 *   Fixed graphs breaking when a build has more than one CIM instances.
 *   Added Impact into defect filters. Checkers can now be filtered by impact**
 
-	**_(Note)_** After upgrade, the build configuration might need to be reconfigured so that impact filtering can be added. Initial build after upgrade might return zero defects.
+  **_(Note)_** After upgrade, the build configuration might need to be reconfigured so that impact filtering can be added. Initial build after upgrade might return zero defects.
 
 *   Builds can now be marked as 'Unstable' if defects are found
 *   Fixed issue where defect totals was being printed as total defects instead of matched defects
@@ -861,4 +873,4 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 
 *   Add an option to not fetch defects after commit (BZ 47226)
 *   Allow static analysis binaries to be specified on a per-job basis (BZ 47224)
-</details>
+  </details>
