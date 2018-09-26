@@ -96,4 +96,15 @@ public abstract class CoverityCommand extends Command {
             }
         }
     }
+
+    protected void addCustomTestCommand(){
+        TaOptionBlock taOptionBlock = publisher.getTaOptionBlock();
+        try{
+            if (!StringUtils.isEmpty(taOptionBlock.getCustomTestCommand())){
+                addArguments(EnvParser.tokenize(taOptionBlock.getCustomTestCommand()));
+            }
+        }catch(ParseException parseException){
+            throw new RuntimeException("ParseException occurred during tokenizing the cov capture custom test command.");
+        }
+    }
 }
