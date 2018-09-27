@@ -20,19 +20,20 @@ import jenkins.plugins.coverity.ParseException;
 import jenkins.plugins.coverity.TaOptionBlock;
 import org.apache.commons.lang.StringUtils;
 
-public class CovCaptureCommand extends CoverityCommand {
+public class CovBuildCaptureTestCommand extends CoverityCommand {
 
-    private static final String command = "cov-capture";
+    private static final String command = "cov-build";
 
-    public CovCaptureCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
+    public CovBuildCaptureTestCommand(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(command, build, launcher, listener, publisher, home, envVars);
     }
 
     @Override
     protected void prepareCommand() {
+        addArgument("--test-capture");
         addTaCommandArgs();
         addCustomTestCommand();
-        listener.getLogger().println("[Coverity] cov-capture command line arguments: " + commandLine.toString());
+        listener.getLogger().println("[Coverity] cov-build capture test command line arguments: " + commandLine.toString());
     }
 
     @Override

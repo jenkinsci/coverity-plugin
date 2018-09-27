@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 public class CoverityVersion implements Comparable<CoverityVersion>, Serializable {
     public static final CoverityVersion VERSION_JASPER = new CoverityVersion(8, 0, 0, 0);
     public static final CoverityVersion VERSION_JASPER1 = new CoverityVersion(8, 1, 0,0);
+    public static final CoverityVersion VERSION_PACIFIC = new CoverityVersion(2018, 12, 0,0);
 
     public static final CoverityVersion MINIMUM_SUPPORTED_VERSION = VERSION_JASPER;
 

@@ -11,20 +11,14 @@
 package jenkins.plugins.coverity.CoverityTool;
 
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Executor;
 import hudson.model.Node;
 import hudson.model.Result;
-import jenkins.plugins.coverity.CIMInstance;
-import jenkins.plugins.coverity.CIMStream;
-import jenkins.plugins.coverity.CoverityLauncherDecorator;
-import jenkins.plugins.coverity.CoverityPublisher;
-import jenkins.plugins.coverity.CoverityTempDir;
-import jenkins.plugins.coverity.CoverityToolInstallation;
-import jenkins.plugins.coverity.CoverityUtils;
-import jenkins.plugins.coverity.InvocationAssistance;
+import jenkins.plugins.coverity.*;
 import jenkins.plugins.coverity.ws.DefectReader;
 
 /**
@@ -55,6 +49,8 @@ public class CoverityToolHandler {
             useAdvancedParser = true;
         }
 
+        FilePath homePath = new FilePath(launcher.getChannel(), installation.getHome());
+        CoverityVersion version = CheckConfig.getVersion(homePath);
 
         /**
          * Fix Bug 84077
@@ -119,14 +115,23 @@ public class CoverityToolHandler {
             CoverityLauncherDecorator.CoverityPostBuildAction.set(false);
         }
 
-        // Run Cov-Capture
-        try {
+        // Capturing TA violations
+        try{
             CoverityLauncherDecorator.CoverityPostBuildAction.set(true);
-            Command covCaptureCommand = new CovCaptureCommand(build, launcher, listener, publisher, home, envVars);
-            int result = covCaptureCommand.runCommand();
+            Command command = null;
+
+            if (version.compareTo(CoverityVersion.VERSION_PACIFIC) < 0) {
+                // Run Cov-Capture since the analysis tool version is older than 2018.12
+                command = new CovCaptureCommand(build, launcher, listener, publisher, home, envVars);
+            } else {
+                // Run Cov-Build since the analysis tool version is equal or greater than 2018.12
+                command = new CovBuildCaptureTestCommand(build, launcher, listener, publisher, home, envVars);
+            }
+
+            int result = command.runCommand();
 
             if(result != 0) {
-                listener.getLogger().println("[Coverity] cov-capture returned " + result + ", aborting...");
+                listener.getLogger().println("[Coverity] Capturing tests returned " + result + ", aborting...");
                 build.setResult(Result.FAILURE);
                 return;
             }
