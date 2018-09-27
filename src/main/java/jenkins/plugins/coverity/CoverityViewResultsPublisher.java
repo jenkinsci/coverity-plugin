@@ -108,18 +108,8 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
         return connectInstance;
     }
 
-    @DataBoundSetter
-    public void setConnectInstance(String connectInstance) {
-        this.connectInstance = Util.fixNull(connectInstance);
-    }
-
     public String getConnectView() {
         return connectView;
-    }
-
-    @DataBoundSetter
-    public void setConnectView(String connectView) {
-        this.connectView = Util.fixNull(connectView);
     }
 
     @Override
@@ -129,11 +119,6 @@ public class CoverityViewResultsPublisher extends Recorder implements SimpleBuil
 
     public String getProjectId() {
         return projectId;
-    }
-
-    @DataBoundSetter
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
     }
 
     public boolean isFailPipeline() {
