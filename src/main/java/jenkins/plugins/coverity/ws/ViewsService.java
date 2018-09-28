@@ -17,16 +17,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 /**
  * Service for interacting with the Coverity Connect Views Service JSON API
@@ -41,7 +41,6 @@ public class ViewsService {
         this.coverityConnectUrl = coverityConnectUrl;
         this.restClient = restClient;
     }
-
     /**
      * Returns a Map of available Coverity connect views, using the numeric identifier as the key and name as value
      */
@@ -53,8 +52,10 @@ public class ViewsService {
             final UriBuilder uriBuilder = UriBuilder.fromUri(coverityConnectUrl.toURI())
                 .path("api/views/v1");
 
-            WebResource resource = restClient.resource(uriBuilder.build());
-            String response = resource.get(String.class);
+            WebTarget webTarget = restClient.target(uriBuilder.build());
+            Invocation.Builder invocationBuilder =  webTarget.request();
+            String response = invocationBuilder.get(String.class);
+
             JSONParser parser = new JSONParser();
             json = (JSONObject)parser.parse(response);
         } catch (ParseException | URISyntaxException e) {
@@ -90,16 +91,11 @@ public class ViewsService {
             final URI viewContentsUri = uriBuilder.build();
             logger.info("Retrieving View contents from " + viewContentsUri);
 
-            WebResource resource = restClient.resource(viewContentsUri);
+            WebTarget webTarget = restClient.target(viewContentsUri);
+            Invocation.Builder invocationBuilder =  webTarget.request();
+            Response response = invocationBuilder.get();
 
-            ClientResponse response = resource.get(ClientResponse.class);
-            if (response.getStatus() != 200) {
-                throw new RuntimeException("GET " + viewContentsUri +
-                    " returned a response status of " + response.getStatus() +
-                    ": " + response.getEntity(String.class));
-            }
-
-            String output = response.getEntity(String.class);
+            String output = response.readEntity(String.class);
             JSONParser parser = new JSONParser();
             JSONObject json = (JSONObject)parser.parse(output);
 
