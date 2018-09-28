@@ -14,12 +14,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -36,10 +39,32 @@ public class ViewsService {
 
     private final URL coverityConnectUrl;
     private final Client restClient;
+    private Map<String, NewCookie> sessionCookies;
 
     public ViewsService(URL coverityConnectUrl, Client restClient) {
         this.coverityConnectUrl = coverityConnectUrl;
         this.restClient = restClient;
+
+        initializeSession();
+    }
+
+    private void initializeSession(){
+        try {
+            final UriBuilder uriBuilder = UriBuilder.fromUri(coverityConnectUrl.toURI())
+                    .path("api/views/v1");
+
+            WebTarget webTarget = restClient.target(uriBuilder.build());
+            Invocation.Builder invocationBuilder =  webTarget.request();
+            Response response = invocationBuilder.get();
+            if (response.getStatus() != 200) {
+                throw new RuntimeException("Initializing session failed");
+            }
+
+            sessionCookies = response.getCookies() != null
+                    ? response.getCookies() : new HashMap<String, NewCookie>();
+        } catch (URISyntaxException e) {
+            logger.throwing(ViewsService.class.getName(), "InitializeSession", e);
+        }
     }
     /**
      * Returns a Map of available Coverity connect views, using the numeric identifier as the key and name as value
@@ -93,7 +118,21 @@ public class ViewsService {
 
             WebTarget webTarget = restClient.target(viewContentsUri);
             Invocation.Builder invocationBuilder =  webTarget.request();
+
+            // Adding session cookies
+            Iterator iterator = sessionCookies.entrySet().iterator();
+            while(iterator.hasNext()){
+                Map.Entry entry = (Map.Entry)iterator.next();
+                invocationBuilder.cookie((Cookie)entry.getValue());
+            }
+
             Response response = invocationBuilder.get();
+
+            if (response.getStatus() != 200) {
+                throw new RuntimeException("GET " + viewContentsUri +
+                        " returned a response status of " + response.getStatus() +
+                        ": " + response.readEntity(String.class));
+            }
 
             String output = response.readEntity(String.class);
             JSONParser parser = new JSONParser();
