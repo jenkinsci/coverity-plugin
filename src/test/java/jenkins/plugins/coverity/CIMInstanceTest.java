@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -51,7 +53,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.StreamDataObj;
 import com.google.common.collect.ImmutableSortedMap;
-import com.sun.jersey.api.client.Client;
 
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
@@ -60,7 +61,7 @@ import jenkins.plugins.coverity.ws.TestWebServiceFactory.TestConfigurationServic
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WebServiceFactory.class, Client.class, SSLContext.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
+@PrepareForTest({WebServiceFactory.class, Client.class, ClientBuilder.class, SSLContext.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 @PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
 public class CIMInstanceTest {
     private TestWebServiceFactory testWsFactory;
@@ -470,76 +471,6 @@ public class CIMInstanceTest {
         final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
 
         assertEquals(1, result.size());
-        assertTrue(result.containsKey(Long.valueOf(67890)));
-        assertEquals("All Defects", result.get(Long.valueOf(67890)));
-    }
-
-    @Test
-    public void getViews_withSSL_returnsAvailableIssuesViews() throws MalformedURLException, NoSuchAlgorithmException {
-        final String viewApiJsonResult = "{\"views\": [" +
-            "    {" +
-            "        \"id\": 54321," +
-            "        \"type\": \"issues\"," +
-            "        \"name\": \"Custom View\"," +
-            "        \"groupBy\":false," +
-            "        \"columns\": [" +
-            "            {" +
-            "                \"name\": \"cid\"," +
-            "                \"label\": \"CID\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"checker\"," +
-            "                \"label\": \"Checker\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayFunction\"," +
-            "                \"label\": \"Function\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayFile\"," +
-            "                \"label\": \"File\"" +
-            "            }" +
-            "        ]" +
-            "    }" +
-            "    {" +
-            "        \"id\": 67890," +
-            "        \"type\": \"issues\"," +
-            "        \"name\": \"All Defects\"," +
-            "        \"groupBy\":false," +
-            "        \"columns\": [" +
-            "            {" +
-            "                \"name\": \"cid\"," +
-            "                \"label\": \"CID\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayType\"," +
-            "                \"label\": \"Type\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"displayImpact\"," +
-            "                \"label\": \"Impact\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"firstDetected\"," +
-            "                \"label\": \"First Detected\"" +
-            "            }," +
-            "            {" +
-            "                \"name\": \"owner\"," +
-            "                \"label\": \"Owner\"" +
-            "            }       " +
-            "        ]" +
-            "    }" +
-            "]}";
-        TestableViewsService.setupWithViewApi(viewApiJsonResult);
-        CredentialUtil.setCredentialManager("user", "password");
-        CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("ssl-host").withPort(8443)
-                .withUseSSL(true).withDefaultCredentialId().build();
-
-        final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
-
-        assertEquals(2, result.size());
-        assertTrue(result.containsKey(Long.valueOf(54321)));
-        assertEquals("Custom View", result.get(Long.valueOf(54321)));
         assertTrue(result.containsKey(Long.valueOf(67890)));
         assertEquals("All Defects", result.get(Long.valueOf(67890)));
     }

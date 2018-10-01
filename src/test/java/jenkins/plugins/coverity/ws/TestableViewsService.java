@@ -26,10 +26,12 @@ import org.hamcrest.TypeSafeMatcher;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
 
 /**
  * Utility for setting up (mocking) the required classes to return values from the views service REST API.
@@ -39,11 +41,18 @@ import com.sun.jersey.api.client.WebResource;
 public final class TestableViewsService {
     public static void setupWithViewApi(String viewApiJsonResult) {
         Client restClient = mock(Client.class);
-        PowerMockito.mockStatic(Client.class);
-        when(Client.create()).thenReturn(restClient);
-        WebResource webResource = mock(WebResource.class);
-        when(webResource.get(String.class)).thenReturn(viewApiJsonResult);
-        when(restClient.resource(argThat(matchUriPath("/api/views/v1")))).thenReturn(webResource);
+        WebTarget webTarget = mock(WebTarget.class);
+        ClientBuilder clientBuilder = mock(ClientBuilder.class);
+        PowerMockito.mockStatic(ClientBuilder.class);
+        Invocation.Builder builder = mock(Invocation.Builder.class);
+        Response response = mock(Response.class);
+
+        when(response.getStatus()).thenReturn(200);
+        when(clientBuilder.newClient()).thenReturn(restClient);
+        when(restClient.target(argThat(matchUriPath("/api/views/v1")))).thenReturn(webTarget);
+        when(webTarget.request()).thenReturn(builder);
+        when(builder.get(String.class)).thenReturn(viewApiJsonResult);
+        when(builder.get()).thenReturn(response);
     }
 
     public static void setupWithViews(Map<Long, String> views) {
@@ -69,23 +78,33 @@ public final class TestableViewsService {
 
     public static void setupViewContentsApi(String viewName, int httpStatus, String viewContentsApiJsonResult) {
         Client restClient = mock(Client.class);
-        PowerMockito.mockStatic(Client.class);
-        when(Client.create()).thenReturn(restClient);
-        WebResource webResource = mock(WebResource.class);
-        ClientResponse response = mock(ClientResponse.class);
+        Response response = mock(Response.class);
+        WebTarget webTarget = mock(WebTarget.class);
+        Invocation.Builder builder = mock(Invocation.Builder.class);
+        ClientBuilder clientBuilder = mock(ClientBuilder.class);
+        PowerMockito.mockStatic(ClientBuilder.class);
+
+        when(clientBuilder.newClient()).thenReturn(restClient);
+        when(restClient.target(argThat(matchUriPath("/api/views/v1")))).thenReturn(webTarget);
+        when(restClient.target(argThat(matchUriPath("/api/viewContents/issues/v1/" + viewName)))).thenReturn(webTarget);
+        when(webTarget.request()).thenReturn(builder);
         when(response.getStatus()).thenReturn(httpStatus);
-        when(response.getEntity(String.class)).thenReturn(viewContentsApiJsonResult);
-        when(webResource.get(ClientResponse.class)).thenReturn(response);
-        when(restClient.resource(argThat(matchUriPath("/api/viewContents/issues/v1/" + viewName)))).thenReturn(webResource);
+        when(response.readEntity(String.class)).thenReturn(viewContentsApiJsonResult);
+        when(builder.get()).thenReturn(response);
     }
 
-    public static void setupViewContentsApiThrows(ClientHandlerException exception, String viewName) {
+    public static void setupViewContentsApiThrows(Exception exception, String viewName) {
         Client restClient = mock(Client.class);
-        PowerMockito.mockStatic(Client.class);
-        when(Client.create()).thenReturn(restClient);
-        WebResource webResource = mock(WebResource.class);
-        when(webResource.get(ClientResponse.class)).thenThrow(exception);
-        when(restClient.resource(argThat(matchUriPath("/api/viewContents/issues/v1/" + viewName)))).thenReturn(webResource);
+        Response response = mock(Response.class);
+        WebTarget webTarget = mock(WebTarget.class);
+        Invocation.Builder builder = mock(Invocation.Builder.class);
+        ClientBuilder clientBuilder = mock(ClientBuilder.class);
+        PowerMockito.mockStatic(ClientBuilder.class);
+
+        when(clientBuilder.newClient()).thenReturn(restClient);
+        when(restClient.target(argThat(matchUriPath("/api/viewContents/issues/v1/" + viewName)))).thenReturn(webTarget);
+        when(webTarget.request()).thenReturn(builder);
+        when(builder.get()).thenThrow(exception);
     }
 
     /**

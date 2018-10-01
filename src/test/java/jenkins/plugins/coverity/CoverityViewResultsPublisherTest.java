@@ -37,9 +37,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientHandlerException;
-
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Result;
@@ -51,8 +48,12 @@ import jenkins.plugins.coverity.Utils.TestableConsoleLogger;
 import jenkins.plugins.coverity.ws.TestableViewsService;
 import jenkins.plugins.coverity.ws.WebServiceFactory;
 
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, WebServiceFactory.class, Client.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
+@PrepareForTest({Jenkins.class, WebServiceFactory.class, Client.class, ClientBuilder.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public class CoverityViewResultsPublisherTest {
     private CIMInstance cimInstance;
     private TestableConsoleLogger consoleLogger;
@@ -198,7 +199,7 @@ public class CoverityViewResultsPublisherTest {
     }
 
     @Test
-    public void perform_unstablePipeline_withIssues() throws IOException, InterruptedException {
+    public void perform_unstablePipeline_withIssues() throws IOException {
         final String instance = cimInstance.getName();
         final String projectId = "projectId";
         final String view = "view";
@@ -221,13 +222,13 @@ public class CoverityViewResultsPublisherTest {
     }
 
     @Test(expected = AbortException.class)
-    public void perform_handlesError_failsPipeline() throws IOException, InterruptedException {
+    public void perform_handlesError_failsPipeline() throws IOException {
         final String instance = cimInstance.getName();
         final String projectId = "projectId";
         final String view = "view";
 
         // setup exception when calling rest web service client
-        final ClientHandlerException exception = new ClientHandlerException("Unexpected error");
+        final ClientErrorException exception = new ClientErrorException("Unexpected error", 400);
         TestableViewsService.setupViewContentsApiThrows(exception, view);
         final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
 
@@ -241,7 +242,7 @@ public class CoverityViewResultsPublisherTest {
     }
 
     @Test(expected = AbortException.class)
-    public void perform_handles400Error_logsMessage_failsPipeline() throws IOException, InterruptedException {
+    public void perform_handles400Error_logsMessage_failsPipeline() throws IOException {
         final String instance = cimInstance.getName();
         final String projectId = "projectId";
         final String view = "group-by-view";
