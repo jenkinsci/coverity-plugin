@@ -35,11 +35,11 @@ See [https://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin](https://wiki.j
 The following is the plugin version compatability with Coverity Connect server and Coverity Static Analysis Tools.
 
 | Plugin version         | Coverity Connect / Static Analysis version |
-| ---------------------- | ---------------------------------------- |
-| **1.7.0** to **1.8.1** | **7.5.1** to **8.7.0**                   |
-| **1.9.0** to **1.9.1** | **7.7.0** to **8.7.1**                   |
-| **1.9.2**              | **7.7.0** to **2017.07+**                |
-| **1.10.0+**            | **8.0.0** to **2017.07+**                |
+| ---------------------- | ------------------------------------------ |
+| **1.7.0** to **1.8.1** | **7.5.1** to **8.7.0**                     |
+| **1.9.0** to **1.9.1** | **7.7.0** to **8.7.1**                     |
+| **1.9.2**              | **7.7.0** to **2017.07+**                  |
+| **1.10.0+**            | **8.0.0** to **2018.09+**                  |
 
 ## Features
 
@@ -328,6 +328,12 @@ To enable the Jenkins Coverity plugin to operate with a Coverity Connect instanc
 If you have any questions or issues with the Coverity plugin, contact <coverity-support@synopsys.com>
 
 ## Changelog
+
+#### Version 1.11.2 (Oct, 2018)
+
+- Fixed an issue where "CoverityResults" step fetches the wrong number of defects from Coverity Connect (COVJP-580)
+- Modified ""connectInstance", "connectView", and "projectId" parameters are not optional for CoverityViewResultsPublisher. (COVJP-610)
+- The Jenkins plugin will now use "cov-build" executable for capturing test coverage with custom test command, instead of running "cov-capture" executable. (COVJP-607)
 
 #### Version 1.11.1 (May, 2018)
 
