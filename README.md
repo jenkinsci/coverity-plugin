@@ -1,9 +1,9 @@
 # Coverity Jenkins Plugin
 
-*	[Overview](#overview)
-*	[Compatibility](#compatibility)
-*	[Features](#features)
-*	[How to Use](#how-to-use)
+*    [Overview](#overview)
+*    [Compatibility](#compatibility)
+*    [Features](#features)
+*    [How to Use](#how-to-use)
     *   [Getting Started](#getting-started)
     *   [Freestyle Job Setup](#freestyle-job-setup)
     *   [Build Results](#build-results)
@@ -14,12 +14,12 @@
         *   [Using Coverity Static Analysis Tools](#using-coverity-static-analysis-tools)
         *   [Publishing Coverity results](#publishing-coverity-results)
         *   [Example Script](#example-script)
-*	[Troubleshooting](#troubleshooting)
-*	[Known Issues](#known-issues)
+*    [Troubleshooting](#troubleshooting)
+*    [Known Issues](#known-issues)
     *   [Compatibility with other Jenkins plugins](#compatibility-with-other-jenkins-plugins)
-*	[Upgrade Notes](#upgrade-notes)
-*	[Support](#support)
-*	[Changelog](#changelog)
+*    [Upgrade Notes](#upgrade-notes)
+*    [Support](#support)
+*    [Changelog](#changelog)
 
 
 ## Deprecation
