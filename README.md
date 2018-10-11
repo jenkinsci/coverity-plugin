@@ -22,6 +22,11 @@
 *   [Changelog](#changelog)
 
 
+## Deprecation
+
+**This plugin is no longer maintained and will be deprecated by 11/30/2018.** The functionality has been migrated onto the new [Synopsys Coverity Jenkins Plugin](https://github.com/jenkinsci/synopsys-coverity-plugin). Please download the new plugin from GitHub or search for “Synopsys Coverity Jenkins" plugin under “Manage plugins” on your Jenkins system to install it directly. Please contact <software-integrity-support@synopsys.com> for any issues. **Official support for this implementation ends on 06/30/2019.**
+
+
 ## Overview
 
 This plugin integrates Coverity Connect and Analysis with the Jenkins Continuous Integration Server. ([Synopsys Static Analysis Tool (Coverity)](https://www.synopsys.com/software-integrity/resources/datasheets/coverity.html))
