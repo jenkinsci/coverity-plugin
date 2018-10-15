@@ -282,6 +282,237 @@ public class CoverityViewResultsPublisherTest {
                 "[Coverity] Coverity issues were found and abortPipeline was set to true, throwing abort exception");
     }
 
+    @Test
+    public void perform_withNoIssues_withMultiNoIssues_logsSuccess() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String viewMulti = "viewMulti";
+        final String view = "view";
+
+        setupRunToHandleBuildAction();
+        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
+        setupIssues(viewMulti, 0);
+        setupIssues(view, 0);
+        final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+
+        publisherMulti.perform(run, workspace, launcher, multiListener);
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(
+            getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(0, projectId, view),
+            expectedUrlMessage,
+            expectedFinishedMessage);
+    }
+
+    @Test
+    public void perform_withIssues_withMultiNoIssues_logsSuccess() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String viewMulti = "viewMulti";
+        final String view = "view";
+
+        setupRunToHandleBuildAction();
+        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
+        setupIssues(viewMulti, 0);
+        setupIssues(view, 10);
+        final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+
+        publisherMulti.perform(run, workspace, launcher, multiListener);
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(10, projectId, view),
+            expectedUrlMessage,
+            expectedFinishedMessage);
+    }
+
+    @Test
+    public void perform_withIssues_withMultiIssues_logsSuccess() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String viewMulti = "viewMulti";
+        final String view = "view";
+
+        setupRunToHandleBuildAction();
+        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
+        setupIssues(viewMulti, 15);
+        setupIssues(view, 10);
+        final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+
+        publisherMulti.perform(run, workspace, launcher, multiListener);
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(10, projectId, view),
+            expectedUrlMessage,
+            expectedFinishedMessage);
+    }
+
+    @Test
+    public void perform_failPipeline_withIssues_withMultiIssues() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String viewMulti = "viewMulti";
+        final String view = "view";
+        final boolean failPipeline = true;
+
+        setupRunToHandleBuildAction();
+        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
+        setupIssues(viewMulti, 15);
+        setupIssues(view, 10);
+        final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisher.setFailPipeline(failPipeline);
+
+        publisherMulti.perform(run, workspace, launcher, multiListener);
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(10, projectId, view),
+            expectedUrlMessage,
+            "[Coverity] Coverity issues were found and failPipeline was set to true, the pipeline result will be marked as FAILURE.",
+            expectedFinishedMessage);
+        verify(run).setResult(Result.FAILURE);
+    }
+
+    @Test
+    public void perform_failPipeline_withIssues_withMultiNoIssues() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String viewMulti = "viewMulti";
+        final String view = "view";
+        final boolean failPipeline = true;
+
+        setupRunToHandleBuildAction();
+        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
+        setupIssues(viewMulti, 0);
+        setupIssues(view, 10);
+        final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisher.setFailPipeline(failPipeline);
+
+        publisherMulti.perform(run, workspace, launcher, multiListener);
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(10, projectId, view),
+            expectedUrlMessage,
+            "[Coverity] Coverity issues were found and failPipeline was set to true, the pipeline result will be marked as FAILURE.",
+            expectedFinishedMessage);
+        verify(run).setResult(Result.FAILURE);
+    }
+
+    @Test
+    public void perform_unstablePipeline_withIssues_withMultiIssues() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String viewMulti = "viewMulti";
+        final String view = "view";
+        final boolean unstablePipeline = true;
+
+        setupRunToHandleBuildAction();
+        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
+        setupIssues(viewMulti, 15);
+        setupIssues(view, 20);
+        final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisher.setUnstable(unstablePipeline);
+
+        publisherMulti.perform(run, workspace, launcher, multiListener);
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(20, projectId, view),
+            expectedUrlMessage,
+            "[Coverity] Coverity issues were found and unstable was set to true, the pipeline result will be marked as UNSTABLE.",
+            expectedFinishedMessage);
+        verify(run).setResult(Result.UNSTABLE);
+    }
+
+    @Test
+    public void perform_unstablePipeline_withIssues_withMultiNoIssues() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String viewMulti = "viewMulti";
+        final String view = "view";
+        final boolean unstablePipeline = true;
+
+        setupRunToHandleBuildAction();
+        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
+        setupIssues(viewMulti, 0);
+        setupIssues(view, 20);
+        final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisher.setUnstable(unstablePipeline);
+
+        publisherMulti.perform(run, workspace, launcher, multiListener);
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+            getRetrievingMessage(projectId, view),
+            getIssueCountMessage(20, projectId, view),
+            expectedUrlMessage,
+            "[Coverity] Coverity issues were found and unstable was set to true, the pipeline result will be marked as UNSTABLE.",
+            expectedFinishedMessage);
+        verify(run).setResult(Result.UNSTABLE);
+    }
+
+    @Test(expected = AbortException.class)
+    public void perform_abortPipeline_withIssues_withMultiIssues() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String viewMulti = "viewMulti";
+        final String view = "view";
+        final boolean abortPipeline = true;
+
+        setupRunToHandleBuildAction();
+        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
+        setupIssues(viewMulti, 15);
+        setupIssues(view, 10);
+        final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisher.setAbortPipeline(abortPipeline);
+
+        publisherMulti.perform(run, workspace, launcher, multiListener);
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+                "[Coverity] Coverity issues were found and abortPipeline was set to true, throwing abort exception");
+    }
+
+    @Test(expected = AbortException.class)
+    public void perform_abortPipeline_withIssues_withMultiNoIssues() throws IOException, InterruptedException {
+        final String instance = cimInstance.getName();
+        final String projectId = "projectId";
+        final String viewMulti = "viewMulti";
+        final String view = "view";
+        final boolean abortPipeline = true;
+
+        setupRunToHandleBuildAction();
+        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
+        setupIssues(viewMulti, 0);
+        setupIssues(view, 10);
+        final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisher.setAbortPipeline(abortPipeline);
+
+        publisherMulti.perform(run, workspace, launcher, multiListener);
+        publisher.perform(run, workspace, launcher, listener);
+
+        consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
+                "[Coverity] Coverity issues were found and abortPipeline was set to true, throwing abort exception");
+    }
+
     public void setupIssues(String view, int count) {
         final StringBuilder viewContentsApiJsonResult = new StringBuilder("{\"viewContentsV1\": {" +
             "    \"offset\": 0," +
