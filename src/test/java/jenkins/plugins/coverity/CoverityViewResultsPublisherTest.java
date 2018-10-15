@@ -55,6 +55,8 @@ import jenkins.plugins.coverity.ws.WebServiceFactory;
 @PrepareForTest({Jenkins.class, WebServiceFactory.class, Client.class, Secret.class, CredentialsMatchers.class, CredentialsProvider.class})
 public class CoverityViewResultsPublisherTest {
     private CIMInstance cimInstance;
+    private TestableConsoleLogger consoleLoggerMulti;
+    private TaskListener listenerMulti;
     private TestableConsoleLogger consoleLogger;
     private TaskListener listener;
     private Run run;
@@ -63,6 +65,7 @@ public class CoverityViewResultsPublisherTest {
     private String expectedUrlMessage;
     private static final String expectedFinishedMessage = "[Coverity] Finished Publishing Coverity View Results";
     public Object lastBuildAction;
+    public Boolean alreadyResponded;
 
     @Before
     public void setup() throws IOException {
@@ -81,6 +84,11 @@ public class CoverityViewResultsPublisherTest {
 
         final CoverityViewResultsDescriptor stepDescriptor = new CoverityViewResultsDescriptor();
         when(jenkins.getDescriptorOrDie(CoverityViewResultsPublisher.class)).thenReturn(stepDescriptor);
+
+        //Seperate out the multi test logging so it doesn't interfere with validation
+        consoleLoggerMulti = new TestableConsoleLogger();
+        listenerMulti = mock(TaskListener.class);
+        when(listenerMulti.getLogger()).thenReturn(consoleLoggerMulti.getPrintStream());
 
         consoleLogger = new TestableConsoleLogger();
         listener = mock(TaskListener.class);
@@ -290,13 +298,12 @@ public class CoverityViewResultsPublisherTest {
         final String view = "view";
 
         setupRunToHandleBuildAction();
-        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
         setupIssues(viewMulti, 0);
-        setupIssues(view, 0);
         final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
-        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisherMulti.perform(run, workspace, launcher, listenerMulti);
 
-        publisherMulti.perform(run, workspace, launcher, multiListener);
+        setupIssues(view, 0);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(
@@ -315,13 +322,12 @@ public class CoverityViewResultsPublisherTest {
         final String view = "view";
 
         setupRunToHandleBuildAction();
-        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
         setupIssues(viewMulti, 0);
-        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
-        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisherMulti.perform(run, workspace, launcher, listenerMulti);
 
-        publisherMulti.perform(run, workspace, launcher, multiListener);
+        setupIssues(view, 10);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
@@ -339,13 +345,12 @@ public class CoverityViewResultsPublisherTest {
         final String view = "view";
 
         setupRunToHandleBuildAction();
-        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
         setupIssues(viewMulti, 15);
-        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
-        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
+        publisherMulti.perform(run, workspace, launcher, listenerMulti);
 
-        publisherMulti.perform(run, workspace, launcher, multiListener);
+        setupIssues(view, 10);
+        final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
@@ -364,14 +369,13 @@ public class CoverityViewResultsPublisherTest {
         final boolean failPipeline = true;
 
         setupRunToHandleBuildAction();
-        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
         setupIssues(viewMulti, 15);
-        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        publisherMulti.perform(run, workspace, launcher, listenerMulti);
+
+        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
         publisher.setFailPipeline(failPipeline);
-
-        publisherMulti.perform(run, workspace, launcher, multiListener);
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
@@ -392,14 +396,13 @@ public class CoverityViewResultsPublisherTest {
         final boolean failPipeline = true;
 
         setupRunToHandleBuildAction();
-        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
         setupIssues(viewMulti, 0);
-        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        publisherMulti.perform(run, workspace, launcher, listenerMulti);
+
+        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
         publisher.setFailPipeline(failPipeline);
-
-        publisherMulti.perform(run, workspace, launcher, multiListener);
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
@@ -420,14 +423,13 @@ public class CoverityViewResultsPublisherTest {
         final boolean unstablePipeline = true;
 
         setupRunToHandleBuildAction();
-        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
         setupIssues(viewMulti, 15);
-        setupIssues(view, 20);
         final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        publisherMulti.perform(run, workspace, launcher, listenerMulti);
+
+        setupIssues(view, 20);
         final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
         publisher.setUnstable(unstablePipeline);
-
-        publisherMulti.perform(run, workspace, launcher, multiListener);
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
@@ -448,14 +450,13 @@ public class CoverityViewResultsPublisherTest {
         final boolean unstablePipeline = true;
 
         setupRunToHandleBuildAction();
-        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
         setupIssues(viewMulti, 0);
-        setupIssues(view, 20);
         final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        publisherMulti.perform(run, workspace, launcher, listenerMulti);
+
+        setupIssues(view, 20);
         final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
         publisher.setUnstable(unstablePipeline);
-
-        publisherMulti.perform(run, workspace, launcher, multiListener);
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
@@ -476,14 +477,13 @@ public class CoverityViewResultsPublisherTest {
         final boolean abortPipeline = true;
 
         setupRunToHandleBuildAction();
-        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
         setupIssues(viewMulti, 15);
-        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        publisherMulti.perform(run, workspace, launcher, listenerMulti);
+
+        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
         publisher.setAbortPipeline(abortPipeline);
-
-        publisherMulti.perform(run, workspace, launcher, multiListener);
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
@@ -499,14 +499,13 @@ public class CoverityViewResultsPublisherTest {
         final boolean abortPipeline = true;
 
         setupRunToHandleBuildAction();
-        TaskListener multiListener = mock(TaskListener.class); //mock out and ignore the result of the secondary view
         setupIssues(viewMulti, 0);
-        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisherMulti = new CoverityViewResultsPublisher(instance, viewMulti, projectId);
+        publisherMulti.perform(run, workspace, launcher, listenerMulti);
+
+        setupIssues(view, 10);
         final CoverityViewResultsPublisher publisher = new CoverityViewResultsPublisher(instance, view, projectId);
         publisher.setAbortPipeline(abortPipeline);
-
-        publisherMulti.perform(run, workspace, launcher, multiListener);
         publisher.perform(run, workspace, launcher, listener);
 
         consoleLogger.verifyMessages(getInformationMessage(instance, projectId, view),
@@ -574,11 +573,18 @@ public class CoverityViewResultsPublisherTest {
     }
 
     public void setupRunToHandleBuildAction() {
+        //mock how Jenkins actually responds within a scenerio
+        //getAction returns the first instance of the class
+        alreadyResponded = false;
+
         Answer<Void> setCovActionAnswer = new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                lastBuildAction = args[0];
+                if(!alreadyResponded) {
+                    lastBuildAction = args[0];
+                    alreadyResponded = true;
+                }
                 return null;
             }
         };
