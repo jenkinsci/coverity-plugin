@@ -4,3 +4,8 @@
 target
 work
 .idea
+.settings/
+.vscode/
+.classpath
+.factorypath
+.project
