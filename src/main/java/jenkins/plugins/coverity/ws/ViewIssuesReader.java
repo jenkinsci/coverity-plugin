@@ -40,7 +40,7 @@ public class ViewIssuesReader {
         this.publisher = publisher;
     }
 
-    public void getIssuesFromConnectView() throws Exception {
+    public CoverityBuildAction getIssuesFromConnectView() throws Exception {
         CIMInstance instance = publisher.getInstance();
 
         if (instance != null) {
@@ -53,6 +53,9 @@ public class ViewIssuesReader {
             if(StringUtils.isNotEmpty(rootUrl)) {
                 outputLogger.println("Coverity details: " + rootUrl + run.getUrl() + action.getUrlName());
             }
+
+            return action;
         }
+        return run.getAction(CoverityBuildAction.class);
     }
 }
