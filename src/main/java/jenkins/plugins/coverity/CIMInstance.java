@@ -13,6 +13,7 @@ package jenkins.plugins.coverity;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -280,7 +281,7 @@ public class CIMInstance {
         Map<? extends Long, ? extends String> views;
         try {
             views = WebServiceFactory.getInstance().getViewService(this).getViews();
-        } catch (MalformedURLException | NoSuchAlgorithmException e) {
+        } catch (MalformedURLException | NoSuchAlgorithmException | KeyManagementException e) {
             return ImmutableSortedMap.of();
         }
         return ImmutableSortedMap.copyOf(views);

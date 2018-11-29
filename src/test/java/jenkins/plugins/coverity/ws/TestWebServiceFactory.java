@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,7 +66,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
     }
 
     @Override
-    public ViewsService getViewService(CIMInstance instance) throws MalformedURLException, NoSuchAlgorithmException {
+    public ViewsService getViewService(CIMInstance instance) throws MalformedURLException, NoSuchAlgorithmException, KeyManagementException {
         if (_mockViewsService != null) {
             return _mockViewsService;
         }

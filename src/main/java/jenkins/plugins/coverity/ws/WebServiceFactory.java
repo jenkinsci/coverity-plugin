@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -141,21 +143,23 @@ public class WebServiceFactory {
     /**
      * Returns a new Views Service client
      */
-    public ViewsService getViewService(CIMInstance instance) throws MalformedURLException, NoSuchAlgorithmException {
+    public ViewsService getViewService(CIMInstance instance) throws MalformedURLException, NoSuchAlgorithmException, KeyManagementException {
         URL baseUrl = getURL(instance);
         Client restClient = null;
         if (instance.isUseSSL()){
             SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, null, new SecureRandom());
             restClient = ClientBuilder.newBuilder()
                         .sslContext(sslContext)
                         .hostnameVerifier(HttpsURLConnection.getDefaultHostnameVerifier())
                         .build();
         } else {
             restClient = ClientBuilder.newClient();
-            HttpAuthenticationFeature httpAuthenticationFeature =
-                    HttpAuthenticationFeature.basic(instance.getCoverityUser(), instance.getCoverityPassword());
-            restClient.register(httpAuthenticationFeature);
         }
+
+        HttpAuthenticationFeature httpAuthenticationFeature =
+                HttpAuthenticationFeature.basic(instance.getCoverityUser(), instance.getCoverityPassword());
+        restClient.register(httpAuthenticationFeature);
 
         return new ViewsService(baseUrl, restClient);
     }
