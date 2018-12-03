@@ -334,6 +334,10 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 
 ## Changelog
 
+#### Version 1.11.3 (Dec, 2018)
+
+- Fixed an issue with SSL configuration for any communications with CIM (COVJP-620)
+
 #### Version 1.11.2 (Oct, 2018)
 
 - Fixed an issue where "CoverityResults" step fetches the wrong number of defects from Coverity Connect (COVJP-580)
