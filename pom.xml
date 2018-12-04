@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>coverity</artifactId>
-    <version>1.11.3-SNAPSHOT</version>
+    <version>1.11.3</version>
     <packaging>hpi</packaging>
     <name>Coverity plugin</name>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Coverity+Plugin</url>
@@ -83,7 +83,7 @@
         <connection>scm:git:ssh://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-      <tag>HEAD</tag>
+      <tag>coverity-1.11.3</tag>
   </scm>
 
     <build>
