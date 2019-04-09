@@ -53,7 +53,7 @@ public class TestWebServiceFactory extends WebServiceFactory {
 
     @Override
     public CheckWsResponse getCheckWsResponse(CIMInstance cimInstance) {
-        return new CheckWsResponse(wsResponseCode, responseMsg);
+        return new CheckWsResponse(wsResponseCode, responseMsg, StringUtils.EMPTY);
     }
 
     public void setWSResponseCode(int wsResponseCode, String responseMsg) {
