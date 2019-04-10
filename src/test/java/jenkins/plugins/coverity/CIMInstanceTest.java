@@ -140,7 +140,7 @@ public class CIMInstanceTest {
     public void doCheck_invalidWSResponseCode() {
         testWsFactory.setWSResponseCode(401, "failed response message");
         final String expectedErrorMessage = "Connection check failed." + System.lineSeparator() +
-            "Check Coverity Web Service Response: { Code=401, Message=\"failed response message\" }" + System.lineSeparator() +
+            "Check Coverity Web Service Response: { Code=401, Message=\"failed response message\", URL=}" + System.lineSeparator() +
             "(check that the values entered for this instance are correct and ensure the Coverity Connect version is at least " +
             CoverityVersion.MINIMUM_SUPPORTED_VERSION.toString() + ")";
         CredentialUtil.setCredentialManager("admin", "password");

@@ -42,13 +42,13 @@ public class TestWebServiceFactory extends WebServiceFactory {
     @Override
     protected DefectService createDefectService(CIMInstance cimInstance) throws MalformedURLException {
         return new TestDefectService(
-            new URL(getURL(cimInstance), DEFECT_SERVICE_V9_WSDL));
+            getURL(cimInstance, WebServiceType.DefectService));
     }
 
     @Override
     protected ConfigurationService createConfigurationService(CIMInstance cimInstance) throws MalformedURLException {
         return new TestConfigurationService(
-            new URL(getURL(cimInstance), CONFIGURATION_SERVICE_V9_WSDL));
+            getURL(cimInstance, WebServiceType.ConfigurationService));
     }
 
     @Override

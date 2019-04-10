@@ -54,14 +54,12 @@ public class WebServiceFactory {
 
     private Map<CIMInstance, DefectService> defectServiceMap;
     private Map<CIMInstance, ConfigurationService> configurationServiceMap;
-    private Map<CIMInstance, URL> configurationServiceUrlMap;
-    private Map<CIMInstance, URL> defectServiceUrlMap;
+    private Map<CIMInstance, URL> serviceUrlMap;
 
     protected WebServiceFactory() {
         this.defectServiceMap = new HashMap<>();
         this.configurationServiceMap = new HashMap<>();
-        this.configurationServiceUrlMap = new HashMap<>();
-        this.defectServiceUrlMap = new HashMap<>();
+        this.serviceUrlMap = new HashMap<>();
     }
 
     public static WebServiceFactory getInstance() {
@@ -85,36 +83,14 @@ public class WebServiceFactory {
             if(!defectServiceMap.containsKey(cimInstance)) {
                 defectService = createDefectService(cimInstance);
                 defectServiceMap.put(cimInstance, defectService);
-                CheckWsResponse connectionResponse = getCheckWsResponse(cimInstance);
-                if (connectionResponse.isConnected()){
-                    if (!defectServiceMap.containsKey(cimInstance)){
-                        defectService = createDefectService(cimInstance);
-                        defectServiceMap.put(cimInstance, defectService);
-                    }
-                }
-            }
-            else {
-                CheckWsResponse response = getCheckWsResponse(cimInstance);
-                if (response.isConnected()){
-                    if (!defectServiceMap.containsKey(cimInstance)){
-                        defectService = createDefectService(cimInstance);
-                        defectServiceMap.put(cimInstance, defectService);
-                    } else{
-                        defectService = defectServiceMap.get(cimInstance);
-                    }
-                }
             }
         }
-        return defectService;
+        ensureServiceConnection(cimInstance, WebServiceType.DefectService);
+        return defectServiceMap.get(cimInstance);
     }
 
     protected DefectService createDefectService(CIMInstance cimInstance) throws MalformedURLException {
-        URL url = null;
-        if (defectServiceUrlMap.containsKey(cimInstance)){
-            url = defectServiceUrlMap.get(cimInstance);
-        }else{
-            url = new URL(getURL(cimInstance), WebServiceFactory.DEFECT_SERVICE_V9_WSDL);
-        }
+        URL url = getURL(cimInstance, WebServiceType.DefectService);
 
         DefectServiceService defectServiceService = new DefectServiceService(
                 url, new QName(COVERITY_V9_NAMESPACE, "DefectServiceService"));
@@ -134,41 +110,39 @@ public class WebServiceFactory {
      * Returns a Configuration service client using v9 web services.
      */
     public ConfigurationService getConfigurationService(CIMInstance cimInstance) throws IOException {
-        ConfigurationService configurationService = null;
         synchronized (this){
             if(!configurationServiceMap.containsKey(cimInstance)) {
-                configurationService = createConfigurationService(cimInstance);
+                ConfigurationService configurationService = createConfigurationService(cimInstance);
                 configurationServiceMap.put(cimInstance, configurationService);
-                CheckWsResponse connectionResponse = getCheckWsResponse(cimInstance);
-                if (connectionResponse.isConnected()){
-                    if (!configurationServiceMap.containsKey(cimInstance)){
-                        configurationService = createConfigurationService(cimInstance);
-                        configurationServiceMap.put(cimInstance, configurationService);
-                    }
-                }
-            }
-            else {
-                CheckWsResponse response = getCheckWsResponse(cimInstance);
-                if (response.isConnected()){
-                    if (!configurationServiceMap.containsKey(cimInstance)){
-                        configurationService = createConfigurationService(cimInstance);
-                        configurationServiceMap.put(cimInstance, configurationService);
-                    } else{
-                        configurationService = configurationServiceMap.get(cimInstance);
-                    }
-                }
             }
         }
-        return configurationService;
+        ensureServiceConnection(cimInstance, WebServiceType.ConfigurationService);
+        return configurationServiceMap.get(cimInstance);
+    }
+
+    private void ensureServiceConnection(CIMInstance cimInstance, WebServiceType serviceType) {
+        try{
+            CheckWsResponse connectionResponse = getCheckWsResponse(cimInstance);
+            synchronized (this){
+                if (connectionResponse.isConnected()){
+                    if (serviceType == WebServiceType.ConfigurationService){
+                        if (!configurationServiceMap.containsKey(cimInstance)){
+                            configurationServiceMap.put(cimInstance, createConfigurationService(cimInstance));
+                        }
+                    }else if (serviceType == WebServiceType.DefectService){
+                        if (!defectServiceMap.containsKey(cimInstance)){
+                            defectServiceMap.put(cimInstance, createDefectService(cimInstance));
+                        }
+                    }
+                }
+            }
+        }catch (MalformedURLException e){
+            logger.log(java.util.logging.Level.ALL, "MalformedURLException occurred");
+        }
     }
 
     protected ConfigurationService createConfigurationService(CIMInstance cimInstance) throws MalformedURLException {
-        URL url = null;
-        if (configurationServiceUrlMap.containsKey(cimInstance)){
-            url = configurationServiceUrlMap.get(cimInstance);
-        }else{
-            url = new URL(getURL(cimInstance), WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL);
-        }
+        URL url = getURL(cimInstance, WebServiceType.ConfigurationService);
 
         ConfigurationServiceService configurationServiceService = new ConfigurationServiceService(
                 url, new QName(COVERITY_V9_NAMESPACE, "ConfigurationServiceService"));
@@ -188,13 +162,7 @@ public class WebServiceFactory {
      * Returns a new Views Service client
      */
     public ViewsService getViewService(CIMInstance instance) throws MalformedURLException, NoSuchAlgorithmException, KeyManagementException {
-        URL baseUrl = null;
-        if (configurationServiceUrlMap.containsKey(instance)){
-            baseUrl = configurationServiceUrlMap.get(instance);
-            baseUrl = new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(), "/");
-        }else{
-            baseUrl = getURL(instance);
-        }
+        URL url = getURL(instance, WebServiceType.ViewService);
 
         Client restClient = null;
         if (instance.isUseSSL()){
@@ -212,17 +180,31 @@ public class WebServiceFactory {
                 HttpAuthenticationFeature.basic(instance.getCoverityUser(), instance.getCoverityPassword());
         restClient.register(httpAuthenticationFeature);
 
-        return new ViewsService(baseUrl, restClient);
+        return new ViewsService(url, restClient);
     }
 
     /**
-     * The root URL for the CIM instance
+     * The root URL for the CIM instance for web service type
      *
      * @return a url
      * @throws MalformedURLException should not happen if host is valid
      */
-    protected URL getURL(CIMInstance cimInstance) throws MalformedURLException {
-        return new URL(cimInstance.isUseSSL() ? "https" : "http", cimInstance.getHost(), cimInstance.getPort(), "/");
+    protected URL getURL(CIMInstance cimInstance, WebServiceType serviceType) throws MalformedURLException {
+        URL baseUrl = null;
+        if (serviceUrlMap.containsKey(cimInstance)){
+            baseUrl = serviceUrlMap.get(cimInstance);
+        }else{
+            baseUrl = new URL(cimInstance.isUseSSL() ? "https" : "http", cimInstance.getHost(), cimInstance.getPort(), "/");
+        }
+
+        switch(serviceType){
+            case ConfigurationService:
+                return new URL(baseUrl, WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL);
+            case DefectService:
+                return new URL(baseUrl, WebServiceFactory.DEFECT_SERVICE_V9_WSDL);
+            default:
+                return baseUrl;
+        }
     }
 
     /**
@@ -232,18 +214,12 @@ public class WebServiceFactory {
      */
     public CheckWsResponse getCheckWsResponse(CIMInstance cimInstance) {
         try {
-            URL url;
-            // Decide which URL to use
-            if (configurationServiceUrlMap.containsKey(cimInstance)){
-                url = configurationServiceUrlMap.get(cimInstance);
-            }else{
-                url = new URL(getURL(cimInstance), WebServiceFactory.CONFIGURATION_SERVICE_V9_WSDL);
-            }
+            URL url = getURL(cimInstance, WebServiceType.ConfigurationService);
 
             CheckWsResponse response = getCheckWsResponse(url, cimInstance);
             if (response.isConnected()){
                 synchronized (this){
-                    configurationServiceUrlMap.put(cimInstance, new URL(response.getServiceUrl()));
+                    serviceUrlMap.put(cimInstance, new URL(response.getBaseUrl()));
                 }
             }
             return response;
@@ -292,8 +268,7 @@ public class WebServiceFactory {
         synchronized (this){
             this.configurationServiceMap.remove(cimInstance);
             this.defectServiceMap.remove(cimInstance);
-            this.configurationServiceUrlMap.remove(cimInstance);
-            this.defectServiceUrlMap.remove(cimInstance);
+            this.serviceUrlMap.remove(cimInstance);
         }
     }
 
@@ -304,11 +279,13 @@ public class WebServiceFactory {
         private final int responseCode;
         private final String responseMessage;
         private final String serviceUrl;
+        private final String baseUrl;
 
         public CheckWsResponse(int responseCode, String responseMessage, String serviceUrl) {
             this.responseCode = responseCode;
             this.responseMessage = responseMessage;
             this.serviceUrl = serviceUrl;
+            this.baseUrl = generateBaseUrl();
         }
 
         public int getResponseCode() {
@@ -319,17 +296,38 @@ public class WebServiceFactory {
             return this.serviceUrl;
         }
 
+        public String getBaseUrl(){
+            return this.baseUrl;
+        }
+
         @Override
         public String toString() {
             return "Check Coverity Web Service Response: {" +
                 " Code=" + responseCode +
-                ", Message=\"" + responseMessage + "\" " +
-                ", URL=" + serviceUrl +
+                ", Message=\"" + responseMessage + "\"" +
+                ", URL=" + serviceUrl+
                 '}';
         }
 
         public boolean isConnected(){
             return responseCode == 200;
         }
+
+        private String generateBaseUrl(){
+            try{
+                URL url = new URL(serviceUrl);
+                URL baseUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), "/");
+                return baseUrl.toString();
+            }catch (MalformedURLException e){
+                logger.log(java.util.logging.Level.ALL, "MalformedURLException occurred during getting the base url");
+                return StringUtils.EMPTY;
+            }
+        }
+    }
+
+    public enum WebServiceType {
+        ConfigurationService,
+        DefectService,
+        ViewService
     }
 }
