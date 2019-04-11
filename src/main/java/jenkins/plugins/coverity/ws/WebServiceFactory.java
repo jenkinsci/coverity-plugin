@@ -54,12 +54,10 @@ public class WebServiceFactory {
 
     private Map<CIMInstance, DefectService> defectServiceMap;
     private Map<CIMInstance, ConfigurationService> configurationServiceMap;
-    private Map<CIMInstance, URL> serviceUrlMap;
 
     protected WebServiceFactory() {
         this.defectServiceMap = new HashMap<>();
         this.configurationServiceMap = new HashMap<>();
-        this.serviceUrlMap = new HashMap<>();
     }
 
     public static WebServiceFactory getInstance() {
@@ -190,10 +188,8 @@ public class WebServiceFactory {
      * @throws MalformedURLException should not happen if host is valid
      */
     protected URL getURL(CIMInstance cimInstance, WebServiceType serviceType) throws MalformedURLException {
-        URL baseUrl = null;
-        if (serviceUrlMap.containsKey(cimInstance)){
-            baseUrl = serviceUrlMap.get(cimInstance);
-        }else{
+        URL baseUrl = RedirectedServiceUrl.getInstance().getURL(cimInstance);
+        if (baseUrl == null){
             baseUrl = new URL(cimInstance.isUseSSL() ? "https" : "http", cimInstance.getHost(), cimInstance.getPort(), "/");
         }
 
@@ -219,7 +215,7 @@ public class WebServiceFactory {
             CheckWsResponse response = getCheckWsResponse(url, cimInstance);
             if (response.isConnected()){
                 synchronized (this){
-                    serviceUrlMap.put(cimInstance, new URL(response.getBaseUrl()));
+                    RedirectedServiceUrl.getInstance().cacheURL(cimInstance, new URL(response.getBaseUrl()));
                 }
             }
             return response;
@@ -268,7 +264,7 @@ public class WebServiceFactory {
         synchronized (this){
             this.configurationServiceMap.remove(cimInstance);
             this.defectServiceMap.remove(cimInstance);
-            this.serviceUrlMap.remove(cimInstance);
+            RedirectedServiceUrl.getInstance().removeURL(cimInstance);
         }
     }
 
