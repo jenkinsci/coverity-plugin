@@ -15,15 +15,15 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
+import jenkins.plugins.coverity.ws.RedirectedServiceUrl;
 import org.apache.commons.lang.StringUtils;
+
+import java.net.URL;
 
 public class CovCommitDefectsCommand extends CoverityCommand {
 
     private static final String command = "cov-commit-defects";
-    private static final String hostArg = "--host";
-    private static final String dataPort = "--dataport";
     private static final String httpsPort = "--https-port";
-    private static final String port = "--port";
     private static final String streamArg = "--stream";
     private static final String userArg = "--user";
     private static final String coverity_passphrase = "COVERITY_PASSPHRASE";
@@ -46,15 +46,7 @@ public class CovCommitDefectsCommand extends CoverityCommand {
 
     @Override
     protected void prepareCommand() {
-        addHost();
-
-        if (cimInstance.isUseSSL()) {
-            addSsl();
-            addHtppsPort();
-            addSslConfiguration(cimInstance);
-        } else {
-            addPort();
-        }
+        addServerInfo();
 
         addStream();
         addUserInfo();
@@ -70,19 +62,28 @@ public class CovCommitDefectsCommand extends CoverityCommand {
         return true;
     }
 
-    private void addHost() {
-        addArgument(hostArg);
-        addArgument(cimInstance.getHost());
+    private void addServerInfo() {
+        URL url = RedirectedServiceUrl.getInstance().getURL(cimInstance);
+        addHost(url, cimInstance);
+
+        boolean isSslConfigured = isSslConfigured(url);
+        if (isSslConfigured){
+            addArgument(useSslArg);
+            addHttpsPort(url);
+            addSslConfiguration();
+        } else{
+            addPort(url, cimInstance);
+        }
     }
 
-    private void addHtppsPort() {
+    private void addHttpsPort(URL url) {
         addArgument(httpsPort);
-        addArgument(Integer.toString(cimInstance.getPort()));
-    }
 
-    private void addPort() {
-        addArgument(port);
-        addArgument(Integer.toString(cimInstance.getPort()));
+        if (url == null){
+            addArgument(Integer.toString(cimInstance.getPort()));
+        }else{
+            addArgument(Integer.toString(url.getPort()));
+        }
     }
 
     private void addStream() {
@@ -106,9 +107,12 @@ public class CovCommitDefectsCommand extends CoverityCommand {
         }
     }
 
-    private void addSsl() {
-        if (cimInstance.isUseSSL()) {
-            addArgument(useSslArg);
+    private boolean isSslConfigured(URL url){
+        if ((url == null && cimInstance.isUseSSL())
+                || url != null && url.getProtocol().equalsIgnoreCase("https")){
+            return true;
         }
+
+        return false;
     }
 }

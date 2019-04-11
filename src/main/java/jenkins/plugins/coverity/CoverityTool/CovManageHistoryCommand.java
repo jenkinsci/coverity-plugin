@@ -18,15 +18,15 @@ import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 import com.coverity.ws.v9.StreamIdDataObj;
 import com.coverity.ws.v9.SnapshotFilterSpecDataObj;
+import jenkins.plugins.coverity.ws.RedirectedServiceUrl;
 
+import java.net.URL;
 import java.util.List;
 
 public class CovManageHistoryCommand extends CoverityCommand {
 
     private static final String command = "cov-manage-history";
     private static final String downloadArg = "download";
-    private static final String hostArg = "--host";
-    private static final String portArg = "--port";
     private static final String streamArg = "--stream";
     private static final String userArg = "--user";
     private static final String mergeArg = "--merge";
@@ -46,11 +46,8 @@ public class CovManageHistoryCommand extends CoverityCommand {
     @Override
     protected void prepareCommand() {
         addArgument(downloadArg);
+        addServerInfo();
         addCimStreamInfo();
-        if (cimInstance.isUseSSL()){
-            addArgument(useSslArg);
-        }
-        addSslConfiguration(cimInstance);
         addUserInfo();
         addArgument(mergeArg);
         listener.getLogger().println("[Coverity] cov-manage-history command line arguments: " + commandLine.toString());
@@ -71,11 +68,19 @@ public class CovManageHistoryCommand extends CoverityCommand {
         return true;
     }
 
+    private void addServerInfo(){
+        URL url = RedirectedServiceUrl.getInstance().getURL(cimInstance);
+        addHost(url, cimInstance);
+        addPort(url, cimInstance);
+
+        boolean isSslConfigured = isSslConfigured(url, cimInstance);
+        if (isSslConfigured) {
+            addArgument(useSslArg);
+            addSslConfiguration();
+        }
+    }
+
     private void addCimStreamInfo(){
-        addArgument(hostArg);
-        addArgument(cimInstance.getHost());
-        addArgument(portArg);
-        addArgument(Integer.toString(cimInstance.getPort()));
         addArgument(streamArg);
         addArgument(CoverityUtils.doubleQuote(cimStream.getStream(), publisher.getInvocationAssistance().getUseAdvancedParser()));
     }
