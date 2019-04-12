@@ -66,7 +66,7 @@ public class CovCommitDefectsCommand extends CoverityCommand {
         URL url = CimServiceUrlCache.getInstance().getURL(cimInstance);
         addHost(url, cimInstance);
 
-        boolean isSslConfigured = isSslConfigured(url);
+        boolean isSslConfigured = isSslConfigured(url, cimInstance);
         if (isSslConfigured){
             addArgument(useSslArg);
             addHttpsPort(url);
@@ -105,14 +105,5 @@ public class CovCommitDefectsCommand extends CoverityCommand {
                 throw new RuntimeException("ParseException occurred during tokenizing the cov-commit-defect commit arguments.");
             }
         }
-    }
-
-    private boolean isSslConfigured(URL url){
-        if ((url == null && cimInstance.isUseSSL())
-                || url != null && url.getProtocol().equalsIgnoreCase("https")){
-            return true;
-        }
-
-        return false;
     }
 }
