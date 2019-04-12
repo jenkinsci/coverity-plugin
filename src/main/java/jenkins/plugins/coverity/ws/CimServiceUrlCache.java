@@ -16,20 +16,23 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RedirectedServiceUrl {
-    private static RedirectedServiceUrl instance = null;
+/**
+ * Temporary cache of cim service url if the url is redirected to other url
+ */
+public class CimServiceUrlCache {
+    private static CimServiceUrlCache instance = null;
     private final Map<CIMInstance, URL> serviceUrlMap;
 
-    private RedirectedServiceUrl(){
+    private CimServiceUrlCache(){
         this.serviceUrlMap = new HashMap<>();
     }
 
-    public static RedirectedServiceUrl getInstance() {
+    public static CimServiceUrlCache getInstance() {
         // ignore for Coverity TA since unit tests will not run against a real Connect server
         //.*cov-begin-ignore
-        synchronized (RedirectedServiceUrl.class) {
+        synchronized (CimServiceUrlCache.class) {
             if (instance == null) {
-                instance = new RedirectedServiceUrl();
+                instance = new CimServiceUrlCache();
             }
             return instance;
         }
