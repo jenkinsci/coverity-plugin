@@ -83,9 +83,9 @@ public class WebServiceFactory {
                 defectService = createDefectService(cimInstance);
                 defectServiceMap.put(cimInstance, defectService);
             }
+            ensureServiceConnection(cimInstance, WebServiceType.DefectService);
+            return defectServiceMap.get(cimInstance);
         }
-        ensureServiceConnection(cimInstance, WebServiceType.DefectService);
-        return defectServiceMap.get(cimInstance);
     }
 
     protected DefectService createDefectService(CIMInstance cimInstance) throws MalformedURLException {
@@ -114,9 +114,9 @@ public class WebServiceFactory {
                 ConfigurationService configurationService = createConfigurationService(cimInstance);
                 configurationServiceMap.put(cimInstance, configurationService);
             }
+            ensureServiceConnection(cimInstance, WebServiceType.ConfigurationService);
+            return configurationServiceMap.get(cimInstance);
         }
-        ensureServiceConnection(cimInstance, WebServiceType.ConfigurationService);
-        return configurationServiceMap.get(cimInstance);
     }
 
     private void ensureServiceConnection(CIMInstance cimInstance, WebServiceType serviceType) {
