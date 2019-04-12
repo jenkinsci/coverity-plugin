@@ -189,7 +189,7 @@ public class WebServiceFactory {
      * @throws MalformedURLException should not happen if host is valid
      */
     protected URL getURL(CIMInstance cimInstance, WebServiceType serviceType) throws MalformedURLException {
-        URL baseUrl = RedirectedServiceUrl.getInstance().getURL(cimInstance);
+        URL baseUrl = CimServiceUrlCache.getInstance().getURL(cimInstance);
         if (baseUrl == null){
             baseUrl = new URL(cimInstance.isUseSSL() ? "https" : "http", cimInstance.getHost(), cimInstance.getPort(), "/");
         }
@@ -216,7 +216,7 @@ public class WebServiceFactory {
             CheckWsResponse response = getCheckWsResponse(url, cimInstance, 1);
             if (response.isConnected()){
                 synchronized (this){
-                    RedirectedServiceUrl.getInstance().cacheURL(cimInstance, new URL(response.getBaseUrl()));
+                    CimServiceUrlCache.getInstance().cacheURL(cimInstance, new URL(response.getBaseUrl()));
                 }
             }
             return response;
@@ -268,7 +268,7 @@ public class WebServiceFactory {
         synchronized (this){
             this.configurationServiceMap.remove(cimInstance);
             this.defectServiceMap.remove(cimInstance);
-            RedirectedServiceUrl.getInstance().removeURL(cimInstance);
+            CimServiceUrlCache.getInstance().removeURL(cimInstance);
         }
     }
 
