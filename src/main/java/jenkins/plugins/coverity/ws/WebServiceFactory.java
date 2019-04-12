@@ -51,15 +51,14 @@ public class WebServiceFactory {
     public static final String COVERITY_V9_NAMESPACE = "http://ws.coverity.com/v9";
     public static final String DEFECT_SERVICE_V9_WSDL = "/ws/v9/defectservice?wsdl";
     public static final String CONFIGURATION_SERVICE_V9_WSDL = "/ws/v9/configurationservice?wsdl";
+    private static int REDIRECTION_MAX_TRY = 10;
 
     private Map<CIMInstance, DefectService> defectServiceMap;
     private Map<CIMInstance, ConfigurationService> configurationServiceMap;
-    private Map<CIMInstance, URL> serviceUrlMap;
 
     protected WebServiceFactory() {
         this.defectServiceMap = new HashMap<>();
         this.configurationServiceMap = new HashMap<>();
-        this.serviceUrlMap = new HashMap<>();
     }
 
     public static WebServiceFactory getInstance() {
@@ -190,10 +189,8 @@ public class WebServiceFactory {
      * @throws MalformedURLException should not happen if host is valid
      */
     protected URL getURL(CIMInstance cimInstance, WebServiceType serviceType) throws MalformedURLException {
-        URL baseUrl = null;
-        if (serviceUrlMap.containsKey(cimInstance)){
-            baseUrl = serviceUrlMap.get(cimInstance);
-        }else{
+        URL baseUrl = CimServiceUrlCache.getInstance().getURL(cimInstance);
+        if (baseUrl == null){
             baseUrl = new URL(cimInstance.isUseSSL() ? "https" : "http", cimInstance.getHost(), cimInstance.getPort(), "/");
         }
 
@@ -216,10 +213,10 @@ public class WebServiceFactory {
         try {
             URL url = getURL(cimInstance, WebServiceType.ConfigurationService);
 
-            CheckWsResponse response = getCheckWsResponse(url, cimInstance);
+            CheckWsResponse response = getCheckWsResponse(url, cimInstance, 1);
             if (response.isConnected()){
                 synchronized (this){
-                    serviceUrlMap.put(cimInstance, new URL(response.getBaseUrl()));
+                    CimServiceUrlCache.getInstance().cacheURL(cimInstance, new URL(response.getBaseUrl()));
                 }
             }
             return response;
@@ -235,7 +232,7 @@ public class WebServiceFactory {
      * @param url to check response
      * @return A {@link CheckWsResponse} with HTTP Status-Code and message from the WSDL, or -1 and an exception message
      */
-    private CheckWsResponse getCheckWsResponse(URL url, CIMInstance cimInstance) {
+    public CheckWsResponse getCheckWsResponse(URL url, CIMInstance cimInstance, int currentTryNumber) {
         try {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -244,8 +241,11 @@ public class WebServiceFactory {
 
             int responseCode = conn.getResponseCode();
             if (responseCode == 301 || responseCode == 302 || responseCode == 307 || responseCode == 308){
+                if (currentTryNumber == REDIRECTION_MAX_TRY){
+                    return new CheckWsResponse(responseCode, "Max try redirection. ", url.toString());
+                }
                 resetWebServices(cimInstance);
-                return getCheckWsResponse(new URL(conn.getHeaderField("Location")), cimInstance);
+                return getCheckWsResponse(new URL(conn.getHeaderField("Location")), cimInstance, currentTryNumber+1);
             }
 
             return new CheckWsResponse(conn.getResponseCode(), conn.getResponseMessage(), url.toString());
@@ -268,7 +268,7 @@ public class WebServiceFactory {
         synchronized (this){
             this.configurationServiceMap.remove(cimInstance);
             this.defectServiceMap.remove(cimInstance);
-            this.serviceUrlMap.remove(cimInstance);
+            CimServiceUrlCache.getInstance().removeURL(cimInstance);
         }
     }
 
