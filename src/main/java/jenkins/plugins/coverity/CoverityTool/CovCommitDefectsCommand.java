@@ -15,7 +15,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
-import jenkins.plugins.coverity.ws.RedirectedServiceUrl;
+import jenkins.plugins.coverity.ws.CimServiceUrlCache;
 import org.apache.commons.lang.StringUtils;
 
 import java.net.URL;
@@ -63,7 +63,7 @@ public class CovCommitDefectsCommand extends CoverityCommand {
     }
 
     private void addServerInfo() {
-        URL url = RedirectedServiceUrl.getInstance().getURL(cimInstance);
+        URL url = CimServiceUrlCache.getInstance().getURL(cimInstance);
         addHost(url, cimInstance);
 
         boolean isSslConfigured = isSslConfigured(url);

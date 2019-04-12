@@ -18,7 +18,7 @@ import hudson.model.TaskListener;
 import jenkins.plugins.coverity.*;
 import com.coverity.ws.v9.StreamIdDataObj;
 import com.coverity.ws.v9.SnapshotFilterSpecDataObj;
-import jenkins.plugins.coverity.ws.RedirectedServiceUrl;
+import jenkins.plugins.coverity.ws.CimServiceUrlCache;
 
 import java.net.URL;
 import java.util.List;
@@ -69,7 +69,7 @@ public class CovManageHistoryCommand extends CoverityCommand {
     }
 
     private void addServerInfo(){
-        URL url = RedirectedServiceUrl.getInstance().getURL(cimInstance);
+        URL url = CimServiceUrlCache.getInstance().getURL(cimInstance);
         addHost(url, cimInstance);
         addPort(url, cimInstance);
 

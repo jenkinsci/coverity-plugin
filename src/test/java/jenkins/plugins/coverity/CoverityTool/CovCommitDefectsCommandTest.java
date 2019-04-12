@@ -15,7 +15,7 @@ import jenkins.plugins.coverity.Utils.CIMInstanceBuilder;
 import jenkins.plugins.coverity.Utils.CoverityPublisherBuilder;
 import jenkins.plugins.coverity.Utils.CredentialUtil;
 import jenkins.plugins.coverity.Utils.InvocationAssistanceBuilder;
-import jenkins.plugins.coverity.ws.RedirectedServiceUrl;
+import jenkins.plugins.coverity.ws.CimServiceUrlCache;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
@@ -58,7 +58,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
                 .withUseSSL(false).withDefaultCredentialId().build();
 
-        RedirectedServiceUrl.getInstance().cacheURL(cimInstance, new URL("http://igor:1234"));
+        CimServiceUrlCache.getInstance().cacheURL(cimInstance, new URL("http://igor:1234"));
 
         InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
         CoverityPublisher publisher =
@@ -116,7 +116,7 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
         SSLConfigurations sslConfigurations = new SSLConfigurations(true, null);
         sslConfigurations.setCertFileName(new SSLCertFileName("TestCertFile"));
 
-        RedirectedServiceUrl.getInstance().cacheURL(cimInstance, new URL("https://igor:1234"));
+        CimServiceUrlCache.getInstance().cacheURL(cimInstance, new URL("https://igor:1234"));
 
         CoverityPublisher.DescriptorImpl descriptor = mock(CoverityPublisher.DescriptorImpl.class);
         CoverityPublisher publisher = mock(CoverityPublisher.class);
