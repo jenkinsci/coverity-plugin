@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
+import java.net.URL;
 
 public abstract class CoverityCommand extends Command {
 
@@ -29,6 +30,8 @@ public abstract class CoverityCommand extends Command {
     private static final String onNewCertArg = "--on-new-cert";
     private static final String trustArg = "trust";
     private static final String certArg = "--certs";
+    private static final String portArg = "--port";
+    private static final String hostArg = "--host";
 
     public CoverityCommand(@Nonnull String command, AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener, CoverityPublisher publisher, String home, EnvVars envVars) {
         super(build, launcher, listener, publisher, envVars);
@@ -76,23 +79,21 @@ public abstract class CoverityCommand extends Command {
         }
     }
 
-    protected void addSslConfiguration(CIMInstance cimInstance) {
-        if (cimInstance.isUseSSL()){
-            boolean isTrustNewSelfSignedCert = false;
-            String certFileName = null;
-            SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
-            if(sslConfigurations != null){
-                isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
-                certFileName = sslConfigurations.getCertFileName();
+    protected void addSslConfiguration() {
+        boolean isTrustNewSelfSignedCert = false;
+        String certFileName = null;
+        SSLConfigurations sslConfigurations = publisher.getDescriptor().getSslConfigurations();
+        if(sslConfigurations != null) {
+            isTrustNewSelfSignedCert = sslConfigurations.isTrustNewSelfSignedCert();
+            certFileName = sslConfigurations.getCertFileName();
 
-                if(isTrustNewSelfSignedCert){
-                    addArgument(onNewCertArg);
-                    addArgument(trustArg);
-                }
-                if(certFileName != null){
-                    addArgument(certArg);
-                    addArgument(certFileName);
-                }
+            if (isTrustNewSelfSignedCert) {
+                addArgument(onNewCertArg);
+                addArgument(trustArg);
+            }
+            if (certFileName != null) {
+                addArgument(certArg);
+                addArgument(certFileName);
             }
         }
     }
@@ -105,6 +106,33 @@ public abstract class CoverityCommand extends Command {
             }
         }catch(ParseException parseException){
             throw new RuntimeException("ParseException occurred during tokenizing the cov capture custom test command.");
+        }
+    }
+
+    protected boolean isSslConfigured(URL url, CIMInstance cimInstance){
+        if ((url == null && cimInstance.isUseSSL())
+                || url != null && url.getProtocol().equalsIgnoreCase("https")){
+            return true;
+        }
+
+        return false;
+    }
+
+    protected void addPort(URL url, CIMInstance cimInstance) {
+        addArgument(portArg);
+        if (url == null){
+            addArgument(Integer.toString(cimInstance.getPort()));
+        }else{
+            addArgument(Integer.toString(url.getPort()));
+        }
+    }
+
+    protected void addHost(URL url, CIMInstance cimInstance){
+        addArgument(hostArg);
+        if (url == null){
+            addArgument(cimInstance.getHost());
+        }else{
+            addArgument(url.getHost());
         }
     }
 }
