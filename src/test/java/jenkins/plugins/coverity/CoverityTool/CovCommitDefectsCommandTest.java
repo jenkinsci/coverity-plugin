@@ -76,6 +76,30 @@ public class CovCommitDefectsCommandTest extends CommandTestBase {
     }
 
     @Test
+    public void prepareCommandTest_withRedirection_WithDefaultPort() throws IOException, InterruptedException {
+        CredentialUtil.setCredentialManager("TestUser", "TestPassword");
+        CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");
+        CIMInstance cimInstance = new CIMInstanceBuilder().withName("TestInstance").withHost("Localhost").withPort(8080)
+                .withUseSSL(false).withDefaultCredentialId().build();
+
+        CimServiceUrlCache.getInstance().cacheURL(cimInstance, new URL("http://igor"));
+
+        InvocationAssistance invocationAssistance = new InvocationAssistanceBuilder().build();
+        CoverityPublisher publisher =
+                new CoverityPublisherBuilder().withCimStream(cimStream).
+                        withInvocationAssistance(invocationAssistance).build();
+
+        Command covCommitDefectsCommand = new CovCommitDefectsCommand(build, launcher, listener, publisher, StringUtils.EMPTY, envVars, cimStream, cimInstance);
+        setExpectedArguments(new String[] {
+                "cov-commit-defects", "--dir", "TestDir", "--host", "igor",
+                "--port", "80", "--stream", "TestStream", "--user", "TestUser"
+        });
+        covCommitDefectsCommand.runCommand();
+        assertEquals("TestPassword", envVars.get("COVERITY_PASSPHRASE"));
+        consoleLogger.verifyLastMessage("[Coverity] cov-commit-defects command line arguments: " + actualArguments.toString());
+    }
+
+    @Test
     public void addHttpsPortTest() throws IOException, InterruptedException {
         CredentialUtil.setCredentialManager("TestUser", "TestPassword");
         CIMStream cimStream = new CIMStream("TestInstance", "TestProject", "TestStream");

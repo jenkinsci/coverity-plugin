@@ -123,7 +123,12 @@ public abstract class CoverityCommand extends Command {
         if (url == null){
             addArgument(Integer.toString(cimInstance.getPort()));
         }else{
-            addArgument(Integer.toString(url.getPort()));
+            String portNumber = Integer.toString(url.getPort());
+            if (portNumber.equals("-1")){
+                addArgument("80");
+            }else{
+                addArgument(Integer.toString(url.getPort()));
+            }
         }
     }
 
