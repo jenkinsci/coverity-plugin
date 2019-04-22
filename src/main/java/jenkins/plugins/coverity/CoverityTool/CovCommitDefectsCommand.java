@@ -82,7 +82,12 @@ public class CovCommitDefectsCommand extends CoverityCommand {
         if (url == null){
             addArgument(Integer.toString(cimInstance.getPort()));
         }else{
-            addArgument(Integer.toString(url.getPort()));
+            String portNumber = Integer.toString(url.getPort());
+            if (portNumber.equals("-1")){
+                addArgument("443");
+            }else{
+                addArgument(Integer.toString(url.getPort()));
+            }
         }
     }
 
