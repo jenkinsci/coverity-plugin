@@ -334,6 +334,10 @@ If you have any questions or issues with the Coverity plugin, contact <coverity-
 
 ## Changelog
 
+#### Version 1.11.4 (Apr, 2019)
+
+- Added support for Nginx RP and HTTPS redirect (COVJP-624)
+
 #### Version 1.11.3 (Dec, 2018)
 
 - Fixed an issue with SSL configuration for any communications with CIM (COVJP-620)
