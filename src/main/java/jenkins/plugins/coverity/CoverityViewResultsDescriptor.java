@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -22,7 +23,6 @@ import org.kohsuke.stapler.QueryParameter;
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.ProjectDataObj;
 import com.coverity.ws.v9.ProjectFilterSpecDataObj;
-import com.google.common.collect.ImmutableSortedMap;
 
 import hudson.Extension;
 import hudson.model.AbstractProject;
@@ -145,7 +145,7 @@ public class CoverityViewResultsDescriptor extends BuildStepDescriptor<Publisher
         }
 
         try {
-            final ImmutableSortedMap<Long, String> views = instance.getViews();
+            final Map<Long, String> views = instance.getViews();
 
             // first check if any view names match connectView value
             if (!views.containsValue(connectView)) {
