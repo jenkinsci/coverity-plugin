@@ -52,7 +52,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.coverity.ws.v9.CovRemoteServiceException_Exception;
 import com.coverity.ws.v9.StreamDataObj;
-import com.google.common.collect.ImmutableSortedMap;
 
 import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
@@ -468,7 +467,7 @@ public class CIMInstanceTest {
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("host").withPort(8080)
                 .withUseSSL(false).withDefaultCredentialId().build();
 
-        final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
+        final Map<Long, String> result = cimInstance.getViews();
 
         assertEquals(1, result.size());
         assertTrue(result.containsKey(Long.valueOf(67890)));
@@ -484,7 +483,7 @@ public class CIMInstanceTest {
         CIMInstance cimInstance = new CIMInstanceBuilder().withName("instance").withHost("host").withPort(8080)
                 .withUseSSL(true).withDefaultCredentialId().build();
 
-        final ImmutableSortedMap<Long, String> result = cimInstance.getViews();
+        final Map<Long, String> result = cimInstance.getViews();
 
         assertEquals(0, result.size());
     }

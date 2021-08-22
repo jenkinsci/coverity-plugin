@@ -46,8 +46,6 @@ import com.coverity.ws.v9.RoleDataObj;
 import com.coverity.ws.v9.StreamDataObj;
 import com.coverity.ws.v9.StreamFilterSpecDataObj;
 import com.coverity.ws.v9.UserDataObj;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSortedMap;
 
 import hudson.security.ACL;
 import hudson.util.FormValidation;
@@ -266,25 +264,25 @@ public class CIMInstance {
         }
     }
 
-    public ImmutableList<String> getCimInstanceCheckers() throws IOException, CovRemoteServiceException_Exception {
+    public List<String> getCimInstanceCheckers() throws IOException, CovRemoteServiceException_Exception {
         final List<String> checkerNames = this.getConfigurationService().getCheckerNames();
         Collections.sort(checkerNames);
 
-        return ImmutableList.copyOf(checkerNames);
+        return Collections.unmodifiableList(new ArrayList<>(checkerNames));
     }
 
     /**
      * Returns a Map of available Coverity connect views for this instance, using the numeric identifier as the key
      * and name as value
      */
-    public ImmutableSortedMap<Long, String> getViews() {
+    public Map<Long, String> getViews() {
         Map<? extends Long, ? extends String> views;
         try {
             views = WebServiceFactory.getInstance().getViewService(this).getViews();
         } catch (MalformedURLException | NoSuchAlgorithmException | KeyManagementException e) {
-            return ImmutableSortedMap.of();
+            return Collections.emptyMap();
         }
-        return ImmutableSortedMap.copyOf(views);
+        return Collections.unmodifiableMap(new TreeMap<>(views));
     }
 
     public List<CoverityDefect> getIssuesVorView(String projectId, String connectView, PrintStream outputLogger) throws Exception {
