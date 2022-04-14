@@ -10,7 +10,7 @@
  *    Synopsys, Inc - initial implementation and documentation
  *******************************************************************************/
 -->
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form" xmlns:c="/lib/credentials" xmlns:l="/lib/layout">
     <j:set var="javaOption" value="${instance.javaOptionBlock}"/>
 	<script type="text/javascript">
     document.observe("dom:loaded", function() {
@@ -398,7 +398,7 @@
 									<td class="setting-help">
 										<a href="#" class="help-button"
 										   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/defectFilters">
-											<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+											<l:icon class="icon-help icon-sm" alt="Help for feature: ${title}"/>
 										</a>
 									</td>
 									<f:helpArea/>
@@ -854,7 +854,7 @@
 					<td class="setting-help">
 						<a href="#" class="help-button"
 						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/failBuild">
-							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                            <l:icon class="icon-help icon-sm" alt="Help for feature: ${title}"/>
 						</a>
 					</td>
 				</tr>
@@ -867,7 +867,7 @@
 					<td class="setting-help">
 						<a href="#" class="help-button"
 						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/unstable">
-							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                            <l:icon class="icon-help icon-sm" alt="Help for feature: ${title}"/>
 						</a>
 					</td>
 				</tr>
@@ -880,7 +880,7 @@
 					<td class="setting-help">
 						<a href="#" class="help-button"
 						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/skipFetchingDefects">
-							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                            <l:icon class="icon-help icon-sm" alt="Help for feature: ${title}"/>
 						</a>
 					</td>
 				</tr>
@@ -893,7 +893,7 @@
 					<td class="setting-help">
 						<a href="#" class="help-button"
 						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/keepIntDir">
-							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                            <l:icon class="icon-help icon-sm" alt="Help for feature: ${title}"/>
 						</a>
 					</td>
 				</tr>
@@ -906,7 +906,7 @@
 					<td class="setting-help">
 						<a href="#" class="help-button"
 						   helpURL="${rootURL}/descriptor/jenkins.plugins.coverity.CoverityPublisher/help/hideChart">
-							<img src="${imagesURL}/16x16/help.gif" alt="Help for feature: ${title}"/>
+                            <l:icon class="icon-help icon-sm" alt="Help for feature: ${title}"/>
 						</a>
 					</td>
 				</tr>
