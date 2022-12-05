@@ -319,7 +319,7 @@
     </dependencies>
 
     <properties>
-        <jenkins.version>1.651.3</jenkins.version>
+        <jenkins.version>2.356</jenkins.version>
     </properties>
 </project>
 
